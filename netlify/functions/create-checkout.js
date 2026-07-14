@@ -1,5 +1,5 @@
 // netlify/functions/create-checkout.js
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
