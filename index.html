@@ -41,7 +41,7 @@
             padding: 0 20px;
         }
 
-        /* 1. GALLERY GRID */
+        /* GALLERY GRID */
         .gallery-title {
             text-align: center;
             margin-bottom: 30px;
@@ -86,7 +86,7 @@
             font-weight: bold;
         }
 
-        /* 2. CUSTOM FLOW MODAL (The Editor Screen) */
+        /* CUSTOM FLOW MODAL (The Editor Screen) */
         #editor-container {
             display: none; /* Hidden by default */
             position: fixed;
@@ -166,7 +166,7 @@
 
         /* Editor Section States */
         .control-group {
-            display: none; /* Controlled dynamically by JS */
+            display: none; 
             flex-direction: column;
             gap: 12px;
         }
@@ -230,6 +230,7 @@
         }
 
         .btn:hover { background-color: #1557b0; }
+        .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
         .btn-close { background-color: #e0e0e0; color: #333; margin-top: 5px; }
         .btn-close:hover { background-color: #d0d0d0; }
     </style>
@@ -555,10 +556,47 @@
             document.getElementById('editor-container').style.display = 'none';
         }
 
+        // STRIPE CHECKOUT REDIRECT METHOD
         function goToCheckout() {
-            alert("Perfect! We will integrate your customized design details straight into Stripe payments next.");
+            // 1. Gather all customized values
+            const checkoutData = {
+                name: nameText ? nameText.text : "NAME",
+                age: ageText ? ageText.text : "40",
+                insideTop: (insideTopText && insideTopText.text !== "Add Message Here") ? insideTopText.text : "",
+                insideMiddle: (insideMiddleText && insideMiddleText.text !== "Happy Birthday!\nHave a great day!") ? insideMiddleText.text : "",
+                insideBottom: (insideBottomText && insideBottomText.text !== "Add Message Here") ? insideBottomText.text : ""
+            };
+
+            // 2. Visual loader state
+            const buyBtn = document.querySelector(".controls .btn");
+            const originalText = buyBtn.innerText;
+            buyBtn.innerText = "Connecting secure checkout...";
+            buyBtn.disabled = true;
+
+            // 3. Talk to Netlify's backend endpoint securely
+            fetch('/.netlify/functions/create-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(checkoutData)
+            })
+            .then(response => response.json())
+            .then(session => {
+                if (session.url) {
+                    // Forward to Stripe's payment screen
+                    window.location.href = session.url;
+                } else {
+                    alert("Checkout Issue: " + (session.error || "Please verify environment keys."));
+                    buyBtn.innerText = originalText;
+                    buyBtn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error("Connection failed:", err);
+                alert("Failed to reach checkout. Try checking Netlify config keys.");
+                buyBtn.innerText = originalText;
+                buyBtn.disabled = false;
+            });
         }
     </script>
 </body>
 </html>
-
