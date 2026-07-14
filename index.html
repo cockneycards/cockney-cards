@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cockney Cards | Custom Greeting Cards</title>
+    <!-- Fabric.js Library for the editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        :root {
+            --primary: #1A73E8;
+            --dark: #1e1e24;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+
+        header {
+            background-color: white;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* 1. GALLERY GRID */
+        .gallery-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .card-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .card-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .card-item img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+        }
+
+        .card-item h3 {
+            margin: 15px 0 5px 0;
+            font-size: 18px;
+        }
+
+        .card-item p {
+            margin: 0;
+            color: #666;
+            font-weight: bold;
+        }
+
+        /* 2. CUSTOM FLOW MODAL (The Editor Screen) */
+        #editor-container {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .editor-box {
+            display: flex;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 90%;
+            max-height: 90%;
+            gap: 30px;
+            align-items: center;
+        }
+
+        #canvas {
+            border: 3px solid var(--primary);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 300px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background-color: #1557b0; }
+        .btn-close { background-color: #e0e0e0; color: #333; }
+        .btn-close:hover { background-color: #d0d0d0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>COCKNEY CARDS</h1>
+    </header>
+
+    <div class="container" id="gallery-view">
+        <div class="gallery-title">
+            <h2>Select a card to personalise</h2>
+            <p>High-quality customized greeting cards for any occasion</p>
+        </div>
+
+        <!-- This is where your cards live. We can add as many as you want here! -->
+        <div class="grid">
+            <!-- Card 1 -->
+            <div class="card-item" onclick="openEditor('https://static.wixstatic.com/media/2a7cb6_cc44b8c1483a4004a87793a49b90c69f~mv2.png')">
+                <img src="https://static.wixstatic.com/media/2a7cb6_cc44b8c1483a4004a87793a49b90c69f~mv2.png" alt="Golfing Card">
+                <h3>Augusta Golfing Birthday Card</h3>
+                <p>£3.49</p>
+            </div>
+            
+            <!-- Card 2 -->
+            <div class="card-item" onclick="openEditor('https://static.wixstatic.com/media/2a7cb6_cc44b8c1483a4004a87793a49b90c69f~mv2.png')">
+                <img src="https://static.wixstatic.com/media/2a7cb6_cc44b8c1483a4004a87793a49b90c69f~mv2.png" alt="Golfing Card">
+                <h3>Another Lovely Cockney Card</h3>
+                <p>£3.49</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- THE DYNAMIC CANVAS EDITOR SCREEN -->
+    <div id="editor-container">
+        <div class="editor-box">
+            <canvas id="canvas"></canvas>
+            
+            <div class="controls">
+                <h2>Personalise Your Card</h2>
+                <p>Customize the text inside using the editor tools.</p>
+                
+                <!-- We will add text tools, colors, sizes, and the Stripe Checkout button right here! -->
+                <button class="btn" onclick="goToCheckout()">Buy Now (Stripe Checkout)</button>
+                <button class="btn btn-close" onclick="closeEditor()">Back to Gallery</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let canvas;
+        let bgImg;
+
+        // Load the Editor with the selected card background image
+        function openEditor(imageUrl) {
+            document.getElementById('gallery-view').style.filter = 'blur(5px)';
+            document.getElementById('editor-container').style.display = 'flex';
+
+            if (!canvas) {
+                // Initialize Fabric.js Canvas on first click
+                const canvasElement = document.getElementById("canvas");
+                canvasElement.width = 595.5;
+                canvasElement.height = 840;
+
+                canvas = new fabric.Canvas(canvasElement, {
+                    width: 595.5, height: 840,
+                    preserveObjectStacking: true, backgroundColor: '#ffffff'
+                });
+            }
+
+            // Load the clicked card background
+            fabric.Image.fromURL(imageUrl, function (img) {
+                if (bgImg) canvas.remove(bgImg);
+                bgImg = img;
+                bgImg.set({
+                    left: 0, top: 0, 
+                    scaleX: 595.5 / bgImg.width, 
+                    scaleY: 840 / bgImg.height,
+                    selectable: false, evented: false
+                });
+                canvas.add(bgImg);
+                canvas.sendToBack(bgImg);
+                canvas.requestRenderAll();
+            });
+        }
+
+        function closeEditor() {
+            document.getElementById('gallery-view').style.filter = 'none';
+            document.getElementById('editor-container').style.display = 'none';
+        }
+
+        function goToCheckout() {
+            alert("This will direct seamlessly to your secure Stripe checkout in our next step!");
+        }
+    </script>
+</body>
+</html>
