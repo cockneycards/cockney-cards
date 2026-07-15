@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop All Cards | Cockney Cards</title>
+    <style>
+        :root {
+            --dark: #1e1e24;
+            --border-color: #d1d1d1;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: var(--dark);
+        }
+
+        /* HEADER */
+        header {
+            background-color: white;
+            text-align: center;
+            padding: 30px 20px 10px 20px;
+        }
+
+        .logo-container img {
+            max-width: 150px;
+            height: auto;
+            cursor: pointer;
+        }
+
+        nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .nav-links {
+            display: inline-flex;
+            gap: 25px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #888;
+        }
+
+        .separator-line {
+            width: 100%;
+            height: 1px;
+            background-color: var(--border-color);
+            margin-top: 25px;
+        }
+
+        /* SHOP LAYOUT */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .shop-title {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .shop-title h1 {
+            font-size: 36px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin: 0 0 10px 0;
+        }
+
+        .shop-title p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* PRODUCTS GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .card-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+            padding-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        }
+
+        .card-item img {
+            width: 100%;
+            height: 340px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-item h3 {
+            margin: 15px 10px 5px 10px;
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            color: #222;
+            flex-grow: 1;
+        }
+
+        .card-item p {
+            margin: 0;
+            color: #444;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+        </div>
+        
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html" style="font-weight: bold; border-bottom: 1px solid black; padding-bottom: 3px;">Shop Cards</a></li>
+                <li><a href="#">Shop Prints</a></li>
+            </ul>
+        </nav>
+        <div class="separator-line"></div>
+    </header>
+
+    <div class="container">
+        <div class="shop-title">
+            <h1>Shop Cards</h1>
+            <p>Browse our collection of hand-crafted, high-quality greeting cards.</p>
+        </div>
+
+        <div class="grid" id="products-grid"></div>
+    </div>
+
+    <script src="cards.js"></script>
+    <script>
+        // 2. Loop through the database and display them on the page
+        const gridElement = document.getElementById("products-grid");
+
+        function renderShop() {
+            gridElement.innerHTML = ""; // Clear grid
+            
+            CARDS_DATABASE.forEach(card => {
+                // Create a container for each card
+                const cardDiv = document.createElement("div");
+                cardDiv.className = "card-item";
+                
+                // When clicked, redirect them to the custom editor for this card
+                cardDiv.onclick = () => {
+                    window.location.href = `index.html?card=${card.id}`;
+                };
+
+                cardDiv.innerHTML = `
+                    <img src="${card.imageUrl}" alt="${card.title}">
+                    <h3>${card.title}</h3>
+                    <p>£3.49</p>
+                `;
+
+                gridElement.appendChild(cardDiv);
+            });
+        }
+
+        // Run the render function on page load
+        renderShop();
+    </script>
+</body>
+</html>
