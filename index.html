@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cockney Cards | Custom Greeting Cards</title>
-    <!-- Fabric.js Library for the editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <style>
         :root {
@@ -227,6 +226,18 @@
             color: #555;
         }
 
+        /* Dropdown styling */
+        select.dropdown-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: white;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
         input[type="text"], textarea {
             width: 100%;
             padding: 10px;
@@ -281,10 +292,9 @@
 </head>
 <body>
 
-    <!-- HEADER & LOGO -->
     <header>
         <div class="logo-container" onclick="window.location.reload();">
-            <img src="logo.png" alt="Cockney Cards">
+            <img src="https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/logo.png" alt="Cockney Cards">
         </div>
         
         <nav>
@@ -303,64 +313,57 @@
         </div>
 
         <div class="grid">
-            <!-- Augusta Golf Card -->
-            <div class="card-item" onclick="openEditor('https://static.wixstatic.com/media/2a7cb6_cc44b8c1483a4004a87793a49b90c69f~mv2.png')">
-                <img src="https://static.wixstatic.com/media/2a7cb6_cc44b8c1483a4004a87793a49b90c69f~mv2.png" alt="Golfing Card">
-                <h3>Augusta Golfing Birthday Card</h3>
-                <p>£3.49</p>
-            </div>
-
-            <!-- Welcome to the Den -->
-            <div class="card-item" onclick="openEditor('den-card.jpg')">
-                <img src="den-card.jpg" alt="Welcome to The Den Card">
+            <div class="card-item" onclick="openEditor('den-card')">
+                <img src="https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/den-card-boy.jpg" alt="Welcome to The Den Card">
                 <h3>Welcome to The Den Personalised Card</h3>
                 <p>£3.49</p>
             </div>
 
-            <!-- Bermondsey Legend -->
-            <div class="card-item" onclick="openEditor('bermondsey-card.jpg')">
-                <img src="bermondsey-card.jpg" alt="Bermondsey Legend Card">
+            <div class="card-item" onclick="openEditor('bermondsey-card')">
+                <img src="https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/bermondsey-card.jpg" alt="Bermondsey Legend Card">
                 <h3>Boy Out Of Bermondsey Legend Card</h3>
                 <p>£3.49</p>
             </div>
         </div>
     </div>
 
-    <!-- DOUBLE SIDED FLAT SPREAD CANVAS EDITOR -->
     <div id="editor-container">
         <div class="editor-box">
             <div id="canvas-wrapper">
-                <!-- Size is now 1191 x 840 (A4 landscape spread at 100DPI) -->
                 <canvas id="canvas"></canvas>
             </div>
             
             <div class="controls">
                 <h2>Personalise</h2>
 
-                <!-- Page toggles for Outside / Inside -->
                 <div class="page-toggle">
                     <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')">Outside Spread</button>
                     <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
                 </div>
 
-                <!-- OUTSIDE PANEL (FRONT COVER) CONTROLS -->
                 <div id="front-controls" class="control-group active">
-                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel is your back cover. The Right panel is the customizable front cover.</p>
                     
-                    <label for="name-input">Name to add:</label>
-                    <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this.value)">
+                    <div id="version-dropdown-container" style="display: none; margin-bottom: 15px;">
+                        <label for="card-version-select">Select Card Version:</label>
+                        <select id="card-version-select" class="dropdown-select" onchange="changeCardVersion(this.value)">
+                            </select>
+                    </div>
 
-                    <label for="age-input">Age:</label>
-                    <input type="text" id="age-input" placeholder="e.g. 40" oninput="updateAgeText(this.value)">
+                    <div id="front-text-inputs">
+                        <label for="name-input">Name to add:</label>
+                        <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this.value)">
 
-                    <label>Text Color (Front):</label>
-                    <div class="flex-row">
-                        <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
-                        <span style="font-size: 13px; color: #666;">Choose Font Color</span>
+                        <label for="age-input">Age:</label>
+                        <input type="text" id="age-input" placeholder="e.g. 40" oninput="updateAgeText(this.value)">
+
+                        <label>Text Color (Front):</label>
+                        <div class="flex-row">
+                            <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
+                            <span style="font-size: 13px; color: #666;">Choose Font Color</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- INSIDE PANEL CONTROLS -->
                 <div id="inside-controls" class="control-group">
                     <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel will remain blank. Select a box on the Right panel to write your message.</p>
                     
@@ -384,32 +387,45 @@
     </div>
 
     <script>
-        // REPLACE WITH YOUR CLOUDINARY INFO
-        const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
-        const CLOUDINARY_UPLOAD_PRESET = "cockneyuploads";
+        // 1. REPLACE WITH YOUR ACTUAL CLOUDINARY INFO
+        const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUD_NAME_HERE";
+        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
+
+        // 2. DEFINE YOUR CARD BLUEPRINTS HERE
+        const CARD_TEMPLATES = {
+            'den-card': {
+                editionType: 'front-and-inside',
+                // Define the versions/dropdown options for this card here!
+                versions: [
+                    { label: "Boy Version", url: "https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/den-card-boy.jpg" },
+                    { label: "Girl Version", url: "https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/den-card-girl.jpg" }
+                ],
+                name: { left: 892.5, top: 545, fontSize: 26, isCurved: true, curveRadius: 150, color: '#FFFFFF' },
+                age: { left: 892.5, top: 605, fontSize: 57, color: '#FFFFFF' }
+            },
+            'bermondsey-card': {
+                editionType: 'inside-only',
+                versions: [
+                    { label: "Standard", url: "https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/bermondsey-card.jpg" }
+                ],
+                name: null,
+                age: null
+            }
+        };
 
         let canvas;
         let bgImg, backCoverImg;
         let nameText, ageText;
         let insideTopText, insideMiddleText, insideBottomText;
         let currentPage = "front";
+        let activeTemplate = null;
 
-        // Layout settings (Width is 1191. Left page starts at 0, Right page starts at 595.5)
+        // Canvas constraints
         const PANEL_WIDTH = 595.5;
         const CANVAS_WIDTH = 1191;
         const CANVAS_HEIGHT = 840;
 
-        // Cover Text coordinates (shifted +595.5px right)
-        let STARTING_NAME_LEFT = 297 + PANEL_WIDTH; 
-        let STARTING_NAME_TOP = 545; 
-        let STARTING_NAME_SIZE = 26;
-
-        let STARTING_AGE_LEFT = 297 + PANEL_WIDTH; 
-        let STARTING_AGE_TOP = 605; 
-        let STARTING_AGE_SIZE = 57;
-        let currentCurveValue = 150; 
-
-        // Inside text boxes coordinates (shifted +595.5px right)
+        // Inside text boxes coordinates (aligned on the right side)
         const BOX_WIDTH = 495;
         const BOX_HEIGHT = 225;
         const BOX_LEFT = 50 + PANEL_WIDTH; 
@@ -423,9 +439,37 @@
         let leftPageBg, rightPageBg;
         let topBgRect, middleBgRect, bottomBgRect;
 
-        function openEditor(imageUrl) {
+        function openEditor(templateKey) {
+            activeTemplate = CARD_TEMPLATES[templateKey];
+            if (!activeTemplate) return;
+
             document.getElementById('gallery-view').style.filter = 'blur(5px)';
             document.getElementById('editor-container').style.display = 'flex';
+
+            // Populate Dropdown Options
+            const dropdownContainer = document.getElementById("version-dropdown-container");
+            const dropdownSelect = document.getElementById("card-version-select");
+            dropdownSelect.innerHTML = "";
+
+            if (activeTemplate.versions && activeTemplate.versions.length > 1) {
+                dropdownContainer.style.display = "block";
+                activeTemplate.versions.forEach((v, index) => {
+                    let opt = document.createElement("option");
+                    opt.value = v.url;
+                    opt.innerText = v.label;
+                    dropdownSelect.appendChild(opt);
+                });
+            } else {
+                dropdownContainer.style.display = "none";
+            }
+
+            // Hide/Show dynamic front inputs if it's "inside-only" vs customizable
+            const frontInputs = document.getElementById("front-text-inputs");
+            if (activeTemplate.editionType === 'inside-only') {
+                frontInputs.style.display = "none";
+            } else {
+                frontInputs.style.display = "block";
+            }
 
             if (canvas) {
                 canvas.dispose();
@@ -441,8 +485,9 @@
                 preserveObjectStacking: true, backgroundColor: '#ffffff'
             });
 
-            // 1. Load Logo on Left Side (Back Cover)
-            fabric.Image.fromURL('logo.png', function(logoImg) {
+            // 1. Load Static Back Cover Logo
+            const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/card-fronts/logo.png`;
+            fabric.Image.fromURL(logoUrl, function(logoImg) {
                 backCoverImg = logoImg;
                 backCoverImg.set({
                     left: PANEL_WIDTH / 2, top: CANVAS_HEIGHT / 2,
@@ -454,7 +499,17 @@
                 canvas.sendToBack(backCoverImg);
             });
 
-            // 2. Load Selected Front Design on Right Side (Front Cover)
+            // 2. Load Default Active Version Front Cover Image
+            const initialImgUrl = activeTemplate.versions[0].url;
+            loadFrontCover(initialImgUrl);
+        }
+
+        function loadFrontCover(imageUrl) {
+            // Remove old background if it exists
+            if (bgImg) {
+                canvas.remove(bgImg);
+            }
+
             fabric.Image.fromURL(imageUrl, function (img) {
                 bgImg = img;
                 bgImg.set({
@@ -466,79 +521,111 @@
                 canvas.add(bgImg);
                 canvas.sendToBack(bgImg);
 
-                // Setup Front Custom Texts (Right Panel)
-                nameText = new fabric.Text("NAME", {
-                    left: STARTING_NAME_LEFT, top: STARTING_NAME_TOP,
-                    originX: "center", originY: "center",
-                    fontSize: STARTING_NAME_SIZE, fontFamily: "Arial", fontWeight: "bold",
-                    fill: "#FFFFFF", textAlign: "center",
-                    hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
-                });
-
-                ageText = new fabric.Text("40", {
-                    left: STARTING_AGE_LEFT, top: STARTING_AGE_TOP,
-                    originX: "center", originY: "center",
-                    fontSize: STARTING_AGE_SIZE, fontFamily: "Arial", fontWeight: "bold",
-                    fill: "#FFFFFF",
-                    hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
-                });
-
-                // Setup Inside Message Panels (Right side only)
-                const bgPanelDefaults = {
-                    width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
-                    fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false
-                };
-
-                // Whole canvas background rects to cover/blank left side for writing mode
-                leftPageBg = new fabric.Rect({ left: 0, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
-                rightPageBg = new fabric.Rect({ left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
-
-                topBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: TOP_BOX_Y }));
-                middleBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: MIDDLE_BOX_Y }));
-                bottomBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: BOTTOM_BOX_Y }));
-
-                const textDefaults = {
-                    width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
-                    fontFamily: "Arial", fill: "#000000", textAlign: "center",
-                    visible: false, hasControls: false,
-                    lockMovementX: true, lockMovementY: true,
-                    lockScalingX: true, lockScalingY: true,
-                    hasBorders: true, splitByGrapheme: true,
-                    backgroundColor: "transparent",
-                    ...STYLE_DASHED
-                };
-
-                insideTopText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, {
-                    top: TOP_BOX_Y, fontSize: 45
-                }));
-
-                insideMiddleText = new fabric.Textbox("Happy Birthday!\nHave a great day!", Object.assign({}, textDefaults, {
-                    top: MIDDLE_BOX_Y, fontSize: 45
-                }));
-
-                insideBottomText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, {
-                    top: BOTTOM_BOX_Y, fontSize: 45
-                }));
-
-                canvas.add(
-                    nameText, ageText,
-                    leftPageBg, rightPageBg,
-                    topBgRect, middleBgRect, bottomBgRect,
-                    insideTopText, insideMiddleText, insideBottomText
-                );
-
-                updateTextCurve(nameText, currentCurveValue);
-                canvas.requestRenderAll();
-                
-                setupTextEvents();
+                setupTextsAndOverlays();
                 switchPage('front');
             });
+        }
+
+        // Swaps front covers when dropdown is selected
+        function changeCardVersion(imageUrl) {
+            if (!canvas || !bgImg) return;
+            
+            // Re-import the selected cover template onto the canvas
+            fabric.Image.fromURL(imageUrl, function (newImg) {
+                canvas.remove(bgImg);
+                bgImg = newImg;
+                bgImg.set({
+                    left: PANEL_WIDTH, top: 0, 
+                    scaleX: PANEL_WIDTH / bgImg.width, 
+                    scaleY: CANVAS_HEIGHT / bgImg.height,
+                    selectable: false, evented: false
+                });
+                canvas.add(bgImg);
+                canvas.sendToBack(bgImg);
+                canvas.requestRenderAll();
+            });
+        }
+
+        function setupTextsAndOverlays() {
+            // Setup Front Texts dynamically based on template config coordinates
+            if (activeTemplate.name && activeTemplate.editionType !== 'inside-only') {
+                if (nameText) canvas.remove(nameText);
+                nameText = new fabric.Text("NAME", {
+                    left: activeTemplate.name.left, top: activeTemplate.name.top,
+                    originX: "center", originY: "center",
+                    fontSize: activeTemplate.name.fontSize, fontFamily: "Arial", fontWeight: "bold",
+                    fill: activeTemplate.name.color, textAlign: "center",
+                    hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+                });
+                if (activeTemplate.name.isCurved) {
+                    updateTextCurve(nameText, activeTemplate.name.curveRadius);
+                }
+                canvas.add(nameText);
+            }
+
+            if (activeTemplate.age && activeTemplate.editionType !== 'inside-only') {
+                if (ageText) canvas.remove(ageText);
+                ageText = new fabric.Text("40", {
+                    left: activeTemplate.age.left, top: activeTemplate.age.top,
+                    originX: "center", originY: "center",
+                    fontSize: activeTemplate.age.fontSize, fontFamily: "Arial", fontWeight: "bold",
+                    fill: activeTemplate.age.color,
+                    hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+                });
+                canvas.add(ageText);
+            }
+
+            // Setup inside message overlays
+            const bgPanelDefaults = {
+                width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
+                fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false
+            };
+
+            leftPageBg = new fabric.Rect({ left: 0, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
+            rightPageBg = new fabric.Rect({ left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
+
+            topBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: TOP_BOX_Y }));
+            middleBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: MIDDLE_BOX_Y }));
+            bottomBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: BOTTOM_BOX_Y }));
+
+            const textDefaults = {
+                width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
+                fontFamily: "Arial", fill: "#000000", textAlign: "center",
+                visible: false, hasControls: false,
+                lockMovementX: true, lockMovementY: true,
+                lockScalingX: true, lockScalingY: true,
+                hasBorders: true, splitByGrapheme: true,
+                backgroundColor: "transparent",
+                ...STYLE_DASHED
+            };
+
+            insideTopText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, {
+                top: TOP_BOX_Y, fontSize: 45
+            }));
+
+            insideMiddleText = new fabric.Textbox("Happy Birthday!\nHave a great day!", Object.assign({}, textDefaults, {
+                top: MIDDLE_BOX_Y, fontSize: 45
+            }));
+
+            insideBottomText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, {
+                top: BOTTOM_BOX_Y, fontSize: 45
+            }));
+
+            canvas.add(
+                leftPageBg, rightPageBg,
+                topBgRect, middleBgRect, bottomBgRect,
+                insideTopText, insideMiddleText, insideBottomText
+            );
+
+            setupTextEvents();
         }
 
         function updateNameText(val) {
             if (!nameText) return;
             nameText.set({ text: val.toUpperCase() || "NAME" });
-            updateTextCurve(nameText, currentCurveValue);
+            if (activeTemplate.name.isCurved) {
+                updateTextCurve(nameText, activeTemplate.name.curveRadius);
+            }
             canvas.requestRenderAll();
         }
 
@@ -549,9 +636,8 @@
         }
 
         function updateFrontColor(hexColor) {
-            if (!nameText || !ageText) return;
-            nameText.set({ fill: hexColor });
-            ageText.set({ fill: hexColor });
+            if (nameText) nameText.set({ fill: hexColor });
+            if (ageText) ageText.set({ fill: hexColor });
             canvas.requestRenderAll();
         }
 
@@ -580,13 +666,13 @@
             document.getElementById('front-controls').classList.toggle('active', page === 'front');
             document.getElementById('inside-controls').classList.toggle('active', page === 'inside');
 
-            // Set visibilities for outside layout
-            backCoverImg.set({ visible: page === 'front' });
-            bgImg.set({ visible: page === 'front' });
-            nameText.set({ visible: page === 'front' });
-            ageText.set({ visible: page === 'front' });
+            // Cover visibilities
+            if (backCoverImg) backCoverImg.set({ visible: page === 'front' });
+            if (bgImg) bgImg.set({ visible: page === 'front' });
+            if (nameText) nameText.set({ visible: page === 'front' });
+            if (ageText) ageText.set({ visible: page === 'front' });
 
-            // Set visibilities for inside spread layout
+            // Inner Spread visibilities
             leftPageBg.set({ visible: page === 'inside' });
             rightPageBg.set({ visible: page === 'inside' });
             topBgRect.set({ visible: page === 'inside' });
@@ -646,7 +732,7 @@
             let pathString = `M 0 0 Q ${halfSpan} ${peakY} ${widthSpan} 0`;
             textObj.set({ 
                 path: new fabric.Path(pathString, { fill: '', stroke: '', visible: false }),
-                left: STARTING_NAME_LEFT, top: STARTING_NAME_TOP, originX: "center", originY: "center" 
+                left: activeTemplate.name.left, top: activeTemplate.name.top, originX: "center", originY: "center" 
             });
         }
 
@@ -655,7 +741,7 @@
             document.getElementById('editor-container').style.display = 'none';
         }
 
-        // CAPTURES THE SPREADS AND UPLOADS THEM DIRECTLY TO CLOUDINARY
+        // CAPTURES BOTH SPREADS AND UPLOADS THEM DIRECTLY TO CLOUDINARY
         async function uploadAndGoToCheckout() {
             const buyBtn = document.querySelector(".controls .btn");
             buyBtn.innerText = "Generating high-res pages...";
@@ -666,10 +752,9 @@
                 switchPage('front');
                 const page1DataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
 
-                // 2. Generate Page 2: Inside Spread (We clear the text box outline helpers first)
+                // 2. Generate Page 2: Inside Spread (Remove text helper lines)
                 switchPage('inside');
                 resetBordersToDashed();
-                // Temporarily hide background helper boxes for clean final print
                 topBgRect.set({ visible: false });
                 middleBgRect.set({ visible: false });
                 bottomBgRect.set({ visible: false });
@@ -681,7 +766,7 @@
 
                 const page2DataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
 
-                // Restore helpers on the display canvas
+                // Restore overlays in browser display
                 topBgRect.set({ visible: true });
                 middleBgRect.set({ visible: true });
                 bottomBgRect.set({ visible: true });
@@ -689,9 +774,8 @@
 
                 buyBtn.innerText = "Uploading templates...";
 
-                // 3. Upload Page 1 to Cloudinary
+                // 3. Upload Page 1 & Page 2 to Cloudinary
                 const p1Upload = await uploadToCloudinary(page1DataUrl);
-                // 4. Upload Page 2 to Cloudinary
                 const p2Upload = await uploadToCloudinary(page2DataUrl);
 
                 if (!p1Upload || !p2Upload) {
@@ -700,10 +784,10 @@
 
                 buyBtn.innerText = "Connecting checkout...";
 
-                // 5. Send secure image URLs directly to our Stripe Netlify function
+                // 4. Send metadata to Netlify backend function
                 const checkoutData = {
-                    name: nameText ? nameText.text : "NAME",
-                    age: ageText ? ageText.text : "40",
+                    name: (nameText && activeTemplate.editionType !== 'inside-only') ? nameText.text : "N/A",
+                    age: (ageText && activeTemplate.editionType !== 'inside-only') ? ageText.text : "N/A",
                     outsideImageUrl: p1Upload.secure_url,
                     insideImageUrl: p2Upload.secure_url
                 };
@@ -725,7 +809,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert("Processing failed. Make sure your Cloudinary preset is set to 'Unsigned'!");
+                alert("Processing failed. Check Cloudinary settings!");
                 buyBtn.innerText = "Buy Now";
                 buyBtn.disabled = false;
             }
