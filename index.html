@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cockney Cards | Greeting Cards & Prints</title>
+    <title>Cockney Cards | Home</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
@@ -108,6 +108,10 @@
             color: #888;
         }
 
+        .nav-links a.active {
+            font-weight: bold;
+        }
+
         /* EXQUISITE 3-COLUMN GALLERY GRID */
         .gallery-section {
             max-width: 1200px;
@@ -148,10 +152,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px;
             box-sizing: border-box;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
+            overflow: hidden; /* Keeps scaled images from spilling out */
         }
 
         .gallery-item:hover {
@@ -167,36 +171,69 @@
             height: 180px;
         }
 
+        /* IMAGE FILL RULE: 
+           Using 'cover' makes sure the image scales beautifully to fully fill the outer framed box 
+        */
         .gallery-img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
         }
 
-        .print-img {
-            filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.15));
-            max-height: 90%;
-        }
-
-        .card-img {
-            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
-            max-height: 95%;
-        }
-
+        /* Center logo box is kept clean and fits nicely without getting cropped */
         .logo-bg {
             background-color: #ffffff;
+            padding: 20px;
         }
 
         .logo-img {
+            object-fit: contain;
             max-height: 85%;
         }
 
-        .gallery-footer {
+        /* INSTAGRAM FEED PLACEHOLDER */
+        .instagram-feed-section {
+            max-width: 1200px;
+            margin: 60px auto 20px auto;
+            padding: 0 20px;
             text-align: center;
-            margin-top: 30px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #333;
+        }
+
+        .instagram-title {
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        /* Placeholder layout grid for Instagram layout */
+        .instagram-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .instagram-placeholder-item {
+            aspect-ratio: 1 / 1;
+            background-color: #f0f0f0;
+            border: 1px solid #e2e2e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .instagram-handle {
+            font-size: 13px;
+            font-weight: bold;
+            color: #111;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
         }
 
         /* FOOTER */
@@ -257,6 +294,9 @@
             .large-box {
                 height: 340px;
             }
+            .instagram-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
@@ -284,7 +324,8 @@
         
         <nav>
             <ul class="nav-links">
-                <li><a href="index.html" class="active" style="font-weight: bold;">Shop Cards</a></li>
+                <li><a href="shop-cards.html">Shop Cards</a></li>
+                <li><a href="shop-prints.html">Shop Prints</a></li>
                 <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
             </ul>
         </nav>
@@ -296,26 +337,26 @@
         <div class="gallery-grid">
             
             <div class="gallery-column">
-                <div class="gallery-item large-box" onclick="goToEditor('millwall-dad-son')">
-                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png" alt="Millwall Dad and Son Print" class="gallery-img print-img">
+                <div class="gallery-item large-box" onclick="goToPrintsShop()">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png" alt="Millwall Dad and Son Print" class="gallery-img">
                 </div>
                 <div class="gallery-row">
-                    <div class="gallery-item small-box" onclick="goToEditor('ofah')">
-                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120973/ofah_rfdqnz.png" alt="Only Fools and Horses Card" class="gallery-img card-img">
+                    <div class="gallery-item small-box" onclick="goToCardsShop()">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120973/ofah_rfdqnz.png" alt="Only Fools and Horses Card" class="gallery-img">
                     </div>
-                    <div class="gallery-item small-box" onclick="goToEditor('leaving-girl')">
-                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120976/leaving-girl1_k227or.png" alt="Sorry You're Leaving Card" class="gallery-img card-img">
+                    <div class="gallery-item small-box" onclick="goToCardsShop()">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120976/leaving-girl1_k227or.png" alt="Sorry You're Leaving Card" class="gallery-img">
                     </div>
                 </div>
             </div>
 
             <div class="gallery-column">
                 <div class="gallery-row">
-                    <div class="gallery-item small-box" onclick="goToEditor('racing-girl')">
-                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120980/racing-girl_zrfb57.png" alt="Racing Girl Card" class="gallery-img card-img">
+                    <div class="gallery-item small-box" onclick="goToCardsShop()">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120980/racing-girl_zrfb57.png" alt="Racing Girl Card" class="gallery-img">
                     </div>
-                    <div class="gallery-item small-box" onclick="goToEditor('ladies-lunch')">
-                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120970/ladies-lunch_so7w76.png" alt="Ladies Lunch Card" class="gallery-img card-img">
+                    <div class="gallery-item small-box" onclick="goToCardsShop()">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120970/ladies-lunch_so7w76.png" alt="Ladies Lunch Card" class="gallery-img">
                     </div>
                 </div>
                 <div class="gallery-item large-box logo-bg">
@@ -324,24 +365,31 @@
             </div>
 
             <div class="gallery-column">
-                <div class="gallery-item large-box" onclick="goToEditor('bermondsey-legend')">
-                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png" alt="Bermondsey Legend Print" class="gallery-img print-img">
+                <div class="gallery-item large-box" onclick="goToPrintsShop()">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png" alt="Bermondsey Legend Print" class="gallery-img">
                 </div>
                 <div class="gallery-row">
-                    <div class="gallery-item small-box" onclick="goToEditor('arsenal-girls')">
-                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120964/arsenal-girls_qpiaid.png" alt="Arsenal Girls Card" class="gallery-img card-img">
+                    <div class="gallery-item small-box" onclick="goToCardsShop()">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120964/arsenal-girls_qpiaid.png" alt="Arsenal Girls Card" class="gallery-img">
                     </div>
-                    <div class="gallery-item small-box" onclick="goToEditor('nolu-lion')">
-                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120967/nolu-lion_zdsmes.png" alt="Congratulations New Home Card" class="gallery-img card-img">
+                    <div class="gallery-item small-box" onclick="goToCardsShop()">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120967/nolu-lion_zdsmes.png" alt="Congratulations New Home Card" class="gallery-img">
                     </div>
                 </div>
             </div>
 
         </div>
+    </section>
 
-        <div class="gallery-footer">
-            <p>Instagram Feed @cockneycards.ig</p>
+    <section class="instagram-feed-section">
+        <h3 class="instagram-title">Follow Us On Instagram</h3>
+        <div class="instagram-grid">
+            <div class="instagram-placeholder-item">Feed Image 1</div>
+            <div class="instagram-placeholder-item">Feed Image 2</div>
+            <div class="instagram-placeholder-item">Feed Image 3</div>
+            <div class="instagram-placeholder-item">Feed Image 4</div>
         </div>
+        <a href="https://www.instagram.com/cockneycards.ig" target="_blank" class="instagram-handle">@cockneycards.ig</a>
     </section>
 
     <footer>
@@ -373,8 +421,13 @@
     </footer>
 
     <script>
-        function goToEditor(productId) {
-            window.location.href = `editor.html?card=${productId}`;
+        // NAVIGATION ACTIONS FOR PRINTS VS CARDS
+        function goToPrintsShop() {
+            window.location.href = 'shop-prints.html';
+        }
+
+        function goToCardsShop() {
+            window.location.href = 'shop-cards.html';
         }
 
         window.addEventListener('DOMContentLoaded', () => {
