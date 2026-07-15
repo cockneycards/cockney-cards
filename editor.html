@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalise Your Card | Cockney Cards</title>
-    <!-- Fabric.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    <!-- Netlify Identity Widget -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
@@ -16,7 +14,6 @@
             --light: #fcfcfc;
             --border-color: #e0e0e0;
             --font-family: 'Helvetica Neue', Arial, sans-serif;
-            --typewriter-font: 'Courier New', Courier, monospace;
         }
         
         body {
@@ -184,19 +181,17 @@
 
     <header>
         <div class="header-top">
-            <div class="logo-container" onclick="window.location.href='shop.html';">
+            <div class="logo-container" onclick="window.location.href='index.html';">
                 <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
             </div>
         </div>
     </header>
 
     <div class="editor-workspace">
-        <!-- Live Canvas -->
         <div id="canvas-wrapper">
             <canvas id="canvas"></canvas>
         </div>
         
-        <!-- Action Workspace Sidebar -->
         <div class="controls">
             <h2>Personalise Card</h2>
 
@@ -205,7 +200,6 @@
                 <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
             </div>
 
-            <!-- Front Panel Customisation -->
             <div id="front-controls" class="control-group active">
                 <div id="front-text-inputs">
                     <label for="name-input">Name to add:</label>
@@ -222,9 +216,8 @@
                 </div>
             </div>
 
-            <!-- Inside Panel Customisation -->
             <div id="inside-controls" class="control-group">
-                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel will remain blank. Select a text box on the Right panel to write your message.</p>
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel remains blank. Click on the text layers on the Right panel to write your message.</p>
                 
                 <label>Font Size:</label>
                 <div class="flex-row">
@@ -240,42 +233,52 @@
             </div>
             
             <button class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
-            <button class="btn btn-close" onclick="window.location.href='shop.html'">Cancel & Return</button>
+            <button class="btn btn-close" onclick="window.location.href='index.html'">Cancel & Return</button>
         </div>
     </div>
 
     <script>
         const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
-        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
+        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE"; // Be sure to set this in Cloudinary
 
         const CARD_TEMPLATES = {
-            'tvmovies-inbetweeners': {
-                editionType: 'front-and-inside',
-                versions: [{ label: "Standard", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png" }],
+            'millwall-dad-son': {
+                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png",
                 name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
                 age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
             },
             'ofah': {
-                editionType: 'front-and-inside',
-                versions: [{ label: "Standard", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png" }],
+                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120973/ofah_rfdqnz.png",
                 name: { left: 892.5, top: 540, fontSize: 28, isCurved: true, curveRadius: 160, color: '#FFFFFF' },
                 age: { left: 892.5, top: 610, fontSize: 55, color: '#FFFFFF' }
             },
-            'tvmovies-youngones': {
-                editionType: 'front-and-inside',
-                versions: [{ label: "Standard", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058082/tvmovies-youngones.png" }],
-                name: { left: 892.5, top: 530, fontSize: 30, isCurved: false, color: '#FFFFFF' },
-                age: { left: 892.5, top: 610, fontSize: 50, color: '#FFFFFF' }
+            'leaving-girl': {
+                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120976/leaving-girl1_k227or.png",
+                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#111111' },
+                age: null
             },
-            'exams-boy': {
-                editionType: 'front-and-inside',
-                versions: [{ label: "Standard", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058150/exams-boy.png" }],
+            'racing-girl': {
+                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120980/racing-girl_zrfb57.png",
                 name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
                 age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
             },
-            'exams-girl': {
-                editionType: 'front-and-inside',
-                versions: [{ label: "Standard", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058144/exams-girl.png" }],
+            'ladies-lunch': {
+                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120970/ladies-lunch_so7w76.png",
+                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+            },
+            'bermondsey-legend': {
+                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png",
+                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+                age: null
+            },
+            'arsenal-girls': {
+                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120964/arsenal-girls_qpiaid.png",
+                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+            },
+            'nolu-lion': {
+                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120967/nolu-lion_zdsmes.png",
                 name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
                 age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
             }
@@ -295,12 +298,11 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            const cardId = params.get('card');
-            if (cardId && CARD_TEMPLATES[cardId]) {
+            const cardId = params.get('card') || 'millwall-dad-son';
+            if (CARD_TEMPLATES[cardId]) {
                 initEditor(cardId);
             } else {
-                // If direct navigating without card, bounce back to shop
-                window.location.href = 'shop.html';
+                window.location.href = 'index.html';
             }
         });
 
@@ -315,25 +317,25 @@
                 preserveObjectStacking: true, backgroundColor: '#ffffff'
             });
 
-            // Set up static back cover logo
-const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
-fabric.Image.fromURL(logoUrl, function(logoImg) {
-    backCoverImg = logoImg;
-    backCoverImg.set({
-        left: PANEL_WIDTH / 2, // Keeps it perfectly centered on the back cover
-        top: 690,              // Moves it down near the bottom (total canvas height is 840)
-        originX: 'center', 
-        originY: 'center',
-        scaleX: 0.38,          // Makes the logo smaller
-        scaleY: 0.38,          // Makes the logo smaller
-        selectable: false, 
-        evented: false
-    });
-    canvas.add(backCoverImg);
-    canvas.sendToBack(backCoverImg);
-});
+            // ELEGANT SMALL LOWER-BOTTOM LEFT LOGO FOR THE CARD BACK COVER
+            const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
+            fabric.Image.fromURL(logoUrl, function(logoImg) {
+                backCoverImg = logoImg;
+                backCoverImg.set({
+                    left: PANEL_WIDTH / 2, // Centers perfectly horizontally on the back cover
+                    top: 690, // Places it beautifully down towards the bottom margin
+                    originX: 'center', 
+                    originY: 'center',
+                    scaleX: 0.38, // Small aesthetic scaling
+                    scaleY: 0.38,          
+                    selectable: false, 
+                    evented: false
+                });
+                canvas.add(backCoverImg);
+                canvas.sendToBack(backCoverImg);
+            });
 
-            loadFrontCover(activeTemplate.versions[0].url);
+            loadFrontCover(activeTemplate.url);
         }
 
         function loadFrontCover(imageUrl) {
