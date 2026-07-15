@@ -39,11 +39,14 @@
         }
 
         .header-icon {
-            font-size: 20px;
-            cursor: pointer;
-            text-decoration: none;
-            color: var(--dark);
-            width: 30px;
+    font-size: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--dark);
+    flex: 1; /* Forces the left side to fill empty space */
+    display: flex;
+    justify-content: flex-start; /* Keeps the search icon on the far left */
+
         }
 
         .logo-container {
@@ -57,9 +60,12 @@
         }
 
         .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1; /* Forces the right side to fill equal empty space */
+    justify-content: flex-end; /* Keeps the login and cart on the far right */
+
         }
 
         .cart-icon {
