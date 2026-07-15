@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cockney Cards | Custom Greeting Cards</title>
+    <!-- Fabric.js Library for the editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <style>
         :root {
@@ -292,14 +293,16 @@
 </head>
 <body>
 
+    <!-- HEADER & LOGO: (Loads your Cloudinary logo) -->
     <header>
         <div class="logo-container" onclick="window.location.reload();">
-            <img src="https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/logo.png" alt="Cockney Cards">
+            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
         </div>
         
         <nav>
             <ul class="nav-links">
-                <li><a href="#" onclick="window.location.reload();">Shop Cards</a></li>
+                <!-- Shop Cards now points directly to shop.html! -->
+                <li><a href="shop.html">Shop Cards</a></li>
                 <li><a href="#">Shop Prints</a></li>
                 <li><a href="#">My Orders</a></li>
             </ul>
@@ -309,24 +312,27 @@
 
     <div class="container" id="gallery-view">
         <div class="gallery-title">
-            <h2>Discover Our Range of Greeting Cards & Prints</h2>
+            <h2>Featured Personalised Cards</h2>
         </div>
 
         <div class="grid">
-            <div class="card-item" onclick="openEditor('den-card')">
-                <img src="https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/den-card-boy.jpg" alt="Welcome to The Den Card">
-                <h3>Welcome to The Den Personalised Card</h3>
+            <!-- 1. The Inbetweeners Card Grid Entry -->
+            <div class="card-item" onclick="openEditor('tvmovies-inbetweeners')">
+                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png" alt="The Inbetweeners Card">
+                <h3>The Inbetweeners Personalised Card</h3>
                 <p>£3.49</p>
             </div>
 
-            <div class="card-item" onclick="openEditor('bermondsey-card')">
-                <img src="https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/bermondsey-card.jpg" alt="Bermondsey Legend Card">
-                <h3>Boy Out Of Bermondsey Legend Card</h3>
+            <!-- 2. Only Fools and Horses Card Grid Entry -->
+            <div class="card-item" onclick="openEditor('ofah')">
+                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png" alt="Only Fools and Horses Card">
+                <h3>Only Fools and Horses Personalised Card</h3>
                 <p>£3.49</p>
             </div>
         </div>
     </div>
 
+    <!-- DOUBLE SIDED FLAT SPREAD CANVAS EDITOR -->
     <div id="editor-container">
         <div class="editor-box">
             <div id="canvas-wrapper">
@@ -336,17 +342,21 @@
             <div class="controls">
                 <h2>Personalise</h2>
 
+                <!-- Page toggles for Outside / Inside -->
                 <div class="page-toggle">
                     <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')">Outside Spread</button>
                     <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
                 </div>
 
+                <!-- OUTSIDE PANEL (FRONT COVER) CONTROLS -->
                 <div id="front-controls" class="control-group active">
                     
+                    <!-- Dynamic Dropdown Container (Shows when template has versions) -->
                     <div id="version-dropdown-container" style="display: none; margin-bottom: 15px;">
                         <label for="card-version-select">Select Card Version:</label>
                         <select id="card-version-select" class="dropdown-select" onchange="changeCardVersion(this.value)">
-                            </select>
+                            <!-- Dropdown options injected via Javascript -->
+                        </select>
                     </div>
 
                     <div id="front-text-inputs">
@@ -364,6 +374,7 @@
                     </div>
                 </div>
 
+                <!-- INSIDE PANEL CONTROLS -->
                 <div id="inside-controls" class="control-group">
                     <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel will remain blank. Select a box on the Right panel to write your message.</p>
                     
@@ -387,29 +398,27 @@
     </div>
 
     <script>
-        // 1. REPLACE WITH YOUR ACTUAL CLOUDINARY INFO
-        const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUD_NAME_HERE";
-        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
+        // 1. YOUR CLOUDINARY CLOUD DETAILS (Change preset if needed)
+        const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
+        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE"; // Keep your active unsigned upload preset name here!
 
-        // 2. DEFINE YOUR CARD BLUEPRINTS HERE
+        // 2. DEFINE YOUR INDIVIDUAL CARD CONFIGURATIONS
         const CARD_TEMPLATES = {
-            'den-card': {
+            'tvmovies-inbetweeners': {
                 editionType: 'front-and-inside',
-                // Define the versions/dropdown options for this card here!
                 versions: [
-                    { label: "Boy Version", url: "https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/den-card-boy.jpg" },
-                    { label: "Girl Version", url: "https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/den-card-girl.jpg" }
+                    { label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png" }
                 ],
-                name: { left: 892.5, top: 545, fontSize: 26, isCurved: true, curveRadius: 150, color: '#FFFFFF' },
-                age: { left: 892.5, top: 605, fontSize: 57, color: '#FFFFFF' }
+                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+                age:  { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
             },
-            'bermondsey-card': {
-                editionType: 'inside-only',
+            'ofah': {
+                editionType: 'front-and-inside',
                 versions: [
-                    { label: "Standard", url: "https://res.cloudinary.com/YOUR_CLOUD_NAME_HERE/image/upload/card-fronts/bermondsey-card.jpg" }
+                    { label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png" }
                 ],
-                name: null,
-                age: null
+                name: { left: 892.5, top: 540, fontSize: 28, isCurved: true, curveRadius: 160, color: '#FFFFFF' },
+                age:  { left: 892.5, top: 610, fontSize: 55, color: '#FFFFFF' }
             }
         };
 
@@ -420,12 +429,12 @@
         let currentPage = "front";
         let activeTemplate = null;
 
-        // Canvas constraints
+        // Canvas dimensions
         const PANEL_WIDTH = 595.5;
         const CANVAS_WIDTH = 1191;
         const CANVAS_HEIGHT = 840;
 
-        // Inside text boxes coordinates (aligned on the right side)
+        // Inside layout positioning (right-side page)
         const BOX_WIDTH = 495;
         const BOX_HEIGHT = 225;
         const BOX_LEFT = 50 + PANEL_WIDTH; 
@@ -438,6 +447,15 @@
 
         let leftPageBg, rightPageBg;
         let topBgRect, middleBgRect, bottomBgRect;
+
+        // Handle URL Params (Direct redirect from shop.html click)
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const cardId = params.get('card');
+            if (cardId && CARD_TEMPLATES[cardId]) {
+                openEditor(cardId);
+            }
+        });
 
         function openEditor(templateKey) {
             activeTemplate = CARD_TEMPLATES[templateKey];
@@ -486,7 +504,7 @@
             });
 
             // 1. Load Static Back Cover Logo
-            const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/card-fronts/logo.png`;
+            const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
             fabric.Image.fromURL(logoUrl, function(logoImg) {
                 backCoverImg = logoImg;
                 backCoverImg.set({
@@ -505,7 +523,6 @@
         }
 
         function loadFrontCover(imageUrl) {
-            // Remove old background if it exists
             if (bgImg) {
                 canvas.remove(bgImg);
             }
@@ -526,11 +543,9 @@
             });
         }
 
-        // Swaps front covers when dropdown is selected
         function changeCardVersion(imageUrl) {
             if (!canvas || !bgImg) return;
             
-            // Re-import the selected cover template onto the canvas
             fabric.Image.fromURL(imageUrl, function (newImg) {
                 canvas.remove(bgImg);
                 bgImg = newImg;
@@ -547,7 +562,7 @@
         }
 
         function setupTextsAndOverlays() {
-            // Setup Front Texts dynamically based on template config coordinates
+            // Front texts setup
             if (activeTemplate.name && activeTemplate.editionType !== 'inside-only') {
                 if (nameText) canvas.remove(nameText);
                 nameText = new fabric.Text("NAME", {
@@ -575,7 +590,7 @@
                 canvas.add(ageText);
             }
 
-            // Setup inside message overlays
+            // Inside message setup
             const bgPanelDefaults = {
                 width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
                 fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false
@@ -666,13 +681,11 @@
             document.getElementById('front-controls').classList.toggle('active', page === 'front');
             document.getElementById('inside-controls').classList.toggle('active', page === 'inside');
 
-            // Cover visibilities
             if (backCoverImg) backCoverImg.set({ visible: page === 'front' });
             if (bgImg) bgImg.set({ visible: page === 'front' });
             if (nameText) nameText.set({ visible: page === 'front' });
             if (ageText) ageText.set({ visible: page === 'front' });
 
-            // Inner Spread visibilities
             leftPageBg.set({ visible: page === 'inside' });
             rightPageBg.set({ visible: page === 'inside' });
             topBgRect.set({ visible: page === 'inside' });
@@ -739,20 +752,22 @@
         function closeEditor() {
             document.getElementById('gallery-view').style.filter = 'none';
             document.getElementById('editor-container').style.display = 'none';
+            
+            // Clean URL query param so user can browse cleanly again
+            const url = new URL(window.location);
+            url.searchParams.delete('card');
+            window.history.pushState({}, '', url);
         }
 
-        // CAPTURES BOTH SPREADS AND UPLOADS THEM DIRECTLY TO CLOUDINARY
         async function uploadAndGoToCheckout() {
             const buyBtn = document.querySelector(".controls .btn");
             buyBtn.innerText = "Generating high-res pages...";
             buyBtn.disabled = true;
 
             try {
-                // 1. Generate Page 1: Outside Cover Spread
                 switchPage('front');
                 const page1DataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
 
-                // 2. Generate Page 2: Inside Spread (Remove text helper lines)
                 switchPage('inside');
                 resetBordersToDashed();
                 topBgRect.set({ visible: false });
@@ -766,7 +781,6 @@
 
                 const page2DataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
 
-                // Restore overlays in browser display
                 topBgRect.set({ visible: true });
                 middleBgRect.set({ visible: true });
                 bottomBgRect.set({ visible: true });
@@ -774,7 +788,6 @@
 
                 buyBtn.innerText = "Uploading templates...";
 
-                // 3. Upload Page 1 & Page 2 to Cloudinary
                 const p1Upload = await uploadToCloudinary(page1DataUrl);
                 const p2Upload = await uploadToCloudinary(page2DataUrl);
 
@@ -784,7 +797,6 @@
 
                 buyBtn.innerText = "Connecting checkout...";
 
-                // 4. Send metadata to Netlify backend function
                 const checkoutData = {
                     name: (nameText && activeTemplate.editionType !== 'inside-only') ? nameText.text : "N/A",
                     age: (ageText && activeTemplate.editionType !== 'inside-only') ? ageText.text : "N/A",
