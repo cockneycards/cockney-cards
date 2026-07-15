@@ -3,43 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cockney Cards | Custom Greeting Cards</title>
+    <title>Cockney Cards | Discover Our Range of Greeting Cards & Prints</title>
     <!-- Fabric.js Library for the editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    
+    <!-- Netlify Identity Widget for Login System -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
     <style>
         :root {
             --primary: #1A73E8;
             --dark: #1e1e24;
             --light: #fcfcfc;
-            --border-color: #d1d1d1;
+            --border-color: #e0e0e0;
+            --font-family: 'Helvetica Neue', Arial, sans-serif;
+            --typewriter-font: 'Courier New', Courier, monospace;
         }
         
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: var(--font-family);
             margin: 0;
             padding: 0;
             background-color: white;
             color: var(--dark);
         }
 
-        /* HEADER & LOGO */
+        /* HEADER & NAVIGATION */
         header {
             background-color: white;
-            text-align: center;
-            padding: 30px 20px 10px 20px;
+            padding: 15px 40px 10px 40px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-icon {
+            font-size: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--dark);
+            width: 30px;
         }
 
         .logo-container {
-            cursor: pointer;
-            display: inline-block;
+            text-align: center;
         }
 
         .logo-container img {
-            max-width: 150px;
+            max-width: 120px;
             height: auto;
+            cursor: pointer;
         }
 
-        /* NAVIGATION */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            font-size: 11px;
+            text-decoration: none;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .login-btn:hover {
+            color: #111;
+        }
+
         nav {
             margin-top: 15px;
             text-align: center;
@@ -47,7 +95,7 @@
 
         .nav-links {
             display: inline-flex;
-            gap: 25px;
+            gap: 30px;
             padding: 0;
             margin: 0;
             list-style: none;
@@ -55,9 +103,9 @@
 
         .nav-links a {
             text-decoration: none;
-            color: #333;
-            font-size: 15px;
-            letter-spacing: 0.5px;
+            color: #111;
+            font-size: 13px;
+            letter-spacing: 1px;
             transition: color 0.2s;
         }
 
@@ -65,76 +113,234 @@
             color: #888;
         }
 
-        .separator-line {
-            width: 100%;
-            height: 1px;
-            background-color: var(--border-color);
-            margin-top: 25px;
-        }
-
-        /* MAIN CONTENT AREA */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        .gallery-title {
+        /* PROMO SUBTITLE */
+        .promo-banner {
             text-align: center;
-            margin-bottom: 40px;
+            padding: 40px 20px 20px 20px;
         }
 
-        .gallery-title h2 {
-            font-size: 32px;
+        .promo-banner h1 {
+            font-size: 26px;
             font-weight: 300;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             margin: 0;
         }
 
-        /* BORDERED GALLERY GRID */
-        .grid {
+        /* HERO COLLAGE GRID */
+        .collage-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 10px 20px 40px 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 15px;
+            align-items: stretch;
         }
 
-        .card-item {
-            background: white;
+        /* Left and Right columns use stacked sub-grids */
+        .collage-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .collage-row-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Image Blocks */
+        .collage-item {
+            background-color: #fbfbfb;
             border: 1px solid var(--border-color);
+            position: relative;
             overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer;
-            text-align: center;
-            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 10px;
         }
 
-        .card-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .card-item img {
+        .collage-item img {
             width: 100%;
-            height: 380px;
-            object-fit: cover;
-            border-bottom: 1px solid var(--border-color);
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            transition: transform 0.3s ease;
         }
 
-        .card-item h3 {
-            margin: 15px 10px 5px 10px;
-            font-size: 16px;
-            font-weight: 400;
+        .collage-item:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Sizing variants to match structural styles */
+        .large-print {
+            height: 420px;
+        }
+
+        .large-print img {
+            object-fit: cover;
+            padding: 15px;
+        }
+
+        .small-card {
+            height: 220px;
+        }
+
+        .center-circle-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .center-circle-wrapper img {
+            width: 100%;
+            height: auto;
+            max-width: 440px;
+            object-fit: contain;
+        }
+
+        /* INSTAGRAM FEED SECTION */
+        .instagram-section {
+            text-align: center;
+            padding: 50px 20px 30px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .instagram-section h2 {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+
+        .instagram-section a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .instagram-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .instagram-item {
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: #f5f5f5;
+        }
+
+        .instagram-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: filter 0.2s ease;
+        }
+
+        .instagram-item img:hover {
+            filter: brightness(0.9);
+        }
+
+        /* TESTIMONIALS SECTION */
+        .testimonials-section {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .testimonial-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .testimonial-card .quote-icon {
+            font-size: 36px;
+            font-family: Georgia, serif;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .testimonial-card h3 {
+            font-family: var(--typewriter-font);
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+        }
+
+        .testimonial-card p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #444;
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 60px 40px 20px 40px;
+            background-color: white;
+        }
+
+        .footer-grid {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+        }
+
+        .footer-col {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .footer-col h4 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 20px;
             letter-spacing: 0.5px;
         }
 
-        .card-item p {
-            margin: 0;
-            color: #444;
-            font-weight: 600;
-            font-size: 14px;
+        .footer-col p {
+            margin: 0 0 15px 0;
         }
 
-        /* CUSTOM FLOW MODAL (The A4 Spread Editor Screen) */
+        .footer-col a {
+            color: #111;
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            max-width: 1300px;
+            margin: 50px auto 0 auto;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 0.5px;
+        }
+
+        /* EDITOR MODAL */
         #editor-container {
             display: none; 
             position: fixed;
@@ -227,7 +433,6 @@
             color: #555;
         }
 
-        /* Dropdown styling */
         select.dropdown-select {
             width: 100%;
             padding: 10px;
@@ -239,18 +444,13 @@
             cursor: pointer;
         }
 
-        input[type="text"], textarea {
+        input[type="text"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
             box-sizing: border-box;
             font-size: 15px;
-        }
-
-        textarea {
-            resize: none;
-            height: 100px;
         }
 
         .flex-row {
@@ -289,47 +489,151 @@
         .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
         .btn-close { background-color: #e0e0e0; color: #333; margin-top: 5px; }
         .btn-close:hover { background-color: #d0d0d0; }
+
+        /* Responsive fixes for mobile screen sizing */
+        @media (max-width: 900px) {
+            .collage-container {
+                grid-template-columns: 1fr;
+            }
+            .instagram-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .testimonials-section, .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- HEADER & LOGO: (Loads your Cloudinary logo) -->
+    <!-- BRANDED HEADER -->
     <header>
-        <div class="logo-container" onclick="window.location.reload();">
-            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+        <div class="header-top">
+            <!-- Search placeholder on left -->
+            <div class="header-icon">⌕</div>
+            
+            <!-- Centered Logo -->
+            <div class="logo-container" onclick="window.location.reload();">
+                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+            </div>
+            
+            <!-- Branded Shopping bag & Log-in on right -->
+            <div class="header-right">
+                <!-- Login Button linked to Netlify Identity -->
+                <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
+                
+                <div class="cart-icon">
+                    <!-- SVG vector of the black shopping bag -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
         
         <nav>
             <ul class="nav-links">
-                <!-- Shop Cards now points directly to shop.html! -->
+                <!-- Clean, requested navigation links -->
                 <li><a href="shop.html">Shop Cards</a></li>
-                <li><a href="#">Shop Prints</a></li>
-                <li><a href="#">My Orders</a></li>
+                <li><a href="prints.html">Shop Prints</a></li>
+                <!-- Interactive My Orders Link -->
+                <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
             </ul>
         </nav>
-        <div class="separator-line"></div>
     </header>
 
+    <!-- MAIN HOMEPAGE CONTENT -->
     <div class="container" id="gallery-view">
-        <div class="gallery-title">
-            <h2>Featured Personalised Cards</h2>
+        
+        <div class="promo-banner">
+            <h1>Discover Our Range of Greeting Cards & Prints</h1>
         </div>
 
-        <div class="grid">
-            <!-- 1. The Inbetweeners Card Grid Entry -->
-            <div class="card-item" onclick="openEditor('tvmovies-inbetweeners')">
-                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png" alt="The Inbetweeners Card">
-                <h3>The Inbetweeners Personalised Card</h3>
-                <p>£3.49</p>
+        <!-- COLLAGE LAYOUT -->
+        <div class="collage-container">
+            
+            <!-- LEFT COLUMN: Frame Print + 2 Cards Side-by-Side -->
+            <div class="collage-column">
+                <div class="collage-item large-print" onclick="openEditor('ofah')">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png" alt="Featured Wall Art Print">
+                </div>
+                <div class="collage-row-split">
+                    <div class="collage-item small-card" onclick="openEditor('tvmovies-inbetweeners')">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png" alt="Card Design Left 1">
+                    </div>
+                    <div class="collage-item small-card" onclick="openEditor('tvmovies-youngones')">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058082/tvmovies-youngones.png" alt="Card Design Left 2">
+                    </div>
+                </div>
             </div>
 
-            <!-- 2. Only Fools and Horses Card Grid Entry -->
-            <div class="card-item" onclick="openEditor('ofah')">
-                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png" alt="Only Fools and Horses Card">
-                <h3>Only Fools and Horses Personalised Card</h3>
-                <p>£3.49</p>
+            <!-- CENTER COLUMN: Circular Branded Illustration -->
+            <div class="center-circle-wrapper">
+                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards London Illustration">
+            </div>
+
+            <!-- RIGHT COLUMN: Frame Print + 2 Cards Side-by-Side -->
+            <div class="collage-column">
+                <div class="collage-row-split">
+                    <div class="collage-item small-card" onclick="openEditor('exams-boy')">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058150/exams-boy.png" alt="Card Design Right 1">
+                    </div>
+                    <div class="collage-item small-card" onclick="openEditor('exams-girl')">
+                        <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058144/exams-girl.png" alt="Card Design Right 2">
+                    </div>
+                </div>
+                <div class="collage-item large-print" onclick="openEditor('ofah')">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058158/tvmovies-bttf.png" alt="Typographic Wall Art Print">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- INSTAGRAM FEED LAYOUT -->
+        <div class="instagram-section">
+            <a href="https://www.instagram.com/cockneycards.ig" target="_blank">
+                <h2>Instagram Feed @cockneycards.ig</h2>
+            </a>
+            <div class="instagram-grid">
+                <div class="instagram-item">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058135/artsy-girl.png" alt="Instagram Post 1">
+                </div>
+                <div class="instagram-item">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058157/new-home.png" alt="Instagram Post 2">
+                </div>
+                <div class="instagram-item">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058128/wine-girl.png" alt="Instagram Post 3">
+                </div>
+                <div class="instagram-item">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058096/gamer-girl.png" alt="Instagram Post 4">
+                </div>
+                <div class="instagram-item">
+                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784058147/driving-boy.png" alt="Instagram Post 5">
+                </div>
             </div>
         </div>
+
+        <!-- TESTIMONIALS -->
+        <div class="testimonials-section">
+            <div class="testimonial-card">
+                <span class="quote-icon">“</span>
+                <h3>L. TUCKER</h3>
+                <p>"My Nephew absolutely loved his birthday card and wall print - Thanks mate!"</p>
+            </div>
+            <div class="testimonial-card">
+                <span class="quote-icon">“</span>
+                <h3>G. SMALLE</h3>
+                <p>"Ahhh mate!! Mum loved the card so much!! Thanks so much for creating a custom card for her J."</p>
+            </div>
+            <div class="testimonial-card">
+                <span class="quote-icon">“</span>
+                <h3>D. Woodley</h3>
+                <p>"My Son loved his gaming card - top quality as always mate - great work!!"</p>
+            </div>
+        </div>
+
     </div>
 
     <!-- DOUBLE SIDED FLAT SPREAD CANVAS EDITOR -->
@@ -342,7 +646,6 @@
             <div class="controls">
                 <h2>Personalise</h2>
 
-                <!-- Page toggles for Outside / Inside -->
                 <div class="page-toggle">
                     <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')">Outside Spread</button>
                     <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
@@ -351,11 +654,9 @@
                 <!-- OUTSIDE PANEL (FRONT COVER) CONTROLS -->
                 <div id="front-controls" class="control-group active">
                     
-                    <!-- Dynamic Dropdown Container (Shows when template has versions) -->
                     <div id="version-dropdown-container" style="display: none; margin-bottom: 15px;">
                         <label for="card-version-select">Select Card Version:</label>
                         <select id="card-version-select" class="dropdown-select" onchange="changeCardVersion(this.value)">
-                            <!-- Dropdown options injected via Javascript -->
                         </select>
                     </div>
 
@@ -397,65 +698,134 @@
         </div>
     </div>
 
-    <script>
-        // 1. YOUR CLOUDINARY CLOUD DETAILS (Change preset if needed)
-        const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
-        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE"; // Keep your active unsigned upload preset name here!
+    <!-- 3-COLUMN FOOTER -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Our Store Policies</h4>
+                <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+                <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><strong>Email:</strong><br><a href="mailto:cockneycards@gmail.com">cockneycards@gmail.com</a></p>
+                <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+                <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Business Hours</h4>
+                <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+                <p><strong>Saturday:</strong><br>10am - 4pm</p>
+                <p><strong>Sunday:</strong><br>Closed</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            © 2026 by Cockney Cards.
+        </div>
+    </footer>
 
-        // 2. DEFINE YOUR INDIVIDUAL CARD CONFIGURATIONS
+    <script>
+        // 1. YOUR CLOUDINARY DETAILS
+        const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
+        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
+
+        // 2. DEFINE YOUR CARD CONFIGURATIONS
         const CARD_TEMPLATES = {
             'tvmovies-inbetweeners': {
                 editionType: 'front-and-inside',
-                versions: [
-                    { label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png" }
-                ],
+                versions: [{ label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png" }],
                 name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
-                age:  { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
             },
             'ofah': {
                 editionType: 'front-and-inside',
-                versions: [
-                    { label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png" }
-                ],
+                versions: [{ label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png" }],
                 name: { left: 892.5, top: 540, fontSize: 28, isCurved: true, curveRadius: 160, color: '#FFFFFF' },
-                age:  { left: 892.5, top: 610, fontSize: 55, color: '#FFFFFF' }
+                age: { left: 892.5, top: 610, fontSize: 55, color: '#FFFFFF' }
+            },
+            'tvmovies-youngones': {
+                editionType: 'front-and-inside',
+                versions: [{ label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058082/tvmovies-youngones.png" }],
+                name: { left: 892.5, top: 530, fontSize: 30, isCurved: false, color: '#FFFFFF' },
+                age: { left: 892.5, top: 610, fontSize: 50, color: '#FFFFFF' }
+            },
+            'exams-boy': {
+                editionType: 'front-and-inside',
+                versions: [{ label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058150/exams-boy.png" }],
+                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+            },
+            'exams-girl': {
+                editionType: 'front-and-inside',
+                versions: [{ label: "Standard Version", url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058144/exams-girl.png" }],
+                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
             }
         };
 
-        let canvas;
-        let bgImg, backCoverImg;
-        let nameText, ageText;
+        let canvas, bgImg, backCoverImg, nameText, ageText;
+        let leftPageBg, rightPageBg, topBgRect, middleBgRect, bottomBgRect;
         let insideTopText, insideMiddleText, insideBottomText;
-        let currentPage = "front";
-        let activeTemplate = null;
+        let currentPage = "front", activeTemplate = null;
 
-        // Canvas dimensions
-        const PANEL_WIDTH = 595.5;
-        const CANVAS_WIDTH = 1191;
-        const CANVAS_HEIGHT = 840;
-
-        // Inside layout positioning (right-side page)
-        const BOX_WIDTH = 495;
-        const BOX_HEIGHT = 225;
-        const BOX_LEFT = 50 + PANEL_WIDTH; 
-        const TOP_BOX_Y = 40;
-        const MIDDLE_BOX_Y = 305;
-        const BOTTOM_BOX_Y = 570;
+        const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 1191, CANVAS_HEIGHT = 840;
+        const BOX_WIDTH = 495, BOX_HEIGHT = 225, BOX_LEFT = 50 + PANEL_WIDTH;
+        const TOP_BOX_Y = 40, MIDDLE_BOX_Y = 305, BOTTOM_BOX_Y = 570;
 
         const STYLE_DASHED = { borderDashArray: [4, 4], borderColor: "#cccccc", strokeWidth: 1.5 };
         const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth: 2 };
 
-        let leftPageBg, rightPageBg;
-        let topBgRect, middleBgRect, bottomBgRect;
-
-        // Handle URL Params (Direct redirect from shop.html click)
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             const cardId = params.get('card');
             if (cardId && CARD_TEMPLATES[cardId]) {
                 openEditor(cardId);
             }
+
+            // Netlify Identity integration helpers
+            netlifyIdentity.on('init', user => {
+                updateLoginUI(user);
+            });
+
+            netlifyIdentity.on('login', user => {
+                updateLoginUI(user);
+                netlifyIdentity.close();
+            });
+
+            netlifyIdentity.on('logout', () => {
+                updateLoginUI(null);
+            });
         });
+
+        // Toggle user visual feedback on the Login button
+        function updateLoginUI(user) {
+            const loginBtn = document.getElementById("login-button");
+            if (user) {
+                loginBtn.innerHTML = "👤 Log Out";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.logout()");
+            } else {
+                loginBtn.innerHTML = "👤 Log In";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.open()");
+            }
+        }
+
+        // Logic check when clicking 'My Orders'
+        function handleMyOrdersClick(event) {
+            event.preventDefault();
+            const currentUser = netlifyIdentity.currentUser();
+
+            if (currentUser) {
+                // User is authenticated! Send them to their orders page
+                window.location.href = "orders.html";
+            } else {
+                // Not authenticated yet - prompt them to register/login
+                alert("Please log in to view your order history.");
+                netlifyIdentity.open('login');
+            }
+        }
 
         function openEditor(templateKey) {
             activeTemplate = CARD_TEMPLATES[templateKey];
@@ -464,14 +834,13 @@
             document.getElementById('gallery-view').style.filter = 'blur(5px)';
             document.getElementById('editor-container').style.display = 'flex';
 
-            // Populate Dropdown Options
             const dropdownContainer = document.getElementById("version-dropdown-container");
             const dropdownSelect = document.getElementById("card-version-select");
             dropdownSelect.innerHTML = "";
 
             if (activeTemplate.versions && activeTemplate.versions.length > 1) {
                 dropdownContainer.style.display = "block";
-                activeTemplate.versions.forEach((v, index) => {
+                activeTemplate.versions.forEach((v) => {
                     let opt = document.createElement("option");
                     opt.value = v.url;
                     opt.innerText = v.label;
@@ -481,7 +850,6 @@
                 dropdownContainer.style.display = "none";
             }
 
-            // Hide/Show dynamic front inputs if it's "inside-only" vs customizable
             const frontInputs = document.getElementById("front-text-inputs");
             if (activeTemplate.editionType === 'inside-only') {
                 frontInputs.style.display = "none";
@@ -503,7 +871,6 @@
                 preserveObjectStacking: true, backgroundColor: '#ffffff'
             });
 
-            // 1. Load Static Back Cover Logo
             const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
             fabric.Image.fromURL(logoUrl, function(logoImg) {
                 backCoverImg = logoImg;
@@ -517,15 +884,12 @@
                 canvas.sendToBack(backCoverImg);
             });
 
-            // 2. Load Default Active Version Front Cover Image
             const initialImgUrl = activeTemplate.versions[0].url;
             loadFrontCover(initialImgUrl);
         }
 
         function loadFrontCover(imageUrl) {
-            if (bgImg) {
-                canvas.remove(bgImg);
-            }
+            if (bgImg) canvas.remove(bgImg);
 
             fabric.Image.fromURL(imageUrl, function (img) {
                 bgImg = img;
@@ -545,7 +909,6 @@
 
         function changeCardVersion(imageUrl) {
             if (!canvas || !bgImg) return;
-            
             fabric.Image.fromURL(imageUrl, function (newImg) {
                 canvas.remove(bgImg);
                 bgImg = newImg;
@@ -562,7 +925,6 @@
         }
 
         function setupTextsAndOverlays() {
-            // Front texts setup
             if (activeTemplate.name && activeTemplate.editionType !== 'inside-only') {
                 if (nameText) canvas.remove(nameText);
                 nameText = new fabric.Text("NAME", {
@@ -590,7 +952,6 @@
                 canvas.add(ageText);
             }
 
-            // Inside message setup
             const bgPanelDefaults = {
                 width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
                 fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false
@@ -614,17 +975,9 @@
                 ...STYLE_DASHED
             };
 
-            insideTopText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, {
-                top: TOP_BOX_Y, fontSize: 45
-            }));
-
-            insideMiddleText = new fabric.Textbox("Happy Birthday!\nHave a great day!", Object.assign({}, textDefaults, {
-                top: MIDDLE_BOX_Y, fontSize: 45
-            }));
-
-            insideBottomText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, {
-                top: BOTTOM_BOX_Y, fontSize: 45
-            }));
+            insideTopText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, { top: TOP_BOX_Y, fontSize: 45 }));
+            insideMiddleText = new fabric.Textbox("Happy Birthday!\nHave a great day!", Object.assign({}, textDefaults, { top: MIDDLE_BOX_Y, fontSize: 45 }));
+            insideBottomText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, { top: BOTTOM_BOX_Y, fontSize: 45 }));
 
             canvas.add(
                 leftPageBg, rightPageBg,
@@ -752,8 +1105,6 @@
         function closeEditor() {
             document.getElementById('gallery-view').style.filter = 'none';
             document.getElementById('editor-container').style.display = 'none';
-            
-            // Clean URL query param so user can browse cleanly again
             const url = new URL(window.location);
             url.searchParams.delete('card');
             window.history.pushState({}, '', url);
