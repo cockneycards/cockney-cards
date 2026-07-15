@@ -871,18 +871,24 @@
                 preserveObjectStacking: true, backgroundColor: '#ffffff'
             });
 
-            const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
-            fabric.Image.fromURL(logoUrl, function(logoImg) {
-                backCoverImg = logoImg;
-                backCoverImg.set({
-                    left: PANEL_WIDTH / 2, top: CANVAS_HEIGHT / 2,
-                    originX: 'center', originY: 'center',
-                    scaleX: 0.6, scaleY: 0.6,
-                    selectable: false, evented: false
-                });
-                canvas.add(backCoverImg);
-                canvas.sendToBack(backCoverImg);
-            });
+           // Set up static back cover logo
+const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
+fabric.Image.fromURL(logoUrl, function(logoImg) {
+    backCoverImg = logoImg;
+    backCoverImg.set({
+        left: PANEL_WIDTH / 2, // Keeps it perfectly centered on the back cover
+        top: 690,              // Moves it down near the bottom (total canvas height is 840)
+        originX: 'center', 
+        originY: 'center',
+        scaleX: 0.38,          // Makes the logo smaller
+        scaleY: 0.38,          // Makes the logo smaller
+        selectable: false, 
+        evented: false
+    });
+    canvas.add(backCoverImg);
+    canvas.sendToBack(backCoverImg);
+});
+
 
             const initialImgUrl = activeTemplate.versions[0].url;
             loadFrontCover(initialImgUrl);
