@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Cards | Cockney Cards</title>
-    <!-- Netlify Identity Widget for Login System -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
@@ -44,9 +43,9 @@
             cursor: pointer;
             text-decoration: none;
             color: var(--dark);
-            flex: 1;
+            flex: 1; /* Forces the left side to fill empty space */
             display: flex;
-            justify-content: flex-start;
+            justify-content: flex-start; /* Keeps the search icon on the far left */
         }
 
         .logo-container {
@@ -63,8 +62,8 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            flex: 1;
-            justify-content: flex-end;
+            flex: 1; /* Forces the right side to fill equal empty space */
+            justify-content: flex-end; /* Keeps the login and cart on the far right */
         }
 
         .cart-icon {
@@ -119,7 +118,7 @@
 
         /* PAGE HEADER */
         .shop-header {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 40px auto 20px auto;
             padding: 0 40px;
         }
@@ -141,7 +140,7 @@
 
         /* MAIN SHOP LAYOUT */
         .shop-container {
-            max-width: 1400px;
+            max-width: 1280px;
             margin: 0 auto;
             display: flex;
             gap: 40px;
@@ -282,7 +281,7 @@
             background-color: #444;
         }
 
-        /* FOOTER */
+        /* CENTERED FOOTER SYSTEM */
         footer {
             border-top: 1px solid var(--border-color);
             padding: 60px 40px 20px 40px;
@@ -290,7 +289,7 @@
         }
 
         .footer-grid {
-            max-width: 1300px;
+            max-width: 1200px; /* Centers and contains the content area */
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -301,6 +300,7 @@
             font-size: 13px;
             line-height: 1.8;
             color: #333;
+            text-align: left; /* Keeps individual columns clean-aligned inside the grid */
         }
 
         .footer-col h4 {
@@ -321,7 +321,7 @@
         }
 
         .footer-bottom {
-            max-width: 1300px;
+            max-width: 1200px;
             margin: 50px auto 0 auto;
             border-top: 1px solid #f0f0f0;
             padding-top: 20px;
@@ -339,12 +339,12 @@
             .shop-container { flex-direction: column; }
             .sidebar { width: 100%; }
             .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- BRANDED HEADER -->
     <header>
         <div class="header-top">
             <div class="header-icon">⌕</div>
@@ -374,16 +374,13 @@
         </nav>
     </header>
 
-    <!-- SHOP BANNER -->
     <div class="shop-header">
         <h1>Cards</h1>
         <p>Cockney Cards has a range of greeting cards for all celebrations that are perfect for any occasion.</p>
     </div>
 
-    <!-- MAIN SHOP CONTAINER -->
     <div class="shop-container">
         
-        <!-- SIDEBAR -->
         <aside class="sidebar">
             <h2>Browse by</h2>
             <ul class="category-list">
@@ -402,7 +399,6 @@
             </ul>
         </aside>
 
-        <!-- CATALOG GRID -->
         <main class="catalog-content">
             <div class="catalog-meta">
                 <span id="product-count">0 products</span>
@@ -410,13 +406,11 @@
             </div>
 
             <div class="product-grid" id="product-grid">
-                <!-- Products dynamically injected below -->
-            </div>
+                </div>
         </main>
 
     </div>
 
-    <!-- 3-COLUMN FOOTER -->
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
@@ -446,7 +440,6 @@
     </footer>
 
     <script>
-        // CARDS DATA FILE WITH CORRECT CLOUDINARY LINKS
         const PRODUCTS = [
             {
                 id: 'millwall-dad-son',
@@ -509,7 +502,6 @@
         window.addEventListener('DOMContentLoaded', () => {
             renderGrid(PRODUCTS);
 
-            // Netlify Identity initialization
             netlifyIdentity.on('init', user => updateLoginUI(user));
             netlifyIdentity.on('login', user => {
                 updateLoginUI(user);
@@ -518,7 +510,6 @@
             netlifyIdentity.on('logout', () => updateLoginUI(null));
         });
 
-        // Dynamic Product Renderer
         function renderGrid(productsToRender) {
             const grid = document.getElementById('product-grid');
             const countLabel = document.getElementById('product-count');
@@ -543,9 +534,7 @@
             });
         }
 
-        // Filtering Logic
         function filterProducts(categoryKey) {
-            // Update Active Sidebar Class
             document.querySelectorAll('.category-list a').forEach(a => a.classList.remove('active'));
             document.getElementById(`cat-${categoryKey}`).classList.add('active');
 
@@ -557,7 +546,6 @@
             }
         }
 
-        // Send to separate editor file
         function goToEditor(productId) {
             window.location.href = `editor.html?card=${productId}`;
         }
