@@ -416,47 +416,49 @@
         const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
 
         const CARD_TEMPLATES = {
-            'millwall-dad-son': {
-                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png",
-                name: { left: 892.5, top: 400, fontSize: 32, isCurved: false, color: '#FFFFFF' },
-                age: { left: 892.5, top: 480, fontSize: 45, color: '#FFFFFF' }
-            },
-            'ofah': {
-                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120973/ofah_rfdqnz.png",
-                name: { left: 892.5, top: 540, fontSize: 28, isCurved: true, curveRadius: 160, color: '#FFFFFF' },
-                age: { left: 892.5, top: 610, fontSize: 55, color: '#FFFFFF' }
-            },
-            'leaving-girl': {
-                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120976/leaving-girl1_k227or.png",
-                name: { left: 892.5, top: 535, fontSize: 30, isCurved: false, color: '#111111' },
-                age: null
-            },
-            'racing-girl': {
-                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120980/racing-girl_zrfb57.png",
-                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
-                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
-            },
-            'ladies-lunch': {
-                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120970/ladies-lunch_so7w76.png",
-                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
-                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
-            },
-            'bermondsey-legend': {
-                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png",
-                name: { left: 892.5, top: 650, fontSize: 28, isCurved: false, color: '#FFFFFF' },
-                age: null
-            },
-            'arsenal-girls': {
-                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120964/arsenal-girls_qpiaid.png",
-                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
-                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
-            },
-            'nolu-lion': {
-                url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120967/nolu-lion_zdsmes.png",
-                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
-                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
-            }
-        };
+    'millwall-dad-son': {
+        // 2. Drop the flat print design URL here (without the mock-up envelope frame)
+        url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png", 
+        name: { left: 892.5, top: 400, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+        age: { left: 892.5, top: 480, fontSize: 45, color: '#FFFFFF' }
+    },
+    'ofah': {
+        // 2. Drop the flat print design URL here (without the mock-up envelope frame)
+        url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120973/ofah_rfdqnz.png", 
+        name: { left: 892.5, top: 540, fontSize: 28, isCurved: true, curveRadius: 160, color: '#FFFFFF' },
+        age: { left: 892.5, top: 610, fontSize: 55, color: '#FFFFFF' }
+    },
+    'leaving-girl': {
+        url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120976/leaving-girl1_k227or.png",
+        name: { left: 892.5, top: 535, fontSize: 30, isCurved: false, color: '#111111' },
+        age: null
+    },
+    'racing-girl': {
+        url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120980/racing-girl_zrfb57.png",
+        name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+        age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+    },
+    'ladies-lunch': {
+        url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120970/ladies-lunch_so7w76.png",
+        name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+        age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+    },
+    'bermondsey-legend': {
+        url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png",
+        name: { left: 892.5, top: 650, fontSize: 28, isCurved: false, color: '#FFFFFF' },
+        age: null
+    },
+    'arsenal-girls': {
+        url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120964/arsenal-girls_qpiaid.png",
+        name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+        age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+    },
+    'nolu-lion': {
+        url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120967/nolu-lion_zdsmes.png",
+        name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+        age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+    }
+};
 
         let canvas, bgImg, backCoverImg, nameText, ageText;
         let leftPageBg, rightPageBg, topBgRect, middleBgRect, bottomBgRect;
