@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalise Your Card | Cockney Cards</title>
+    <!-- Fabric.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <!-- Netlify Identity Widget -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
@@ -181,17 +183,19 @@
 
     <header>
         <div class="header-top">
-            <div class="logo-container" onclick="window.location.href='index.html';">
+            <div class="logo-container" onclick="window.location.href='shop-cards.html';">
                 <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
             </div>
         </div>
     </header>
 
     <div class="editor-workspace">
+        <!-- Live Canvas -->
         <div id="canvas-wrapper">
             <canvas id="canvas"></canvas>
         </div>
         
+        <!-- Sidebar Workspace Controls -->
         <div class="controls">
             <h2>Personalise Card</h2>
 
@@ -200,12 +204,13 @@
                 <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
             </div>
 
+            <!-- Front Panel Options -->
             <div id="front-controls" class="control-group active">
                 <div id="front-text-inputs">
-                    <label for="name-input">Name to add:</label>
+                    <label id="label-name" for="name-input">Name to add:</label>
                     <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this.value)">
 
-                    <label for="age-input" style="margin-top: 10px; display: block;">Age:</label>
+                    <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
                     <input type="text" id="age-input" placeholder="e.g. 40" oninput="updateAgeText(this.value)">
 
                     <label style="margin-top: 10px; display: block;">Text Color:</label>
@@ -216,8 +221,9 @@
                 </div>
             </div>
 
+            <!-- Inside Spread Options -->
             <div id="inside-controls" class="control-group">
-                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel remains blank. Click on the text layers on the Right panel to write your message.</p>
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel remains blank. Click on the text panels on the Right panel to write your inside message.</p>
                 
                 <label>Font Size:</label>
                 <div class="flex-row">
@@ -233,19 +239,19 @@
             </div>
             
             <button class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
-            <button class="btn btn-close" onclick="window.location.href='index.html'">Cancel & Return</button>
+            <button class="btn btn-close" onclick="window.location.href='shop-cards.html'">Cancel & Return</button>
         </div>
     </div>
 
     <script>
         const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
-        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE"; // Be sure to set this in Cloudinary
+        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
 
         const CARD_TEMPLATES = {
             'millwall-dad-son': {
                 url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png",
-                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
-                age: { left: 892.5, top: 600, fontSize: 50, color: '#FFFFFF' }
+                name: { left: 892.5, top: 400, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+                age: { left: 892.5, top: 480, fontSize: 45, color: '#FFFFFF' }
             },
             'ofah': {
                 url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120973/ofah_rfdqnz.png",
@@ -254,7 +260,7 @@
             },
             'leaving-girl': {
                 url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120976/leaving-girl1_k227or.png",
-                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#111111' },
+                name: { left: 892.5, top: 535, fontSize: 30, isCurved: false, color: '#111111' },
                 age: null
             },
             'racing-girl': {
@@ -269,7 +275,7 @@
             },
             'bermondsey-legend': {
                 url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png",
-                name: { left: 892.5, top: 520, fontSize: 32, isCurved: false, color: '#FFFFFF' },
+                name: { left: 892.5, top: 650, fontSize: 28, isCurved: false, color: '#FFFFFF' },
                 age: null
             },
             'arsenal-girls': {
@@ -302,7 +308,7 @@
             if (CARD_TEMPLATES[cardId]) {
                 initEditor(cardId);
             } else {
-                window.location.href = 'index.html';
+                window.location.href = 'shop-cards.html';
             }
         });
 
@@ -317,16 +323,16 @@
                 preserveObjectStacking: true, backgroundColor: '#ffffff'
             });
 
-            // ELEGANT SMALL LOWER-BOTTOM LEFT LOGO FOR THE CARD BACK COVER
+            // LOGO PLACEMENT: BOTTOM LEFT PANEL (BACK COVER)
             const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
             fabric.Image.fromURL(logoUrl, function(logoImg) {
                 backCoverImg = logoImg;
                 backCoverImg.set({
-                    left: PANEL_WIDTH / 2, // Centers perfectly horizontally on the back cover
-                    top: 690, // Places it beautifully down towards the bottom margin
+                    left: PANEL_WIDTH / 2, 
+                    top: 690,              
                     originX: 'center', 
                     originY: 'center',
-                    scaleX: 0.38, // Small aesthetic scaling
+                    scaleX: 0.38,          
                     scaleY: 0.38,          
                     selectable: false, 
                     evented: false
@@ -334,6 +340,12 @@
                 canvas.add(backCoverImg);
                 canvas.sendToBack(backCoverImg);
             });
+
+            // Toggle visibility of input fields depending on whether the template has an Age property
+            if (activeTemplate.age === null) {
+                document.getElementById('age-input').style.display = 'none';
+                document.getElementById('label-age').style.display = 'none';
+            }
 
             loadFrontCover(activeTemplate.url);
         }
