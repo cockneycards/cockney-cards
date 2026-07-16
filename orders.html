@@ -1,1 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | Cockney Cards</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
+    <style>
+        :root {
+            --primary: #1A73E8;
+            --dark: #1e1e24;
+            --light: #fcfcfc;
+            --border-color: #e0e0e0;
+            --font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: #fcfcfc;
+            color: var(--dark);
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            background-color: white;
+            padding: 15px 40px 10px 40px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-icon {
+            font-size: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--dark);
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo-container img {
+            max-width: 120px;
+            height: auto;
+            cursor: pointer;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            font-size: 11px;
+            text-decoration: none;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .login-btn:hover {
+            color: #111;
+        }
+
+        nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .nav-links {
+            display: inline-flex;
+            gap: 30px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #111;
+            font-size: 13px;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #888;
+        }
+
+        .nav-links a.active {
+            font-weight: bold;
+        }
+
+        /* ORDERS LIST CONTAINER */
+        .orders-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 0 20px;
+            min-height: 400px;
+        }
+
+        .orders-container h1 {
+            font-size: 26px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            margin-bottom: 30px;
+        }
+
+        .order-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 13px;
+            color: #555;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 15px;
+        }
+
+        .order-details {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .order-details img {
+            width: 80px;
+            height: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .order-info {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* CENTERED FOOTER SYSTEM */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 60px 40px 20px 40px;
+            background-color: white;
+            margin-top: 60px;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+        }
+
+        .footer-col {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #333;
+            text-align: left;
+        }
+
+        .footer-col h4 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-col p {
+            margin: 0 0 15px 0;
+        }
+
+        .footer-col a {
+            color: #111;
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 50px auto 0 auto;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 750px) {
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <div class="header-icon">⌕</div>
+            
+            <div class="logo-container" onclick="window.location.href='index.html';">
+                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+            </div>
+            
+            <div class="header-right">
+                <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
+                <div class="cart-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <nav>
+            <ul class="nav-links">
+                <li><a href="shop-cards.html">Shop Cards</a></li>
+                <li><a href="shop-prints.html">Shop Prints</a></li>
+                <li><a href="#" id="my-orders-link" class="active" onclick="handleMyOrdersClick(event)">My Orders</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="orders-container">
+        <h1>My Order History</h1>
+        <div id="orders-list">
+            <p style="color: #666; font-size: 14px;">Log in to view past order activities.</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Our Store Policies</h4>
+                <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+                <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><strong>Email:</strong><br><a href="mailto:cockneycards@gmail.com">cockneycards@gmail.com</a></p>
+                <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+                <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Business Hours</h4>
+                <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+                <p><strong>Saturday:</strong><br>10am - 4pm</p>
+                <p><strong>Sunday:</strong><br>Closed</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            © 2026 by Cockney Cards.
+        </div>
+    </footer>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            netlifyIdentity.on('init', user => {
+                updateLoginUI(user);
+                fetchOrders(user);
+            });
+            netlifyIdentity.on('login', user => {
+                updateLoginUI(user);
+                fetchOrders(user);
+                netlifyIdentity.close();
+            });
+            netlifyIdentity.on('logout', () => {
+                updateLoginUI(null);
+                document.getElementById("orders-list").innerHTML = '<p style="color: #666; font-size: 14px;">Log in to view past order activities.</p>';
+            });
+        });
+
+        async function fetchOrders(user) {
+            if (!user) return;
+            const container = document.getElementById("orders-list");
+            container.innerHTML = "<p>Retrieving purchase histories...</p>";
+
+            try {
+                // Fetch dynamic Stripe metadata list from Netlify secure functions
+                const response = await fetch('/.netlify/functions/get-orders', {
+                    headers: { 'Authorization': `Bearer ${user.token.access_token}` }
+                });
+                const orders = await response.json();
+
+                if (orders.length === 0) {
+                    container.innerHTML = '<p style="color: #666; font-size: 14px;">You haven\'t made any orders yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = "";
+                orders.forEach(order => {
+                    const formattedDate = new Date(order.created * 1000).toLocaleDateString();
+                    const orderItem = `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <span>Order No: ${order.id.substring(3, 12).toUpperCase()}</span>
+                                <span>Date: ${formattedDate}</span>
+                            </div>
+                            <div class="order-details">
+                                <img src="${order.outsideImageUrl || 'https://via.placeholder.com/150'}" alt="Card preview">
+                                <div class="order-info">
+                                    <p style="margin:0 0 5px 0;"><strong>Card Name:</strong> ${order.name}</p>
+                                    <p style="margin:0 0 5px 0;"><strong>Custom Name Added:</strong> ${order.custom_text || 'N/A'}</p>
+                                    <p style="margin:0;"><strong>Age:</strong> ${order.custom_age || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += orderItem;
+                });
+
+            } catch (err) {
+                container.innerHTML = '<p style="color: red; font-size: 13px;">Error fetching order metadata.</p>';
+            }
+        }
+
+        function updateLoginUI(user) {
+            const loginBtn = document.getElementById("login-button");
+            if (user) {
+                loginBtn.innerHTML = "👤 Log Out";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.logout()");
+            } else {
+                loginBtn.innerHTML = "👤 Log In";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.open()");
+            }
+        }
+
+        function handleMyOrdersClick(event) {
+            event.preventDefault();
+            const currentUser = netlifyIdentity.currentUser();
+            if (currentUser) {
+                window.location.href = "orders.html";
+            } else {
+                alert("Please log in to view your order history.");
+                netlifyIdentity.open('login');
+            }
+        }
+    </script>
+</body>
+</html>
