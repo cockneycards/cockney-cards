@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop Greeting Cards | Cockney Cards</title>
+    <title>Shop Cards | Cockney Cards</title>
     <!-- Netlify Identity Widget for Login System -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
@@ -14,7 +14,6 @@
             --light: #fcfcfc;
             --border-color: #e0e0e0;
             --font-family: 'Helvetica Neue', Arial, sans-serif;
-            --typewriter-font: 'Courier New', Courier, monospace;
         }
         
         body {
@@ -45,7 +44,9 @@
             cursor: pointer;
             text-decoration: none;
             color: var(--dark);
-            width: 30px;
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
         }
 
         .logo-container {
@@ -62,6 +63,8 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            flex: 1;
+            justify-content: flex-end;
         }
 
         .cart-icon {
@@ -108,6 +111,10 @@
 
         .nav-links a:hover {
             color: #888;
+        }
+
+        .nav-links a.active {
+            font-weight: bold;
         }
 
         /* PAGE HEADER */
@@ -360,8 +367,8 @@
         
         <nav>
             <ul class="nav-links">
-                <li><a href="shop.html" class="active" style="font-weight: bold;">Shop Cards</a></li>
-                <li><a href="prints.html">Shop Prints</a></li>
+                <li><a href="shop-cards.html" class="active">Shop Cards</a></li>
+                <li><a href="shop-prints.html">Shop Prints</a></li>
                 <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
             </ul>
         </nav>
@@ -439,41 +446,62 @@
     </footer>
 
     <script>
-        // 1. CARDS DATA WITH CATEGORY MAPPING
+        // CARDS DATA FILE WITH CORRECT CLOUDINARY LINKS
         const PRODUCTS = [
             {
-                id: 'exams-boy',
-                title: '11+ Pass Card for Boys',
+                id: 'millwall-dad-son',
+                title: 'Millwall Dad & Son Card',
                 price: '£3.49',
-                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784058150/exams-boy.png',
-                categories: ['all', 'children', 'congratulations']
-            },
-            {
-                id: 'exams-girl',
-                title: '11+ Pass Card for Girls',
-                price: '£3.49',
-                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784058144/exams-girl.png',
-                categories: ['all', 'children', 'congratulations']
-            },
-            {
-                id: 'tvmovies-inbetweeners',
-                title: 'Arty Inbetweeners Birthday Card',
-                price: '£3.49',
-                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png',
-                categories: ['all', 'for-him', 'tv-movies', 'celebrations']
-            },
-            {
-                id: 'tvmovies-youngones',
-                title: 'The Young Ones Birthday Card',
-                price: '£3.49',
-                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784058082/tvmovies-youngones.png',
-                categories: ['all', 'for-him', 'tv-movies', 'celebrations']
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png',
+                categories: ['all', 'for-him', 'sports', 'celebrations']
             },
             {
                 id: 'ofah',
-                title: 'Augusta Master\'s Golfing Birthday Card',
+                title: 'Only Fools and Horses Birthday Card',
                 price: '£3.49',
-                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120973/ofah_rfdqnz.png',
+                categories: ['all', 'for-him', 'tv-movies', 'celebrations']
+            },
+            {
+                id: 'leaving-girl',
+                title: 'Sorry You\'re Leaving Card',
+                price: '£3.49',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120976/leaving-girl1_k227or.png',
+                categories: ['all', 'for-her', 'new-jobs', 'thank-you']
+            },
+            {
+                id: 'racing-girl',
+                title: 'Racing Girl Card',
+                price: '£3.49',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120980/racing-girl_zrfb57.png',
+                categories: ['all', 'for-her', 'sports']
+            },
+            {
+                id: 'ladies-lunch',
+                title: 'Ladies Lunch Birthday Card',
+                price: '£3.49',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120970/ladies-lunch_so7w76.png',
+                categories: ['all', 'for-her', 'celebrations']
+            },
+            {
+                id: 'bermondsey-legend',
+                title: 'Bermondsey Legend Card',
+                price: '£3.49',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png',
+                categories: ['all', 'for-him']
+            },
+            {
+                id: 'arsenal-girls',
+                title: 'Arsenal Girls Birthday Card',
+                price: '£3.49',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120964/arsenal-girls_qpiaid.png',
+                categories: ['all', 'for-her', 'sports', 'children']
+            },
+            {
+                id: 'nolu-lion',
+                title: 'No One Likes Us Lion Card',
+                price: '£3.49',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120967/nolu-lion_zdsmes.png',
                 categories: ['all', 'for-him', 'sports', 'celebrations']
             }
         ];
