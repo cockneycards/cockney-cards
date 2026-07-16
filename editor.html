@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalise Your Card | Cockney Cards</title>
-    <!-- Fabric.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    <!-- Netlify Identity Widget -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
@@ -26,7 +24,7 @@
             color: var(--dark);
         }
 
-        /* HEADER */
+        /* HEADER & NAVIGATION */
         header {
             background-color: white;
             padding: 15px 40px 10px 40px;
@@ -41,16 +39,84 @@
             margin: 0 auto;
         }
 
+        .header-icon {
+            font-size: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--dark);
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
         .logo-container img {
             max-width: 120px;
             height: auto;
             cursor: pointer;
         }
 
-        /* EDITOR CONTAINER */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            font-size: 11px;
+            text-decoration: none;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .login-btn:hover {
+            color: #111;
+        }
+
+        nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .nav-links {
+            display: inline-flex;
+            gap: 30px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #111;
+            font-size: 13px;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #888;
+        }
+
+        /* EDITOR WORKSPACE */
         .editor-workspace {
             display: flex;
-            max-width: 1400px;
+            max-width: 1280px;
             margin: 40px auto;
             padding: 0 40px;
             gap: 40px;
@@ -177,25 +243,101 @@
         .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
         .btn-close { background-color: #f0f0f0; color: #333; margin-top: 10px; }
         .btn-close:hover { background-color: #e0e0e0; }
+
+        /* CENTERED FOOTER SYSTEM */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 60px 40px 20px 40px;
+            background-color: white;
+            margin-top: 60px;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+        }
+
+        .footer-col {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #333;
+            text-align: left;
+        }
+
+        .footer-col h4 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-col p {
+            margin: 0 0 15px 0;
+        }
+
+        .footer-col a {
+            color: #111;
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 50px auto 0 auto;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 900px) {
+            .editor-workspace { flex-direction: column; align-items: center; }
+            .controls { width: 100%; max-width: 595px; }
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+        }
     </style>
 </head>
 <body>
 
     <header>
         <div class="header-top">
-            <div class="logo-container" onclick="window.location.href='shop-cards.html';">
+            <div class="header-icon">⌕</div>
+            
+            <div class="logo-container" onclick="window.location.href='index.html';">
                 <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
             </div>
+            
+            <div class="header-right">
+                <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
+                <div class="cart-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
+        
+        <nav>
+            <ul class="nav-links">
+                <li><a href="shop-cards.html">Shop Cards</a></li>
+                <li><a href="shop-prints.html">Shop Prints</a></li>
+                <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
+            </ul>
+        </nav>
     </header>
 
     <div class="editor-workspace">
-        <!-- Live Canvas -->
         <div id="canvas-wrapper">
             <canvas id="canvas"></canvas>
         </div>
         
-        <!-- Sidebar Workspace Controls -->
         <div class="controls">
             <h2>Personalise Card</h2>
 
@@ -204,7 +346,6 @@
                 <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
             </div>
 
-            <!-- Front Panel Options -->
             <div id="front-controls" class="control-group active">
                 <div id="front-text-inputs">
                     <label id="label-name" for="name-input">Name to add:</label>
@@ -221,7 +362,6 @@
                 </div>
             </div>
 
-            <!-- Inside Spread Options -->
             <div id="inside-controls" class="control-group">
                 <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel remains blank. Click on the text panels on the Right panel to write your inside message.</p>
                 
@@ -242,6 +382,34 @@
             <button class="btn btn-close" onclick="window.location.href='shop-cards.html'">Cancel & Return</button>
         </div>
     </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Our Store Policies</h4>
+                <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+                <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><strong>Email:</strong><br><a href="mailto:cockneycards@gmail.com">cockneycards@gmail.com</a></p>
+                <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+                <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Business Hours</h4>
+                <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+                <p><strong>Saturday:</strong><br>10am - 4pm</p>
+                <p><strong>Sunday:</strong><br>Closed</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            © 2026 by Cockney Cards.
+        </div>
+    </footer>
 
     <script>
         const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
@@ -323,7 +491,6 @@
                 preserveObjectStacking: true, backgroundColor: '#ffffff'
             });
 
-            // LOGO PLACEMENT: BOTTOM LEFT PANEL (BACK COVER)
             const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
             fabric.Image.fromURL(logoUrl, function(logoImg) {
                 backCoverImg = logoImg;
@@ -341,7 +508,6 @@
                 canvas.sendToBack(backCoverImg);
             });
 
-            // Toggle visibility of input fields depending on whether the template has an Age property
             if (activeTemplate.age === null) {
                 document.getElementById('age-input').style.display = 'none';
                 document.getElementById('label-age').style.display = 'none';
@@ -621,6 +787,28 @@
                 body: formData
             });
             return res.json();
+        }
+
+        function updateLoginUI(user) {
+            const loginBtn = document.getElementById("login-button");
+            if (user) {
+                loginBtn.innerHTML = "👤 Log Out";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.logout()");
+            } else {
+                loginBtn.innerHTML = "👤 Log In";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.open()");
+            }
+        }
+
+        function handleMyOrdersClick(event) {
+            event.preventDefault();
+            const currentUser = netlifyIdentity.currentUser();
+            if (currentUser) {
+                window.location.href = "orders.html";
+            } else {
+                alert("Please log in to view your order history.");
+                netlifyIdentity.open('login');
+            }
         }
     </script>
 </body>
