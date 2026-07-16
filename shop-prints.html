@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Prints | Cockney Cards</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+
+    <style>
+        :root {
+            --primary: #1A73E8;
+            --dark: #1e1e24;
+            --light: #fcfcfc;
+            --border-color: #e0e0e0;
+            --font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: var(--dark);
+        }
+
+        /* HEADER & NAVIGATION */
+        header {
+            background-color: white;
+            padding: 15px 40px 10px 40px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-icon {
+            font-size: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--dark);
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo-container img {
+            max-width: 120px;
+            height: auto;
+            cursor: pointer;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            font-size: 11px;
+            text-decoration: none;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .login-btn:hover {
+            color: #111;
+        }
+
+        nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .nav-links {
+            display: inline-flex;
+            gap: 30px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #111;
+            font-size: 13px;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #888;
+        }
+
+        .nav-links a.active {
+            font-weight: bold;
+        }
+
+        /* PAGE HEADER */
+        .shop-header {
+            max-width: 1200px;
+            margin: 40px auto 20px auto;
+            padding: 0 40px;
+        }
+
+        .shop-header h1 {
+            font-size: 28px;
+            font-weight: 300;
+            margin: 0 0 10px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .shop-header p {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+            margin: 0;
+            max-width: 800px;
+        }
+
+        /* MAIN SHOP LAYOUT */
+        .shop-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            gap: 40px;
+            padding: 0 40px 60px 40px;
+            box-sizing: border-box;
+        }
+
+        /* SIDEBAR / BROWSE BY */
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .category-list li a {
+            text-decoration: none;
+            color: #555;
+            font-size: 13px;
+            transition: color 0.2s;
+            cursor: pointer;
+            display: block;
+        }
+
+        .category-list li a:hover,
+        .category-list li a.active {
+            color: #111;
+            font-weight: bold;
+        }
+
+        /* PRODUCT GRID */
+        .catalog-content {
+            flex-grow: 1;
+        }
+
+        .catalog-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        /* PRODUCT CARD */
+        .product-card {
+            border: 1px solid var(--border-color);
+            background: #fff;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .image-wrapper {
+            aspect-ratio: 3 / 4;
+            background-color: #fbfbfb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .product-info {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .product-title {
+            font-size: 13px;
+            font-weight: normal;
+            margin: 0 0 5px 0;
+            color: #111;
+            line-height: 1.4;
+            cursor: pointer;
+        }
+
+        .product-price {
+            font-size: 13px;
+            font-weight: bold;
+            color: #444;
+            margin: 0;
+        }
+
+        .btn-action {
+            width: 100%;
+            background-color: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: auto;
+        }
+
+        .btn-action:hover {
+            background-color: #444;
+        }
+
+        /* CENTERED FOOTER SYSTEM */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 60px 40px 20px 40px;
+            background-color: white;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+        }
+
+        .footer-col {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #333;
+            text-align: left;
+        }
+
+        .footer-col h4 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-col p {
+            margin: 0 0 15px 0;
+        }
+
+        .footer-col a {
+            color: #111;
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 50px auto 0 auto;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 950px) {
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 850px) {
+            .shop-container { flex-direction: column; }
+            .sidebar { width: 100%; }
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <div class="header-icon">⌕</div>
+            
+            <div class="logo-container" onclick="window.location.href='index.html';">
+                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+            </div>
+            
+            <div class="header-right">
+                <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
+                <div class="cart-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <nav>
+            <ul class="nav-links">
+                <li><a href="shop-cards.html">Shop Cards</a></li>
+                <li><a href="shop-prints.html" class="active">Shop Prints</a></li>
+                <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="shop-header">
+        <h1>Prints</h1>
+        <p>Premium prints depicting the most iconic designs, customized and perfect for framing at home.</p>
+    </div>
+
+    <div class="shop-container">
+        
+        <aside class="sidebar">
+            <h2>Browse by</h2>
+            <ul class="category-list">
+                <li><a onclick="filterProducts('all')" class="active" id="cat-all">All Prints</a></li>
+                <li><a onclick="filterProducts('sports')" id="cat-sports">Sports</a></li>
+                <li><a onclick="filterProducts('family')" id="cat-family">Family</a></li>
+                <li><a onclick="filterProducts('legends')" id="cat-legends">Bermondsey Legends</a></li>
+            </ul>
+        </aside>
+
+        <main class="catalog-content">
+            <div class="catalog-meta">
+                <span id="product-count">0 products</span>
+                <span>Sort by: Featured</span>
+            </div>
+
+            <div class="product-grid" id="product-grid">
+                </div>
+        </main>
+
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Our Store Policies</h4>
+                <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+                <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><strong>Email:</strong><br><a href="mailto:cockneycards@gmail.com">cockneycards@gmail.com</a></p>
+                <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+                <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Business Hours</h4>
+                <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+                <p><strong>Saturday:</strong><br>10am - 4pm</p>
+                <p><strong>Sunday:</strong><br>Closed</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            © 2026 by Cockney Cards.
+        </div>
+    </footer>
+
+    <script>
+        const PRODUCTS = [
+            {
+                id: 'millwall-dad-son-print',
+                title: 'Millwall Dad & Son A4 Print',
+                price: '£9.99',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png',
+                categories: ['all', 'sports', 'family']
+            },
+            {
+                id: 'bermondsey-legend-print',
+                title: 'Bermondsey Legend Framed Print',
+                price: '£12.99',
+                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png',
+                categories: ['all', 'legends']
+            }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderGrid(PRODUCTS);
+
+            netlifyIdentity.on('init', user => updateLoginUI(user));
+            netlifyIdentity.on('login', user => {
+                updateLoginUI(user);
+                netlifyIdentity.close();
+            });
+            netlifyIdentity.on('logout', () => updateLoginUI(null));
+        });
+
+        function renderGrid(productsToRender) {
+            const grid = document.getElementById('product-grid');
+            const countLabel = document.getElementById('product-count');
+            grid.innerHTML = '';
+            
+            countLabel.innerText = `${productsToRender.length} products`;
+
+            productsToRender.forEach(prod => {
+                const cardMarkup = `
+                    <div class="product-card">
+                        <div class="image-wrapper" onclick="goToEditor('${prod.id}')">
+                            <img src="${prod.image}" alt="${prod.title}">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title" onclick="goToEditor('${prod.id}')">${prod.title}</h3>
+                            <p class="product-price">${prod.price}</p>
+                        </div>
+                        <button class="btn-action" onclick="goToEditor('${prod.id}')">Personalise Print</button>
+                    </div>
+                `;
+                grid.innerHTML += cardMarkup;
+            });
+        }
+
+        function filterProducts(categoryKey) {
+            document.querySelectorAll('.category-list a').forEach(a => a.classList.remove('active'));
+            document.getElementById(`cat-${categoryKey}`).classList.add('active');
+
+            if (categoryKey === 'all') {
+                renderGrid(PRODUCTS);
+            } else {
+                const filtered = PRODUCTS.filter(p => p.categories.includes(categoryKey));
+                renderGrid(filtered);
+            }
+        }
+
+        function goToEditor(productId) {
+            window.location.href = `editor.html?card=${productId}`;
+        }
+
+        function updateLoginUI(user) {
+            const loginBtn = document.getElementById("login-button");
+            if (user) {
+                loginBtn.innerHTML = "👤 Log Out";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.logout()");
+            } else {
+                loginBtn.innerHTML = "👤 Log In";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.open()");
+            }
+        }
+
+        function handleMyOrdersClick(event) {
+            event.preventDefault();
+            const currentUser = netlifyIdentity.currentUser();
+            if (currentUser) {
+                window.location.href = "orders.html";
+            } else {
+                alert("Please log in to view your order history.");
+                netlifyIdentity.open('login');
+            }
+        }
+    </script>
+</body>
+</html>
