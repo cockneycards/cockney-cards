@@ -751,25 +751,28 @@ if (activeTemplate.name === null && activeTemplate.age === null) {
         function setupTextsAndOverlays() {
             if (activeTemplate.name) {
                 nameText = new fabric.Text("NAME", {
-                    left: activeTemplate.name.left, top: activeTemplate.name.top,
-                    originX: "center", originY: "center",
-                    fontSize: activeTemplate.name.fontSize, fontFamily: activeTemplate.name.fontFamily || "Arial", fontWeight: "bold",
-                    fill: activeTemplate.name.color, textAlign: "center",
-                    hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
-                    if (activeTemplate.name?.canChangeSize) {
+    left: activeTemplate.name.left,
+    top: activeTemplate.name.top,
+    originX: "center",
+    originY: "center",
+    fontSize: activeTemplate.name.fontSize,
+    fontFamily: activeTemplate.name.fontFamily || "Arial",
+    fontWeight: activeTemplate.name.fontWeight || "bold",
+    fill: activeTemplate.name.color,
+    textAlign: "center",
+    hasControls: false,
+    hasBorders: false,
+    lockMovementX: true,
+    lockMovementY: true
+});
 
-    document.getElementById("front-size").value =
-        activeTemplate.name.fontSize;
-
+if (activeTemplate.name?.canChangeSize) {
+    document.getElementById("front-size").value = activeTemplate.name.fontSize;
     document.getElementById("front-size-val").innerText =
         activeTemplate.name.fontSize + "px";
-
 }
-                });
-                if (activeTemplate.name.isCurved) {
-                    updateTextCurve(nameText, activeTemplate.name.curveRadius);
-                }
-                canvas.add(nameText);
+
+canvas.add(nameText);
             }
 
             if (activeTemplate.age) {
