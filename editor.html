@@ -675,20 +675,30 @@
             });
 
             // SMART CONTROL TOGGLE: Hide inputs completely if card is non-personalized
-            if (activeTemplate.name === null && activeTemplate.age === null) {
-                document.getElementById('front-text-inputs').style.display = 'none';
-            } else {
-                document.getElementById('front-text-inputs').style.display = 'block';
-                
-                // Toggle individual age controls
-                if (activeTemplate.age === null) {
-                    document.getElementById('age-input').style.display = 'none';
-                    document.getElementById('label-age').style.display = 'none';
-                } else {
-                    document.getElementById('age-input').style.display = 'block';
-                    document.getElementById('label-age').style.display = 'block';
-                }
-            }
+if (activeTemplate.name === null && activeTemplate.age === null) {
+    document.getElementById('front-text-inputs').style.display = 'none';
+} else {
+    document.getElementById('front-text-inputs').style.display = 'block';
+    
+    // Check Name: Hide name input if name is null
+    if (activeTemplate.name === null) {
+        document.getElementById('name-input').style.display = 'none';
+        document.getElementById('label-name').style.display = 'none';
+    } else {
+        document.getElementById('name-input').style.display = 'block';
+        document.getElementById('label-name').style.display = 'block';
+    }
+
+    // Check Age: Hide age input if age is null (like the Thank You Teacher card!)
+    if (activeTemplate.age === null) {
+        document.getElementById('age-input').style.display = 'none';
+        document.getElementById('label-age').style.display = 'none';
+    } else {
+        document.getElementById('age-input').style.display = 'block';
+        document.getElementById('label-age').style.display = 'block';
+    }
+}
+
 
             loadFrontCover(activeTemplate.url);
         }
