@@ -365,9 +365,19 @@
 
                     <label style="margin-top: 10px; display: block;">Text Color:</label>
                     <div class="flex-row">
-                        <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
-                        <span style="font-size: 12px; color: #666;">Choose Font Color</span>
-                      <div id="front-size-controls" style="display:none; margin-top:15px;">
+    <input type="color"
+           id="front-color"
+           class="color-picker"
+           value="#FFFFFF"
+           onchange="updateFrontColor(this.value)">
+
+    <span>Choose Font Color</span>
+</div>
+
+<div id="front-size-controls" style="display:none; margin-top:15px;">
+
+    ...
+</div>
 
     <label>Font Size:</label>
 
@@ -588,7 +598,15 @@
           },
           "thankyou-teacher": {
             "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058119/thankyou-teacher_vnh8yv.png",
-            "name": { "left": 892.5, "top": 725, "fontSize": 52, "fontFamily": "BubblegumSans", "isCurved": false, "curveRadius": 0, "color": "#FD7D96" },
+            "name": {
+    left:892.5,
+    top:725,
+    fontSize:52,
+    fontFamily:"BubblegumSans",
+    color:"#FD7D96",
+
+    canChangeSize:true,
+    canChangeColor:true
             "age": null
           },
           "topboy-mfc": {
@@ -842,7 +860,7 @@ canvas.add(nameText);
             if (ageText) ageText.set({ fill: hexColor });
             canvas.requestRenderAll();
         }
-}
+
        function updateFrontSize(size) {
 
     document.getElementById("front-size-val").innerText = size + "px";
@@ -855,7 +873,6 @@ canvas.add(nameText);
         if (activeTemplate.name?.isCurved) {
             updateTextCurve(nameText, activeTemplate.name.curveRadius);
         }
-    }
 
     canvas.requestRenderAll();
 
