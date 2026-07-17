@@ -731,7 +731,7 @@ if (activeTemplate.name === null && activeTemplate.age === null) {
                 nameText = new fabric.Text("NAME", {
                     left: activeTemplate.name.left, top: activeTemplate.name.top,
                     originX: "center", originY: "center",
-                    fontSize: activeTemplate.name.fontSize, fontFamily: "Arial", fontWeight: "bold",
+                    fontSize: activeTemplate.name.fontSize, fontFamily: activeTemplate.name.fontFamily "Arial", fontWeight: "bold",
                     fill: activeTemplate.name.color, textAlign: "center",
                     hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
                 });
@@ -745,7 +745,7 @@ if (activeTemplate.name === null && activeTemplate.age === null) {
                 ageText = new fabric.Text("40", {
                     left: activeTemplate.age.left, top: activeTemplate.age.top,
                     originX: "center", originY: "center",
-                    fontSize: activeTemplate.age.fontSize, fontFamily: "Arial", fontWeight: "bold",
+                    fontSize: activeTemplate.age.fontSize, fontFamily: activeTemplate.name.fontFamily "Arial", fontWeight: "bold",
                     fill: activeTemplate.age.color,
                     hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
                 });
