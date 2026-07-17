@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Cards | Cockney Cards</title>
+    <!-- Netlify Identity Widget for Login System -->
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
@@ -43,9 +44,9 @@
             cursor: pointer;
             text-decoration: none;
             color: var(--dark);
-            flex: 1; /* Forces the left side to fill empty space */
+            flex: 1;
             display: flex;
-            justify-content: flex-start; /* Keeps the search icon on the far left */
+            justify-content: flex-start;
         }
 
         .logo-container {
@@ -62,8 +63,8 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            flex: 1; /* Forces the right side to fill equal empty space */
-            justify-content: flex-end; /* Keeps the login and cart on the far right */
+            flex: 1;
+            justify-content: flex-end;
         }
 
         .cart-icon {
@@ -148,7 +149,7 @@
             box-sizing: border-box;
         }
 
-        /* SIDEBAR / BROWSE BY */
+        /* SIDEBAR */
         .sidebar {
             width: 220px;
             flex-shrink: 0;
@@ -281,7 +282,7 @@
             background-color: #444;
         }
 
-        /* CENTERED FOOTER SYSTEM */
+        /* CENTERED FOOTER */
         footer {
             border-top: 1px solid var(--border-color);
             padding: 60px 40px 20px 40px;
@@ -289,7 +290,7 @@
         }
 
         .footer-grid {
-            max-width: 1200px; /* Centers and contains the content area */
+            max-width: 1200px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -300,7 +301,7 @@
             font-size: 13px;
             line-height: 1.8;
             color: #333;
-            text-align: left; /* Keeps individual columns clean-aligned inside the grid */
+            text-align: left;
         }
 
         .footer-col h4 {
@@ -331,7 +332,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Responsive Breakpoints */
         @media (max-width: 1100px) {
             .product-grid { grid-template-columns: repeat(3, 1fr); }
         }
@@ -345,6 +345,7 @@
 </head>
 <body>
 
+    <!-- BRANDED HEADER -->
     <header>
         <div class="header-top">
             <div class="header-icon">⌕</div>
@@ -374,13 +375,16 @@
         </nav>
     </header>
 
+    <!-- SHOP BANNER -->
     <div class="shop-header">
         <h1>Cards</h1>
         <p>Cockney Cards has a range of greeting cards for all celebrations that are perfect for any occasion.</p>
     </div>
 
+    <!-- MAIN SHOP CONTAINER -->
     <div class="shop-container">
         
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <h2>Browse by</h2>
             <ul class="category-list">
@@ -399,6 +403,7 @@
             </ul>
         </aside>
 
+        <!-- CATALOG GRID -->
         <main class="catalog-content">
             <div class="catalog-meta">
                 <span id="product-count">0 products</span>
@@ -406,11 +411,13 @@
             </div>
 
             <div class="product-grid" id="product-grid">
-                </div>
+                <!-- Products dynamically injected below -->
+            </div>
         </main>
 
     </div>
 
+    <!-- CENTERED FOOTER -->
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
@@ -440,66 +447,282 @@
     </footer>
 
     <script>
+        // FULL EXTENDED PRODUCT LIST WITH PREVIEW IMAGES
         const PRODUCTS = [
-    {
-        id: 'millwall-dad-son',
-        title: 'Millwall Dad & Son Card',
-        price: '£3.49',
-        // 1. Drop your retail mockup preview link here (the one with the envelope/border)
-        image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png', 
-        categories: ['all', 'for-him', 'sports', 'celebrations']
-    },
-    {
-        id: 'ofah',
-        title: 'Only Fools and Horses Birthday Card',
-        price: '£3.49',
-        // 1. Drop your retail mockup preview link here (the one with the envelope/border)
-        image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120973/ofah_rfdqnz.png', 
-        categories: ['all', 'for-him', 'tv-movies', 'celebrations']
-    },
-    {
-        id: 'leaving-girl',
-        title: 'Sorry You\'re Leaving Card',
-        price: '£3.49',
-        image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120976/leaving-girl1_k227or.png',
-        categories: ['all', 'for-her', 'new-jobs', 'thank-you']
-    },
-    {
-        id: 'racing-girl',
-        title: 'Racing Girl Card',
-        price: '£3.49',
-        image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120980/racing-girl_zrfb57.png',
-        categories: ['all', 'for-her', 'sports']
-    },
-    {
-        id: 'ladies-lunch',
-        title: 'Ladies Lunch Birthday Card',
-        price: '£3.49',
-        image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120970/ladies-lunch_so7w76.png',
-        categories: ['all', 'for-her', 'celebrations']
-    },
-    {
-        id: 'bermondsey-legend',
-        title: 'Bermondsey Legend Card',
-        price: '£3.49',
-        image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png',
-        categories: ['all', 'for-him']
-    },
-    {
-        id: 'arsenal-girls',
-        title: 'Arsenal Girls Birthday Card',
-        price: '£3.49',
-        image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120964/arsenal-girls_qpiaid.png',
-        categories: ['all', 'for-her', 'sports', 'children']
-    },
-    {
-        id: 'nolu-lion',
-        title: 'No One Likes Us Lion Card',
-        price: '£3.49',
-        image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120967/nolu-lion_zdsmes.png',
-        categories: ['all', 'for-him', 'sports', 'celebrations']
-    }
-];
+            {
+                id: "11plus-boy",
+                title: "11 Plus Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209507/11plus-boy-preview_sf4n9y.png",
+                categories: ["all", "for-him", "congratulations"]
+            },
+            {
+                id: "11plus-girl",
+                title: "11 Plus Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209509/11plus-girl-preview_xdyo0z.png",
+                categories: ["all", "for-her", "congratulations"]
+            },
+            {
+                id: "11plus-kids",
+                title: "11 Plus Kids Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209512/11plus-kids-preview_a1hxrs.png",
+                categories: ["all", "congratulations", "children"]
+            },
+            {
+                id: "80s-birthday",
+                title: "80s Retro Birthday Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209494/80s-birthday-preview_i8mnhc.png",
+                categories: ["all", "celebrations"]
+            },
+            {
+                id: "90s-birthday",
+                title: "90s Retro Birthday Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209497/90s-birthday-preview_vmzyiu.png",
+                categories: ["all", "celebrations"]
+            },
+            {
+                id: "artsy-girl",
+                title: "Artsy Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209514/artsy-girl-preview_ygwv7b.png",
+                categories: ["all", "for-her", "celebrations"]
+            },
+            {
+                id: "beer-boy",
+                title: "Beer Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209517/beer-boy-preview_amm29h.png",
+                categories: ["all", "for-him", "celebrations"]
+            },
+            {
+                id: "dj-boy",
+                title: "DJ Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209498/dj-boy-preview_yqclnk.png",
+                categories: ["all", "for-him", "sports", "children"]
+            },
+            {
+                id: "drivingtest-boy1",
+                title: "Driving Test Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209464/drivingtest-boy1-preview_mcgers.png",
+                categories: ["all", "for-him", "congratulations"]
+            },
+            {
+                id: "drivingtest-boy3",
+                title: "Driving Pass Congratulations Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209469/drivingtest-boy3-preview_eek6cj.png",
+                categories: ["all", "for-him", "congratulations"]
+            },
+            {
+                id: "drivingtest-girl1",
+                title: "Driving Test Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209469/drivingtest-girl1-preview_ilpeaq.png",
+                categories: ["all", "for-her", "congratulations"]
+            },
+            {
+                id: "drivingtest-girl4",
+                title: "Driving Pass Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209476/drivingtest-girl4-preview_n0onrv.png",
+                categories: ["all", "for-her", "congratulations"]
+            },
+            {
+                id: "exams-boy",
+                title: "Exams Congratulations Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209521/exams-boy-preview_pwc5me.png",
+                categories: ["all", "for-him", "congratulations"]
+            },
+            {
+                id: "exams-girl",
+                title: "Exams Congratulations Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209524/exams-girl-preview_tysy1h.png",
+                categories: ["all", "for-her", "congratulations"]
+            },
+            {
+                id: "gameboy-minecraft",
+                title: "Minecraft Gaming Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209527/gameboy-minecraft-preview_smhncv.png",
+                categories: ["all", "for-him", "sports", "children"]
+            },
+            {
+                id: "gamegirl-minecraft",
+                title: "Minecraft Gaming Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209502/gamegirl-minecraft-preview_ccseer.png",
+                categories: ["all", "for-her", "sports", "children"]
+            },
+            {
+                id: "gamer-boy",
+                title: "Gamer Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209529/gamer-boy-preview_zanxij.png",
+                categories: ["all", "for-him", "sports", "children"]
+            },
+            {
+                id: "gamer-girl",
+                title: "Gamer Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209531/gamer-girl-preview_jmm03m.png",
+                categories: ["all", "for-her", "sports", "children"]
+            },
+            {
+                id: "ladies-lunch",
+                title: "Ladies Lunch Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209436/ladies-lunch-preview_apknm3.png",
+                categories: ["all", "for-her", "celebrations"]
+            },
+            {
+                id: "ladies-shopping",
+                title: "Ladies Shopping Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209534/ladies-shopping-preview_hxo8bq.png",
+                categories: ["all", "for-her", "celebrations"]
+            },
+            {
+                id: "leaving-boy",
+                title: "Sorry You're Leaving Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209445/leaving-boy-preview_opwuv7.png",
+                categories: ["all", "for-him", "new-jobs"]
+            },
+            {
+                id: "leaving-girl",
+                title: "Sorry You're Leaving Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209454/leaving-girl-preview_sb81pd.png",
+                categories: ["all", "for-her", "new-jobs"]
+            },
+            {
+                id: "leaving-girl1",
+                title: "We'll Miss You Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209447/leaving-girl1-preview_awpheh.png",
+                categories: ["all", "for-her", "new-jobs"]
+            },
+            {
+                id: "new-home",
+                title: "New Home Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209536/new-home-preview_xnugt2.png",
+                categories: ["all", "new-home"]
+            },
+            {
+                id: "newjob-teacher-boy1",
+                title: "New Teacher Job Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209456/newjob-teacher-boy1-preview_zlabbg.png",
+                categories: ["all", "for-him", "new-jobs"]
+            },
+            {
+                id: "newjob-teacher-girl1",
+                title: "New Teacher Job Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209478/newjob-teacher-girl1-preview_oyv8wd.png",
+                categories: ["all", "for-her", "new-jobs"]
+            },
+            {
+                id: "superteacher-boy",
+                title: "Super Teacher Boy Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209480/superteacher-boy-preview_m28awi.png",
+                categories: ["all", "for-him", "thank-you"]
+            },
+            {
+                id: "superteacher-girl",
+                title: "Super Teacher Girl Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209483/superteacher-girl-preview_cbxnp1.png",
+                categories: ["all", "for-her", "thank-you"]
+            },
+            {
+                id: "thankyou-teacher",
+                title: "Thank You Teacher Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209503/thankyou-teacher-preview_j609g7.png",
+                categories: ["all", "thank-you"]
+            },
+            {
+                id: "topboy-mfc",
+                title: "Topboy Millwall FC Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209485/topboy-mfc-preview_oe0tyj.png",
+                categories: ["all", "for-him", "sports"]
+            },
+            {
+                id: "topboy-whu",
+                title: "Topboy West Ham United Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209487/topboy-whu-preview_vpmzeb.png",
+                categories: ["all", "for-him", "sports"]
+            },
+            {
+                id: "tvmovies-bttf",
+                title: "Back to the Future TV Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209436/tvmovies-bttf_preview_kdtytk.png",
+                categories: ["all", "tv-movies"]
+            },
+            {
+                id: "tvmovies-inbetweeners",
+                title: "The Inbetweeners TV Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209439/tvmovies-inbetweeners-preview_srj2ni.png",
+                categories: ["all", "tv-movies"]
+            },
+            {
+                id: "tvmovies-jaws1",
+                title: "Jaws \"We're Gonna Need a Bigger Boat\" Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209440/tvmovies-jaws1-preview_vsu0rh.png",
+                categories: ["all", "tv-movies"]
+            },
+            {
+                id: "tvmovies-jaws2",
+                title: "Jaws Retro Film Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209490/tvmovies-jaws2-preview_m1eren.png",
+                categories: ["all", "tv-movies"]
+            },
+            {
+                id: "tvmovies-ofah",
+                title: "Only Fools and Horses TV Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209442/tvmovies-ofah_preview_f21tnx.png",
+                categories: ["all", "tv-movies"]
+            },
+            {
+                id: "tvmovies-quadrophenia",
+                title: "Quadrophenia Film Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209492/tvmovies-quadrophenia-preview_rmi4fj.png",
+                categories: ["all", "tv-movies"]
+            },
+            {
+                id: "tvmovies-youngones",
+                title: "The Young Ones TV Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209444/tvmovies-youngones_v5lemm.png",
+                categories: ["all", "tv-movies"]
+            },
+            {
+                id: "wine-girls",
+                title: "Wine Girls Card",
+                price: "£3.49",
+                image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209539/wine-girls-preview_pnfprf.png",
+                categories: ["all", "for-her", "celebrations"]
+            }
+        ];
 
         window.addEventListener('DOMContentLoaded', () => {
             renderGrid(PRODUCTS);
