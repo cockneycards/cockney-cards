@@ -664,9 +664,19 @@
             canvasElement.width = CANVAS_WIDTH;
             canvasElement.height = CANVAS_HEIGHT;
 
+            const myFont = new FontFace('BubblegumSans', 'url(https://res.cloudinary.com/uzf4eeky/raw/upload/BubblegumSans-Regular.ttf)');
+
+myFont.load().then((font) => {
+  document.fonts.add(font);
+  console.log('Font loaded and added to document');
+  // Re-render the canvas so the text updates
+  canvas.renderAll();
+
             canvas = new fabric.Canvas(canvasElement, {
                 width: CANVAS_WIDTH, height: CANVAS_HEIGHT,
                 preserveObjectStacking: true, backgroundColor: '#ffffff'
+
+                
             });
 
             // LOGO PLACEMENT: BACK COVER (ADJUSTED PROPORTIONS TO PREVENT OVERHANG)
