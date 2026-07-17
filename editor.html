@@ -9,11 +9,11 @@
 
     <style>
         @font-face {
-            font-family: 'BubblegumSans';
-            /* Make sure to replace this URL with your actual Cloudinary font URL */
-            src: url('https://res.cloudinary.com/uzf4eeky/raw/upload/v1784281780/BubblegumSans-Regular_owvpsg.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
+    font-family: 'BubblegumSans';
+    src: url('/fonts/BubblegumSans-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
         }
 
         :root {
@@ -609,7 +609,7 @@
           },
           "tvmovies-ofah": {
             "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png",
-            "name": { "left": 892.5, "top": 540, "fontSize": 28, "isCurved": true, "curveRadius": 160, "color": "#FFFFFF" },
+            "name": null,
             "age": null
           },
           "tvmovies-quadrophenia": {
@@ -731,7 +731,7 @@ if (activeTemplate.name === null && activeTemplate.age === null) {
                 nameText = new fabric.Text("NAME", {
                     left: activeTemplate.name.left, top: activeTemplate.name.top,
                     originX: "center", originY: "center",
-                    fontSize: activeTemplate.name.fontSize, fontFamily: "Arial", fontWeight: "bold",
+                    fontSize: activeTemplate.name.fontSize, fontFamily: activeTemplate.name.fontFamily || "Arial", fontWeight: "bold",
                     fill: activeTemplate.name.color, textAlign: "center",
                     hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
                 });
@@ -745,7 +745,7 @@ if (activeTemplate.name === null && activeTemplate.age === null) {
                 ageText = new fabric.Text("40", {
                     left: activeTemplate.age.left, top: activeTemplate.age.top,
                     originX: "center", originY: "center",
-                    fontSize: activeTemplate.age.fontSize, fontFamily: "Arial", fontWeight: "bold",
+                    fontSize: activeTemplate.age.fontSize, fontFamily: activeTemplate.age.fontFamily || "Arial", fontWeight: "bold",
                     fill: activeTemplate.age.color,
                     hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
                 });
