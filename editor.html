@@ -656,22 +656,23 @@
                 preserveObjectStacking: true, backgroundColor: '#ffffff'
             });
 
-            const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
-            fabric.Image.fromURL(logoUrl, function(logoImg) {
-                backCoverImg = logoImg;
-                backCoverImg.set({
-                    left: PANEL_WIDTH / 2, 
-                    top: 690,              
-                    originX: 'center', 
-                    originY: 'center',
-                    scaleX: 0.38,          
-                    scaleY: 0.38,          
-                    selectable: false, 
-                    evented: false
-                });
-                canvas.add(backCoverImg);
-                canvas.sendToBack(backCoverImg);
-            });
+          // LOGO PLACEMENT: BOTTOM LEFT PANEL (BACK COVER)
+const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
+fabric.Image.fromURL(logoUrl, function(logoImg) {
+    backCoverImg = logoImg;
+    backCoverImg.set({
+        left: PANEL_WIDTH / 2, 
+        top: 730, // Increased from 690 to push it lower down the page
+        originX: 'center', 
+        originY: 'center',
+        scaleX: 0.22, // Reduced from 0.38 to make it smaller
+        scaleY: 0.22, // Reduced from 0.38 to match scale proportion
+        selectable: false, 
+        evented: false
+    });
+    canvas.add(backCoverImg);
+    canvas.sendToBack(backCoverImg);
+});
 
             if (activeTemplate.age === null) {
                 document.getElementById('age-input').style.display = 'none';
