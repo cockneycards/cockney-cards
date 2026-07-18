@@ -452,6 +452,43 @@
         const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
 
         // MAPPED RAW FLAT DESIGNS FOR EDITOR CANVAS
+        const DEFAULT_NAME_SETTINGS = {
+    left: 892.5,
+    top: 725,
+
+    startSize: 52,
+    minSize: 20,
+    maxSize: 120,
+
+    fontFamily: "BubblegumSans",
+    fontWeight: "bold",
+    color: "#FFFFFF",
+
+    canChangeSize: true,
+    canChangeColor: true,
+
+    canMove: false,
+    canRotate: false,
+
+    isCurved: false,
+    curveRadius: 0
+};
+
+const DEFAULT_AGE_SETTINGS = {
+    left: 900,
+    top: 600,
+
+    startSize: 60,
+    minSize: 20,
+    maxSize: 120,
+
+    fontFamily: "Arial",
+    fontWeight: "bold",
+    color: "#FFFFFF",
+
+    canChangeSize: true,
+    canChangeColor: true
+};
         const CARD_TEMPLATES = {
           "11plus-boy": {
             "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058134/11plus-boy_umzz8e.png",
@@ -598,19 +635,24 @@
             "name": null,
             "age": null
           },
-          "thankyou-teacher": {
-            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058119/thankyou-teacher_vnh8yv.png",
-            name:{
-        left:892.5,
-        top:725,
-        fontSize:52,
-        fontFamily:"BubblegumSans",
-        color:"#FD7D96",
-        canChangeSize:true,
-        canChangeColor:true
+        "thankyou-teacher": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058119/thankyou-teacher_vnh8yv.png",
+
+    name: {
+        ...DEFAULT_NAME_SETTINGS,
+
+        left: 892.5,
+        top: 725,
+
+        startSize: 52,
+        minSize: 35,
+        maxSize: 80,
+
+        color: "#FD7D96"
     },
-    age:null
-          },
+
+    age: null
+},
           "topboy-mfc": {
             "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208079/topboy-mfc_flvp3e.png",
             "name": null,
@@ -775,7 +817,7 @@ if (activeTemplate.name === null && activeTemplate.age === null) {
     top: activeTemplate.name.top,
     originX: "center",
     originY: "center",
-    fontSize: activeTemplate.name.fontSize,
+    fontSize: activeTemplate.name.startSize,
     fontFamily: activeTemplate.name.fontFamily || "Arial",
     fontWeight: activeTemplate.name.fontWeight || "bold",
     fill: activeTemplate.name.color,
@@ -787,9 +829,14 @@ if (activeTemplate.name === null && activeTemplate.age === null) {
 });
 
 if (activeTemplate.name?.canChangeSize) {
-    document.getElementById("front-size").value = activeTemplate.name.fontSize;
-    document.getElementById("front-size-val").innerText =
-        activeTemplate.name.fontSize + "px";
+    const slider = document.getElementById("front-size");
+
+slider.min = activeTemplate.name.minSize;
+slider.max = activeTemplate.name.maxSize;
+slider.value = activeTemplate.name.startSize;
+
+document.getElementById("front-size-val").innerText =
+    activeTemplate.name.startSize + "px";
 }
 
 canvas.add(nameText);
