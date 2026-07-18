@@ -718,17 +718,32 @@ const DEFAULT_AGE_SETTINGS = {
         const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth: 2 };
 
         window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const cardId = params.get('card') || '11plus-boy';
-            if (CARD_TEMPLATES[cardId]) {
-                initEditor(cardId);
-            } else {
-                window.location.href = 'shop-cards.html';
-            }
-        });
+    const params = new URLSearchParams(window.location.search);
+    const cardId = params.get('card') || '11plus-boy';
 
-        function initEditor(templateKey) {
-            activeTemplate = CARD_TEMPLATES[templateKey];
+    if (CARD_TEMPLATES[cardId]) {
+        initEditor(cardId);
+    } else {
+        window.location.href = 'shop-cards.html';
+    }
+});
+
+function applyFrontSizeSettings() {
+
+    if (!activeTemplate.name) return;
+
+    const slider = document.getElementById("front-size");
+
+    slider.min = activeTemplate.name.minSize ?? 20;
+    slider.max = activeTemplate.name.maxSize ?? 120;
+    slider.value = activeTemplate.name.startSize;
+
+    document.getElementById("front-size-val").innerText =
+        activeTemplate.name.startSize + "px";
+}
+
+function initEditor(templateKey) {
+    activeTemplate = CARD_TEMPLATES[templateKey];
             const frontSizeControls = document.getElementById("front-size-controls");
 const frontColourPicker = document.getElementById("front-color").parentElement;
 
