@@ -703,6 +703,227 @@ const DEFAULT_AGE_SETTINGS = {
             "name": null,
             "age": null
           }
+,
+"afc-ladies-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378958/afc-ladies-celebrating_dbnjcj.png",
+    name: null,
+    age: null
+},
+"afc-ladies-shirt1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378958/afc-ladies-shirt1_mvge3p.png",
+    name: null,
+    age: null
+},
+"afc-ladies-shirt2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378958/afc-ladies-shirt2_rcb305.png",
+    name: null,
+    age: null
+},
+"afc-men-shirt1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378958/afc-men-shirt1_rsoquo.png",
+    name: null,
+    age: null
+},
+"afc-men-shirt2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378963/afc-men-shirt2_qiabya.png",
+    name: null,
+    age: null
+},
+"afc-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378964/afc-shirt_galno0.png",
+    name: null,
+    age: null
+},
+"brighton-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378932/brighton-celebrating_rx9o8w.png",
+    name: null,
+    age: null
+},
+"brighton-girl1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378932/brighton-girl1_hkhhlx.png",
+    name: null,
+    age: null
+},
+"brighton-girl2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378932/brighton-girl2_qfggnh.png",
+    name: null,
+    age: null
+},
+"brighton-girl3": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378933/brighton-girl3_felwps.png",
+    name: null,
+    age: null
+},
+"brighton-girl4": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378933/brighton-girl4_aau0lo.png",
+    name: null,
+    age: null
+},
+"cfc-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378933/cfc-shirt_te7yee.png",
+    name: null,
+    age: null
+},
+"cfc-shirt-blues2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/cfc-shirt-blues2_e4clio.png",
+    name: null,
+    age: null
+},
+"city-ladies-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/city-ladies-celebrating_pqx4vc.png",
+    name: null,
+    age: null
+},
+"cricket-boy1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/cricket-boy1_l13ql9.png",
+    name: null,
+    age: null
+},
+"cricket-boy2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/cricket-boy2_f4mjhh.png",
+    name: null,
+    age: null
+},
+"cricket-boy3": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378935/cricket-boy3_nwi4d5.png",
+    name: null,
+    age: null
+},
+"cricket-boy4": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378935/cricket-boy4_z9pggv.png",
+    name: null,
+    age: null
+},
+"dancing-queen": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378936/dancing-queen_dr9ic2.png",
+    name: null,
+    age: null
+},
+"darts-boy1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378936/darts-boy1_njlchs.png",
+    name: null,
+    age: null
+},
+"darts-boy2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378937/darts-boy2_mrvrzn.png",
+    name: null,
+    age: null
+},
+"golfer": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378938/golfer_gxfwrs.png",
+    name: null,
+    age: null
+},
+"grandad-racing": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378939/grandad-racing_p7e3ov.png",
+    name: null,
+    age: null
+},
+"leeds": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378940/leeds_i1rvlh.png",
+    name: null,
+    age: null
+},
+"liv-ladies-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378940/liv-ladies-celebrating_ew6s9c.png",
+    name: null,
+    age: null
+},
+"liv-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378940/liv-shirt_kbtxdd.png",
+    name: null,
+    age: null
+},
+"masters-boy1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378941/masters-boy1_dgrlf5.png",
+    name: null,
+    age: null
+},
+"masters-boy2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378942/masters-boy2_jojmtr.png",
+    name: null,
+    age: null
+},
+"mfc-christmas": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784384302/mfc-christmas_xam3fy.png",
+    name: null,
+    age: null
+},
+"mfc-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378942/mfc-shirt_q9iuol.png",
+    name: null,
+    age: null
+},
+"netball-girl1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378944/netball-girl1_ood1bz.png",
+    name: null,
+    age: null
+},
+"netball-girl2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378945/netball-girl2_cfgnel.png",
+    name: null,
+    age: null
+},
+"netball-girl3": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378946/netball-girl3_h2kic9.png",
+    name: null,
+    age: null
+},
+"netball-girl4": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378946/netball-girl4_dz5von.png",
+    name: null,
+    age: null
+},
+"nolu-lion1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784382014/nolu-lion1_fzvvj0.png",
+    name: null,
+    age: null
+},
+"rugby-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378950/rugby-shirt_raclg6.png",
+    name: null,
+    age: null
+},
+"spurs-girl1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378950/spurs-girl1_jiodfu.png",
+    name: null,
+    age: null
+},
+"spurs-girl2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378951/spurs-girl2_j0pnme.png",
+    name: null,
+    age: null
+},
+"spurs-girl3": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378951/spurs-girl3_byfsc2.png",
+    name: null,
+    age: null
+},
+"spurs-girl4": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378951/spurs-girl4_yvzlyv.png",
+    name: null,
+    age: null
+},
+"spurs-ladies-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378952/spurs-ladies-celebrating_k3u51y.png",
+    name: null,
+    age: null
+},
+"tot-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378957/tot-shirt_bc5eeb.png",
+    name: null,
+    age: null
+},
+"whu-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378957/whu-shirt_zj7c65.png",
+    name: null,
+    age: null
+},
+"yoga-girl": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378957/yoga-girl_l1ilz8.png",
+    name: null,
+    age: null
+}
         };
 
         let canvas, bgImg, backCoverImg, nameText, ageText;
