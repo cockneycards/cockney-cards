@@ -641,12 +641,12 @@ const DEFAULT_AGE_SETTINGS = {
     name: {
         ...DEFAULT_NAME_SETTINGS,
 
-        left: 892.5,
+        left: 900,
         top: 725,
 
         startSize: 52,
         minSize: 35,
-        maxSize: 80,
+        maxSize: 68,
 
         color: "#FD7D96"
     },
