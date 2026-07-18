@@ -197,6 +197,51 @@
             max-height: 95%;
         }
 
+        /* INSTAGRAM FEED PLACEHOLDER */
+        .instagram-feed-section {
+            max-width: 1200px;
+            margin: 60px auto 20px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .instagram-title {
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        /* Placeholder layout grid for Instagram layout */
+        .instagram-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .instagram-placeholder-item {
+            aspect-ratio: 1 / 1;
+            background-color: #f0f0f0;
+            border: 1px solid #e2e2e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .instagram-handle {
+            font-size: 13px;
+            font-weight: bold;
+            color: #111;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
         /* FOOTER */
         footer {
             border-top: 1px solid var(--border-color);
@@ -343,22 +388,29 @@
     </section>
 
     <section class="instagram-feed-section">
+        <h3 class="instagram-title">Follow Us On Instagram</h3>
+        <div class="instagram-grid">
+            <div class="instagram-placeholder-item">Feed Image 1</div>
+            <div class="instagram-placeholder-item">Feed Image 2</div>
+            <div class="instagram-placeholder-item">Feed Image 3</div>
+            <div class="instagram-placeholder-item">Feed Image 4</div>
+        </div>
+        <a href="https://www.instagram.com/cockneycards.ig" target="_blank" class="instagram-handle">@cockneycards.ig</a>
+    </section>
 
-    <h3 class="instagram-title">
-        Follow Us On Instagram
-    </h3>
-
-    <div id="instagram-feed" class="instagram-grid"></div>
-
-    <a
-        href="https://www.instagram.com/cockneycards.ig"
-        target="_blank"
-        class="instagram-handle"
-    >
-        @cockneycards.ig
-    </a>
-
-</section>
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Our Store Policies</h4>
+                <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+                <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><strong>Email:</strong><br><a href="mailto:cockneycards@gmail.com">cockneycards@gmail.com</a></p>
+                <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+                <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
             </div>
             
             <div class="footer-col">
