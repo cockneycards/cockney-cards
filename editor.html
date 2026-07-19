@@ -42,10 +42,10 @@
     .nav-links a:hover { color: #888; }
 
     /* EDITOR WORKSPACE */
-    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; flex-wrap: wrap; }
-    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; max-width: 640px; width: 100%; }
+    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; }
+    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; max-width: 640px; flex: 1 1 0%; min-width: 0; }
     #canvas { border: 1px solid #e2e2e2; }
-    .controls { width: 380px; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
     .page-toggle { display: flex; gap: 10px; margin-bottom: 25px; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
