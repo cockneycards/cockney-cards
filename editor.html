@@ -42,8 +42,8 @@
     .nav-links a:hover { color: #888; }
 
     /* EDITOR WORKSPACE */
-    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; }
-    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; flex-wrap: wrap; }
+    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; max-width: 640px; width: 100%; }
     #canvas { border: 1px solid #e2e2e2; }
     .controls { width: 380px; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
@@ -355,6 +355,9 @@ function initEditor(templateKey) {
         preserveObjectStacking: true, backgroundColor: '#ffffff'
     });
 
+    fitCanvasToWrapper();
+    window.addEventListener('resize', fitCanvasToWrapper);
+
     // Logo on the back cover panel
     fabric.Image.fromURL(`${CLOUD_BASE}v1784098145/logo.png`, (logoImg) => {
         backCoverImg = logoImg;
@@ -377,6 +380,23 @@ function initEditor(templateKey) {
     }
 
     loadFrontCover(activeTemplate.url);
+}
+
+// Scales the CANVAS DISPLAY to fit the available space (identical on every
+// card, since the underlying 1191x840 resolution never changes). This only
+// changes CSS size, not the drawing resolution — text stays crisp and every
+// object's stored left/top coordinates stay correct.
+function fitCanvasToWrapper() {
+    if (!canvas) return;
+    const wrapper = $('canvas-wrapper');
+    const style = getComputedStyle(wrapper);
+    const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+    const availableWidth = wrapper.clientWidth - paddingX;
+
+    const displayWidth = Math.min(availableWidth, CANVAS_WIDTH);
+    const displayHeight = displayWidth * (CANVAS_HEIGHT / CANVAS_WIDTH);
+
+    canvas.setDimensions({ width: displayWidth, height: displayHeight }, { cssOnly: true });
 }
 
 function loadFrontCover(imageUrl) {
