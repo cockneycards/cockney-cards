@@ -1176,39 +1176,32 @@ canvas.add(nameText);
         }
 
         function switchPage(page) {
-            currentPage = page;
-            
-            document.getElementById('toggle-front').classList.toggle('active', page === 'front');
-            document.getElementById('toggle-inside').classList.toggle('active', page === 'inside');
-            document.getElementById('front-controls').classList.toggle('active', page === 'front');
-            document.getElementById('inside-controls').classList.toggle('active', page === 'inside');
+    currentPage = page;
+    
+    // Toggle active classes
+    document.getElementById('toggle-front').classList.toggle('active', page === 'front');
+    document.getElementById('toggle-inside').classList.toggle('active', page === 'inside');
+    document.getElementById('front-controls').classList.toggle('active', page === 'front');
+    document.getElementById('inside-controls').classList.toggle('active', page === 'inside');
 
-            if (backCoverImg) backCoverImg.set({ visible: page === 'front' });
-            if (bgImg) bgImg.set({ visible: page === 'front' });
-            if (nameText) nameText.set({ visible: page === 'front' });
-            if (ageText) ageText.set({ visible: page === 'front' });
+    // Toggle Canvas visibility
+    if (bgImg) bgImg.set({ visible: page === 'front' });
+    if (nameText) nameText.set({ visible: page === 'front' });
+    if (ageText) ageText.set({ visible: page === 'front' });
 
-            leftPageBg.set({ visible: page === 'inside' });
-            rightPageBg.set({ visible: page === 'inside' });
-            topBgRect.set({ visible: page === 'inside' });
-            middleBgRect.set({ visible: page === 'inside' });
-            bottomBgRect.set({ visible: page === 'inside' });
+    // Show inside elements
+    const isInside = (page === 'inside');
+    leftPageBg.set({ visible: isInside });
+    rightPageBg.set({ visible: isInside });
+    topBgRect.set({ visible: isInside });
+    middleBgRect.set({ visible: isInside });
+    bottomBgRect.set({ visible: isInside });
+    insideTopText.set({ visible: isInside });
+    insideMiddleText.set({ visible: isInside });
+    insideBottomText.set({ visible: isInside });
 
-            insideTopText.set({ visible: page === 'inside' });
-            insideMiddleText.set({ visible: page === 'inside' });
-            insideBottomText.set({ visible: page === 'inside' });
-
-            canvas.discardActiveObject();
-            resetBordersToDashed();
-
-            if (page === 'inside') {
-                insideTopText.setCoords();
-                insideMiddleText.setCoords();
-                insideBottomText.setCoords();
-            }
-
-            canvas.requestRenderAll();
-        }
+    canvas.requestRenderAll();
+}
 
         function setupTextEvents() {
             canvas.on("mouse:down", function(options) {
