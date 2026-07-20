@@ -42,8 +42,26 @@
     .nav-links a:hover { color: #888; }
 
     /* EDITOR WORKSPACE */
-    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; }
-    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; max-width: 640px; flex: 1 1 0%; min-width: 0; }
+    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; justify-content: center; box-sizing: border-box; }
+
+    /* #canvas-wrapper is intentionally sized to a SINGLE card panel (not the
+       full two-panel spread). The fabric canvas underneath still renders at
+       full spread resolution (needed for print/checkout) — it's just shifted
+       left/clipped so only the relevant half is visible to the customer. See
+       fitCanvasToWrapper() in the script below. */
+    #canvas-wrapper {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 380px;
+        flex: 0 0 auto;
+        overflow: hidden;
+        position: relative;
+    }
     #canvas { border: 1px solid #e2e2e2; }
     .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
@@ -382,10 +400,14 @@ function initEditor(templateKey) {
     loadFrontCover(activeTemplate.url);
 }
 
-// Scales the CANVAS DISPLAY to fit the available space (identical on every
-// card, since the underlying 1191x840 resolution never changes). This only
-// changes CSS size, not the drawing resolution — text stays crisp and every
-// object's stored left/top coordinates stay correct.
+// Scales the CANVAS DISPLAY so a SINGLE panel (right-hand side — the front
+// cover on the outside spread, or the message panel on the inside spread)
+// fills the wrapper, instead of scaling the whole two-panel spread into
+// view. The fabric canvas keeps its full 1191x840 backstore resolution the
+// whole time (so exported/print images are unaffected) — this only changes
+// the on-screen CSS size and then shifts the canvas left by exactly one
+// panel-width, so the left-hand panel gets clipped off by the wrapper's
+// overflow:hidden. Every object's stored left/top coordinates stay correct.
 function fitCanvasToWrapper() {
     if (!canvas) return;
     const wrapper = $('canvas-wrapper');
@@ -393,10 +415,14 @@ function fitCanvasToWrapper() {
     const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
     const availableWidth = wrapper.clientWidth - paddingX;
 
-    const displayWidth = Math.min(availableWidth, CANVAS_WIDTH);
-    const displayHeight = displayWidth * (CANVAS_HEIGHT / CANVAS_WIDTH);
+    const scale = availableWidth / PANEL_WIDTH;
+    const fullDisplayWidth = CANVAS_WIDTH * scale;
+    const fullDisplayHeight = CANVAS_HEIGHT * scale;
 
-    canvas.setDimensions({ width: displayWidth, height: displayHeight }, { cssOnly: true });
+    canvas.setDimensions({ width: fullDisplayWidth, height: fullDisplayHeight }, { cssOnly: true });
+
+    // Shift the whole canvas left so only the right-hand panel is visible.
+    canvas.wrapperEl.style.marginLeft = `-${PANEL_WIDTH * scale}px`;
 }
 
 function loadFrontCover(imageUrl) {
