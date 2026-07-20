@@ -1017,21 +1017,30 @@ if (activeTemplate.name === null && activeTemplate.age === null) {
         }
 
         function loadFrontCover(imageUrl) {
-            fabric.Image.fromURL(imageUrl, function (img) {
-                bgImg = img;
-                bgImg.set({
-                    left: 0, top: 0, // Aligned to start of new smaller canvas
-                    scaleX: CANVAS_WIDTH / img.width, 
-                    scaleY: CANVAS_HEIGHT / img.height,
-                    selectable: false, evented: false
-                });
-                canvas.add(bgImg);
-                canvas.sendToBack(bgImg);
+    fabric.Image.fromURL(imageUrl, function (img) {
+        bgImg = img;
+        
+        // This ensures the image covers the new, smaller canvas
+        bgImg.set({
+            left: 0, 
+            top: 0, 
+            scaleX: CANVAS_WIDTH / img.width, 
+            scaleY: CANVAS_HEIGHT / img.height,
+            selectable: false, 
+            evented: false
+        });
+        
+        canvas.add(bgImg);
+        canvas.sendToBack(bgImg);
+        
+        // Refresh the canvas to ensure it renders
+        canvas.requestRenderAll();
 
-                setupTextsAndOverlays();
-                switchPage('front');
-            });
-        }
+        setupTextsAndOverlays();
+        switchPage('front');
+    });
+}
+
 
         function setupTextsAndOverlays() {
                         if (activeTemplate.name) {
