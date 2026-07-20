@@ -979,17 +979,17 @@ frontColourPicker.style.display =
             // LOGO PLACEMENT: BACK COVER (ADJUSTED PROPORTIONS TO PREVENT OVERHANG)
             const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
             fabric.Image.fromURL(logoUrl, function(logoImg) {
-                backCoverImg = logoImg;
-                backCoverImg.set({
-                    left: CANVAS_WIDTH / 2, top: 710,
-                    originX: 'center', originY: 'center',
-                    scaleX: 0.15, scaleY: 0.15,          
-                    selectable: false, evented: false
-                });
-                canvas.add(backCoverImg);
-                canvas.sendToBack(backCoverImg);
-            });
-
+    backCoverImg = logoImg;
+    backCoverImg.set({
+        left: -200, // Move it off the canvas to the left
+        top: 400, 
+        selectable: false, 
+        evented: false,
+        visible: true // Always visible
+    });
+    canvas.add(backCoverImg);
+    canvas.sendToBack(backCoverImg);
+});
 
             // SMART CONTROL TOGGLE: Hide inputs completely if card is non-personalized
 if (activeTemplate.name === null && activeTemplate.age === null) {
