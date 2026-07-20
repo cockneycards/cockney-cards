@@ -1,703 +1,1351 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Personalise Your Card | Cockney Cards</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalise Your Card | Cockney Cards</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
-<style>
-    @font-face {
-        font-family: 'BubblegumSans';
-        src: url('/fonts/BubblegumSans-Regular.woff2') format('woff2');
-        font-weight: normal;
-        font-style: normal;
-        font-display: swap;
-    }
+    <style>
+        @font-face {
+    font-family: 'BubblegumSans';
+    src: url('/fonts/BubblegumSans-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+        }
 
-    :root {
-        --primary: #1A73E8;
-        --dark: #1e1e24;
-        --light: #fcfcfc;
-        --border-color: #e0e0e0;
-        --font-family: 'Helvetica Neue', Arial, sans-serif;
-    }
+        :root {
+            --primary: #1A73E8;
+            --dark: #1e1e24;
+            --light: #fcfcfc;
+            --border-color: #e0e0e0;
+            --font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: #f6f6f8;
+            color: var(--dark);
+        }
 
-    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); }
+        /* HEADER & NAVIGATION */
+        header {
+            background-color: white;
+            padding: 15px 40px 10px 40px;
+            border-bottom: 1px solid var(--border-color);
+        }
 
-    /* HEADER & NAVIGATION */
-    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
-    .header-top { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
-    .header-icon { font-size: 20px; cursor: pointer; text-decoration: none; color: var(--dark); flex: 1; display: flex; justify-content: flex-start; }
-    .logo-container { text-align: center; }
-    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
-    .header-right { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; }
-    .cart-icon { position: relative; cursor: pointer; }
-    .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
-    .login-btn:hover { color: #111; }
-    nav { margin-top: 15px; text-align: center; }
-    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
-    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
-    .nav-links a:hover { color: #888; }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-    /* EDITOR WORKSPACE */
-    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; justify-content: center; box-sizing: border-box; }
+        .header-icon {
+            font-size: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--dark);
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+        }
 
-    /* #canvas-wrapper is intentionally sized to a SINGLE card panel (not the
-       full two-panel spread). The fabric canvas underneath still renders at
-       full spread resolution (needed for print/checkout) — it's just shifted
-       left/clipped so only the relevant half is visible to the customer. See
-       fitCanvasToWrapper() in the script below. */
-    #canvas-wrapper {
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        box-sizing: border-box;
-        width: 100%;
-        max-width: 380px;
-        flex: 0 0 auto;
-        overflow: hidden;
-        position: relative;
-    }
-    #canvas { border: 1px solid #e2e2e2; }
-    .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
-    .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
-    .page-toggle { display: flex; gap: 10px; margin-bottom: 25px; }
-    .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
-    .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
-    .control-group { display: none; flex-direction: column; gap: 15px; }
-    .control-group.active { display: flex; }
-    label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
-    input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-    .flex-row { display: flex; align-items: center; gap: 10px; }
-    .color-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; }
-    .size-slider { flex: 1; }
+        .logo-container {
+            text-align: center;
+        }
 
-    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
-    .btn:hover { background-color: #444; }
-    .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
-    .btn-close { background-color: #f0f0f0; color: #333; margin-top: 10px; }
-    .btn-close:hover { background-color: #e0e0e0; }
+        .logo-container img {
+            max-width: 120px;
+            height: auto;
+            cursor: pointer;
+        }
 
-    /* FOOTER */
-    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
-    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; }
-    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
-    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
-    .footer-col p { margin: 0 0 15px 0; }
-    .footer-col a { color: #111; text-decoration: underline; }
-    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+            justify-content: flex-end;
+        }
 
-    @media (max-width: 900px) {
-        .editor-workspace { flex-direction: column; align-items: center; }
-        .controls { width: 100%; max-width: 595px; }
-        .footer-grid { grid-template-columns: 1fr; gap: 30px; }
-    }
-</style>
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            font-size: 11px;
+            text-decoration: none;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .login-btn:hover {
+            color: #111;
+        }
+
+        nav {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .nav-links {
+            display: inline-flex;
+            gap: 30px;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #111;
+            font-size: 13px;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #888;
+        }
+
+        /* EDITOR WORKSPACE */
+        .editor-workspace {
+            display: flex;
+            max-width: 1280px;
+            margin: 40px auto;
+            padding: 0 40px;
+            gap: 40px;
+            align-items: flex-start;
+            box-sizing: border-box;
+        }
+
+        #canvas-wrapper {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        #canvas {
+            border: 1px solid #e2e2e2;
+        }
+
+        .controls {
+            width: 380px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        .controls h2 {
+            margin-top: 0;
+            font-size: 22px;
+            font-weight: 300;
+            margin-bottom: 25px;
+        }
+
+        .page-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background-color: #111;
+            color: white;
+            border-color: #111;
+        }
+
+        .control-group {
+            display: none; 
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group.active {
+            display: flex;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #444;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .flex-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-picker {
+            width: 50px;
+            height: 40px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .size-slider {
+            flex: 1;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .btn:hover { background-color: #444; }
+        .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .btn-close { background-color: #f0f0f0; color: #333; margin-top: 10px; }
+        .btn-close:hover { background-color: #e0e0e0; }
+
+        /* CENTERED FOOTER SYSTEM */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 60px 40px 20px 40px;
+            background-color: white;
+            margin-top: 60px;
+        }
+
+        .footer-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 50px;
+        }
+
+        .footer-col {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #333;
+            text-align: left;
+        }
+
+        .footer-col h4 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-col p {
+            margin: 0 0 15px 0;
+        }
+
+        .footer-col a {
+            color: #111;
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 50px auto 0 auto;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 900px) {
+            .editor-workspace { flex-direction: column; align-items: center; }
+            .controls { width: 100%; max-width: 595px; }
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+        }
+    </style>
 </head>
 <body>
 
-<header>
-    <div class="header-top">
-        <div class="header-icon">⌕</div>
-        <div class="logo-container" onclick="window.location.href='index.html';">
-            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
-        </div>
-        <div class="header-right">
-            <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
-            <div class="cart-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
+    <!-- BRANDED HEADER -->
+    <header>
+        <div class="header-top">
+            <div class="header-icon">⌕</div>
+            
+            <div class="logo-container" onclick="window.location.href='index.html';">
+                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
             </div>
-        </div>
-    </div>
-    <nav>
-        <ul class="nav-links">
-            <li><a href="shop-cards.html">Shop Cards</a></li>
-            <li><a href="shop-prints.html">Shop Prints</a></li>
-            <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
-        </ul>
-    </nav>
-</header>
-
-<div class="editor-workspace">
-    <div id="canvas-wrapper">
-        <canvas id="canvas"></canvas>
-    </div>
-
-    <div class="controls">
-        <h2>Personalise Card</h2>
-
-        <div class="page-toggle">
-            <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')">Outside Spread</button>
-            <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
-        </div>
-
-        <div id="front-controls" class="control-group active">
-            <div id="front-text-inputs">
-                <label id="label-name" for="name-input">Name to add:</label>
-                <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this.value)">
-
-                <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
-                <input type="text" id="age-input" placeholder="e.g. 40" oninput="updateAgeText(this.value)">
-
-                <label style="margin-top:10px; display:block;">Text Color:</label>
-                <div class="flex-row">
-                    <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
-                    <span>Choose Font Color</span>
-                </div>
-
-                <div id="front-size-controls" style="display:none; margin-top:15px;">
-                    <label>Font Size:</label>
-                    <div class="flex-row">
-                        <input type="range" id="front-size" class="size-slider" min="20" max="120" value="52" oninput="updateFrontSize(this.value)">
-                        <span id="front-size-val">52px</span>
-                    </div>
+            
+            <div class="header-right">
+                <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
+                <div class="cart-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
                 </div>
             </div>
         </div>
+        
+        <nav>
+            <ul class="nav-links">
+                <li><a href="shop-cards.html">Shop Cards</a></li>
+                <li><a href="shop-prints.html">Shop Prints</a></li>
+                <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
+            </ul>
+        </nav>
+    </header>
 
-        <div id="inside-controls" class="control-group">
-            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel remains blank. Click on the text panels on the Right panel to write your inside message.</p>
-
-            <label>Font Size:</label>
-            <div class="flex-row">
-                <input type="range" id="inside-size" class="size-slider" min="15" max="80" value="45" oninput="updateInsideSize(this.value)">
-                <span id="size-val">45px</span>
-            </div>
-
-            <label style="margin-top: 10px; display: block;">Font Color:</label>
-            <div class="flex-row">
-                <input type="color" id="inside-color" class="color-picker" value="#000000" onchange="updateInsideColor(this.value)">
-                <span style="font-size: 12px; color: #666;">Choose Inside Color</span>
-            </div>
+    <div class="editor-workspace">
+        <div id="canvas-wrapper">
+            <canvas id="canvas"></canvas>
         </div>
+        
+        <div class="controls">
+            <h2>Personalise Card</h2>
 
-        <button class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
-        <button class="btn btn-close" onclick="window.location.href='shop-cards.html'">Cancel & Return</button>
-    </div>
+            <div class="page-toggle">
+                <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')">Outside Spread</button>
+                <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
+            </div>
+
+            <div id="front-controls" class="control-group active">
+                <div id="front-text-inputs">
+                    <label id="label-name" for="name-input">Name to add:</label>
+                    <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this.value)">
+
+                    <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
+                    <input type="text" id="age-input" placeholder="e.g. 40" oninput="updateAgeText(this.value)">
+
+                   <label style="margin-top:10px; display:block;">Text Color:</label>
+
+<div class="flex-row">
+    <input
+        type="color"
+        id="front-color"
+        class="color-picker"
+        value="#FFFFFF"
+        onchange="updateFrontColor(this.value)">
+
+    <span>Choose Font Color</span>
 </div>
 
-<footer>
-    <div class="footer-grid">
-        <div class="footer-col">
-            <h4>Our Store Policies</h4>
-            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
-            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
-        </div>
-        <div class="footer-col">
-            <h4>Contact Us</h4>
-            <p><strong>Email:</strong><br><a href="mailto:cockneycards@gmail.com">cockneycards@gmail.com</a></p>
-            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
-            <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
-        </div>
-        <div class="footer-col">
-            <h4>Business Hours</h4>
-            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
-            <p><strong>Saturday:</strong><br>10am - 4pm</p>
-            <p><strong>Sunday:</strong><br>Closed</p>
+<div id="front-size-controls" style="display:none; margin-top:15px;">
+
+    <label>Font Size:</label>
+
+    <div class="flex-row">
+        <input
+            type="range"
+            id="front-size"
+            class="size-slider"
+            min="20"
+            max="120"
+            value="52"
+            oninput="updateFrontSize(this.value)">
+
+        <span id="front-size-val">52px</span>
+    </div>
+
+</div>
+                </div>
+            </div>
+
+            <div id="inside-controls" class="control-group">
+                <p style="font-size: 13px; color: #666; margin-bottom: 10px;">The Left panel remains blank. Click on the text panels on the Right panel to write your inside message.</p>
+                
+                <label>Font Size:</label>
+                <div class="flex-row">
+                    <input type="range" id="inside-size" class="size-slider" min="15" max="80" value="45" oninput="updateInsideSize(this.value)">
+                    <span id="size-val">45px</span>
+                </div>
+
+                <label style="margin-top: 10px; display: block;">Font Color:</label>
+                <div class="flex-row">
+                    <input type="color" id="inside-color" class="color-picker" value="#000000" onchange="updateInsideColor(this.value)">
+                    <span style="font-size: 12px; color: #666;">Choose Inside Color</span>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
+            <button class="btn btn-close" onclick="window.location.href='shop-cards.html'">Cancel & Return</button>
         </div>
     </div>
-    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
-</footer>
 
-<script>
-const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
-const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
-const CLOUD_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/`;
+    <!-- CENTERED FOOTER -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Our Store Policies</h4>
+                <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+                <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Contact Us</h4>
+                <p><strong>Email:</strong><br><a href="mailto:cockneycards@gmail.com">cockneycards@gmail.com</a></p>
+                <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+                <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
+            </div>
+            
+            <div class="footer-col">
+                <h4>Business Hours</h4>
+                <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+                <p><strong>Saturday:</strong><br>10am - 4pm</p>
+                <p><strong>Sunday:</strong><br>Closed</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            © 2026 by Cockney Cards.
+        </div>
+    </footer>
 
-// ---- Text style defaults (reused / overridden per template) ----
-const DEFAULT_NAME_SETTINGS = {
-    left: 892.5, top: 725, startSize: 52, minSize: 20, maxSize: 120,
-    fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
-    canChangeSize: true, canChangeColor: true,
-    canMove: false, canRotate: false, isCurved: false, curveRadius: 0
+    <script>
+        const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
+        const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
+
+        // MAPPED RAW FLAT DESIGNS FOR EDITOR CANVAS
+        const DEFAULT_NAME_SETTINGS = {
+    left: 892.5,
+    top: 725,
+
+    startSize: 52,
+    minSize: 20,
+    maxSize: 120,
+
+    fontFamily: "BubblegumSans",
+    fontWeight: "bold",
+    color: "#FFFFFF",
+
+    canChangeSize: true,
+    canChangeColor: true,
+
+    canMove: false,
+    canRotate: false,
+
+    isCurved: false,
+    curveRadius: 0
 };
+
 const DEFAULT_AGE_SETTINGS = {
-    left: 900, top: 600, startSize: 60, minSize: 20, maxSize: 120,
-    fontFamily: "Arial", fontWeight: "bold", color: "#FFFFFF",
-    canChangeSize: true, canChangeColor: true
+    left: 900,
+    top: 600,
+
+    startSize: 60,
+    minSize: 20,
+    maxSize: 120,
+
+    fontFamily: "Arial",
+    fontWeight: "bold",
+    color: "#FFFFFF",
+
+    canChangeSize: true,
+    canChangeColor: true
 };
+        const CARD_TEMPLATES = {
+          "11plus-boy": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058134/11plus-boy_umzz8e.png",
+            "name": null,
+            "age": null
+          },
+          "11plus-girl": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058129/11plus-girl_rmkpbe.png",
+            "name": null,
+            "age": null
+          },
+          "11plus-kids": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058140/11plus-kids_wg25kp.png",
+            "name": null,
+            "age": null
+          },
+          "80s-birthday": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208088/80s-birthday_jeq3bk.png",
+            "name": null,
+            "age": null
+          },
+          "90s-birthday": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208085/90s-birthday_ldr2pi.png",
+            "name": null,
+            "age": null
+          },
+          "artsy-girl": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058135/artsy-girl_gx8dwv.png",
+            "name": null,
+            "age": null
+          },
+          "beer-boy": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058080/beer-boy_hscpkf.png",
+            "name": null,
+            "age": null
+          },
+          "charlie-says": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058139/charlie-says_legryi.png",
+            "name": null,
+            "age": null
+          },
+          "dj-boy": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208082/dj-boy_uyrjcy.png",
+            "name": null,
+            "age": null
+          },
+          "drivingtest-boy1": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208057/drivingtest-boy1_icejra.png",
+            "name": null,
+            "age": null
+          },
+          "drivingtest-boy3": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208062/drivingtest-boy3_sqejou.png",
+            "name": null,
+            "age": null
+          },
+          "drivingtest-girl1": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784206064/drivingtest-girl1_hw1a1t.png",
+            "name": null,
+            "age": null
+          },
+          "drivingtest-girl4": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208061/drivingtest-girl4_grx0ed.png",
+            "name": null,
+            "age": null
+          },
+          "exams-boy": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058150/exams-boy_wuej29.png",
+            "name": null,
+            "age": null
+          },
+          "exams-girl": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058144/exams-girl_d2wyhs.png",
+            "name": null,
+            "age": null
+          },
+          "gameboy-minecraft": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058080/gameboy-minecraft_qhzdje.png",
+            "name": null,
+            "age": null
+          },
+          "gamegirl-minecraft": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058085/gamegirl-minecraft_kn2sex.png",
+            "name": null,
+            "age": null
+          },
+          "gamer-boy": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058090/gamer-boy_k6ntmo.png",
+            "name": null,
+            "age": null
+          },
+          "gamer-girl": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058096/gamer-girl_f8nufl.png",
+            "name": null,
+            "age": null
+          },
+          "ladies-lunch": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058155/ladies-lunch_et7asg.png",
+            "name": null,
+            "age": null
+          },
+          "ladies-shopping": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058157/ladies-shopping.png",
+            "name": null,
+            "age": null
+          },
+          "leaving-boy": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208051/leaving-boy_g8y7z0.png",
+            "name": null,
+            "age": null
+          },
+          "leaving-girl": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208050/leaving-girl_cu4lci.png",
+            "name": null,
+            "age": null
+          },
+          "leaving-girl1": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208050/leaving-girl1_s4n0bw.png",
+            "name": null,
+            "age": null
+          },
+          "new-home": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058157/new-home_wgtf1r.png",
+            "name": null,
+            "age": null
+          },
+          "newjob-teacher-boy1": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208072/newjob-teacher-boy1_qnrwb4.png",
+            "name": null,
+            "age": null
+          },
+          "newjob-teacher-girl1": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208067/newjob-teacher-girl1_kkh4bb.png",
+            "name": null,
+            "age": null
+          },
+          "superteacher-boy": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208060/superteacher-boy_gaptps.png",
+            "name": null,
+            "age": null
+          },
+          "superteacher-girl": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208066/superteacher-girl_iyeekh.png",
+            "name": null,
+            "age": null
+          },
+        "thankyou-teacher": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058119/thankyou-teacher_vnh8yv.png",
 
-// ---- Card catalogue: just filename paths, so each card is one line ----
-const CARD_PATHS = {
-    "11plus-boy": "v1784058134/11plus-boy_umzz8e.png",
-    "11plus-girl": "v1784058129/11plus-girl_rmkpbe.png",
-    "11plus-kids": "v1784058140/11plus-kids_wg25kp.png",
-    "80s-birthday": "v1784208088/80s-birthday_jeq3bk.png",
-    "90s-birthday": "v1784208085/90s-birthday_ldr2pi.png",
-    "artsy-girl": "v1784058135/artsy-girl_gx8dwv.png",
-    "beer-boy": "v1784058080/beer-boy_hscpkf.png",
-    "charlie-says": "v1784058139/charlie-says_legryi.png",
-    "dj-boy": "v1784208082/dj-boy_uyrjcy.png",
-    "drivingtest-boy1": "v1784208057/drivingtest-boy1_icejra.png",
-    "drivingtest-boy3": "v1784208062/drivingtest-boy3_sqejou.png",
-    "drivingtest-girl1": "v1784206064/drivingtest-girl1_hw1a1t.png",
-    "drivingtest-girl4": "v1784208061/drivingtest-girl4_grx0ed.png",
-    "exams-boy": "v1784058150/exams-boy_wuej29.png",
-    "exams-girl": "v1784058144/exams-girl_d2wyhs.png",
-    "gameboy-minecraft": "v1784058080/gameboy-minecraft_qhzdje.png",
-    "gamegirl-minecraft": "v1784058085/gamegirl-minecraft_kn2sex.png",
-    "gamer-boy": "v1784058090/gamer-boy_k6ntmo.png",
-    "gamer-girl": "v1784058096/gamer-girl_f8nufl.png",
-    "ladies-lunch": "v1784058155/ladies-lunch_et7asg.png",
-    "ladies-shopping": "v1784058157/ladies-shopping.png",
-    "leaving-boy": "v1784208051/leaving-boy_g8y7z0.png",
-    "leaving-girl": "v1784208050/leaving-girl_cu4lci.png",
-    "leaving-girl1": "v1784208050/leaving-girl1_s4n0bw.png",
-    "new-home": "v1784058157/new-home_wgtf1r.png",
-    "newjob-teacher-boy1": "v1784208072/newjob-teacher-boy1_qnrwb4.png",
-    "newjob-teacher-girl1": "v1784208067/newjob-teacher-girl1_kkh4bb.png",
-    "superteacher-boy": "v1784208060/superteacher-boy_gaptps.png",
-    "superteacher-girl": "v1784208066/superteacher-girl_iyeekh.png",
-    "thankyou-teacher": "v1784058119/thankyou-teacher_vnh8yv.png",
-    "topboy-mfc": "v1784208079/topboy-mfc_flvp3e.png",
-    "topboy-whu": "v1784208073/topboy-whu_jvukd8.png",
-    "tvmovies-bttf": "v1784058158/tvmovies-bttf.png",
-    "tvmovies-inbetweeners": "v1784058166/tvmovies-inbetweeners.png",
-    "tvmovies-jaws1": "v1784058069/tvmovies-jaws_sfqlhq.png",
-    "tvmovies-jaws2": "v1784208083/tvmovies-jaws2_ohhblo.png",
-    "tvmovies-ofah": "v1784058159/ofah.png",
-    "tvmovies-quadrophenia": "v1784208078/tvmovies-quadrophenia_t2egjh.png",
-    "tvmovies-youngones": "v1784058082/tvmovies-youngones_znc8wj.png",
-    "wine-girls": "v1784058128/wine-girl_lxwhit.png",
-    "afc-ladies-celebrating": "v1784378958/afc-ladies-celebrating_dbnjcj.png",
-    "afc-ladies-shirt1": "v1784378958/afc-ladies-shirt1_mvge3p.png",
-    "afc-ladies-shirt2": "v1784378958/afc-ladies-shirt2_rcb305.png",
-    "afc-men-shirt1": "v1784378958/afc-men-shirt1_rsoquo.png",
-    "afc-men-shirt2": "v1784378963/afc-men-shirt2_qiabya.png",
-    "afc-shirt": "v1784378964/afc-shirt_galno0.png",
-    "brighton-celebrating": "v1784378932/brighton-celebrating_rx9o8w.png",
-    "brighton-girl1": "v1784378932/brighton-girl1_hkhhlx.png",
-    "brighton-girl2": "v1784378932/brighton-girl2_qfggnh.png",
-    "brighton-girl3": "v1784378933/brighton-girl3_felwps.png",
-    "brighton-girl4": "v1784378933/brighton-girl4_aau0lo.png",
-    "cfc-shirt": "v1784378933/cfc-shirt_te7yee.png",
-    "cfc-shirt-blues2": "v1784378934/cfc-shirt-blues2_e4clio.png",
-    "cfc-shirt-blues1": "v1784378934/cfc-shirt-blues1_su1uof.png",
-    "city-ladies-celebrating": "v1784378934/city-ladies-celebrating_pqx4vc.png",
-    "cricket-boy1": "v1784378934/cricket-boy1_l13ql9.png",
-    "cricket-boy2": "v1784378934/cricket-boy2_f4mjhh.png",
-    "cricket-boy3": "v1784378935/cricket-boy3_nwi4d5.png",
-    "cricket-boy4": "v1784378935/cricket-boy4_z9pggv.png",
-    "dancing-queen": "v1784378936/dancing-queen_dr9ic2.png",
-    "darts-boy1": "v1784378936/darts-boy1_njlchs.png",
-    "darts-boy2": "v1784378937/darts-boy2_mrvrzn.png",
-    "golfer": "v1784378938/golfer_gxfwrs.png",
-    "grandad-racing": "v1784378939/grandad-racing_p7e3ov.png",
-    "leeds": "v1784378940/leeds_i1rvlh.png",
-    "liv-ladies-celebrating": "v1784378940/liv-ladies-celebrating_ew6s9c.png",
-    "liv-shirt": "v1784378940/liv-shirt_kbtxdd.png",
-    "masters-boy1": "v1784378941/masters-boy1_dgrlf5.png",
-    "masters-boy2": "v1784378942/masters-boy2_jojmtr.png",
-    "mfc-christmas": "v1784384302/mfc-christmas_xam3fy.png",
-    "mfc-shirt": "v1784378942/mfc-shirt_q9iuol.png",
-    "netball-girl1": "v1784378944/netball-girl1_ood1bz.png",
-    "netball-girl2": "v1784378945/netball-girl2_cfgnel.png",
-    "netball-girl3": "v1784378946/netball-girl3_h2kic9.png",
-    "netball-girl4": "v1784378946/netball-girl4_dz5von.png",
-    "nolu-lion1": "v1784382014/nolu-lion1_fzvvj0.png",
-    "rugby-shirt": "v1784378950/rugby-shirt_raclg6.png",
-    "spurs-girl1": "v1784378950/spurs-girl1_jiodfu.png",
-    "spurs-girl2": "v1784378951/spurs-girl2_j0pnme.png",
-    "spurs-girl3": "v1784378951/spurs-girl3_byfsc2.png",
-    "spurs-girl4": "v1784378951/spurs-girl4_yvzlyv.png",
-    "spurs-ladies-celebrating": "v1784378952/spurs-ladies-celebrating_k3u51y.png",
-    "tot-shirt": "v1784378957/tot-shirt_bc5eeb.png",
-    "whu-shirt": "v1784378957/whu-shirt_zj7c65.png",
-    "yoga-girl": "v1784378957/yoga-girl_l1ilz8.png"
-};
+    name: {
+        ...DEFAULT_NAME_SETTINGS,
 
-// Per-card overrides for cards that need personalised text (everything else
-// defaults to { name: null, age: null } — i.e. not personalised).
-const CARD_OVERRIDES = {
-    "thankyou-teacher": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 900, top: 725, startSize: 52, minSize: 35, maxSize: 68, color: "#FD7D96" }
-    }
-};
+        left: 900,
+        top: 725,
 
-// Build the final template lookup once, from the compact data above.
-const CARD_TEMPLATES = Object.fromEntries(
-    Object.entries(CARD_PATHS).map(([key, path]) => [
-        key,
-        { url: CLOUD_BASE + path, name: null, age: null, ...(CARD_OVERRIDES[key] || {}) }
-    ])
-);
+        startSize: 52,
+        minSize: 35,
+        maxSize: 68,
 
-// ---- Canvas / layout constants ----
-const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 1191, CANVAS_HEIGHT = 840;
-const BOX_WIDTH = 495, BOX_HEIGHT = 225, BOX_LEFT = 50 + PANEL_WIDTH;
-const BOX_TOPS = [40, 305, 570]; // top / middle / bottom inside panels
-const BOX_DEFAULT_TEXTS = ["Add Message Here", "Happy Birthday!\nHave a great day!", "Add Message Here"];
+        color: "#FD7D96"
+    },
 
-const STYLE_DASHED = { borderDashArray: [4, 4], borderColor: "#cccccc", strokeWidth: 1.5 };
-const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth: 2 };
-
-// ---- Mutable editor state ----
-let canvas, bgImg, backCoverImg, nameText, ageText;
-let leftPageBg, rightPageBg;
-let insideBgRects = []; // [top, middle, bottom]
-let insideTexts = []; // [top, middle, bottom]
-let currentPage = "front", activeTemplate = null;
-
-const $ = (id) => document.getElementById(id);
-
-window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const cardId = params.get('card') || '11plus-boy';
-    if (CARD_TEMPLATES[cardId]) {
-        initEditor(cardId);
-    } else {
-        window.location.href = 'shop-cards.html';
-    }
-});
-
-function initEditor(templateKey) {
-    activeTemplate = CARD_TEMPLATES[templateKey];
-
-    $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
-    $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
-
-    const canvasElement = $("canvas");
-    canvasElement.width = CANVAS_WIDTH;
-    canvasElement.height = CANVAS_HEIGHT;
-
-    canvas = new fabric.Canvas(canvasElement, {
-        width: CANVAS_WIDTH, height: CANVAS_HEIGHT,
-        preserveObjectStacking: true, backgroundColor: '#ffffff'
-    });
-
-    fitCanvasToWrapper();
-    window.addEventListener('resize', fitCanvasToWrapper);
-
-    // Logo on the back cover panel
-    fabric.Image.fromURL(`${CLOUD_BASE}v1784098145/logo.png`, (logoImg) => {
-        backCoverImg = logoImg;
-        backCoverImg.set({
-            left: PANEL_WIDTH / 2, top: 710,
-            originX: 'center', originY: 'center',
-            scaleX: 0.15, scaleY: 0.15,
-            selectable: false, evented: false
-        });
-        canvas.add(backCoverImg);
-        canvas.sendToBack(backCoverImg);
-    });
-
-    // Show/hide the personalisation inputs based on what this card supports
-    const hasPersonalisation = activeTemplate.name || activeTemplate.age;
-    $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
-    if (hasPersonalisation) {
-        $('name-input').style.display = $('label-name').style.display = activeTemplate.name ? 'block' : 'none';
-        $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
-    }
-
-    loadFrontCover(activeTemplate.url);
+    age: null
+},
+          "topboy-mfc": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208079/topboy-mfc_flvp3e.png",
+            "name": null,
+            "age": null
+          },
+          "topboy-whu": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208073/topboy-whu_jvukd8.png",
+            "name": null,
+            "age": null
+          },
+          "tvmovies-bttf": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058158/tvmovies-bttf.png",
+            "name": null,
+            "age": null
+          },
+          "tvmovies-inbetweeners": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058166/tvmovies-inbetweeners.png",
+            "name": null,
+            "age": null
+          },
+          "tvmovies-jaws1": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058069/tvmovies-jaws_sfqlhq.png",
+            "name": null,
+            "age": null
+          },
+          "tvmovies-jaws2": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208083/tvmovies-jaws2_ohhblo.png",
+            "name": null,
+            "age": null
+          },
+          "tvmovies-ofah": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058159/ofah.png",
+            "name": null,
+            "age": null
+          },
+          "tvmovies-quadrophenia": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784208078/tvmovies-quadrophenia_t2egjh.png",
+            "name": null,
+            "age": null
+          },
+          "tvmovies-youngones": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058082/tvmovies-youngones_znc8wj.png",
+            "name": null,
+            "age": null
+          },
+          "wine-girls": {
+            "url": "https://res.cloudinary.com/uzf4eeky/image/upload/v1784058128/wine-girl_lxwhit.png",
+            "name": null,
+            "age": null
+          }
+,
+"afc-ladies-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378958/afc-ladies-celebrating_dbnjcj.png",
+    name: null,
+    age: null
+},
+"afc-ladies-shirt1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378958/afc-ladies-shirt1_mvge3p.png",
+    name: null,
+    age: null
+},
+"afc-ladies-shirt2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378958/afc-ladies-shirt2_rcb305.png",
+    name: null,
+    age: null
+},
+"afc-men-shirt1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378958/afc-men-shirt1_rsoquo.png",
+    name: null,
+    age: null
+},
+"afc-men-shirt2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378963/afc-men-shirt2_qiabya.png",
+    name: null,
+    age: null
+},
+"afc-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378964/afc-shirt_galno0.png",
+    name: null,
+    age: null
+},
+"brighton-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378932/brighton-celebrating_rx9o8w.png",
+    name: null,
+    age: null
+},
+"brighton-girl1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378932/brighton-girl1_hkhhlx.png",
+    name: null,
+    age: null
+},
+"brighton-girl2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378932/brighton-girl2_qfggnh.png",
+    name: null,
+    age: null
+},
+"brighton-girl3": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378933/brighton-girl3_felwps.png",
+    name: null,
+    age: null
+},
+"brighton-girl4": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378933/brighton-girl4_aau0lo.png",
+    name: null,
+    age: null
+},
+"cfc-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378933/cfc-shirt_te7yee.png",
+    name: null,
+    age: null
+},
+"cfc-shirt-blues2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/cfc-shirt-blues2_e4clio.png",
+    name: null,
+    age: null
+},
+  "cfc-shirt-blues1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/cfc-shirt-blues1_su1uof.png",
+    name: null,
+    age: null
+},
+"city-ladies-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/city-ladies-celebrating_pqx4vc.png",
+    name: null,
+    age: null
+},
+"cricket-boy1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/cricket-boy1_l13ql9.png",
+    name: null,
+    age: null
+},
+"cricket-boy2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378934/cricket-boy2_f4mjhh.png",
+    name: null,
+    age: null
+},
+"cricket-boy3": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378935/cricket-boy3_nwi4d5.png",
+    name: null,
+    age: null
+},
+"cricket-boy4": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378935/cricket-boy4_z9pggv.png",
+    name: null,
+    age: null
+},
+"dancing-queen": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378936/dancing-queen_dr9ic2.png",
+    name: null,
+    age: null
+},
+"darts-boy1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378936/darts-boy1_njlchs.png",
+    name: null,
+    age: null
+},
+"darts-boy2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378937/darts-boy2_mrvrzn.png",
+    name: null,
+    age: null
+},
+"golfer": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378938/golfer_gxfwrs.png",
+    name: null,
+    age: null
+},
+"grandad-racing": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378939/grandad-racing_p7e3ov.png",
+    name: null,
+    age: null
+},
+"leeds": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378940/leeds_i1rvlh.png",
+    name: null,
+    age: null
+},
+"liv-ladies-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378940/liv-ladies-celebrating_ew6s9c.png",
+    name: null,
+    age: null
+},
+"liv-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378940/liv-shirt_kbtxdd.png",
+    name: null,
+    age: null
+},
+"masters-boy1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378941/masters-boy1_dgrlf5.png",
+    name: null,
+    age: null
+},
+"masters-boy2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378942/masters-boy2_jojmtr.png",
+    name: null,
+    age: null
+},
+"mfc-christmas": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784384302/mfc-christmas_xam3fy.png",
+    name: null,
+    age: null
+},
+"mfc-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378942/mfc-shirt_q9iuol.png",
+    name: null,
+    age: null
+},
+"netball-girl1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378944/netball-girl1_ood1bz.png",
+    name: null,
+    age: null
+},
+"netball-girl2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378945/netball-girl2_cfgnel.png",
+    name: null,
+    age: null
+},
+"netball-girl3": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378946/netball-girl3_h2kic9.png",
+    name: null,
+    age: null
+},
+"netball-girl4": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378946/netball-girl4_dz5von.png",
+    name: null,
+    age: null
+},
+"nolu-lion1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784382014/nolu-lion1_fzvvj0.png",
+    name: null,
+    age: null
+},
+"rugby-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378950/rugby-shirt_raclg6.png",
+    name: null,
+    age: null
+},
+"spurs-girl1": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378950/spurs-girl1_jiodfu.png",
+    name: null,
+    age: null
+},
+"spurs-girl2": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378951/spurs-girl2_j0pnme.png",
+    name: null,
+    age: null
+},
+"spurs-girl3": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378951/spurs-girl3_byfsc2.png",
+    name: null,
+    age: null
+},
+"spurs-girl4": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378951/spurs-girl4_yvzlyv.png",
+    name: null,
+    age: null
+},
+"spurs-ladies-celebrating": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378952/spurs-ladies-celebrating_k3u51y.png",
+    name: null,
+    age: null
+},
+"tot-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378957/tot-shirt_bc5eeb.png",
+    name: null,
+    age: null
+},
+"whu-shirt": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378957/whu-shirt_zj7c65.png",
+    name: null,
+    age: null
+},
+"yoga-girl": {
+    url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784378957/yoga-girl_l1ilz8.png",
+    name: null,
+    age: null
 }
-
-// Scales the CANVAS DISPLAY so a SINGLE panel (right-hand side — the front
-// cover on the outside spread, or the message panel on the inside spread)
-// fills the wrapper, instead of scaling the whole two-panel spread into
-// view. The fabric canvas keeps its full 1191x840 backstore resolution the
-// whole time (so exported/print images are unaffected) — this only changes
-// the on-screen CSS size and then shifts the canvas left by exactly one
-// panel-width, so the left-hand panel gets clipped off by the wrapper's
-// overflow:hidden. Every object's stored left/top coordinates stay correct.
-function fitCanvasToWrapper() {
-    if (!canvas) return;
-    const wrapper = $('canvas-wrapper');
-    const style = getComputedStyle(wrapper);
-    const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-    const availableWidth = wrapper.clientWidth - paddingX;
-
-    const scale = availableWidth / PANEL_WIDTH;
-    const fullDisplayWidth = CANVAS_WIDTH * scale;
-    const fullDisplayHeight = CANVAS_HEIGHT * scale;
-
-    canvas.setDimensions({ width: fullDisplayWidth, height: fullDisplayHeight }, { cssOnly: true });
-
-    // Shift the whole canvas left so only the right-hand panel is visible.
-    canvas.wrapperEl.style.marginLeft = `-${PANEL_WIDTH * scale}px`;
-}
-
-function loadFrontCover(imageUrl) {
-    fabric.Image.fromURL(imageUrl, (img) => {
-        bgImg = img;
-        bgImg.set({
-            left: PANEL_WIDTH, top: 0,
-            scaleX: PANEL_WIDTH / bgImg.width,
-            scaleY: CANVAS_HEIGHT / bgImg.height,
-            selectable: false, evented: false
-        });
-        canvas.add(bgImg);
-        canvas.sendToBack(bgImg);
-
-        setupTextsAndOverlays();
-        switchPage('front');
-    });
-}
-
-function setupTextsAndOverlays() {
-    if (activeTemplate.name) {
-        const n = activeTemplate.name;
-        nameText = new fabric.Text("NAME", {
-            left: n.left, top: n.top, originX: "center", originY: "center",
-            fontSize: n.startSize, fontFamily: n.fontFamily || "Arial",
-            fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
-            hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
-        });
-
-        if (n.canChangeSize) {
-            const slider = $("front-size");
-            slider.min = n.minSize;
-            slider.max = n.maxSize;
-            slider.value = n.startSize;
-            $("front-size-val").innerText = n.startSize + "px";
-        }
-        canvas.add(nameText);
-    }
-
-    if (activeTemplate.age) {
-        const a = activeTemplate.age;
-        ageText = new fabric.Text("40", {
-            left: a.left, top: a.top, originX: "center", originY: "center",
-            fontSize: a.startSize, fontFamily: a.fontFamily || "Arial", fontWeight: "bold",
-            fill: a.color, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
-        });
-        canvas.add(ageText);
-    }
-
-    leftPageBg = new fabric.Rect({ left: 0, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
-    rightPageBg = new fabric.Rect({ left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
-
-    const bgPanelDefaults = { width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT, fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false };
-    insideBgRects = BOX_TOPS.map((top) => new fabric.Rect({ ...bgPanelDefaults, top }));
-
-    const textDefaults = {
-        width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
-        fontFamily: "Arial", fill: "#000000", textAlign: "center",
-        visible: false, hasControls: false,
-        lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
-        hasBorders: true, splitByGrapheme: true, backgroundColor: "transparent",
-        ...STYLE_DASHED
-    };
-    insideTexts = BOX_TOPS.map((top, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top, fontSize: 45 }));
-
-    canvas.add(leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts);
-    setupTextEvents();
-}
-
-function updateNameText(val) {
-    if (!nameText) return;
-    nameText.set({ text: val.toUpperCase() || "NAME" });
-    if (activeTemplate.name.isCurved) updateTextCurve(nameText, activeTemplate.name.curveRadius);
-    canvas.requestRenderAll();
-}
-
-function updateAgeText(val) {
-    if (!ageText) return;
-    ageText.set({ text: val || "40" });
-    canvas.requestRenderAll();
-}
-
-function updateFrontColor(hexColor) {
-    nameText?.set({ fill: hexColor });
-    ageText?.set({ fill: hexColor });
-    canvas.requestRenderAll();
-}
-
-function updateFrontSize(size) {
-    $("front-size-val").innerText = size + "px";
-    if (nameText) {
-        nameText.set({ fontSize: Number(size) });
-        if (activeTemplate.name?.isCurved) updateTextCurve(nameText, activeTemplate.name.curveRadius);
-    }
-    canvas.requestRenderAll();
-}
-
-function activeInsideText() {
-    const active = canvas.getActiveObject();
-    return insideTexts.includes(active) ? active : null;
-}
-
-function updateInsideSize(px) {
-    $('size-val').innerText = px + "px";
-    const active = activeInsideText();
-    if (active) {
-        active.set({ fontSize: Number(px) });
-        canvas.requestRenderAll();
-    }
-}
-
-function updateInsideColor(hexColor) {
-    const active = activeInsideText();
-    if (active) {
-        active.set({ fill: hexColor });
-        canvas.requestRenderAll();
-    }
-}
-
-function switchPage(page) {
-    currentPage = page;
-    const isFront = page === 'front';
-
-    $('toggle-front').classList.toggle('active', isFront);
-    $('toggle-inside').classList.toggle('active', !isFront);
-    $('front-controls').classList.toggle('active', isFront);
-    $('inside-controls').classList.toggle('active', !isFront);
-
-    [backCoverImg, bgImg, nameText, ageText].forEach((o) => o?.set({ visible: isFront }));
-    [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o.set({ visible: !isFront }));
-
-    canvas.discardActiveObject();
-    resetBordersToDashed();
-
-    if (!isFront) insideTexts.forEach((t) => t.setCoords());
-    canvas.requestRenderAll();
-}
-
-function setupTextEvents() {
-    canvas.on("mouse:down", ({ target }) => {
-        if (currentPage !== 'inside' || !insideTexts.includes(target)) return;
-        resetBordersToDashed();
-        target.set(STYLE_SOLID);
-        $('inside-size').value = target.fontSize;
-        $('size-val').innerText = target.fontSize + "px";
-        $('inside-color').value = target.fill;
-        canvas.requestRenderAll();
-    });
-
-    canvas.on('text:editing:entered', ({ target }) => {
-        if (target.text === "Add Message Here") {
-            target.text = "";
-            target.hiddenTextarea.value = "";
-            canvas.requestRenderAll();
-        }
-    });
-}
-
-function resetBordersToDashed() {
-    insideTexts.forEach((t) => t.set(STYLE_DASHED));
-}
-
-function updateTextCurve(textObj, curveVal) {
-    if (!textObj || curveVal <= 0) return;
-    const widthSpan = 320, halfSpan = widthSpan / 2;
-    const peakY = -Number(curveVal * 1.8);
-    textObj.set({
-        path: new fabric.Path(`M 0 0 Q ${halfSpan} ${peakY} ${widthSpan} 0`, { fill: '', stroke: '', visible: false }),
-        left: activeTemplate.name.left, top: activeTemplate.name.top, originX: "center", originY: "center"
-    });
-}
-
-async function uploadAndGoToCheckout() {
-    const buyBtn = document.querySelector(".controls .btn");
-    buyBtn.innerText = "Generating high-res pages...";
-    buyBtn.disabled = true;
-
-    try {
-        switchPage('front');
-        const page1DataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
-
-        switchPage('inside');
-        resetBordersToDashed();
-        insideBgRects.forEach((r) => r.set({ visible: false }));
-        insideTexts.forEach((t) => t.set({ borderDashArray: null, borderColor: "transparent" }));
-        canvas.discardActiveObject();
-        canvas.requestRenderAll();
-
-        const page2DataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
-
-        insideBgRects.forEach((r) => r.set({ visible: true }));
-        switchPage('inside');
-
-        buyBtn.innerText = "Uploading templates...";
-
-        // Upload both pages in parallel for faster checkout
-        const [p1Upload, p2Upload] = await Promise.all([
-            uploadToCloudinary(page1DataUrl),
-            uploadToCloudinary(page2DataUrl)
-        ]);
-
-        if (!p1Upload?.secure_url || !p2Upload?.secure_url) {
-            throw new Error("Upload failed. Verify Cloudinary credentials.");
-        }
-
-        buyBtn.innerText = "Connecting checkout...";
-
-        const checkoutData = {
-            name: nameText?.text ?? "N/A",
-            age: ageText?.text ?? "N/A",
-            outsideImageUrl: p1Upload.secure_url,
-            insideImageUrl: p2Upload.secure_url
         };
 
-        const response = await fetch('/.netlify/functions/create-checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(checkoutData)
+        let canvas, bgImg, backCoverImg, nameText, ageText;
+        let leftPageBg, rightPageBg, topBgRect, middleBgRect, bottomBgRect;
+        let insideTopText, insideMiddleText, insideBottomText;
+        let currentPage = "front", activeTemplate = null;
+
+        const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 595.5, CANVAS_HEIGHT = 840;
+        const BOX_WIDTH = 495, BOX_HEIGHT = 225, BOX_LEFT = 50; // Aligned to left
+        const TOP_BOX_Y = 40, MIDDLE_BOX_Y = 305, BOTTOM_BOX_Y = 570;
+
+        const STYLE_DASHED = { borderDashArray: [4, 4], borderColor: "#cccccc", strokeWidth: 1.5 };
+        const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth: 2 };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const cardId = params.get('card') || '11plus-boy';
+            if (CARD_TEMPLATES[cardId]) {
+                initEditor(cardId);
+            } else {
+                window.location.href = 'shop-cards.html';
+            }
         });
 
-        const session = await response.json();
-        if (session.url) {
-            window.location.href = session.url;
-        } else {
-            alert("Checkout Error: " + (session.error || "Please verify environment settings."));
-            buyBtn.innerText = "Buy Now";
-            buyBtn.disabled = false;
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Processing failed. Check Cloudinary settings!");
-        buyBtn.innerText = "Buy Now";
-        buyBtn.disabled = false;
-    }
-}
+        function initEditor(templateKey) {
+            activeTemplate = CARD_TEMPLATES[templateKey];
+            const frontSizeControls = document.getElementById("front-size-controls");
+const frontColourPicker = document.getElementById("front-color").parentElement;
 
-async function uploadToCloudinary(base64Data) {
-    const formData = new FormData();
-    formData.append("file", base64Data);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+frontSizeControls.style.display =
+    activeTemplate.name?.canChangeSize ? "block" : "none";
 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-        method: "POST",
-        body: formData
-    });
-    return res.json();
-}
+frontColourPicker.style.display =
+    activeTemplate.name?.canChangeColor ? "flex" : "none";
+            const canvasElement = document.getElementById("canvas");
+            canvasElement.width = CANVAS_WIDTH;
+            canvasElement.height = CANVAS_HEIGHT;
 
-function updateLoginUI(user) {
-    const loginBtn = $("login-button");
-    loginBtn.innerHTML = user ? "👤 Log Out" : "👤 Log In";
-    loginBtn.setAttribute("onclick", user ? "netlifyIdentity.logout()" : "netlifyIdentity.open()");
-}
+            canvas = new fabric.Canvas(canvasElement, {
+                width: CANVAS_WIDTH, height: CANVAS_HEIGHT,
+                preserveObjectStacking: true, backgroundColor: '#ffffff'
+            });
 
-// DEV HELPER — not called automatically. Open this card in the editor,
-// open the browser console, run findCoords(), then click anywhere on the
-// canvas: it logs the {left, top} under your cursor so you can copy those
-// numbers straight into a new CARD_OVERRIDES entry above.
-function findCoords() {
-    canvas.on('mouse:down', (e) => {
-        const p = canvas.getPointer(e.e);
-        console.log(`left: ${Math.round(p.x)}, top: ${Math.round(p.y)}`);
-    });
-    console.log('findCoords active — click anywhere on the canvas.');
-}
+            // LOGO PLACEMENT: BACK COVER (ADJUSTED PROPORTIONS TO PREVENT OVERHANG)
+            const logoUrl = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/v1784098145/logo.png`;
+            fabric.Image.fromURL(logoUrl, function(logoImg) {
+                backCoverImg = logoImg;
+                backCoverImg.set({
+                    left: CANVAS_WIDTH / 2, top: 710,
+                    originX: 'center', originY: 'center',
+                    scaleX: 0.15, scaleY: 0.15,          
+                    selectable: false, evented: false
+                });
+                canvas.add(backCoverImg);
+                canvas.sendToBack(backCoverImg);
+            });
 
-function handleMyOrdersClick(event) {
-    event.preventDefault();
-    if (netlifyIdentity.currentUser()) {
-        window.location.href = "orders.html";
+
+            // SMART CONTROL TOGGLE: Hide inputs completely if card is non-personalized
+if (activeTemplate.name === null && activeTemplate.age === null) {
+    document.getElementById('front-text-inputs').style.display = 'none';
+} else {
+    document.getElementById('front-text-inputs').style.display = 'block';
+    
+    // Check Name: Hide name input if name is null
+    if (activeTemplate.name === null) {
+        document.getElementById('name-input').style.display = 'none';
+        document.getElementById('label-name').style.display = 'none';
     } else {
-        alert("Please log in to view your order history.");
-        netlifyIdentity.open('login');
+        document.getElementById('name-input').style.display = 'block';
+        document.getElementById('label-name').style.display = 'block';
+    }
+
+    // Check Age: Hide age input if age is null (like the Thank You Teacher card!)
+    if (activeTemplate.age === null) {
+        document.getElementById('age-input').style.display = 'none';
+        document.getElementById('label-age').style.display = 'none';
+    } else {
+        document.getElementById('age-input').style.display = 'block';
+        document.getElementById('label-age').style.display = 'block';
     }
 }
-</script>
+
+
+                        loadFrontCover(activeTemplate.url);
+        }
+
+        function loadFrontCover(imageUrl) {
+            fabric.Image.fromURL(imageUrl, function (img) {
+                bgImg = img;
+                bgImg.set({
+                    left: 0, top: 0, // Aligned to start of new smaller canvas
+                    scaleX: CANVAS_WIDTH / img.width, 
+                    scaleY: CANVAS_HEIGHT / img.height,
+                    selectable: false, evented: false
+                });
+                canvas.add(bgImg);
+                canvas.sendToBack(bgImg);
+
+                setupTextsAndOverlays();
+                switchPage('front');
+            });
+        }
+
+        function setupTextsAndOverlays() {
+                        if (activeTemplate.name) {
+                nameText = new fabric.Text("NAME", {
+                    left: CANVAS_WIDTH / 2, // Centered on new width
+                    top: activeTemplate.name.top,
+    originX: "center",
+    originY: "center",
+    fontSize: activeTemplate.name.startSize,
+    fontFamily: activeTemplate.name.fontFamily || "Arial",
+    fontWeight: activeTemplate.name.fontWeight || "bold",
+    fill: activeTemplate.name.color,
+    textAlign: "center",
+    hasControls: false,
+    hasBorders: false,
+    lockMovementX: true,
+    lockMovementY: true
+});
+canvas.add(nameText);
+  }                            
+if (activeTemplate.name?.canChangeSize) {
+    const slider = document.getElementById("front-size");
+
+slider.min = activeTemplate.name.minSize;
+slider.max = activeTemplate.name.maxSize;
+slider.value = activeTemplate.name.startSize;
+
+document.getElementById("front-size-val").innerText =
+    activeTemplate.name.startSize + "px";
+}
+
+canvas.add(nameText);
+            }
+
+            if (activeTemplate.age) {
+                ageText = new fabric.Text("40", {
+                    left: activeTemplate.age.left, top: activeTemplate.age.top,
+                    originX: "center", originY: "center",
+                    fontSize: activeTemplate.age.fontSize, fontFamily: activeTemplate.age.fontFamily || "Arial", fontWeight: "bold",
+                    fill: activeTemplate.age.color,
+                    hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+                });
+                canvas.add(ageText);
+            }
+
+            const bgPanelDefaults = {
+                width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
+                fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false
+            };
+
+            leftPageBg = new fabric.Rect({ left: 0, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
+            rightPageBg = new fabric.Rect({ left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
+
+            topBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: TOP_BOX_Y }));
+            middleBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: MIDDLE_BOX_Y }));
+            bottomBgRect = new fabric.Rect(Object.assign({}, bgPanelDefaults, { top: BOTTOM_BOX_Y }));
+
+            const textDefaults = {
+                width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
+                fontFamily: "Arial", fill: "#000000", textAlign: "center",
+                visible: false, hasControls: false,
+                lockMovementX: true, lockMovementY: true,
+                lockScalingX: true, lockScalingY: true,
+                hasBorders: true, splitByGrapheme: true,
+                backgroundColor: "transparent",
+                ...STYLE_DASHED
+            };
+
+            insideTopText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, { top: TOP_BOX_Y, fontSize: 45 }));
+            insideMiddleText = new fabric.Textbox("Happy Birthday!\nHave a great day!", Object.assign({}, textDefaults, { top: MIDDLE_BOX_Y, fontSize: 45 }));
+            insideBottomText = new fabric.Textbox("Add Message Here", Object.assign({}, textDefaults, { top: BOTTOM_BOX_Y, fontSize: 45 }));
+
+            canvas.add(
+                leftPageBg, rightPageBg,
+                topBgRect, middleBgRect, bottomBgRect,
+                insideTopText, insideMiddleText, insideBottomText
+            );
+
+            setupTextEvents();
+        }
+
+        function updateNameText(val) {
+            if (!nameText) return;
+            nameText.set({ text: val.toUpperCase() || "NAME" });
+            if (activeTemplate.name.isCurved) {
+                updateTextCurve(nameText, activeTemplate.name.curveRadius);
+            }
+            canvas.requestRenderAll();
+        }
+
+        function updateAgeText(val) {
+            if (!ageText) return;
+            ageText.set({ text: val || "40" });
+            canvas.requestRenderAll();
+        }
+
+        function updateFrontColor(hexColor) {
+            if (nameText) nameText.set({ fill: hexColor });
+            if (ageText) ageText.set({ fill: hexColor });
+            canvas.requestRenderAll();
+        }
+
+       function updateFrontSize(size){
+
+    document.getElementById("front-size-val").innerText = size + "px";
+
+    if(nameText){
+        nameText.set({
+            fontSize:Number(size)
+        });
+
+        if(activeTemplate.name?.isCurved){
+            updateTextCurve(nameText, activeTemplate.name.curveRadius);
+        }
+    }
+
+    canvas.requestRenderAll();
+        }
+        function updateInsideSize(px) {
+            document.getElementById('size-val').innerText = px + "px";
+            let active = canvas.getActiveObject();
+            if (active && (active === insideTopText || active === insideMiddleText || active === insideBottomText)) {
+                active.set({ fontSize: Number(px) });
+                canvas.requestRenderAll();
+            }
+        }
+
+        function updateInsideColor(hexColor) {
+            let active = canvas.getActiveObject();
+            if (active && (active === insideTopText || active === insideMiddleText || active === insideBottomText)) {
+                active.set({ fill: hexColor });
+                canvas.requestRenderAll();
+            }
+        }
+
+        function switchPage(page) {
+            currentPage = page;
+            
+            document.getElementById('toggle-front').classList.toggle('active', page === 'front');
+            document.getElementById('toggle-inside').classList.toggle('active', page === 'inside');
+            document.getElementById('front-controls').classList.toggle('active', page === 'front');
+            document.getElementById('inside-controls').classList.toggle('active', page === 'inside');
+
+            if (backCoverImg) backCoverImg.set({ visible: page === 'front' });
+            if (bgImg) bgImg.set({ visible: page === 'front' });
+            if (nameText) nameText.set({ visible: page === 'front' });
+            if (ageText) ageText.set({ visible: page === 'front' });
+
+            leftPageBg.set({ visible: page === 'inside' });
+            rightPageBg.set({ visible: page === 'inside' });
+            topBgRect.set({ visible: page === 'inside' });
+            middleBgRect.set({ visible: page === 'inside' });
+            bottomBgRect.set({ visible: page === 'inside' });
+
+            insideTopText.set({ visible: page === 'inside' });
+            insideMiddleText.set({ visible: page === 'inside' });
+            insideBottomText.set({ visible: page === 'inside' });
+
+            canvas.discardActiveObject();
+            resetBordersToDashed();
+
+            if (page === 'inside') {
+                insideTopText.setCoords();
+                insideMiddleText.setCoords();
+                insideBottomText.setCoords();
+            }
+
+            canvas.requestRenderAll();
+        }
+
+        function setupTextEvents() {
+            canvas.on("mouse:down", function(options) {
+                if (currentPage !== 'inside') return;
+                let t = options.target;
+                if (t && (t === insideTopText || t === insideMiddleText || t === insideBottomText)) {
+                    resetBordersToDashed();
+                    t.set(STYLE_SOLID);
+                    document.getElementById('inside-size').value = t.fontSize;
+                    document.getElementById('size-val').innerText = t.fontSize + "px";
+                    document.getElementById('inside-color').value = t.fill;
+                    canvas.requestRenderAll();
+                }
+            });
+
+            canvas.on('text:editing:entered', function(e) {
+                let target = e.target;
+                if (target.text === "Add Message Here") {
+                    target.text = "";
+                    target.hiddenTextarea.value = "";
+                    canvas.requestRenderAll();
+                }
+            });
+        }
+
+        function resetBordersToDashed() {
+            if (insideTopText) insideTopText.set(STYLE_DASHED);
+            if (insideMiddleText) insideMiddleText.set(STYLE_DASHED);
+            if (insideBottomText) insideBottomText.set(STYLE_DASHED);
+        }
+
+        function updateTextCurve(textObj, curveVal) {
+            if (!textObj || curveVal <= 0) return;
+            let widthSpan = 320, halfSpan = widthSpan / 2;
+            let peakY = -Number(curveVal * 1.8);
+            let pathString = `M 0 0 Q ${halfSpan} ${peakY} ${widthSpan} 0`;
+            textObj.set({ 
+                path: new fabric.Path(pathString, { fill: '', stroke: '', visible: false }),
+                left: activeTemplate.name.left, top: activeTemplate.name.top, originX: "center", originY: "center" 
+            });
+        }
+
+        async function uploadAndGoToCheckout() {
+            const buyBtn = document.querySelector(".controls .btn");
+            buyBtn.innerText = "Generating high-res pages...";
+            buyBtn.disabled = true;
+
+            try {
+                switchPage('front');
+                const page1DataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
+
+                switchPage('inside');
+                resetBordersToDashed();
+                topBgRect.set({ visible: false });
+                middleBgRect.set({ visible: false });
+                bottomBgRect.set({ visible: false });
+                insideTopText.set({ borderDashArray: null, borderColor: "transparent" });
+                insideMiddleText.set({ borderDashArray: null, borderColor: "transparent" });
+                insideBottomText.set({ borderDashArray: null, borderColor: "transparent" });
+                canvas.discardActiveObject();
+                canvas.requestRenderAll();
+
+                const page2DataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
+
+                topBgRect.set({ visible: true });
+                middleBgRect.set({ visible: true });
+                bottomBgRect.set({ visible: true });
+                switchPage('inside');
+
+                buyBtn.innerText = "Uploading templates...";
+
+                const p1Upload = await uploadToCloudinary(page1DataUrl);
+                const p2Upload = await uploadToCloudinary(page2DataUrl);
+
+                if (!p1Upload || !p2Upload) {
+                    throw new Error("Upload failed. Verify Cloudinary credentials.");
+                }
+
+                buyBtn.innerText = "Connecting checkout...";
+
+                const checkoutData = {
+                    name: (nameText) ? nameText.text : "N/A",
+                    age: (ageText) ? ageText.text : "N/A",
+                    outsideImageUrl: p1Upload.secure_url,
+                    insideImageUrl: p2Upload.secure_url
+                };
+
+                const response = await fetch('/.netlify/functions/create-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(checkoutData)
+                });
+
+                const session = await response.json();
+                if (session.url) {
+                    window.location.href = session.url;
+                } else {
+                    alert("Checkout Error: " + (session.error || "Please verify environment settings."));
+                    buyBtn.innerText = "Buy Now";
+                    buyBtn.disabled = false;
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert("Processing failed. Check Cloudinary settings!");
+                buyBtn.innerText = "Buy Now";
+                buyBtn.disabled = false;
+            }
+        }
+
+        async function uploadToCloudinary(base64Data) {
+            const formData = new FormData();
+            formData.append("file", base64Data);
+            formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                method: "POST",
+                body: formData
+            });
+            return res.json();
+        }
+
+        function updateLoginUI(user) {
+            const loginBtn = document.getElementById("login-button");
+            if (user) {
+                loginBtn.innerHTML = "👤 Log Out";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.logout()");
+            } else {
+                loginBtn.innerHTML = "👤 Log In";
+                loginBtn.setAttribute("onclick", "netlifyIdentity.open()");
+            }
+        }
+
+        function handleMyOrdersClick(event) {
+            event.preventDefault();
+            const currentUser = netlifyIdentity.currentUser();
+            if (currentUser) {
+                window.location.href = "orders.html";
+            } else {
+                alert("Please log in to view your order history.");
+                netlifyIdentity.open('login');
+            }
+        }
+    </script>
 </body>
 </html>
+
+
