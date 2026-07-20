@@ -343,9 +343,13 @@
     </header>
 
     <div class="editor-workspace">
-        <div id="canvas-wrapper">
-            <canvas id="canvas"></canvas>
-        </div>
+        <div id="canvas-wrapper" style="position: relative;">
+    <!-- This puts the logo behind the canvas, aligned to the left -->
+    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" 
+         style="position: absolute; left: -150px; top: 350px; width: 120px; opacity: 0.5;">
+    
+    <canvas id="canvas"></canvas>
+</div>
         
         <div class="controls">
             <h2>Personalise Card</h2>
