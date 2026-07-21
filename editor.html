@@ -466,7 +466,7 @@ function initEditor(templateKey) {
         });
         canvas.add(backCoverImg);
         canvas.sendToBack(backCoverImg);
-    });
+    }, { crossOrigin: 'anonymous' });
 
     // Show/hide the personalisation inputs based on what this card supports
     const hasPersonalisation = activeTemplate.name || activeTemplate.age;
@@ -495,7 +495,7 @@ function loadFrontCover(imageUrl) {
 
         setupTextsAndOverlays();
         switchPage('front');
-    });
+    }, { crossOrigin: 'anonymous' });
 }
 
 function setupTextsAndOverlays() {
@@ -636,7 +636,7 @@ function updateInsideColor(hexColor) {
     }
 }
 
-function switchPage(page) {
+function switchPage(page, updateBuyBtn = true) {
     currentPage = page;
     const isFront = page === 'front';
 
@@ -644,7 +644,7 @@ function switchPage(page) {
     $('toggle-inside').classList.toggle('active', !isFront);
     $('front-controls').classList.toggle('active', isFront);
     $('inside-controls').classList.toggle('active', !isFront);
-    $('buy-now-btn').style.display = isFront ? 'none' : 'block';
+    if (updateBuyBtn) $('buy-now-btn').style.display = isFront ? 'none' : 'block';
 
     [backCoverImg, bgImg, nameText, ageText].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o.set({ visible: !isFront }));
@@ -740,17 +740,22 @@ function replaceNameText(newNameObj) {
 // front/inside visibility state is active right now) onto that hidden
 // canvas, grab a PNG, then discard it.
 function captureFullSpread() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const exportEl = document.createElement('canvas');
         const exportCanvas = new fabric.StaticCanvas(exportEl, {
             width: CANVAS_WIDTH, height: CANVAS_HEIGHT
         });
         exportCanvas.loadFromJSON(canvas.toJSON(), () => {
-            exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
-            exportCanvas.renderAll();
-            const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0 });
-            exportCanvas.dispose();
-            resolve(dataUrl);
+            try {
+                exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+                exportCanvas.renderAll();
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0 });
+                exportCanvas.dispose();
+                resolve(dataUrl);
+            } catch (err) {
+                exportCanvas.dispose();
+                reject(err);
+            }
         });
     });
 }
@@ -761,10 +766,10 @@ async function uploadAndGoToCheckout() {
     buyBtn.disabled = true;
 
     try {
-        switchPage('front');
+        switchPage('front', false);
         const page1DataUrl = await captureFullSpread();
 
-        switchPage('inside');
+        switchPage('inside', false);
         resetBordersToDashed();
         insideBgRects.forEach((r) => r.set({ visible: false }));
         insideTexts.forEach((t) => t.set({ borderDashArray: null, borderColor: "transparent" }));
@@ -774,7 +779,7 @@ async function uploadAndGoToCheckout() {
         const page2DataUrl = await captureFullSpread();
 
         insideBgRects.forEach((r) => r.set({ visible: true }));
-        switchPage('inside');
+        switchPage('inside', false);
 
         buyBtn.innerText = "Uploading templates...";
 
