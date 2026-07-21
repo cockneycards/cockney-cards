@@ -123,11 +123,11 @@
 
         <div id="front-controls" class="control-group active">
             <div id="front-text-inputs">
-                <label id="label-name" for="name-input">Name:</label>
-                <input type="text" id="name-input" placeholder="Name" oninput="updateNameText(this)">
+                <label id="label-name" for="name-input">Name to add:</label>
+                <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this)">
 
                 <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
-                <input type="text" id="age-input" placeholder="Age" inputmode="numeric" oninput="updateAgeText(this)">
+                <input type="text" id="age-input" placeholder="e.g. 40" inputmode="numeric" oninput="updateAgeText(this)">
 
                 <label style="margin-top:10px; display:block;">Text Color:</label>
                 <div class="flex-row">
@@ -161,7 +161,7 @@
             </div>
         </div>
 
-        <button class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
+        <button id="buy-now-btn" class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
         <button class="btn btn-close" onclick="window.location.href='shop-cards.html'">Cancel & Return</button>
     </div>
 </div>
@@ -306,12 +306,8 @@ const CARD_OVERRIDES = {
         name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96" }
     },
     "mfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 45, minSize: 35, maxSize: 50, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 630, startSize: 106, color: "#FFFFFF", maxChars: 2 }
-    },
-    "liv-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 45, minSize: 35, maxSize: 50, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 630, startSize: 106, color: "#FFFFFF", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 620, startSize: 106, color: "#FFFFFF", maxChars: 3 }
     }
 };
 
@@ -585,6 +581,7 @@ function switchPage(page) {
     $('toggle-inside').classList.toggle('active', !isFront);
     $('front-controls').classList.toggle('active', isFront);
     $('inside-controls').classList.toggle('active', !isFront);
+    $('buy-now-btn').style.display = isFront ? 'none' : 'block';
 
     [backCoverImg, bgImg, nameText, ageText].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o.set({ visible: !isFront }));
@@ -672,35 +669,37 @@ function replaceNameText(newNameObj) {
     canvas.add(nameText);
 }
 
-// Briefly expand the (normally cropped) editor canvas to the full 1191x840
-// spread — both panels, no viewport pan — grab a PNG, then restore the
-// cropped A4-portrait edit view. Checkout output is therefore unchanged:
-// still the full outside/inside spread images.
+// Renders the full 1191x840 spread — both panels, no crop/pan — on a
+// completely separate, invisible canvas that's never attached to the
+// page. The customer's on-screen editor canvas is untouched throughout:
+// it stays at its normal cropped size the whole time this runs. We just
+// snapshot the current objects (via toJSON, so it picks up whichever
+// front/inside visibility state is active right now) onto that hidden
+// canvas, grab a PNG, then discard it.
 function captureFullSpread() {
-    const editorVpt = canvas.viewportTransform.slice();
-    canvas.setWidth(CANVAS_WIDTH);
-    canvas.setHeight(CANVAS_HEIGHT);
-    canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
-    canvas.requestRenderAll();
-
-    const dataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
-
-    canvas.setWidth(EDIT_WIDTH);
-    canvas.setHeight(EDIT_HEIGHT);
-    canvas.setViewportTransform(editorVpt);
-    canvas.calcOffset();
-    canvas.requestRenderAll();
-    return dataUrl;
+    return new Promise((resolve) => {
+        const exportEl = document.createElement('canvas');
+        const exportCanvas = new fabric.StaticCanvas(exportEl, {
+            width: CANVAS_WIDTH, height: CANVAS_HEIGHT
+        });
+        exportCanvas.loadFromJSON(canvas.toJSON(), () => {
+            exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+            exportCanvas.renderAll();
+            const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0 });
+            exportCanvas.dispose();
+            resolve(dataUrl);
+        });
+    });
 }
 
 async function uploadAndGoToCheckout() {
-    const buyBtn = document.querySelector(".controls .btn");
+    const buyBtn = $('buy-now-btn');
     buyBtn.innerText = "Generating high-res pages...";
     buyBtn.disabled = true;
 
     try {
         switchPage('front');
-        const page1DataUrl = captureFullSpread();
+        const page1DataUrl = await captureFullSpread();
 
         switchPage('inside');
         resetBordersToDashed();
@@ -709,7 +708,7 @@ async function uploadAndGoToCheckout() {
         canvas.discardActiveObject();
         canvas.requestRenderAll();
 
-        const page2DataUrl = captureFullSpread();
+        const page2DataUrl = await captureFullSpread();
 
         insideBgRects.forEach((r) => r.set({ visible: true }));
         switchPage('inside');
@@ -729,7 +728,7 @@ async function uploadAndGoToCheckout() {
         buyBtn.innerText = "Connecting checkout...";
 
         const checkoutData = {
-            name: nameText?.text ?? "N/A",
+            name: activeTemplate.name ? ($('name-input').value.toUpperCase() || "NAME") : "N/A",
             age: ageText?.text ?? "N/A",
             outsideImageUrl: p1Upload.secure_url,
             insideImageUrl: p2Upload.secure_url
