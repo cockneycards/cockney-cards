@@ -303,7 +303,7 @@ const CARD_OVERRIDES = {
         name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96" }
     },
     "mfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF" },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 45 },
         age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 620, startSize: 106, color: "#FFFFFF" }
     }
 };
@@ -430,6 +430,11 @@ function setupTextsAndOverlays() {
             fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
             hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
         });
+
+        // Apply the arch immediately if this card is set up for curved text,
+        // so it's curved from the first render rather than only after the
+        // customer types something or moves the size slider.
+        if (n.isCurved) updateTextCurve(nameText, n.curveRadius);
 
         if (n.canChangeSize) {
             const slider = $("front-size");
@@ -564,14 +569,26 @@ function resetBordersToDashed() {
     insideTexts.forEach((t) => t.set(STYLE_DASHED));
 }
 
+// Arches `textObj` along a quadratic curve so the name reads like it's
+// wrapping around e.g. a shirt crest. Re-centers the text along the path
+// via pathStartOffset every time it's called, so the arch stays centered
+// as the customer's name gets longer or shorter (rather than drifting
+// toward one end of the fixed-width path).
 function updateTextCurve(textObj, curveVal) {
-    if (!textObj || curveVal <= 0) return;
+    if (!textObj || !curveVal) return;
+
     const widthSpan = 320, halfSpan = widthSpan / 2;
     const peakY = -Number(curveVal * 1.8);
+
     textObj.set({
         path: new fabric.Path(`M 0 0 Q ${halfSpan} ${peakY} ${widthSpan} 0`, { fill: '', stroke: '', visible: false }),
-        left: activeTemplate.name.left, top: activeTemplate.name.top, originX: "center", originY: "center"
+        pathSide: "left",
+        pathAlign: "baseline",
+        pathStartOffset: Math.max(0, (widthSpan - textObj.width) / 2),
+        left: activeTemplate.name.left, top: activeTemplate.name.top,
+        originX: "center", originY: "center"
     });
+    canvas.requestRenderAll();
 }
 
 // Briefly expand the (normally cropped) editor canvas to the full 1191x840
