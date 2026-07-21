@@ -124,10 +124,10 @@
         <div id="front-controls" class="control-group active">
             <div id="front-text-inputs">
                 <label id="label-name" for="name-input">Name to add:</label>
-                <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this.value)">
+                <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this)">
 
                 <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
-                <input type="text" id="age-input" placeholder="e.g. 40" oninput="updateAgeText(this.value)">
+                <input type="text" id="age-input" placeholder="e.g. 40" inputmode="numeric" oninput="updateAgeText(this)">
 
                 <label style="margin-top:10px; display:block;">Text Color:</label>
                 <div class="flex-row">
@@ -199,12 +199,17 @@ const DEFAULT_NAME_SETTINGS = {
     left: 892.5, top: 725, startSize: 52, minSize: 20, maxSize: 120,
     fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
     canChangeSize: true, canChangeColor: true,
-    canMove: false, canRotate: false, isCurved: false, curveRadius: 0
+    canMove: false, canRotate: false, isCurved: false, curveRadius: 0,
+    maxChars: 14,   // hard cap on characters, also set as the input's maxlength
+    maxWidth: 260   // px — once typed text would render wider than this, further characters are blocked
 };
 const DEFAULT_AGE_SETTINGS = {
     left: 900, top: 600, startSize: 60, minSize: 20, maxSize: 120,
     fontFamily: "Arial", fontWeight: "bold", color: "#FFFFFF",
-    canChangeSize: true, canChangeColor: true
+    canChangeSize: true, canChangeColor: true,
+    maxChars: 3,        // hard cap on digits
+    maxWidth: 200,      // px — same idea as name's maxWidth
+    numericOnly: true   // strips any non-digit as the customer types
 };
 
 // ---- Card catalogue: just filename paths, so each card is one line ----
@@ -303,8 +308,8 @@ const CARD_OVERRIDES = {
         name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96" }
     },
     "mfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 545, startSize: 45, minSize: 45, maxSize: 50, color: "#FFFFFF", isCurved: true, curveRadius: 150 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 625, startSize: 106, color: "#FFFFFF" }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12, maxWidth: 230 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 620, startSize: 106, color: "#FFFFFF", maxChars: 3, maxWidth: 230 }
     }
 };
 
@@ -341,6 +346,15 @@ let insideTexts = [];     // [top, middle, bottom]
 let currentPage = "front", activeTemplate = null;
 
 const $ = (id) => document.getElementById(id);
+
+// Scratch 2D context used to measure rendered text width for a given
+// font — lets us enforce maxWidth caps and lay out curved-text characters
+// using the same metrics the browser will actually render with.
+const measureCtx = document.createElement('canvas').getContext('2d');
+function measureTextWidth(text, fontSize, fontFamily, fontWeight) {
+    measureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    return measureCtx.measureText(text).width;
+}
 
 window.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
@@ -400,6 +414,8 @@ function initEditor(templateKey) {
         $('name-input').style.display = $('label-name').style.display = activeTemplate.name ? 'block' : 'none';
         $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
     }
+    if (activeTemplate.name?.maxChars) $('name-input').maxLength = activeTemplate.name.maxChars;
+    if (activeTemplate.age?.maxChars) $('age-input').maxLength = activeTemplate.age.maxChars;
 
     loadFrontCover(activeTemplate.url);
 }
@@ -474,21 +490,50 @@ function setupTextsAndOverlays() {
     setupTextEvents();
 }
 
-function updateNameText(val) {
-    if (!nameText || !activeTemplate.name) return;
-    const n = activeTemplate.name;
+function updateNameText(inputEl) {
+    const n = activeTemplate?.name;
+    if (!nameText || !n) return;
+
+    let rawVal = inputEl.value;
+    if (n.maxChars) rawVal = rawVal.slice(0, n.maxChars);
+
+    let displayVal = rawVal.toUpperCase();
+    if (n.maxWidth) {
+        const size = Number($("front-size").value) || n.startSize;
+        while (displayVal.length > 0 && measureTextWidth(displayVal, size, n.fontFamily || "Arial", n.fontWeight || "bold") > n.maxWidth) {
+            displayVal = displayVal.slice(0, -1);
+        }
+        rawVal = rawVal.slice(0, displayVal.length);
+    }
+
+    if (inputEl.value !== rawVal) inputEl.value = rawVal;
+
     if (n.isCurved) {
         const size = Number($("front-size").value) || n.startSize;
         const color = $("front-color").value || n.color;
-        replaceNameText(buildCurvedNameGroup(val, size, color));
+        replaceNameText(buildCurvedNameGroup(displayVal, size, color));
     } else {
-        nameText.set({ text: val.toUpperCase() || "NAME" });
+        nameText.set({ text: displayVal || "NAME" });
     }
     canvas.requestRenderAll();
 }
 
-function updateAgeText(val) {
+function updateAgeText(inputEl) {
     if (!ageText) return;
+    const a = activeTemplate?.age;
+
+    let val = inputEl.value;
+    if (a?.numericOnly) val = val.replace(/[^0-9]/g, "");
+    if (a?.maxChars) val = val.slice(0, a.maxChars);
+
+    if (a?.maxWidth) {
+        while (val.length > 0 && measureTextWidth(val, a.startSize, a.fontFamily || "Arial", a.fontWeight || "bold") > a.maxWidth) {
+            val = val.slice(0, -1);
+        }
+    }
+
+    if (inputEl.value !== val) inputEl.value = val;
+
     ageText.set({ text: val || "40" });
     canvas.requestRenderAll();
 }
@@ -585,11 +630,6 @@ function setupTextEvents() {
 function resetBordersToDashed() {
     insideTexts.forEach((t) => t.set(STYLE_DASHED));
 }
-
-// Scratch 2D context used only to measure character widths for the font
-// currently in use — lets us lay out each letter on the arc precisely,
-// same way the browser will actually render it.
-const measureCtx = document.createElement('canvas').getContext('2d');
 
 // Builds the name as a Fabric Group of individually-rotated characters
 // arranged along a real circle of radius `curveRadius`. Because every
