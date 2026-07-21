@@ -303,7 +303,7 @@ const CARD_OVERRIDES = {
         name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96" }
     },
     "mfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 580, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 45 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150 },
         age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 620, startSize: 106, color: "#FFFFFF" }
     }
 };
@@ -424,17 +424,15 @@ function loadFrontCover(imageUrl) {
 function setupTextsAndOverlays() {
     if (activeTemplate.name) {
         const n = activeTemplate.name;
-        nameText = new fabric.Text("NAME", {
-            left: n.left, top: n.top, originX: "center", originY: "center",
-            fontSize: n.startSize, fontFamily: n.fontFamily || "Arial",
-            fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
-            hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
-        });
 
-        // Apply the arch immediately if this card is set up for curved text,
-        // so it's curved from the first render rather than only after the
-        // customer types something or moves the size slider.
-        if (n.isCurved) updateTextCurve(nameText, n.curveRadius);
+        nameText = n.isCurved
+            ? buildCurvedNameGroup("NAME", n.startSize, n.color)
+            : new fabric.Text("NAME", {
+                left: n.left, top: n.top, originX: "center", originY: "center",
+                fontSize: n.startSize, fontFamily: n.fontFamily || "Arial",
+                fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
+                hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+            });
 
         if (n.canChangeSize) {
             const slider = $("front-size");
@@ -477,9 +475,15 @@ function setupTextsAndOverlays() {
 }
 
 function updateNameText(val) {
-    if (!nameText) return;
-    nameText.set({ text: val.toUpperCase() || "NAME" });
-    if (activeTemplate.name.isCurved) updateTextCurve(nameText, activeTemplate.name.curveRadius);
+    if (!nameText || !activeTemplate.name) return;
+    const n = activeTemplate.name;
+    if (n.isCurved) {
+        const size = Number($("front-size").value) || n.startSize;
+        const color = $("front-color").value || n.color;
+        replaceNameText(buildCurvedNameGroup(val, size, color));
+    } else {
+        nameText.set({ text: val.toUpperCase() || "NAME" });
+    }
     canvas.requestRenderAll();
 }
 
@@ -490,16 +494,29 @@ function updateAgeText(val) {
 }
 
 function updateFrontColor(hexColor) {
-    nameText?.set({ fill: hexColor });
+    const n = activeTemplate?.name;
+    if (n?.isCurved) {
+        const val = $("name-input").value;
+        const size = Number($("front-size").value) || n.startSize;
+        replaceNameText(buildCurvedNameGroup(val, size, hexColor));
+    } else {
+        nameText?.set({ fill: hexColor });
+    }
     ageText?.set({ fill: hexColor });
     canvas.requestRenderAll();
 }
 
 function updateFrontSize(size) {
     $("front-size-val").innerText = size + "px";
-    if (nameText) {
-        nameText.set({ fontSize: Number(size) });
-        if (activeTemplate.name?.isCurved) updateTextCurve(nameText, activeTemplate.name.curveRadius);
+    const n = activeTemplate?.name;
+    if (nameText && n) {
+        if (n.isCurved) {
+            const val = $("name-input").value;
+            const color = $("front-color").value || n.color;
+            replaceNameText(buildCurvedNameGroup(val, Number(size), color));
+        } else {
+            nameText.set({ fontSize: Number(size) });
+        }
     }
     canvas.requestRenderAll();
 }
@@ -569,26 +586,61 @@ function resetBordersToDashed() {
     insideTexts.forEach((t) => t.set(STYLE_DASHED));
 }
 
-// Arches `textObj` along a quadratic curve so the name reads like it's
-// wrapping around e.g. a shirt crest. Re-centers the text along the path
-// via pathStartOffset every time it's called, so the arch stays centered
-// as the customer's name gets longer or shorter (rather than drifting
-// toward one end of the fixed-width path).
-function updateTextCurve(textObj, curveVal) {
-    if (!textObj || !curveVal) return;
+// Scratch 2D context used only to measure character widths for the font
+// currently in use — lets us lay out each letter on the arc precisely,
+// same way the browser will actually render it.
+const measureCtx = document.createElement('canvas').getContext('2d');
 
-    const widthSpan = 320, halfSpan = widthSpan / 2;
-    const peakY = -Number(curveVal * 1.8);
+// Builds the name as a Fabric Group of individually-rotated characters
+// arranged along a real circle of radius `curveRadius`. Because every
+// character's position is derived purely from that fixed radius and the
+// template's anchor point (never from the current on-screen text's
+// bounding box), the arch keeps its shape and stays anchored at the same
+// spot on the card no matter how the font size or the name itself changes
+// — unlike Fabric's built-in text-on-path mode, which recalculates the
+// object's effective bounding box (and therefore its position) every time
+// the font size changes. Smaller curveRadius = tighter curve, larger = flatter.
+function buildCurvedNameGroup(rawValue, fontSize, color) {
+    const n = activeTemplate.name;
+    const text = (rawValue || "").toUpperCase() || "NAME";
+    const fontFamily = n.fontFamily || "Arial";
+    const fontWeight = n.fontWeight || "bold";
+    const radius = n.curveRadius;
 
-    textObj.set({
-        path: new fabric.Path(`M 0 0 Q ${halfSpan} ${peakY} ${widthSpan} 0`, { fill: '', stroke: '', visible: false }),
-        pathSide: "left",
-        pathAlign: "baseline",
-        pathStartOffset: Math.max(0, (widthSpan - textObj.width) / 2),
-        left: activeTemplate.name.left, top: activeTemplate.name.top,
-        originX: "center", originY: "center"
+    measureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    const chars = text.split("");
+    const charWidths = chars.map((c) => measureCtx.measureText(c).width);
+    const totalAngle = charWidths.reduce((sum, w) => sum + w / radius, 0);
+
+    let angle = -totalAngle / 2;
+    const letters = chars.map((c, i) => {
+        const charAngle = charWidths[i] / radius;
+        const midAngle = angle + charAngle / 2;
+        angle += charAngle;
+
+        return new fabric.Text(c, {
+            fontSize, fontFamily, fontWeight, fill: color,
+            originX: "center", originY: "center",
+            left: radius * Math.sin(midAngle),
+            top: radius - radius * Math.cos(midAngle),
+            angle: (midAngle * 180) / Math.PI,
+            selectable: false, evented: false
+        });
     });
-    canvas.requestRenderAll();
+
+    return new fabric.Group(letters, {
+        left: n.left, top: n.top, originX: "center", originY: "center",
+        hasControls: false, hasBorders: false,
+        lockMovementX: true, lockMovementY: true
+    });
+}
+
+// Swaps the on-canvas name object for a freshly-built one (used whenever
+// the curved name's text, size, or color changes).
+function replaceNameText(newNameObj) {
+    if (nameText) canvas.remove(nameText);
+    nameText = newNameObj;
+    canvas.add(nameText);
 }
 
 // Briefly expand the (normally cropped) editor canvas to the full 1191x840
