@@ -58,6 +58,12 @@
     .color-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; }
     .size-slider { flex: 1; }
 
+    /* STYLE / VARIANT PICKER (e.g. brighton-girl1..4) */
+    .variant-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .variant-thumb { width: 56px; height: 56px; padding: 0; border: 2px solid #ccc; border-radius: 6px; overflow: hidden; cursor: pointer; background: none; }
+    .variant-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .variant-thumb.active { border-color: #111; }
+
     .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
     .btn:hover { background-color: #444; }
     .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
@@ -122,6 +128,8 @@
         </div>
 
         <div id="front-controls" class="control-group active">
+            <div id="variant-selector" class="variant-selector" style="display:none;"></div>
+
             <div id="front-text-inputs">
                 <label id="label-name" for="name-input">Name to add:</label>
                 <input type="text" id="name-input" placeholder="e.g. HARRY" oninput="updateNameText(this)">
@@ -382,6 +390,16 @@ const CARD_TEMPLATES = Object.fromEntries(
     ])
 );
 
+// Groups of cards that are really "one card, several picture options".
+// The KEY is the card that gets sold/linked to (e.g. shop-cards.html only
+// ever links to "brighton-girl1"), and its CARD_OVERRIDES entry (name/age
+// position, colour, etc.) is used for every option in the array — only the
+// picture swaps, so all options need the person's text sitting in the same
+// spot. Add more groups the same way to reuse this for other card families.
+const CARD_VARIANTS = {
+    "brighton-girl1": ["brighton-girl1", "brighton-girl2", "brighton-girl3", "brighton-girl4"]
+};
+
 // ---- Canvas / layout constants ----
 const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 1191, CANVAS_HEIGHT = 840;
 
@@ -392,8 +410,18 @@ const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 1191, CANVAS_HEIGHT = 840;
 // (both panels) is only ever rendered again briefly, off-screen, at checkout.
 const EDIT_WIDTH = PANEL_WIDTH, EDIT_HEIGHT = Math.round(PANEL_WIDTH * (297 / 210));
 
-const BOX_WIDTH = 495, BOX_HEIGHT = 225, BOX_LEFT = 50 + PANEL_WIDTH;
-const BOX_TOPS = [40, 305, 570]; // top / middle / bottom inside panels
+const BOX_WIDTH = 495, BOX_LEFT = 50 + PANEL_WIDTH;
+// Each inside panel has its own top position + height now (rather than one
+// shared size for all three). The top panel is shorter, sized for ~2 lines
+// of text at the default 45px font size.
+// - To move a panel further up/down the inside page, change its `top`.
+// - To let a panel fit more/fewer lines, change its `height`
+//   (roughly: lines x fontSize x 1.16, plus a little breathing room).
+const BOX_CONFIGS = [
+    { top: 55, height: 120 },  // top panel — ~2 lines
+    { top: 305, height: 225 }, // middle panel
+    { top: 570, height: 225 }  // bottom panel
+];
 const BOX_DEFAULT_TEXTS = ["Add Message Here", "Happy Birthday!\nHave a great day!", "Add Message Here"];
 
 const STYLE_DASHED = { borderDashArray: [4, 4], borderColor: "#cccccc", strokeWidth: 1.5 };
@@ -404,7 +432,7 @@ let canvas, bgImg, backCoverImg, nameText, ageText;
 let leftPageBg, rightPageBg;
 let insideBgRects = [];   // [top, middle, bottom]
 let insideTexts = [];     // [top, middle, bottom]
-let currentPage = "front", activeTemplate = null;
+let currentPage = "front", activeTemplate = null, activeVariantKey = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -436,6 +464,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function initEditor(templateKey) {
     activeTemplate = CARD_TEMPLATES[templateKey];
+    activeVariantKey = templateKey;
+    setupVariantSelector(templateKey);
 
     $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
     $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
@@ -498,6 +528,53 @@ function loadFrontCover(imageUrl) {
     }, { crossOrigin: 'anonymous' });
 }
 
+// Builds the row of thumbnail buttons for a card's picture options (if it
+// has any). Clicking a thumbnail just swaps the background picture via
+// selectVariant() below — name/age text, position, colour etc. all stay
+// exactly as defined by this card's CARD_OVERRIDES the whole time.
+function setupVariantSelector(templateKey) {
+    const variants = CARD_VARIANTS[templateKey];
+    const container = $("variant-selector");
+    container.innerHTML = "";
+
+    if (!variants || variants.length < 2) {
+        container.style.display = "none";
+        return;
+    }
+
+    container.style.display = "flex";
+    variants.forEach((key) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "variant-thumb" + (key === activeVariantKey ? " active" : "");
+        btn.dataset.key = key;
+        btn.title = key;
+        btn.innerHTML = `<img src="${CLOUD_BASE + CARD_PATHS[key]}" alt="${key}">`;
+        btn.onclick = () => selectVariant(key);
+        container.appendChild(btn);
+    });
+}
+
+// Swaps just the front picture for a different option from the same
+// CARD_VARIANTS group, then re-fits it to the panel and highlights the
+// matching thumbnail.
+function selectVariant(key) {
+    if (!bgImg || key === activeVariantKey || !CARD_PATHS[key]) return;
+    activeVariantKey = key;
+
+    bgImg.setSrc(CLOUD_BASE + CARD_PATHS[key], () => {
+        bgImg.set({
+            scaleX: PANEL_WIDTH / bgImg.width,
+            scaleY: CANVAS_HEIGHT / bgImg.height
+        });
+        canvas.requestRenderAll();
+    }, { crossOrigin: "anonymous" });
+
+    document.querySelectorAll("#variant-selector .variant-thumb").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.key === key);
+    });
+}
+
 function setupTextsAndOverlays() {
     if (activeTemplate.name) {
         const n = activeTemplate.name;
@@ -534,18 +611,18 @@ function setupTextsAndOverlays() {
     leftPageBg = new fabric.Rect({ left: 0, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
     rightPageBg = new fabric.Rect({ left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
 
-    const bgPanelDefaults = { width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT, fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false };
-    insideBgRects = BOX_TOPS.map((top) => new fabric.Rect({ ...bgPanelDefaults, top }));
+    const bgPanelDefaults = { width: BOX_WIDTH, left: BOX_LEFT, fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false };
+    insideBgRects = BOX_CONFIGS.map((cfg) => new fabric.Rect({ ...bgPanelDefaults, top: cfg.top, height: cfg.height }));
 
     const textDefaults = {
-        width: BOX_WIDTH, height: BOX_HEIGHT, left: BOX_LEFT,
+        width: BOX_WIDTH, left: BOX_LEFT,
         fontFamily: "Arial", fill: "#000000", textAlign: "center",
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
         hasBorders: true, splitByGrapheme: true, backgroundColor: "transparent",
         ...STYLE_DASHED
     };
-    insideTexts = BOX_TOPS.map((top, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top, fontSize: 45 }));
+    insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
 
     canvas.add(leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts);
     setupTextEvents();
