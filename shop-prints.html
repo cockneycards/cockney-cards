@@ -32,20 +32,11 @@
 
         .header-top {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            gap: 30px;
             max-width: 1400px;
             margin: 0 auto;
-        }
-
-        .header-icon {
-            font-size: 20px;
-            cursor: pointer;
-            text-decoration: none;
-            color: var(--dark);
-            flex: 1;
-            display: flex;
-            justify-content: flex-start;
         }
 
         .logo-container {
@@ -62,8 +53,6 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            flex: 1;
-            justify-content: flex-end;
         }
 
         .cart-icon {
@@ -289,10 +278,11 @@
         }
 
         .footer-grid {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(220px, 300px));
+            justify-content: center;
             gap: 50px;
         }
 
@@ -300,7 +290,7 @@
             font-size: 13px;
             line-height: 1.8;
             color: #333;
-            text-align: left;
+            text-align: center;
         }
 
         .footer-col h4 {
@@ -346,8 +336,6 @@
 
     <header>
         <div class="header-top">
-            <div class="header-icon">⌕</div>
-            
             <div class="logo-container" onclick="window.location.href='index.html';">
                 <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
             </div>
