@@ -15,13 +15,15 @@
         font-style: normal;
         font-display: swap;
     }
+
     @font-face {
-        font-family: 'Anton-Regular';
+        font-family: 'Anton';
         src: url('/fonts/Anton-Regular.woff2') format('woff2');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
     }
+
     :root {
         --primary: #1A73E8;
         --dark: #1e1e24;
@@ -212,7 +214,7 @@ const CLOUD_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/up
 const DEFAULT_NAME_SETTINGS = {
     left: 892.5, top: 725, startSize: 52, minSize: 20, maxSize: 120,
     fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
-    canChangeSize: true, canChangeColor: true,
+    canChangeSize: true, canChangeColor: false,
     canMove: false, canRotate: false, isCurved: false, curveRadius: 0,
     maxChars: 14   // hard cap on characters, also set as the input's maxlength
 };
@@ -317,10 +319,10 @@ const CARD_PATHS = {
 // defaults to { name: null, age: null } — i.e. not personalised).
 const CARD_OVERRIDES = {
     "thankyou-teacher": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96" }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96", canChangeColor: true }
     },
     "mfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12, fontFamily: "Anton", fontWeight: "normal" },
         age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 130, color: "#FFFFFF", maxChars: 2 }
     },
     "liv-shirt": {
@@ -403,17 +405,9 @@ const CARD_TEMPLATES = Object.fromEntries(
 // picture swaps, so all options need the person's text sitting in the same
 // spot. Add more groups the same way to reuse this for other card families.
 const CARD_VARIANTS = {
-    "brighton-girl1": ["brighton-girl1", "brighton-girl2", "brighton-girl3", "brighton-girl4"],
-    "tvmovies-jaws1": ["tvmovies-jaws1", "tvmovies-jaws2"],
-    "afc-ladies-shirt1": ["afc-ladies-shirt1", "afc-ladies-shirt2"],
-    "afc-men-shirt1": ["afc-men-shirt1", "afc-men-shirt2"],
-    "cfc-shirt-blues1": ["cfc-shirt-blues1", "cfc-shirt-blues2"],
-    "cricket-boy1": ["cricket-boy1", "cricket-boy2", "cricket-boy3", "cricket-boy4"],
-    "darts-boy1": ["darts-boy1", "darts-boy2"],
-    "masters-boy1": ["masters-boy1", "masters-boy2"],
-    "netball-girl1": ["netball-girl1", "netball-girl2", "netball-girl3", "netball-girl4"],
-    "spurs-girl1": ["spurs-girl1", "spurs-girl2", "spurs-girl3", "spurs-girl4"]
+    "brighton-girl1": ["brighton-girl1", "brighton-girl2", "brighton-girl3", "brighton-girl4"]
 };
+
 // ---- Canvas / layout constants ----
 const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 1191, CANVAS_HEIGHT = 840;
 
