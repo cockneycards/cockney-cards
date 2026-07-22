@@ -43,6 +43,9 @@
         /* PRODUCT GRID & SORTING */
         .catalog-content { flex-grow: 1; }
         .catalog-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; font-size: 12px; color: #666; }
+        .sort-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
+        .sort-label select { font-size: 12px; color: #333; border: 1px solid var(--border-color); padding: 6px 10px; background: white; cursor: pointer; font-family: var(--font-family); border-radius: 3px; }
+        .sort-label select:focus { outline: none; border-color: #999; }
         .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
         /* PRODUCT CARD */
@@ -115,7 +118,16 @@
     <main class="catalog-content">
         <div class="catalog-meta">
             <span id="product-count">0 products</span>
-            <span>Sort by: Featured</span>
+            <label class="sort-label">
+                Sort by:
+                <select id="sort-select" onchange="sortProducts(this.value)">
+                    <option value="featured">Featured</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="name-asc">Name: A-Z</option>
+                    <option value="name-desc">Name: Z-A</option>
+                </select>
+            </label>
         </div>
         <div class="product-grid" id="product-grid"></div>
     </main>
@@ -227,15 +239,23 @@ const RAW_PRODUCTS = [
     ["wine-girls", "Wine Girls Card", "v1784209539/wine-girls-preview_pnfprf.png", ["all","for-her","celebrations"]]
 ];
 
-const PRODUCTS = RAW_PRODUCTS.map(([id, title, path, categories, price]) => ({
-    id, title, price: price || DEFAULT_PRICE, image: CLOUD_BASE + path, categories
-}));
+const PRODUCTS = RAW_PRODUCTS.map(([id, title, path, categories, price]) => {
+    const priceLabel = price || DEFAULT_PRICE;
+    return {
+        id, title, price: priceLabel,
+        priceValue: parseFloat(priceLabel.replace(/[^0-9.]/g, '')),
+        image: CLOUD_BASE + path, categories
+    };
+});
 
 const $ = (id) => document.getElementById(id);
 
+let currentCategory = 'all';
+let currentSort = 'featured';
+
 window.addEventListener('DOMContentLoaded', () => {
     renderCategories();
-    renderGrid(PRODUCTS);
+    applyView();
 
     netlifyIdentity.on('init', (user) => updateLoginUI(user));
     netlifyIdentity.on('login', (user) => {
@@ -274,11 +294,34 @@ function renderGrid(productsToRender) {
     `).join('');
 }
 
+function sortItems(items) {
+    const sorted = [...items];
+    switch (currentSort) {
+        case 'price-asc': sorted.sort((a, b) => a.priceValue - b.priceValue); break;
+        case 'price-desc': sorted.sort((a, b) => b.priceValue - a.priceValue); break;
+        case 'name-asc': sorted.sort((a, b) => a.title.localeCompare(b.title)); break;
+        case 'name-desc': sorted.sort((a, b) => b.title.localeCompare(a.title)); break;
+        // 'featured' (default): keep original catalogue order
+    }
+    return sorted;
+}
+
+function applyView() {
+    const filtered = currentCategory === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.categories.includes(currentCategory));
+    renderGrid(sortItems(filtered));
+}
+
 function filterProducts(categoryKey) {
+    currentCategory = categoryKey;
     document.querySelectorAll('.category-list a').forEach((a) => {
         a.classList.toggle('active', a.dataset.cat === categoryKey);
     });
-    renderGrid(categoryKey === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.categories.includes(categoryKey)));
+    applyView();
+}
+
+function sortProducts(sortKey) {
+    currentSort = sortKey;
+    applyView();
 }
 
 function goToEditor(productId) {
