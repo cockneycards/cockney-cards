@@ -23,6 +23,13 @@
         font-style: normal;
         font-display: swap;
     }
+    @font-face {
+        font-family: 'BebasNeue';
+        src: url('/assets/fonts/BebasNeue-Regular') format('ttf');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
 
     :root {
         --primary: #1A73E8;
@@ -322,12 +329,12 @@ const CARD_OVERRIDES = {
         name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96", canChangeColor: true }
     },
     "mfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12, fontFamily: "Anton", fontWeight: "normal" },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 130, color: "#FFFFFF", maxChars: 2, fontFamily: "Anton", fontWeight: "normal" },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 130, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 },
     },
     "liv-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 106, color: "#FFFFFF", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", fontFamily: "BebasNeue", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 106, color: "#FFFFFF", fontFamily: "BebasNeue", fontWeight: "normal", maxChars: 2 }
     },
     "afc-ladies-shirt1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 883, top: 515, startSize: 26, minSize: 20, maxSize: 34, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12 },
