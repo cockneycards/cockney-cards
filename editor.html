@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -147,13 +148,13 @@
                 <label id="label-name" for="name-input">Name:</label>
                 <input type="text" id="name-input" placeholder="Name.." oninput="updateNameText(this)">
 
-                <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
-                <input type="text" id="age-input" placeholder="Shirt.." inputmode="numeric" oninput="updateAgeText(this)">
+                <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
+                <input type="text" id="age-input" placeholder="Age.." inputmode="numeric" oninput="updateAgeText(this)">
 
-                <label style="margin-top:10px; display:block;">Text color:</label>
+                <label style="margin-top:10px; display:block;">Text Colour:</label>
                 <div class="flex-row">
-                    <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontcolor(this.value)">
-                    <span>Choose Font color</span>
+                    <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
+                    <span>Choose Font Colour</span>
                 </div>
 
                 <div id="front-size-controls" style="display:none; margin-top:15px;">
@@ -173,10 +174,10 @@
                 <span id="size-val">45px</span>
             </div>
 
-            <label style="margin-top: 10px; display: block;">Font color:</label>
+            <label style="margin-top: 10px; display: block;">Font Color:</label>
             <div class="flex-row">
-                <input type="color" id="inside-color" class="color-picker" value="#000000" onchange="updateInsidecolor(this.value)">
-                <span style="font-size: 12px; color: #666;">Choose Inside color</span>
+                <input type="color" id="inside-color" class="color-picker" value="#000000" onchange="updateInsideColor(this.value)">
+                <span style="font-size: 12px; color: #666;">Choose Inside Color</span>
             </div>
         </div>
 
@@ -217,15 +218,17 @@ const CLOUD_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/up
 const DEFAULT_NAME_SETTINGS = {
     left: 892.5, top: 725, startSize: 52, minSize: 20, maxSize: 120,
     fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
-    canChangeSize: true, canChangecolor: false,
+    canChangeSize: true, canChangeColor: false,
     canMove: false, canRotate: false, isCurved: false, curveRadius: 0,
     tiltAngle: 0,  // rotates the whole curved arc (degrees, clockwise). No effect unless isCurved is true.
+    label: "Name",      // text shown on this card's label — override per card if needed
     maxChars: 14   // hard cap on characters, also set as the input's maxlength
 };
 const DEFAULT_AGE_SETTINGS = {
     left: 900, top: 600, startSize: 60, minSize: 20, maxSize: 120,
     fontFamily: "Arial", fontWeight: "bold", color: "#FFFFFF",
-    canChangeSize: true, canChangecolor: true,
+    canChangeSize: true, canChangeColor: true,
+    label: "Age",       // e.g. override to "Shirt" for a football-shirt card
     maxChars: 3,        // hard cap on digits
     numericOnly: true   // strips any non-digit as the customer types
 };
@@ -323,15 +326,15 @@ const CARD_PATHS = {
 // defaults to { name: null, age: null } — i.e. not personalised).
 const CARD_OVERRIDES = {
     "thankyou-teacher": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96", canChangecolor: true }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96", canChangeColor: true }
     },
     "mfc-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" },
     },
     "liv-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "afc-ladies-shirt1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 882, top: 515, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
@@ -438,8 +441,8 @@ const BOX_CONFIGS = [
 ];
 const BOX_DEFAULT_TEXTS = ["Add Message Here", "Happy Birthday!\nHave a great day!", "Add Message Here"];
 
-const STYLE_DASHED = { borderDashArray: [4, 4], bordercolor: "#cccccc", strokeWidth: 1.5 };
-const STYLE_SOLID = { borderDashArray: null, bordercolor: "#1A73E8", strokeWidth: 2 };
+const STYLE_DASHED = { borderDashArray: [4, 4], borderColor: "#cccccc", strokeWidth: 1.5 };
+const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth: 2 };
 
 // ---- Mutable editor state ----
 let canvas, bgImg, backCoverImg, nameText, ageText;
@@ -501,7 +504,7 @@ function initEditor(templateKey) {
     setupVariantSelector(templateKey);
 
     $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
-    $("front-color").parentElement.style.display = activeTemplate.name?.canChangecolor ? "flex" : "none";
+    $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
 
     const canvasElement = $("canvas");
     canvasElement.width = EDIT_WIDTH;
@@ -509,7 +512,7 @@ function initEditor(templateKey) {
 
     canvas = new fabric.Canvas(canvasElement, {
         width: EDIT_WIDTH, height: EDIT_HEIGHT,
-        preserveObjectStacking: true, backgroundcolor: '#ffffff'
+        preserveObjectStacking: true, backgroundColor: '#ffffff'
     });
 
     // Pan so logical x = PANEL_WIDTH..CANVAS_WIDTH (the right/front panel)
@@ -537,6 +540,16 @@ function initEditor(templateKey) {
     if (hasPersonalisation) {
         $('name-input').style.display = $('label-name').style.display = activeTemplate.name ? 'block' : 'none';
         $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
+        if (activeTemplate.name) {
+            const nameLabel = activeTemplate.name.label || 'Name';
+            $('label-name').textContent = nameLabel + ':';
+            $('name-input').placeholder = nameLabel + '..';
+        }
+        if (activeTemplate.age) {
+            const ageLabel = activeTemplate.age.label || 'Age';
+            $('label-age').textContent = ageLabel + ':';
+            $('age-input').placeholder = ageLabel + '..';
+        }
     }
     if (activeTemplate.name?.maxChars) $('name-input').maxLength = activeTemplate.name.maxChars;
     if (activeTemplate.age?.maxChars) $('age-input').maxLength = activeTemplate.age.maxChars;
@@ -563,7 +576,7 @@ function loadFrontCover(imageUrl) {
 
 // Builds the row of thumbnail buttons for a card's picture options (if it
 // has any). Clicking a thumbnail just swaps the background picture via
-// selectVariant() below — name/age text, position, color etc. all stay
+// selectVariant() below — name/age text, position, colour etc. all stay
 // exactly as defined by this card's CARD_OVERRIDES the whole time.
 function setupVariantSelector(templateKey) {
     const variants = CARD_VARIANTS[templateKey];
@@ -652,7 +665,7 @@ function setupTextsAndOverlays() {
         fontFamily: "Arial", fill: "#000000", textAlign: "center",
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
-        hasBorders: true, splitByGrapheme: true, backgroundcolor: "transparent",
+        hasBorders: true, splitByGrapheme: true, backgroundColor: "transparent",
         ...STYLE_DASHED
     };
     insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
@@ -696,16 +709,16 @@ function updateAgeText(inputEl) {
     canvas.requestRenderAll();
 }
 
-function updateFrontcolor(hexcolor) {
+function updateFrontColor(hexColor) {
     const n = activeTemplate?.name;
     if (n?.isCurved) {
         const val = $("name-input").value;
         const size = Number($("front-size").value) || n.startSize;
-        replaceNameText(buildCurvedNameGroup(val, size, hexcolor));
+        replaceNameText(buildCurvedNameGroup(val, size, hexColor));
     } else {
-        nameText?.set({ fill: hexcolor });
+        nameText?.set({ fill: hexColor });
     }
-    ageText?.set({ fill: hexcolor });
+    ageText?.set({ fill: hexColor });
     canvas.requestRenderAll();
 }
 
@@ -738,10 +751,10 @@ function updateInsideSize(px) {
     }
 }
 
-function updateInsidecolor(hexcolor) {
+function updateInsideColor(hexColor) {
     const active = activeInsideText();
     if (active) {
-        active.set({ fill: hexcolor });
+        active.set({ fill: hexColor });
         canvas.requestRenderAll();
     }
 }
@@ -883,7 +896,7 @@ async function uploadAndGoToCheckout() {
         switchPage('inside', false);
         resetBordersToDashed();
         insideBgRects.forEach((r) => r.set({ visible: false }));
-        insideTexts.forEach((t) => t.set({ borderDashArray: null, bordercolor: "transparent" }));
+        insideTexts.forEach((t) => t.set({ borderDashArray: null, borderColor: "transparent" }));
         canvas.discardActiveObject();
         canvas.requestRenderAll();
 
