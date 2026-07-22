@@ -35,63 +35,63 @@
         --primary: #1A73E8;
         --dark: #1e1e24;
         --light: #fcfcfc;
-        --border-colour: #e0e0e0;
+        --border-color: #e0e0e0;
         --font-family: 'Helvetica Neue', Arial, sans-serif;
     }
 
-    body { font-family: var(--font-family); margin: 0; padding: 0; background-colour: #f6f6f8; colour: var(--dark); }
+    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); }
 
     /* HEADER & NAVIGATION */
-    header { background-colour: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-colour); }
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
     .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
     .logo-container { text-align: center; }
     .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
     .header-right { display: flex; align-items: center; gap: 20px; }
     .cart-icon { position: relative; cursor: pointer; }
-    .login-btn { font-size: 11px; text-decoration: none; colour: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
-    .login-btn:hover { colour: #111; }
+    .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
+    .login-btn:hover { color: #111; }
     nav { margin-top: 15px; text-align: center; }
     .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
-    .nav-links a { text-decoration: none; colour: #111; font-size: 13px; letter-spacing: 1px; transition: colour 0.2s; }
-    .nav-links a:hover { colour: #888; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
 
     /* EDITOR WORKSPACE */
     .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; }
-    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-colour); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; max-width: 100%; }
+    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; max-width: 100%; }
     #canvas { border: 1px solid #e2e2e2; }
-    .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-colour); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
     .page-toggle { display: flex; gap: 10px; margin-bottom: 25px; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
-    .toggle-btn.active { background-colour: #111; colour: white; border-colour: #111; }
+    .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
     .control-group { display: none; flex-direction: column; gap: 15px; }
     .control-group.active { display: flex; }
-    label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; colour: #444; }
+    label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
     .flex-row { display: flex; align-items: center; gap: 10px; }
-    .colour-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; }
+    .color-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; }
     .size-slider { flex: 1; }
 
     /* STYLE / VARIANT PICKER (e.g. brighton-girl1..4) */
     .variant-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
     .variant-thumb { width: 56px; height: 56px; padding: 0; border: 2px solid #ccc; border-radius: 6px; overflow: hidden; cursor: pointer; background: none; }
     .variant-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .variant-thumb.active { border-colour: #111; }
+    .variant-thumb.active { border-color: #111; }
 
-    .btn { width: 100%; background-colour: #1a1a1a; colour: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
-    .btn:hover { background-colour: #444; }
-    .btn:disabled { background-colour: #cccccc; cursor: not-allowed; }
-    .btn-close { background-colour: #f0f0f0; colour: #333; margin-top: 10px; }
-    .btn-close:hover { background-colour: #e0e0e0; }
+    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
+    .btn:hover { background-color: #444; }
+    .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+    .btn-close { background-color: #f0f0f0; color: #333; margin-top: 10px; }
+    .btn-close:hover { background-color: #e0e0e0; }
 
     /* FOOTER */
-    footer { border-top: 1px solid var(--border-colour); padding: 60px 40px 20px 40px; background-colour: white; margin-top: 60px; }
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
     .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(220px, 300px)); justify-content: center; gap: 50px; }
-    .footer-col { font-size: 13px; line-height: 1.8; colour: #333; text-align: center; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: center; }
     .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
     .footer-col p { margin: 0 0 15px 0; }
-    .footer-col a { colour: #111; text-decoration: underline; }
-    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; colour: #888; letter-spacing: 0.5px; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
 
     @media (max-width: 900px) {
         .editor-workspace { flex-direction: column; align-items: center; }
@@ -150,10 +150,10 @@
                 <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
                 <input type="text" id="age-input" placeholder="Shirt.." inputmode="numeric" oninput="updateAgeText(this)">
 
-                <label style="margin-top:10px; display:block;">Text Colour:</label>
+                <label style="margin-top:10px; display:block;">Text color:</label>
                 <div class="flex-row">
-                    <input type="colour" id="front-colour" class="colour-picker" value="#FFFFFF" onchange="updateFrontColour(this.value)">
-                    <span>Choose Font colour</span>
+                    <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontcolor(this.value)">
+                    <span>Choose Font color</span>
                 </div>
 
                 <div id="front-size-controls" style="display:none; margin-top:15px;">
@@ -173,10 +173,10 @@
                 <span id="size-val">45px</span>
             </div>
 
-            <label style="margin-top: 10px; display: block;">Font colour:</label>
+            <label style="margin-top: 10px; display: block;">Font color:</label>
             <div class="flex-row">
-                <input type="colour" id="inside-colour" class="colour-picker" value="#000000" onchange="updateInsidecolour(this.value)">
-                <span style="font-size: 12px; colour: #666;">Choose Inside colour</span>
+                <input type="color" id="inside-color" class="color-picker" value="#000000" onchange="updateInsidecolor(this.value)">
+                <span style="font-size: 12px; color: #666;">Choose Inside color</span>
             </div>
         </div>
 
@@ -216,16 +216,16 @@ const CLOUD_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/up
 // ---- Text style defaults (reused / overridden per template) ----
 const DEFAULT_NAME_SETTINGS = {
     left: 892.5, top: 725, startSize: 52, minSize: 20, maxSize: 120,
-    fontFamily: "BubblegumSans", fontWeight: "bold", colour: "#FFFFFF",
-    canChangeSize: true, canChangecolour: false,
+    fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
+    canChangeSize: true, canChangecolor: false,
     canMove: false, canRotate: false, isCurved: false, curveRadius: 0,
     tiltAngle: 0,  // rotates the whole curved arc (degrees, clockwise). No effect unless isCurved is true.
     maxChars: 14   // hard cap on characters, also set as the input's maxlength
 };
 const DEFAULT_AGE_SETTINGS = {
     left: 900, top: 600, startSize: 60, minSize: 20, maxSize: 120,
-    fontFamily: "Arial", fontWeight: "bold", colour: "#FFFFFF",
-    canChangeSize: true, canChangecolour: true,
+    fontFamily: "Arial", fontWeight: "bold", color: "#FFFFFF",
+    canChangeSize: true, canChangecolor: true,
     maxChars: 3,        // hard cap on digits
     numericOnly: true   // strips any non-digit as the customer types
 };
@@ -323,74 +323,74 @@ const CARD_PATHS = {
 // defaults to { name: null, age: null } — i.e. not personalised).
 const CARD_OVERRIDES = {
     "thankyou-teacher": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, colour: "#FD7D96", canChangecolour: true }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96", canChangecolor: true }
     },
     "mfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 },
     },
     "liv-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "afc-ladies-shirt1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 882, top: 515, startSize: 26, minSize: 20, maxSize: 30, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 882, top: 575, startSize: 60, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 882, top: 515, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 882, top: 575, startSize: 60, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "afc-men-shirt1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 883, top: 515, startSize: 26, minSize: 20, maxSize: 30, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 883, top: 555, startSize: 70, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 883, top: 515, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 883, top: 555, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "afc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 875, top: 525, startSize: 40, minSize: 30, maxSize: 45, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 875, top: 615, startSize: 90, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 875, top: 525, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 875, top: 615, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 },
     },
     "brighton-girl1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 }, 
-        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 525, startSize: 70, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 }, 
+        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 525, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "cfc-shirt-blues1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 525, startSize: 26, minSize: 20, maxSize: 34, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 }, 
-        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 585, startSize: 70, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 525, startSize: 26, minSize: 20, maxSize: 34, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 }, 
+        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 585, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "cfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "cricket-boy1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 860, top: 260, startSize: 70, minSize: 50, maxSize: 120, colour: "#FFFFFF", isCurved: true, curveRadius: 120, tiltAngle: -6, maxChars: 12 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 860, top: 260, startSize: 70, minSize: 50, maxSize: 120, color: "#FFFFFF", isCurved: true, curveRadius: 120, tiltAngle: -6, maxChars: 12 },
     },
     "nolu-lion1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 250, startSize: 100, minSize: 70, maxSize: 130, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 100, maxChars: 12 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 250, startSize: 100, minSize: 70, maxSize: 130, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 100, maxChars: 12 },
     },
     "darts-boy1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 290, startSize: 110, minSize: 90, maxSize: 130, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 450, maxChars: 12 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 290, startSize: 110, minSize: 90, maxSize: 130, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 450, maxChars: 12 },
     },
     "golfer": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, colour: "#112342", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 130, maxChars: 12 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, color: "#112342", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 130, maxChars: 12 },
     },
     "masters-boy1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 150, startSize: 70, minSize: 50, maxSize: 100, colour: "#FFFFFF", isCurved: true, curveRadius: 100, maxChars: 12 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 150, startSize: 70, minSize: 50, maxSize: 100, color: "#FFFFFF", isCurved: true, curveRadius: 100, maxChars: 12 },
     },
     "netball-girl1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 895, top: 250, startSize: 70, minSize: 50, maxSize: 140, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 100, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 582, startSize: 60, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, numericOnly: false }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 895, top: 250, startSize: 70, minSize: 50, maxSize: 140, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 100, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 582, startSize: 60, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, numericOnly: false }
     },
     "rugby-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, colour: "#000000", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, colour: "#000000", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#000000", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#000000", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "spurs-girl1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 900, top: 350, startSize: 26, minSize: 20, maxSize: 34, colour: "#12244F", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 410, startSize: 70, colour: "#12244F", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 900, top: 350, startSize: 26, minSize: 20, maxSize: 34, color: "#12244F", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 410, startSize: 70, color: "#12244F", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "tot-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     },
     "whu-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, colour: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
     }
 };
 
@@ -438,8 +438,8 @@ const BOX_CONFIGS = [
 ];
 const BOX_DEFAULT_TEXTS = ["Add Message Here", "Happy Birthday!\nHave a great day!", "Add Message Here"];
 
-const STYLE_DASHED = { borderDashArray: [4, 4], bordercolour: "#cccccc", strokeWidth: 1.5 };
-const STYLE_SOLID = { borderDashArray: null, bordercolour: "#1A73E8", strokeWidth: 2 };
+const STYLE_DASHED = { borderDashArray: [4, 4], bordercolor: "#cccccc", strokeWidth: 1.5 };
+const STYLE_SOLID = { borderDashArray: null, bordercolor: "#1A73E8", strokeWidth: 2 };
 
 // ---- Mutable editor state ----
 let canvas, bgImg, backCoverImg, nameText, ageText;
@@ -501,7 +501,7 @@ function initEditor(templateKey) {
     setupVariantSelector(templateKey);
 
     $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
-    $("front-colour").parentElement.style.display = activeTemplate.name?.canChangecolour ? "flex" : "none";
+    $("front-color").parentElement.style.display = activeTemplate.name?.canChangecolor ? "flex" : "none";
 
     const canvasElement = $("canvas");
     canvasElement.width = EDIT_WIDTH;
@@ -509,7 +509,7 @@ function initEditor(templateKey) {
 
     canvas = new fabric.Canvas(canvasElement, {
         width: EDIT_WIDTH, height: EDIT_HEIGHT,
-        preserveObjectStacking: true, backgroundcolour: '#ffffff'
+        preserveObjectStacking: true, backgroundcolor: '#ffffff'
     });
 
     // Pan so logical x = PANEL_WIDTH..CANVAS_WIDTH (the right/front panel)
@@ -563,7 +563,7 @@ function loadFrontCover(imageUrl) {
 
 // Builds the row of thumbnail buttons for a card's picture options (if it
 // has any). Clicking a thumbnail just swaps the background picture via
-// selectVariant() below — name/age text, position, colour etc. all stay
+// selectVariant() below — name/age text, position, color etc. all stay
 // exactly as defined by this card's CARD_OVERRIDES the whole time.
 function setupVariantSelector(templateKey) {
     const variants = CARD_VARIANTS[templateKey];
@@ -613,11 +613,11 @@ function setupTextsAndOverlays() {
         const n = activeTemplate.name;
 
         nameText = n.isCurved
-            ? buildCurvedNameGroup("NAME", n.startSize, n.colour)
+            ? buildCurvedNameGroup("NAME", n.startSize, n.color)
             : new fabric.Text("NAME", {
                 left: n.left, top: n.top, originX: "center", originY: "center",
                 fontSize: n.startSize, fontFamily: n.fontFamily || "Arial",
-                fontWeight: n.fontWeight || "bold", fill: n.colour, textAlign: "center",
+                fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
                 hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
             });
 
@@ -636,7 +636,7 @@ function setupTextsAndOverlays() {
         ageText = new fabric.Text("40", {
             left: a.left, top: a.top, originX: "center", originY: "center",
             fontSize: a.startSize, fontFamily: a.fontFamily || "Arial", fontWeight: "bold",
-            fill: a.colour, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+            fill: a.color, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
         });
         canvas.add(ageText);
     }
@@ -652,7 +652,7 @@ function setupTextsAndOverlays() {
         fontFamily: "Arial", fill: "#000000", textAlign: "center",
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
-        hasBorders: true, splitByGrapheme: true, backgroundcolour: "transparent",
+        hasBorders: true, splitByGrapheme: true, backgroundcolor: "transparent",
         ...STYLE_DASHED
     };
     insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
@@ -674,8 +674,8 @@ function updateNameText(inputEl) {
 
     if (n.isCurved) {
         const size = Number($("front-size").value) || n.startSize;
-        const colour = $("front-colour").value || n.colour;
-        replaceNameText(buildCurvedNameGroup(displayVal, size, colour));
+        const color = $("front-color").value || n.color;
+        replaceNameText(buildCurvedNameGroup(displayVal, size, color));
     } else {
         nameText.set({ text: displayVal || "NAME" });
     }
@@ -696,16 +696,16 @@ function updateAgeText(inputEl) {
     canvas.requestRenderAll();
 }
 
-function updateFrontcolour(hexcolour) {
+function updateFrontcolor(hexcolor) {
     const n = activeTemplate?.name;
     if (n?.isCurved) {
         const val = $("name-input").value;
         const size = Number($("front-size").value) || n.startSize;
-        replaceNameText(buildCurvedNameGroup(val, size, hexcolour));
+        replaceNameText(buildCurvedNameGroup(val, size, hexcolor));
     } else {
-        nameText?.set({ fill: hexcolour });
+        nameText?.set({ fill: hexcolor });
     }
-    ageText?.set({ fill: hexcolour });
+    ageText?.set({ fill: hexcolor });
     canvas.requestRenderAll();
 }
 
@@ -715,8 +715,8 @@ function updateFrontSize(size) {
     if (nameText && n) {
         if (n.isCurved) {
             const val = $("name-input").value;
-            const colour = $("front-colour").value || n.colour;
-            replaceNameText(buildCurvedNameGroup(val, Number(size), colour));
+            const color = $("front-color").value || n.color;
+            replaceNameText(buildCurvedNameGroup(val, Number(size), color));
         } else {
             nameText.set({ fontSize: Number(size) });
         }
@@ -738,10 +738,10 @@ function updateInsideSize(px) {
     }
 }
 
-function updateInsidecolour(hexcolour) {
+function updateInsidecolor(hexcolor) {
     const active = activeInsideText();
     if (active) {
-        active.set({ fill: hexcolour });
+        active.set({ fill: hexcolor });
         canvas.requestRenderAll();
     }
 }
@@ -773,7 +773,7 @@ function setupTextEvents() {
         target.set(STYLE_SOLID);
         $('inside-size').value = target.fontSize;
         $('size-val').innerText = target.fontSize + "px";
-        $('inside-colour').value = target.fill;
+        $('inside-color').value = target.fill;
         canvas.requestRenderAll();
     });
 
@@ -799,7 +799,7 @@ function resetBordersToDashed() {
 // — unlike Fabric's built-in text-on-path mode, which recalculates the
 // object's effective bounding box (and therefore its position) every time
 // the font size changes. Smaller curveRadius = tighter curve, larger = flatter.
-function buildCurvedNameGroup(rawValue, fontSize, colour) {
+function buildCurvedNameGroup(rawValue, fontSize, color) {
     const n = activeTemplate.name;
     const text = (rawValue || "").toUpperCase() || "NAME";
     const fontFamily = n.fontFamily || "Arial";
@@ -818,7 +818,7 @@ function buildCurvedNameGroup(rawValue, fontSize, colour) {
         angle += charAngle;
 
         return new fabric.Text(c, {
-            fontSize, fontFamily, fontWeight, fill: colour,
+            fontSize, fontFamily, fontWeight, fill: color,
             originX: "center", originY: "center",
             left: radius * Math.sin(midAngle),
             top: radius - radius * Math.cos(midAngle),
@@ -836,7 +836,7 @@ function buildCurvedNameGroup(rawValue, fontSize, colour) {
 }
 
 // Swaps the on-canvas name object for a freshly-built one (used whenever
-// the curved name's text, size, or colour changes).
+// the curved name's text, size, or color changes).
 function replaceNameText(newNameObj) {
     if (nameText) canvas.remove(nameText);
     nameText = newNameObj;
@@ -883,7 +883,7 @@ async function uploadAndGoToCheckout() {
         switchPage('inside', false);
         resetBordersToDashed();
         insideBgRects.forEach((r) => r.set({ visible: false }));
-        insideTexts.forEach((t) => t.set({ borderDashArray: null, bordercolour: "transparent" }));
+        insideTexts.forEach((t) => t.set({ borderDashArray: null, bordercolor: "transparent" }));
         canvas.discardActiveObject();
         canvas.requestRenderAll();
 
