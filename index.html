@@ -42,8 +42,20 @@
         /* PHOTO GALLERY (LINKS OUT TO INSTAGRAM) */
         .photo-gallery-section { max-width: 1200px; margin: 60px auto 20px auto; padding: 0 20px; text-align: center; }
         .photo-gallery-title { font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: #666; margin-bottom: 25px; }
-        .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
-        .photo-grid a { aspect-ratio: 1 / 1; display: block; overflow: hidden; border: 1px solid #e2e2e2; }
+        .photo-grid {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            scroll-snap-type: x proximity;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        .photo-grid::-webkit-scrollbar { height: 6px; }
+        .photo-grid::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+        .photo-grid::-webkit-scrollbar-track { background: transparent; }
+        .photo-grid a { flex: 0 0 auto; width: 220px; aspect-ratio: 1 / 1; display: block; overflow: hidden; border: 1px solid #e2e2e2; scroll-snap-align: start; }
         .photo-grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s ease; }
         .photo-grid a:hover img { transform: scale(1.05); }
         .instagram-handle { font-size: 13px; font-weight: bold; color: #111; text-decoration: none; display: inline-block; margin-top: 10px; }
@@ -60,7 +72,7 @@
         @media (max-width: 900px) {
             .gallery-grid { grid-template-columns: 1fr; gap: 30px; }
             .large-box { height: 340px; }
-            .photo-grid { grid-template-columns: repeat(2, 1fr); }
+            .photo-grid a { width: 150px; }
         }
     </style>
 </head>
