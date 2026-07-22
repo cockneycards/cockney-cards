@@ -144,16 +144,16 @@
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
 
             <div id="front-text-inputs">
-                <label id="label-name" for="name-input">Name to add:</label>
-                <input type="text" id="name-input" placeholder="Text to add.." oninput="updateNameText(this)">
+                <label id="label-name" for="name-input">Name:</label>
+                <input type="text" id="name-input" placeholder="Name.." oninput="updateNameText(this)">
 
                 <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
-                <input type="text" id="age-input" placeholder="Text to add.." inputmode="numeric" oninput="updateAgeText(this)">
+                <input type="text" id="age-input" placeholder="Shirt.." inputmode="numeric" oninput="updateAgeText(this)">
 
-                <label style="margin-top:10px; display:block;">Text Color:</label>
+                <label style="margin-top:10px; display:block;">Text Colour:</label>
                 <div class="flex-row">
-                    <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
-                    <span>Choose Font Color</span>
+                    <input type="colour" id="front-colour" class="colour-picker" value="#FFFFFF" onchange="updateFrontColour(this.value)">
+                    <span>Choose Font Colour</span>
                 </div>
 
                 <div id="front-size-controls" style="display:none; margin-top:15px;">
