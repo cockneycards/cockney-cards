@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -230,7 +229,10 @@ const DEFAULT_AGE_SETTINGS = {
     canChangeSize: true, canChangeColor: true,
     label: "Age",       // e.g. override to "Shirt" for a football-shirt card
     maxChars: 3,        // hard cap on digits
-    numericOnly: true   // strips any non-digit as the customer types
+    numericOnly: true,  // strips any non-digit as the customer types
+    lettersOnly: false, // strips any non-letter as the customer types (use for position codes etc, instead of numericOnly)
+    forceUppercase: false, // uppercases the input as the customer types (canvas text is always uppercased separately)
+    defaultText: "40"   // placeholder text shown on the canvas before the customer types anything
 };
 
 // ---- Card catalogue: just filename paths, so each card is one line ----
@@ -338,27 +340,27 @@ const CARD_OVERRIDES = {
     },
     "afc-ladies-shirt1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 882, top: 515, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 882, top: 575, startSize: 60, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 882, top: 575, startSize: 60, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "afc-men-shirt1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 883, top: 515, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 883, top: 555, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 883, top: 555, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "afc-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 875, top: 525, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 875, top: 615, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 },
+        age: { ...DEFAULT_AGE_SETTINGS, left: 875, top: 615, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" },
     },
     "brighton-girl1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 }, 
-        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 525, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 525, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "cfc-shirt-blues1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 525, startSize: 26, minSize: 20, maxSize: 34, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 }, 
-        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 585, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 585, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "cfc-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "cricket-boy1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 860, top: 260, startSize: 70, minSize: 50, maxSize: 120, color: "#FFFFFF", isCurved: true, curveRadius: 120, tiltAngle: -6, maxChars: 12 },
@@ -377,23 +379,23 @@ const CARD_OVERRIDES = {
     },
     "netball-girl1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 895, top: 250, startSize: 70, minSize: 50, maxSize: 140, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 100, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 582, startSize: 60, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, numericOnly: false }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 582, startSize: 60, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, numericOnly: false, lettersOnly: true, forceUppercase: true, label: "Shirt", defaultText: "GA" }
     },
     "rugby-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#000000", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#000000", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#000000", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "spurs-girl1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 900, top: 350, startSize: 26, minSize: 20, maxSize: 34, color: "#12244F", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 410, startSize: 70, color: "#12244F", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 410, startSize: 70, color: "#12244F", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "tot-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     },
     "whu-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2 }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
     }
 };
 
@@ -543,12 +545,13 @@ function initEditor(templateKey) {
         if (activeTemplate.name) {
             const nameLabel = activeTemplate.name.label || 'Name';
             $('label-name').textContent = nameLabel + ':';
-            $('name-input').placeholder = nameLabel + '..';
+            $('name-input').placeholder = nameLabel + ':';
         }
         if (activeTemplate.age) {
             const ageLabel = activeTemplate.age.label || 'Age';
             $('label-age').textContent = ageLabel + ':';
-            $('age-input').placeholder = ageLabel + '..';
+            $('age-input').placeholder = ageLabel + ':';
+            $('age-input').setAttribute('inputmode', activeTemplate.age.lettersOnly ? 'text' : 'numeric');
         }
     }
     if (activeTemplate.name?.maxChars) $('name-input').maxLength = activeTemplate.name.maxChars;
@@ -646,7 +649,7 @@ function setupTextsAndOverlays() {
 
     if (activeTemplate.age) {
         const a = activeTemplate.age;
-        ageText = new fabric.Text("40", {
+        ageText = new fabric.Text(a.defaultText || "40", {
             left: a.left, top: a.top, originX: "center", originY: "center",
             fontSize: a.startSize, fontFamily: a.fontFamily || "Arial", fontWeight: "bold",
             fill: a.color, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
@@ -701,11 +704,13 @@ function updateAgeText(inputEl) {
 
     let val = inputEl.value;
     if (a?.numericOnly) val = val.replace(/[^0-9]/g, "");
+    if (a?.lettersOnly) val = val.replace(/[^a-zA-Z]/g, "");
+    if (a?.forceUppercase) val = val.toUpperCase();
     if (a?.maxChars) val = val.slice(0, a.maxChars);
 
     if (inputEl.value !== val) inputEl.value = val;
 
-    ageText.set({ text: val || "40" });
+    ageText.set({ text: (val || a?.defaultText || "40").toUpperCase() });
     canvas.requestRenderAll();
 }
 
