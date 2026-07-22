@@ -18,7 +18,7 @@
 
     @font-face {
         font-family: 'Anton';
-        src: url('/fonts/Anton-Regular.woff2') format('woff2');
+        src: url('/assets/fonts/Anton-Regular.woff2') format('woff2');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
@@ -323,7 +323,7 @@ const CARD_OVERRIDES = {
     },
     "mfc-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12, fontFamily: "Anton", fontWeight: "normal" },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 130, color: "#FFFFFF", maxChars: 2, fontFamily: "Anton", fontWeight: "normal" }
+        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 130, color: "#FFFFFF", maxChars: 2 }
     },
     "liv-shirt": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 44, minSize: 35, maxSize: 60, color: "#FFFFFF", isCurved: true, curveRadius: 150, maxChars: 12 },
@@ -453,14 +453,33 @@ function measureTextWidth(text, fontSize, fontFamily, fontWeight) {
     return measureCtx.measureText(text).width;
 }
 
+// Canvas text (unlike normal DOM text) does NOT wait for a @font-face font
+// to finish downloading — if the font isn't already loaded by the time we
+// draw, the canvas just uses a fallback and never redraws itself once the
+// real font arrives. So we explicitly ask the browser to load every custom
+// font up front and wait for that before building any text on the canvas.
+const CUSTOM_FONTS = ["BubblegumSans", "Anton"];
+function preloadCustomFonts() {
+    return Promise.all(
+        CUSTOM_FONTS.map((f) =>
+            document.fonts.load(`400 60px "${f}"`).catch((err) => {
+                console.warn(`Font "${f}" failed to load — check its file exists at the URL in its @font-face rule.`, err);
+            })
+        )
+    );
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const cardId = params.get('card') || '11plus-boy';
-    if (CARD_TEMPLATES[cardId]) {
-        initEditor(cardId);
-    } else {
-        window.location.href = 'shop-cards.html';
-    }
+
+    preloadCustomFonts().finally(() => {
+        if (CARD_TEMPLATES[cardId]) {
+            initEditor(cardId);
+        } else {
+            window.location.href = 'shop-cards.html';
+        }
+    });
 
     netlifyIdentity.on('init', (user) => updateLoginUI(user));
     netlifyIdentity.on('login', (user) => {
