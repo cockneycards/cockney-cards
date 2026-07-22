@@ -192,6 +192,30 @@
             color: #666;
         }
 
+        .sort-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .sort-label select {
+            font-size: 12px;
+            color: #333;
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            background: white;
+            cursor: pointer;
+            font-family: var(--font-family);
+            border-radius: 3px;
+        }
+
+        .sort-label select:focus {
+            outline: none;
+            border-color: #999;
+        }
+
         .product-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -381,7 +405,16 @@
         <main class="catalog-content">
             <div class="catalog-meta">
                 <span id="product-count">0 products</span>
-                <span>Sort by: Featured</span>
+                <label class="sort-label">
+                    Sort by:
+                    <select id="sort-select" onchange="sortProducts(this.value)">
+                        <option value="featured">Featured</option>
+                        <option value="price-asc">Price: Low to High</option>
+                        <option value="price-desc">Price: High to Low</option>
+                        <option value="name-asc">Name: A-Z</option>
+                        <option value="name-desc">Name: Z-A</option>
+                    </select>
+                </label>
             </div>
 
             <div class="product-grid" id="product-grid">
@@ -424,6 +457,7 @@
                 id: 'millwall-dad-son-print',
                 title: 'Millwall Dad & Son A4 Print',
                 price: '£9.99',
+                priceValue: 9.99,
                 image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png',
                 categories: ['all', 'sports', 'family']
             },
@@ -431,13 +465,17 @@
                 id: 'bermondsey-legend-print',
                 title: 'Bermondsey Legend Framed Print',
                 price: '£12.99',
+                priceValue: 12.99,
                 image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png',
                 categories: ['all', 'legends']
             }
         ];
 
+        let currentCategory = 'all';
+        let currentSort = 'featured';
+
         window.addEventListener('DOMContentLoaded', () => {
-            renderGrid(PRODUCTS);
+            applyView();
 
             netlifyIdentity.on('init', user => updateLoginUI(user));
             netlifyIdentity.on('login', user => {
@@ -471,16 +509,33 @@
             });
         }
 
+        function sortItems(items) {
+            const sorted = [...items];
+            switch (currentSort) {
+                case 'price-asc': sorted.sort((a, b) => a.priceValue - b.priceValue); break;
+                case 'price-desc': sorted.sort((a, b) => b.priceValue - a.priceValue); break;
+                case 'name-asc': sorted.sort((a, b) => a.title.localeCompare(b.title)); break;
+                case 'name-desc': sorted.sort((a, b) => b.title.localeCompare(a.title)); break;
+                // 'featured' (default): keep original catalogue order
+            }
+            return sorted;
+        }
+
+        function applyView() {
+            const filtered = currentCategory === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.categories.includes(currentCategory));
+            renderGrid(sortItems(filtered));
+        }
+
         function filterProducts(categoryKey) {
+            currentCategory = categoryKey;
             document.querySelectorAll('.category-list a').forEach(a => a.classList.remove('active'));
             document.getElementById(`cat-${categoryKey}`).classList.add('active');
+            applyView();
+        }
 
-            if (categoryKey === 'all') {
-                renderGrid(PRODUCTS);
-            } else {
-                const filtered = PRODUCTS.filter(p => p.categories.includes(categoryKey));
-                renderGrid(filtered);
-            }
+        function sortProducts(sortKey) {
+            currentSort = sortKey;
+            applyView();
         }
 
         function goToEditor(productId) {
