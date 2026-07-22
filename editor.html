@@ -10,7 +10,7 @@
 <style>
     @font-face {
         font-family: 'BubblegumSans';
-        src: url('/fonts/BubblegumSans-Regular.woff2') format('woff2');
+        src: url('fonts/BubblegumSans-Regular.woff2') format('woff2');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
@@ -18,14 +18,14 @@
 
     @font-face {
         font-family: 'Anton';
-        src: url('/assets/fonts/Anton-Regular.ttf') format('truetype');
+        src: url('assets/fonts/Anton-Regular.ttf') format('truetype');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
     }
     @font-face {
         font-family: 'BebasNeue';
-        src: url('/assets/fonts/BebasNeue-Regular.ttf') format('truetype');
+        src: url('assets/fonts/BebasNeue-Regular.ttf') format('truetype');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
@@ -223,6 +223,7 @@ const DEFAULT_NAME_SETTINGS = {
     fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
     canChangeSize: true, canChangeColor: false,
     canMove: false, canRotate: false, isCurved: false, curveRadius: 0,
+    tiltAngle: 0,  // rotates the whole curved arc (degrees, clockwise). No effect unless isCurved is true.
     maxChars: 14   // hard cap on characters, also set as the input's maxlength
 };
 const DEFAULT_AGE_SETTINGS = {
@@ -361,13 +362,13 @@ const CARD_OVERRIDES = {
         age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 615, startSize: 120, color: "#FFFFFF", maxChars: 2 }
     },
     "cricket-boy1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 860, top: 260, startSize: 70, minSize: 50, maxSize: 120, color: "#FFFFFF", isCurved: true, curveRadius: 120, maxChars: 12 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 860, top: 260, startSize: 70, minSize: 50, maxSize: 120, color: "#FFFFFF", isCurved: true, curveRadius: 120, tiltAngle: -6, maxChars: 12 },
     },
     "nolu-lion1": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 250, startSize: 100, minSize: 70, maxSize: 130, color: "#FFFFFF", isCurved: true, curveRadius: 100, maxChars: 12 },
     },
     "darts-boy1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 290, startSize: 110, minSize: 90, maxSize: 130, color: "#FFFFFF", isCurved: true, curveRadius: 120, maxChars: 12 },
+        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 290, startSize: 110, minSize: 90, maxSize: 130, color: "#FFFFFF", isCurved: true, curveRadius: 450, maxChars: 12 },
     },
     "golfer": {
         name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, color: "#112342", isCurved: true, curveRadius: 130, maxChars: 12 },
@@ -830,6 +831,7 @@ function buildCurvedNameGroup(rawValue, fontSize, color) {
 
     return new fabric.Group(letters, {
         left: n.left, top: n.top, originX: "center", originY: "center",
+        angle: n.tiltAngle || 0,
         hasControls: false, hasBorders: false,
         lockMovementX: true, lockMovementY: true
     });
