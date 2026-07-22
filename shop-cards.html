@@ -12,11 +12,10 @@
 
         /* HEADER & NAVIGATION */
         header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
-        .header-top { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
-        .header-icon { font-size: 20px; cursor: pointer; text-decoration: none; color: var(--dark); flex: 1; display: flex; justify-content: flex-start; }
+        .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
         .logo-container { text-align: center; }
         .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
-        .header-right { display: flex; align-items: center; gap: 20px; flex: 1; justify-content: flex-end; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
         .cart-icon { position: relative; cursor: pointer; }
         .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
         .login-btn:hover { color: #111; }
@@ -59,8 +58,8 @@
 
         /* FOOTER */
         footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; }
-        .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; }
-        .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+        .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(220px, 300px)); justify-content: center; gap: 50px; }
+        .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: center; }
         .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
         .footer-col p { margin: 0 0 15px 0; }
         .footer-col a { color: #111; text-decoration: underline; }
@@ -79,7 +78,6 @@
 
 <header>
     <div class="header-top">
-        <div class="header-icon">⌕</div>
         <div class="logo-container" onclick="window.location.href='index.html';">
             <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
         </div>
