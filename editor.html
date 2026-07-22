@@ -18,14 +18,14 @@
 
     @font-face {
         font-family: 'Anton';
-        src: url('/assets/fonts/Anton-Regular.ttf') format('ttf');
+        src: url('/assets/fonts/Anton-Regular.ttf') format('truetype');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
     }
     @font-face {
         font-family: 'BebasNeue';
-        src: url('/assets/fonts/BebasNeue-Regular') format('ttf');
+        src: url('/assets/fonts/BebasNeue-Regular.ttf') format('truetype');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
@@ -465,7 +465,7 @@ function measureTextWidth(text, fontSize, fontFamily, fontWeight) {
 // draw, the canvas just uses a fallback and never redraws itself once the
 // real font arrives. So we explicitly ask the browser to load every custom
 // font up front and wait for that before building any text on the canvas.
-const CUSTOM_FONTS = ["BubblegumSans", "Anton"];
+const CUSTOM_FONTS = ["BubblegumSans", "Anton", "BebasNeue"];
 function preloadCustomFonts() {
     return Promise.all(
         CUSTOM_FONTS.map((f) =>
