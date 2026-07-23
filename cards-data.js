@@ -401,8 +401,10 @@ const CARD_CATALOGUE = {
       }
     ]
   },
-  // TODO: not shown in the shop yet -- add title/categories/preview to sell this card
   "charlie-says": {
+    title: "Charlie Says..",
+    categories: ["all","for-her","for-him"],
+    preview: "v1784209519/charlie-says-preview_iemrbl.png",
     full: "v1784058139/charlie-says_legryi.png"
   },
   "city-ladies-celebrating": {
@@ -616,10 +618,6 @@ const CARD_CATALOGUE = {
     categories: ["all","for-her","new-jobs"],
     preview: "v1784209447/leaving-girl1-preview_awpheh.png",
     full: "v1784208050/leaving-girl1_s4n0bw.png"
-  },
-  // TODO: not shown in the shop yet -- add title/categories/preview to sell this card
-  "leeds": {
-    full: "v1784378940/leeds_i1rvlh.png"
   },
   "liv-ladies-celebrating": {
     title: "Liverpool Ladies Celebrating Card",
@@ -1160,5 +1158,30 @@ const CARD_CATALOGUE = {
     categories: ["all","for-her","sports","celebrations"],
     preview: "v1784799276/pilates-princess-yoga_uiwtng.png",
     full: "v1784378957/yoga-girl_l1ilz8.png"
+     },
+  "10k-girl": {
+    title: "10k Achievement Girls",
+    categories: ["all","for-her","celebrations","sports"],
+    preview: "v1784800831/10k-girl-preview_h8h1e5.png",
+    full: "v1784800916/10k-girl_rdxdeu.png"
+  },
+  "10k-boy": {
+    title: "10k Achievement Boys",
+    categories: ["all","for-him","celebrations","sports"],
+    preview: "v1784800831/10k-boy-preview_mfky72.png",
+    full: "v1784800915/10k-boy_nxhe2v.png"
+  },
+  "marathon-girl": {
+    title: "Marathon Achievement Girls",
+    categories: ["all","for-her","celebrations","sports"],
+    preview: "v1784800829/marathon-girl-preview_pbagqz.png",
+    full: "v1784800918/marathon-girl_h3zkmt.png"
+  },
+  "marathon-boy": {
+    title: "Marathon Achievement ",
+    categories: ["all","for-her","celebrations","sports"],
+    preview: "v1784800830/marathon-boy-preview_eg1m43.png",
+    full: "v1784800919/marathon-boy_cqsrtw.png"
+  },
   }
 };
