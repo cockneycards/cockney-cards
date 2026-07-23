@@ -1,0 +1,1162 @@
+// cards-data.js
+//
+// SINGLE SOURCE OF TRUTH for the card catalogue. Both shop-cards.html and
+// editor.html load this file and build what they need from it -- so adding a
+// new card only means adding ONE entry below.
+//
+// HOW TO ADD A NEW CARD:
+// 1. Upload the shop thumbnail (preview) image and the full front-cover
+//    artwork to Cloudinary.
+// 2. Copy an existing entry below as a template, change the key (the id --
+//    keep it short, unique, no spaces) and fill in:
+//      title       - shown on the shop page
+//      categories  - array of category keys (see CATEGORIES list below)
+//      price       - optional, e.g. "£3.49"; omit to use DEFAULT_PRICE
+//      preview     - Cloudinary path for the shop thumbnail
+//      full        - Cloudinary path for the full card artwork (shown in the editor)
+// 3. Only if the card is personalisable, also add:
+//      name        - { left, top, startSize, minSize, maxSize, color,
+//                      fontFamily, fontWeight, canChangeSize, canChangeColor,
+//                      isCurved, curveRadius, tiltAngle, label, maxChars }
+//      age         - same idea, for a second field (shirt number, age, etc.)
+//    Any field you leave out falls back to the defaults in editor.html
+//    (DEFAULT_NAME_SETTINGS / DEFAULT_AGE_SETTINGS).
+// 4. Only if the card has swappable picture options (like brighton-girl1
+//    having 4 alternate photos), also add:
+//      variants    - [ { id: "unique-id", full: "cloudinary/path.png" }, ... ]
+//    (the main card itself is always the first/default picture -- variants
+//    are just the EXTRA alternate pictures)
+//
+// That's it -- nothing else needs to change. shop-cards.html picks new
+// cards up in the shop grid automatically, and editor.html picks them up
+// in the personaliser automatically.
+
+const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
+const DEFAULT_PRICE = "£2.49"; // used for any card that doesn't set its own price
+
+// Sidebar categories shown on the shop page: [key, label]
+const CATEGORIES = [
+  ["all","All Cards"],
+  ["for-her","For Her"],
+  ["for-him","For Him"],
+  ["sports","Sports"],
+  ["children","Children"],
+  ["thank-you","Thank you!"],
+  ["new-home","New Home"],
+  ["congratulations","Congratulations"],
+  ["new-jobs","New Jobs"],
+  ["weddings","Weddings"],
+  ["tv-movies","TV / Movies"],
+  ["celebrations","Celebrations"]
+];
+
+const CARD_CATALOGUE = {
+  "11plus-boy": {
+    title: "11 Plus Boy Card",
+    categories: ["all","for-him","congratulations"],
+    preview: "v1784209507/11plus-boy-preview_sf4n9y.png",
+    full: "v1784058134/11plus-boy_umzz8e.png"
+  },
+  "11plus-girl": {
+    title: "11 Plus Girl Card",
+    categories: ["all","for-her","congratulations"],
+    preview: "v1784209509/11plus-girl-preview_xdyo0z.png",
+    full: "v1784058129/11plus-girl_rmkpbe.png"
+  },
+  "11plus-kids": {
+    title: "11 Plus Kids Card",
+    categories: ["all","congratulations","children"],
+    preview: "v1784209512/11plus-kids-preview_a1hxrs.png",
+    full: "v1784058140/11plus-kids_wg25kp.png"
+  },
+  "80s-birthday": {
+    title: "80s Retro Birthday Card",
+    categories: ["all","celebrations"],
+    preview: "v1784209494/80s-birthday-preview_i8mnhc.png",
+    full: "v1784208088/80s-birthday_jeq3bk.png"
+  },
+  "90s-birthday": {
+    title: "90s Retro Birthday Card",
+    categories: ["all","celebrations"],
+    preview: "v1784209497/90s-birthday-preview_vmzyiu.png",
+    full: "v1784208085/90s-birthday_ldr2pi.png"
+  },
+  "afc-ladies-celebrating": {
+    title: "Arsenal Ladies Celebrating Card",
+    categories: ["all","sports","for-her"],
+    preview: "v1784384907/afc-ladies-celebrating-preview_y4roo9.png",
+    full: "v1784378958/afc-ladies-celebrating_dbnjcj.png"
+  },
+  "afc-ladies-shirt1": {
+    title: "Arsenal Ladies Shirt Card",
+    categories: ["all","sports","for-her"],
+    price: "£3.49",
+    preview: "v1784384847/afc-ladies-shirt1-preview_tyalug.png",
+    full: "v1784378958/afc-ladies-shirt1_mvge3p.png",
+    name: {
+      left: 882,
+      top: 515,
+      startSize: 26,
+      minSize: 20,
+      maxSize: 30,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 882,
+      top: 575,
+      startSize: 60,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    },
+    variants: [
+      {
+        id: "afc-ladies-shirt2",
+        full: "v1784378958/afc-ladies-shirt2_rcb305.png"
+      }
+    ]
+  },
+  "afc-men-shirt1": {
+    title: "Arsenal Shirt Card",
+    categories: ["all","sports","for-him"],
+    price: "£3.49",
+    preview: "v1784384813/afc-men-shirt1-preview_zzztbu.png",
+    full: "v1784378958/afc-men-shirt1_rsoquo.png",
+    name: {
+      left: 883,
+      top: 515,
+      startSize: 26,
+      minSize: 20,
+      maxSize: 30,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 883,
+      top: 555,
+      startSize: 70,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    },
+    variants: [
+      {
+        id: "afc-men-shirt2",
+        full: "v1784378963/afc-men-shirt2_qiabya.png"
+      }
+    ]
+  },
+  "afc-shirt": {
+    title: "Arsenal Birthday Shirt Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384850/afc-shirt-preview_wrvfab.png",
+    full: "v1784378964/afc-shirt_galno0.png",
+    name: {
+      left: 875,
+      top: 525,
+      startSize: 40,
+      minSize: 30,
+      maxSize: 45,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 875,
+      top: 615,
+      startSize: 90,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    }
+  },
+  "artsy-girl": {
+    title: "Artsy Girl Card",
+    categories: ["all","for-her","celebrations"],
+    preview: "v1784209514/artsy-girl-preview_ygwv7b.png",
+    full: "v1784058135/artsy-girl_gx8dwv.png"
+  },
+  "beer-boy": {
+    title: "Beer Boy Card",
+    categories: ["all","for-him","celebrations"],
+    preview: "v1784209517/beer-boy-preview_amm29h.png",
+    full: "v1784058080/beer-boy_hscpkf.png"
+  },
+  "brighton-celebrating": {
+    title: "Brighton Celebrating Card",
+    categories: ["all","sports"],
+    preview: "v1784384910/brighton-celebrating-preview_dl45ok.png",
+    full: "v1784378932/brighton-celebrating_rx9o8w.png"
+  },
+  "brighton-girl1": {
+    title: "Brighton Girl Card",
+    categories: ["all","sports","for-her"],
+    price: "£3.49",
+    preview: "v1784385725/brighton-girl1-preview_ind2xy.png",
+    full: "v1784378932/brighton-girl1_hkhhlx.png",
+    name: {
+      left: 890,
+      top: 470,
+      startSize: 26,
+      minSize: 20,
+      maxSize: 30,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 890,
+      top: 525,
+      startSize: 70,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    },
+    variants: [
+      {
+        id: "brighton-girl2",
+        full: "v1784378932/brighton-girl2_qfggnh.png"
+      },
+      {
+        id: "brighton-girl3",
+        full: "v1784378933/brighton-girl3_felwps.png"
+      },
+      {
+        id: "brighton-girl4",
+        full: "v1784378933/brighton-girl4_aau0lo.png"
+      }
+    ]
+  },
+  "cfc-shirt": {
+    title: "Chelsea Birthday Shirt Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384824/cfc-shirt-preview_lpmnh6.png",
+    full: "v1784378933/cfc-shirt_te7yee.png",
+    name: {
+      left: 883,
+      top: 548,
+      startSize: 40,
+      minSize: 30,
+      maxSize: 45,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 883,
+      top: 635,
+      startSize: 90,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    }
+  },
+  "cfc-shirt-blues1": {
+    title: "Chelsea Blues Shirt Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384855/cfc-shirt-blues1-preview_im3eo4.png",
+    full: "v1784378934/cfc-shirt-blues1_su1uof.png",
+    name: {
+      left: 890,
+      top: 525,
+      startSize: 26,
+      minSize: 20,
+      maxSize: 34,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 890,
+      top: 585,
+      startSize: 70,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    },
+    variants: [
+      {
+        id: "cfc-shirt-blues2",
+        full: "v1784378934/cfc-shirt-blues2_e4clio.png"
+      }
+    ]
+  },
+  // TODO: not shown in the shop yet -- add title/categories/preview to sell this card
+  "charlie-says": {
+    full: "v1784058139/charlie-says_legryi.png"
+  },
+  "city-ladies-celebrating": {
+    title: "City Ladies Celebrating Card",
+    categories: ["all","sports","for-her"],
+    preview: "v1784384881/city-ladies-celebrating-preview_i2jciz.png",
+    full: "v1784378934/city-ladies-celebrating_pqx4vc.png"
+  },
+  "cricket-boy1": {
+    title: "Cricket Card",
+    categories: ["all","sports","for-him"],
+    price: "£3.49",
+    preview: "v1784384816/cricket-boy1-preview_mta22z.png",
+    full: "v1784378934/cricket-boy1_l13ql9.png",
+    name: {
+      left: 860,
+      top: 260,
+      startSize: 70,
+      minSize: 50,
+      maxSize: 120,
+      fontFamily: "BubblegumSans",
+      fontWeight: "bold",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 120,
+      tiltAngle: -6,
+      label: "Name",
+      maxChars: 12
+    },
+    variants: [
+      {
+        id: "cricket-boy2",
+        full: "v1784378934/cricket-boy2_f4mjhh.png"
+      },
+      {
+        id: "cricket-boy3",
+        full: "v1784378935/cricket-boy3_nwi4d5.png"
+      },
+      {
+        id: "cricket-boy4",
+        full: "v1784378935/cricket-boy4_z9pggv.png"
+      }
+    ]
+  },
+  "dancing-queen": {
+    title: "Dancing Queen Card",
+    categories: ["all","celebrations","for-her"],
+    preview: "v1784384884/dancing-queen-preview_bgqzn5.png",
+    full: "v1784378936/dancing-queen_dr9ic2.png"
+  },
+  "darts-boy1": {
+    title: "Darts Card",
+    categories: ["all","sports","for-him"],
+    price: "£3.49",
+    preview: "v1784384810/darts-boy1-preview_bixvz3.png",
+    full: "v1784378936/darts-boy1_njlchs.png",
+    name: {
+      left: 885,
+      top: 290,
+      startSize: 110,
+      minSize: 90,
+      maxSize: 130,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 450,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    variants: [
+      {
+        id: "darts-boy2",
+        full: "v1784378937/darts-boy2_mrvrzn.png"
+      }
+    ]
+  },
+  "dj-boy": {
+    title: "DJ Boy Card",
+    categories: ["all","for-him","sports","children"],
+    preview: "v1784209498/dj-boy-preview_yqclnk.png",
+    full: "v1784208082/dj-boy_uyrjcy.png"
+  },
+  "drivingtest-boy1": {
+    title: "Driving Test Boy Card",
+    categories: ["all","for-him","congratulations"],
+    preview: "v1784209464/drivingtest-boy1-preview_mcgers.png",
+    full: "v1784208057/drivingtest-boy1_icejra.png"
+  },
+  "drivingtest-boy3": {
+    title: "Driving Pass Congratulations Card",
+    categories: ["all","for-him","congratulations"],
+    preview: "v1784209469/drivingtest-boy3-preview_eek6cj.png",
+    full: "v1784208062/drivingtest-boy3_sqejou.png"
+  },
+  "drivingtest-girl1": {
+    title: "Driving Test Girl Card",
+    categories: ["all","for-her","congratulations"],
+    preview: "v1784209469/drivingtest-girl1-preview_ilpeaq.png",
+    full: "v1784206064/drivingtest-girl1_hw1a1t.png"
+  },
+  "drivingtest-girl4": {
+    title: "Driving Pass Girl Card",
+    categories: ["all","for-her","congratulations"],
+    preview: "v1784209476/drivingtest-girl4-preview_n0onrv.png",
+    full: "v1784208061/drivingtest-girl4_grx0ed.png"
+  },
+  "exams-boy": {
+    title: "Exams Congratulations Boy Card",
+    categories: ["all","for-him","congratulations"],
+    preview: "v1784209521/exams-boy-preview_pwc5me.png",
+    full: "v1784058150/exams-boy_wuej29.png"
+  },
+  "exams-girl": {
+    title: "Exams Congratulations Girl Card",
+    categories: ["all","for-her","congratulations"],
+    preview: "v1784209524/exams-girl-preview_tysy1h.png",
+    full: "v1784058144/exams-girl_d2wyhs.png"
+  },
+  "gameboy-minecraft": {
+    title: "Minecraft Gaming Boy Card",
+    categories: ["all","for-him","sports","children"],
+    preview: "v1784209527/gameboy-minecraft-preview_smhncv.png",
+    full: "v1784058080/gameboy-minecraft_qhzdje.png"
+  },
+  "gamegirl-minecraft": {
+    title: "Minecraft Gaming Girl Card",
+    categories: ["all","for-her","sports","children"],
+    preview: "v1784209502/gamegirl-minecraft-preview_ccseer.png",
+    full: "v1784058085/gamegirl-minecraft_kn2sex.png"
+  },
+  "gamer-boy": {
+    title: "Gamer Boy Card",
+    categories: ["all","for-him","sports","children"],
+    preview: "v1784209529/gamer-boy-preview_zanxij.png",
+    full: "v1784058090/gamer-boy_k6ntmo.png"
+  },
+  "gamer-girl": {
+    title: "Gamer Girl Card",
+    categories: ["all","for-her","sports","children"],
+    preview: "v1784209531/gamer-girl-preview_jmm03m.png",
+    full: "v1784058096/gamer-girl_f8nufl.png"
+  },
+  "golfer": {
+    title: "Golf Card",
+    categories: ["all","sports","for-him"],
+    price: "£3.49",
+    preview: "v1784384800/golfer-preview_bwmbdo.png",
+    full: "v1784378938/golfer_gxfwrs.png",
+    name: {
+      left: 890,
+      top: 300,
+      startSize: 80,
+      minSize: 70,
+      maxSize: 100,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#112342",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 130,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    }
+  },
+  "grandad-racing": {
+    title: "Grandad Racing Card",
+    categories: ["all","sports","for-him"],
+    preview: "v1784384853/grandad-racing-preview_tx5k2p.png",
+    full: "v1784378939/grandad-racing_p7e3ov.png"
+  },
+  "ladies-lunch": {
+    title: "Ladies Lunch Card",
+    categories: ["all","for-her","celebrations"],
+    preview: "v1784209436/ladies-lunch-preview_apknm3.png",
+    full: "v1784058155/ladies-lunch_et7asg.png"
+  },
+  "ladies-shopping": {
+    title: "Ladies Shopping Card",
+    categories: ["all","for-her","celebrations"],
+    preview: "v1784209534/ladies-shopping-preview_hxo8bq.png",
+    full: "v1784058157/ladies-shopping.png"
+  },
+  "leaving-boy": {
+    title: "Sorry You're Leaving Boy Card",
+    categories: ["all","for-him","new-jobs"],
+    preview: "v1784209445/leaving-boy-preview_opwuv7.png",
+    full: "v1784208051/leaving-boy_g8y7z0.png"
+  },
+  "leaving-girl": {
+    title: "Sorry You're Leaving Girl Card",
+    categories: ["all","for-her","new-jobs"],
+    preview: "v1784209454/leaving-girl-preview_sb81pd.png",
+    full: "v1784208050/leaving-girl_cu4lci.png"
+  },
+  "leaving-girl1": {
+    title: "We'll Miss You Girl Card",
+    categories: ["all","for-her","new-jobs"],
+    preview: "v1784209447/leaving-girl1-preview_awpheh.png",
+    full: "v1784208050/leaving-girl1_s4n0bw.png"
+  },
+  // TODO: not shown in the shop yet -- add title/categories/preview to sell this card
+  "leeds": {
+    full: "v1784378940/leeds_i1rvlh.png"
+  },
+  "liv-ladies-celebrating": {
+    title: "Liverpool Ladies Celebrating Card",
+    categories: ["all","sports","for-her"],
+    preview: "v1784384933/liv-ladies-celebrating-preview_clqk5x.png",
+    full: "v1784378940/liv-ladies-celebrating_ew6s9c.png"
+  },
+  "liv-shirt": {
+    title: "Liverpool Shirt Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384862/liv-shirt-preview_v9mbzv.png",
+    full: "v1784378940/liv-shirt_kbtxdd.png",
+    name: {
+      left: 885,
+      top: 550,
+      startSize: 40,
+      minSize: 30,
+      maxSize: 45,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 885,
+      top: 635,
+      startSize: 90,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    }
+  },
+  "masters-boy1": {
+    title: "Masters Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384868/masters-boy1-preview_da6dfj.png",
+    full: "v1784378941/masters-boy1_dgrlf5.png",
+    name: {
+      left: 885,
+      top: 150,
+      startSize: 70,
+      minSize: 50,
+      maxSize: 100,
+      fontFamily: "BubblegumSans",
+      fontWeight: "bold",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 100,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    variants: [
+      {
+        id: "masters-boy2",
+        full: "v1784378942/masters-boy2_jojmtr.png"
+      }
+    ]
+  },
+  "mfc-christmas": {
+    title: "Millwall Christmas Card",
+    categories: ["all","sports","celebrations"],
+    preview: "v1784384874/mfc-christmas-preview_ellmj6.png",
+    full: "v1784384302/mfc-christmas_xam3fy.png"
+  },
+  "mfc-shirt": {
+    title: "Millwall Shirt Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384805/mfc-shirt-preview_odzlng.png",
+    full: "v1784378942/mfc-shirt_q9iuol.png",
+    name: {
+      left: 885,
+      top: 550,
+      startSize: 40,
+      minSize: 30,
+      maxSize: 45,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 885,
+      top: 635,
+      startSize: 90,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    }
+  },
+  "netball-girl1": {
+    title: "Netball Girl Card",
+    categories: ["all","sports","for-her"],
+    price: "£3.49",
+    preview: "v1784384791/netball-girl1-preview_amq1f1.png",
+    full: "v1784378944/netball-girl1_ood1bz.png",
+    name: {
+      left: 895,
+      top: 243,
+      startSize: 53,
+      minSize: 50,
+      maxSize: 57,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 480,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 867,
+      top: 588,
+      startSize: 53,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: false,
+      lettersOnly: true,
+      forceUppercase: true,
+      defaultText: "GA"
+    },
+    variants: [
+      {
+        id: "netball-girl2",
+        full: "v1784378945/netball-girl2_cfgnel.png"
+      },
+      {
+        id: "netball-girl3",
+        full: "v1784378946/netball-girl3_h2kic9.png"
+      },
+      {
+        id: "netball-girl4",
+        full: "v1784378946/netball-girl4_dz5von.png"
+      }
+    ]
+  },
+  // TODO: no artwork on file for the editor -- this card is currently broken (Personalise will fail)
+  "netball-queen2": {
+    title: "Netball Queen Card",
+    categories: ["all","sports","for-her"],
+    price: "£3.49",
+    preview: "v1784384859/netball-queen2-preview_gxkgfh.png"
+  },
+  "new-home": {
+    title: "New Home Card",
+    categories: ["all","new-home"],
+    preview: "v1784209536/new-home-preview_xnugt2.png",
+    full: "v1784058157/new-home_wgtf1r.png"
+  },
+  "newjob-teacher-boy1": {
+    title: "New Teacher Job Boy Card",
+    categories: ["all","for-him","new-jobs"],
+    preview: "v1784209456/newjob-teacher-boy1-preview_zlabbg.png",
+    full: "v1784208072/newjob-teacher-boy1_qnrwb4.png"
+  },
+  "newjob-teacher-girl1": {
+    title: "New Teacher Job Girl Card",
+    categories: ["all","for-her","new-jobs"],
+    preview: "v1784209478/newjob-teacher-girl1-preview_oyv8wd.png",
+    full: "v1784208067/newjob-teacher-girl1_kkh4bb.png"
+  },
+  "nolu-lion1": {
+    title: "No One Likes Us Lion Card",
+    categories: ["all","sports"],
+    preview: "v1784384877/nolu-lion1-preview_bggbwy.png",
+    full: "v1784382014/nolu-lion1_fzvvj0.png",
+    name: {
+      left: 885,
+      top: 250,
+      startSize: 100,
+      minSize: 70,
+      maxSize: 130,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 100,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    }
+  },
+  "rugby-shirt": {
+    title: "Rugby Shirt Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384803/rugby-shirt-preview_umrbqf.png",
+    full: "v1784378950/rugby-shirt_raclg6.png",
+    name: {
+      left: 885,
+      top: 550,
+      startSize: 40,
+      minSize: 30,
+      maxSize: 45,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#000000",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 885,
+      top: 635,
+      startSize: 90,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#000000",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    }
+  },
+  "spurs-girl1": {
+    title: "Spurs Girl Card",
+    categories: ["all","sports","for-her"],
+    price: "£3.49",
+    preview: "v1784384916/spurs-girl1-preview_u6eocf.png",
+    full: "v1784378950/spurs-girl1_jiodfu.png",
+    name: {
+      left: 900,
+      top: 350,
+      startSize: 26,
+      minSize: 20,
+      maxSize: 34,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#12244F",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 900,
+      top: 410,
+      startSize: 70,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#12244F",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    },
+    variants: [
+      {
+        id: "spurs-girl2",
+        full: "v1784378951/spurs-girl2_j0pnme.png"
+      },
+      {
+        id: "spurs-girl3",
+        full: "v1784378951/spurs-girl3_byfsc2.png"
+      },
+      {
+        id: "spurs-girl4",
+        full: "v1784378951/spurs-girl4_yvzlyv.png"
+      }
+    ]
+  },
+  "spurs-ladies-celebrating": {
+    title: "Spurs Ladies Celebrating Card",
+    categories: ["all","sports","for-her"],
+    preview: "v1784384827/spurs-ladies-celebrating-preview_sucj4s.png",
+    full: "v1784378952/spurs-ladies-celebrating_k3u51y.png"
+  },
+  "superteacher-boy": {
+    title: "Super Teacher Boy Card",
+    categories: ["all","for-him","thank-you"],
+    preview: "v1784209480/superteacher-boy-preview_m28awi.png",
+    full: "v1784208060/superteacher-boy_gaptps.png"
+  },
+  "superteacher-girl": {
+    title: "Super Teacher Girl Card",
+    categories: ["all","for-her","thank-you"],
+    preview: "v1784209483/superteacher-girl-preview_cbxnp1.png",
+    full: "v1784208066/superteacher-girl_iyeekh.png"
+  },
+  "thankyou-teacher": {
+    title: "Thank You Teacher Card",
+    categories: ["all","thank-you"],
+    price: "£3.49",
+    preview: "v1784209503/thankyou-teacher-preview_j609g7.png",
+    full: "v1784058119/thankyou-teacher_vnh8yv.png",
+    name: {
+      left: 898,
+      top: 728,
+      startSize: 52,
+      minSize: 35,
+      maxSize: 60,
+      fontFamily: "BubblegumSans",
+      fontWeight: "bold",
+      color: "#FD7D96",
+      canChangeSize: true,
+      canChangeColor: true,
+      canMove: false,
+      canRotate: false,
+      isCurved: false,
+      curveRadius: 0,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 14
+    }
+  },
+  "topboy-mfc": {
+    title: "Topboy Millwall FC Card",
+    categories: ["all","for-him","sports"],
+    preview: "v1784209485/topboy-mfc-preview_oe0tyj.png",
+    full: "v1784208079/topboy-mfc_flvp3e.png"
+  },
+  "topboy-whu": {
+    title: "Topboy West Ham United Card",
+    categories: ["all","for-him","sports"],
+    preview: "v1784209487/topboy-whu-preview_vpmzeb.png",
+    full: "v1784208073/topboy-whu_jvukd8.png"
+  },
+  "tot-shirt": {
+    title: "Tottenham Shirt Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384844/tot-shirt-preview_rxxau9.png",
+    full: "v1784378957/tot-shirt_bc5eeb.png",
+    name: {
+      left: 885,
+      top: 550,
+      startSize: 40,
+      minSize: 30,
+      maxSize: 45,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 885,
+      top: 635,
+      startSize: 90,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    }
+  },
+  "tvmovies-bttf": {
+    title: "Back to the Future TV Card",
+    categories: ["all","tv-movies"],
+    preview: "v1784209436/tvmovies-bttf_preview_kdtytk.png",
+    full: "v1784058158/tvmovies-bttf.png"
+  },
+  "tvmovies-inbetweeners": {
+    title: "The Inbetweeners TV Card",
+    categories: ["all","tv-movies"],
+    preview: "v1784209439/tvmovies-inbetweeners-preview_srj2ni.png",
+    full: "v1784058166/tvmovies-inbetweeners.png"
+  },
+  "tvmovies-jaws1": {
+    title: "Jaws \"We're Gonna Need a Bigger Boat\" Card",
+    categories: ["all","tv-movies"],
+    preview: "v1784209440/tvmovies-jaws1-preview_vsu0rh.png",
+    full: "v1784058069/tvmovies-jaws_sfqlhq.png",
+    variants: [
+      {
+        id: "tvmovies-jaws2",
+        full: "v1784208083/tvmovies-jaws2_ohhblo.png"
+      }
+    ]
+  },
+  "tvmovies-ofah": {
+    title: "Only Fools and Horses TV Card",
+    categories: ["all","tv-movies"],
+    preview: "v1784209442/tvmovies-ofah_preview_f21tnx.png",
+    full: "v1784058159/ofah.png"
+  },
+  "tvmovies-quadrophenia": {
+    title: "Quadrophenia Film Card",
+    categories: ["all","tv-movies"],
+    preview: "v1784209492/tvmovies-quadrophenia-preview_rmi4fj.png",
+    full: "v1784208078/tvmovies-quadrophenia_t2egjh.png"
+  },
+  "tvmovies-youngones": {
+    title: "The Young Ones TV Card",
+    categories: ["all","tv-movies"],
+    preview: "v1784209444/tvmovies-youngones_v5lemm.png",
+    full: "v1784058082/tvmovies-youngones_znc8wj.png"
+  },
+  "whu-shirt": {
+    title: "West Ham Shirt Card",
+    categories: ["all","sports"],
+    price: "£3.49",
+    preview: "v1784384829/whu-shirt-preview_azohtz.png",
+    full: "v1784378957/whu-shirt_zj7c65.png",
+    name: {
+      left: 885,
+      top: 550,
+      startSize: 40,
+      minSize: 30,
+      maxSize: 45,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: false,
+      canMove: false,
+      canRotate: false,
+      isCurved: true,
+      curveRadius: 150,
+      tiltAngle: 0,
+      label: "Name",
+      maxChars: 12
+    },
+    age: {
+      left: 885,
+      top: 635,
+      startSize: 90,
+      minSize: 20,
+      maxSize: 120,
+      fontFamily: "Anton",
+      fontWeight: "normal",
+      color: "#FFFFFF",
+      canChangeSize: true,
+      canChangeColor: true,
+      label: "Shirt",
+      maxChars: 2,
+      numericOnly: true,
+      lettersOnly: false,
+      forceUppercase: false,
+      defaultText: "40"
+    }
+  },
+  "wine-girls": {
+    title: "Wine Girls Card",
+    categories: ["all","for-her","celebrations"],
+    preview: "v1784209539/wine-girls-preview_pnfprf.png",
+    full: "v1784058128/wine-girl_lxwhit.png"
+  },
+  // TODO: not shown in the shop yet -- add title/categories/preview to sell this card
+  "yoga-girl": {
+    full: "v1784378957/yoga-girl_l1ilz8.png"
+  }
+};
