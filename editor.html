@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="cards-data.js"></script>
 
 <style>
     @font-face {
@@ -151,7 +152,6 @@
                 <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
                 <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)">
 
-                <label style="margin-top:10px; display:block;">Text Colour:</label>
                 <div class="flex-row">
                     <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
                     <span>Choose Font Colour</span>
@@ -216,8 +216,7 @@
 </footer>
 
 <script>
-const CLOUDINARY_CLOUD_NAME = "uzf4eeky"; // still used to load the card template artwork below
-const CLOUD_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/`;
+// CLOUD_BASE comes from cards-data.js (loaded above).
 
 // ---- Print-ready PDF settings ----
 // Trim (cut) size of ONE card panel, before folding, in millimetres.
@@ -253,190 +252,37 @@ const DEFAULT_AGE_SETTINGS = {
     defaultText: "40"   // placeholder text shown on the canvas before the customer types anything
 };
 
-// ---- Card catalogue: just filename paths, so each card is one line ----
-const CARD_PATHS = {
-    "11plus-boy": "v1784058134/11plus-boy_umzz8e.png",
-    "11plus-girl": "v1784058129/11plus-girl_rmkpbe.png",
-    "11plus-kids": "v1784058140/11plus-kids_wg25kp.png",
-    "80s-birthday": "v1784208088/80s-birthday_jeq3bk.png",
-    "90s-birthday": "v1784208085/90s-birthday_ldr2pi.png",
-    "artsy-girl": "v1784058135/artsy-girl_gx8dwv.png",
-    "beer-boy": "v1784058080/beer-boy_hscpkf.png",
-    "charlie-says": "v1784058139/charlie-says_legryi.png",
-    "dj-boy": "v1784208082/dj-boy_uyrjcy.png",
-    "drivingtest-boy1": "v1784208057/drivingtest-boy1_icejra.png",
-    "drivingtest-boy3": "v1784208062/drivingtest-boy3_sqejou.png",
-    "drivingtest-girl1": "v1784206064/drivingtest-girl1_hw1a1t.png",
-    "drivingtest-girl4": "v1784208061/drivingtest-girl4_grx0ed.png",
-    "exams-boy": "v1784058150/exams-boy_wuej29.png",
-    "exams-girl": "v1784058144/exams-girl_d2wyhs.png",
-    "gameboy-minecraft": "v1784058080/gameboy-minecraft_qhzdje.png",
-    "gamegirl-minecraft": "v1784058085/gamegirl-minecraft_kn2sex.png",
-    "gamer-boy": "v1784058090/gamer-boy_k6ntmo.png",
-    "gamer-girl": "v1784058096/gamer-girl_f8nufl.png",
-    "ladies-lunch": "v1784058155/ladies-lunch_et7asg.png",
-    "ladies-shopping": "v1784058157/ladies-shopping.png",
-    "leaving-boy": "v1784208051/leaving-boy_g8y7z0.png",
-    "leaving-girl": "v1784208050/leaving-girl_cu4lci.png",
-    "leaving-girl1": "v1784208050/leaving-girl1_s4n0bw.png",
-    "new-home": "v1784058157/new-home_wgtf1r.png",
-    "newjob-teacher-boy1": "v1784208072/newjob-teacher-boy1_qnrwb4.png",
-    "newjob-teacher-girl1": "v1784208067/newjob-teacher-girl1_kkh4bb.png",
-    "superteacher-boy": "v1784208060/superteacher-boy_gaptps.png",
-    "superteacher-girl": "v1784208066/superteacher-girl_iyeekh.png",
-    "thankyou-teacher": "v1784058119/thankyou-teacher_vnh8yv.png",
-    "topboy-mfc": "v1784208079/topboy-mfc_flvp3e.png",
-    "topboy-whu": "v1784208073/topboy-whu_jvukd8.png",
-    "tvmovies-bttf": "v1784058158/tvmovies-bttf.png",
-    "tvmovies-inbetweeners": "v1784058166/tvmovies-inbetweeners.png",
-    "tvmovies-jaws1": "v1784058069/tvmovies-jaws_sfqlhq.png",
-    "tvmovies-jaws2": "v1784208083/tvmovies-jaws2_ohhblo.png",
-    "tvmovies-ofah": "v1784058159/ofah.png",
-    "tvmovies-quadrophenia": "v1784208078/tvmovies-quadrophenia_t2egjh.png",
-    "tvmovies-youngones": "v1784058082/tvmovies-youngones_znc8wj.png",
-    "wine-girls": "v1784058128/wine-girl_lxwhit.png",
-    "afc-ladies-celebrating": "v1784378958/afc-ladies-celebrating_dbnjcj.png",
-    "afc-ladies-shirt1": "v1784378958/afc-ladies-shirt1_mvge3p.png",
-    "afc-ladies-shirt2": "v1784378958/afc-ladies-shirt2_rcb305.png",
-    "afc-men-shirt1": "v1784378958/afc-men-shirt1_rsoquo.png",
-    "afc-men-shirt2": "v1784378963/afc-men-shirt2_qiabya.png",
-    "afc-shirt": "v1784378964/afc-shirt_galno0.png",
-    "brighton-celebrating": "v1784378932/brighton-celebrating_rx9o8w.png",
-    "brighton-girl1": "v1784378932/brighton-girl1_hkhhlx.png",
-    "brighton-girl2": "v1784378932/brighton-girl2_qfggnh.png",
-    "brighton-girl3": "v1784378933/brighton-girl3_felwps.png",
-    "brighton-girl4": "v1784378933/brighton-girl4_aau0lo.png",
-    "cfc-shirt": "v1784378933/cfc-shirt_te7yee.png",
-    "cfc-shirt-blues2": "v1784378934/cfc-shirt-blues2_e4clio.png",
-    "cfc-shirt-blues1": "v1784378934/cfc-shirt-blues1_su1uof.png",
-    "city-ladies-celebrating": "v1784378934/city-ladies-celebrating_pqx4vc.png",
-    "cricket-boy1": "v1784378934/cricket-boy1_l13ql9.png",
-    "cricket-boy2": "v1784378934/cricket-boy2_f4mjhh.png",
-    "cricket-boy3": "v1784378935/cricket-boy3_nwi4d5.png",
-    "cricket-boy4": "v1784378935/cricket-boy4_z9pggv.png",
-    "dancing-queen": "v1784378936/dancing-queen_dr9ic2.png",
-    "darts-boy1": "v1784378936/darts-boy1_njlchs.png",
-    "darts-boy2": "v1784378937/darts-boy2_mrvrzn.png",
-    "golfer": "v1784378938/golfer_gxfwrs.png",
-    "grandad-racing": "v1784378939/grandad-racing_p7e3ov.png",
-    "leeds": "v1784378940/leeds_i1rvlh.png",
-    "liv-ladies-celebrating": "v1784378940/liv-ladies-celebrating_ew6s9c.png",
-    "liv-shirt": "v1784378940/liv-shirt_kbtxdd.png",
-    "masters-boy1": "v1784378941/masters-boy1_dgrlf5.png",
-    "masters-boy2": "v1784378942/masters-boy2_jojmtr.png",
-    "mfc-christmas": "v1784384302/mfc-christmas_xam3fy.png",
-    "mfc-shirt": "v1784378942/mfc-shirt_q9iuol.png",
-    "netball-girl1": "v1784378944/netball-girl1_ood1bz.png",
-    "netball-girl2": "v1784378945/netball-girl2_cfgnel.png",
-    "netball-girl3": "v1784378946/netball-girl3_h2kic9.png",
-    "netball-girl4": "v1784378946/netball-girl4_dz5von.png",
-    "nolu-lion1": "v1784382014/nolu-lion1_fzvvj0.png",
-    "rugby-shirt": "v1784378950/rugby-shirt_raclg6.png",
-    "spurs-girl1": "v1784378950/spurs-girl1_jiodfu.png",
-    "spurs-girl2": "v1784378951/spurs-girl2_j0pnme.png",
-    "spurs-girl3": "v1784378951/spurs-girl3_byfsc2.png",
-    "spurs-girl4": "v1784378951/spurs-girl4_yvzlyv.png",
-    "spurs-ladies-celebrating": "v1784378952/spurs-ladies-celebrating_k3u51y.png",
-    "tot-shirt": "v1784378957/tot-shirt_bc5eeb.png",
-    "whu-shirt": "v1784378957/whu-shirt_zj7c65.png",
-    "yoga-girl": "v1784378957/yoga-girl_l1ilz8.png"
-};
-
-// Per-card overrides for cards that need personalised text (everything else
-// defaults to { name: null, age: null } — i.e. not personalised).
-const CARD_OVERRIDES = {
-    "thankyou-teacher": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 898, top: 728, startSize: 52, minSize: 35, maxSize: 60, color: "#FD7D96", canChangeColor: true }
-    },
-    "mfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" },
-    },
-    "liv-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "afc-ladies-shirt1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 882, top: 515, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 882, top: 575, startSize: 60, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "afc-men-shirt1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 883, top: 515, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 883, top: 555, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "afc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 875, top: 525, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 875, top: 615, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" },
-    },
-    "brighton-girl1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 }, 
-        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 525, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "cfc-shirt-blues1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 525, startSize: 26, minSize: 20, maxSize: 34, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 }, 
-        age: { ...DEFAULT_AGE_SETTINGS, left: 890, top: 585, startSize: 70, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "cfc-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 883, top: 548, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 883, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "cricket-boy1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 860, top: 260, startSize: 70, minSize: 50, maxSize: 120, color: "#FFFFFF", isCurved: true, curveRadius: 120, tiltAngle: -6, maxChars: 12 },
-    },
-    "nolu-lion1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 250, startSize: 100, minSize: 70, maxSize: 130, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 100, maxChars: 12 },
-    },
-    "darts-boy1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 290, startSize: 110, minSize: 90, maxSize: 130, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 450, maxChars: 12 },
-    },
-    "golfer": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, color: "#112342", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 130, maxChars: 12 },
-    },
-    "masters-boy1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 150, startSize: 70, minSize: 50, maxSize: 100, color: "#FFFFFF", isCurved: true, curveRadius: 100, maxChars: 12 },
-    },
-    "netball-girl1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 895, top: 243, startSize: 53, minSize: 50, maxSize: 57, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 480, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 867, top: 588, startSize: 53, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, numericOnly: false, lettersOnly: true, forceUppercase: true, label: "Shirt", defaultText: "GA" }
-    },
-    "rugby-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#000000", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#000000", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "spurs-girl1": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 900, top: 350, startSize: 26, minSize: 20, maxSize: 34, color: "#12244F", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 900, top: 410, startSize: 70, color: "#12244F", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "tot-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    },
-    "whu-shirt": {
-        name: { ...DEFAULT_NAME_SETTINGS, left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", isCurved: true, curveRadius: 150, maxChars: 12 },
-        age: { ...DEFAULT_AGE_SETTINGS, left: 885, top: 635, startSize: 90, color: "#FFFFFF", fontFamily: "Anton", fontWeight: "normal", maxChars: 2, label: "Shirt" }
-    }
-};
-
-// Build the final template lookup once, from the compact data above.
+// ---- Card catalogue: built from the shared CARD_CATALOGUE (cards-data.js) ----
+// CARD_TEMPLATES: what the editor actually needs per card -- full artwork
+// URL, plus name/age personalisation settings merged onto the defaults.
 const CARD_TEMPLATES = Object.fromEntries(
-    Object.entries(CARD_PATHS).map(([key, path]) => [
-        key,
-        { url: CLOUD_BASE + path, name: null, age: null, ...(CARD_OVERRIDES[key] || {}) }
-    ])
+    Object.entries(CARD_CATALOGUE)
+        .filter(([id, c]) => c.full)
+        .map(([id, c]) => [
+            id,
+            {
+                url: CLOUD_BASE + c.full,
+                name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
+                age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null
+            }
+        ])
 );
 
-const CARD_VARIANTS = {
-    "tvmovies-jaws1": ["tvmovies-jaws1", "tvmovies-jaws2"],
-    "brighton-girl1": ["brighton-girl1", "brighton-girl2", "brighton-girl3", "brighton-girl4"],
-    "afc-ladies-shirt1": ["afc-ladies-shirt1", "afc-ladies-shirt2"],
-    "afc-men-shirt1": ["afc-men-shirt1", "afc-men-shirt2"],
-    "cfc-shirt-blues1": ["cfc-shirt-blues1", "cfc-shirt-blues2"],
-    "cricket-boy1": ["cricket-boy1", "cricket-boy2", "cricket-boy3", "cricket-boy4"],
-    "darts-boy1": ["darts-boy1", "darts-boy2"],
-    "masters-boy1": ["masters-boy1", "masters-boy2"],
-    "netball-girl1": ["netball-girl1", "netball-girl2", "netball-girl3", "netball-girl4"],
-    "spurs-girl1": ["spurs-girl1", "spurs-girl2", "spurs-girl3", "spurs-girl4"]
-};
+// CARD_VARIANTS: swappable picture options per card, e.g. brighton-girl1's
+// 4 alternate photos. Built from each catalogue entry's `variants` list.
+const CARD_VARIANTS = Object.fromEntries(
+    Object.entries(CARD_CATALOGUE)
+        .filter(([id, c]) => c.variants && c.variants.length)
+        .map(([id, c]) => [id, [id, ...c.variants.map(v => v.id)]])
+);
+
+// Cloudinary path lookup for every variant sub-image (the primary image for
+// each card already comes from CARD_TEMPLATES[id].url above).
+const VARIANT_PATHS = Object.fromEntries(
+    Object.values(CARD_CATALOGUE)
+        .filter(c => c.variants)
+        .flatMap(c => c.variants.map(v => [v.id, v.full]))
+);
 
 // ---- Canvas / layout constants ----
 const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 1191, CANVAS_HEIGHT = 840;
@@ -526,6 +372,7 @@ function initEditor(templateKey) {
 
     $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
     $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
+    $("front-color").value = activeTemplate.name?.color || "#FFFFFF";
 
     const canvasElement = $("canvas");
     canvasElement.width = EDIT_WIDTH;
@@ -596,10 +443,18 @@ function loadFrontCover(imageUrl) {
     }, { crossOrigin: 'anonymous' });
 }
 
+// Full artwork URL for any card id OR variant sub-id, from whichever of
+// the two catalogue-derived lookups has it.
+function artUrlFor(key) {
+    if (CARD_TEMPLATES[key]) return CARD_TEMPLATES[key].url;
+    if (VARIANT_PATHS[key]) return CLOUD_BASE + VARIANT_PATHS[key];
+    return null;
+}
+
 // Builds the row of thumbnail buttons for a card's picture options (if it
 // has any). Clicking a thumbnail just swaps the background picture via
 // selectVariant() below — name/age text, position, colour etc. all stay
-// exactly as defined by this card's CARD_OVERRIDES the whole time.
+// exactly as defined by this card's entry in cards-data.js the whole time.
 function setupVariantSelector(templateKey) {
     const variants = CARD_VARIANTS[templateKey];
     const container = $("variant-selector");
@@ -617,7 +472,7 @@ function setupVariantSelector(templateKey) {
         btn.className = "variant-thumb" + (key === activeVariantKey ? " active" : "");
         btn.dataset.key = key;
         btn.title = key;
-        btn.innerHTML = `<img src="${CLOUD_BASE + CARD_PATHS[key]}" alt="${key}">`;
+        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}">`;
         btn.onclick = () => selectVariant(key);
         container.appendChild(btn);
     });
@@ -627,10 +482,11 @@ function setupVariantSelector(templateKey) {
 // CARD_VARIANTS group, then re-fits it to the panel and highlights the
 // matching thumbnail.
 function selectVariant(key) {
-    if (!bgImg || key === activeVariantKey || !CARD_PATHS[key]) return;
+    const url = artUrlFor(key);
+    if (!bgImg || key === activeVariantKey || !url) return;
     activeVariantKey = key;
 
-    bgImg.setSrc(CLOUD_BASE + CARD_PATHS[key], () => {
+    bgImg.setSrc(url, () => {
         bgImg.set({
             scaleX: PANEL_WIDTH / bgImg.width,
             scaleY: CANVAS_HEIGHT / bgImg.height
@@ -709,7 +565,7 @@ function updateNameText(inputEl) {
 
     if (n.isCurved) {
         const size = Number($("front-size").value) || n.startSize;
-        const color = $("front-color").value || n.color;
+        const color = n.canChangeColor ? ($("front-color").value || n.color) : n.color;
         replaceNameText(buildCurvedNameGroup(displayVal, size, color));
     } else {
         nameText.set({ text: displayVal || "NAME" });
@@ -752,7 +608,7 @@ function updateFrontSize(size) {
     if (nameText && n) {
         if (n.isCurved) {
             const val = $("name-input").value;
-            const color = $("front-color").value || n.color;
+            const color = n.canChangeColor ? ($("front-color").value || n.color) : n.color;
             replaceNameText(buildCurvedNameGroup(val, Number(size), color));
         } else {
             nameText.set({ fontSize: Number(size) });
