@@ -1155,8 +1155,10 @@ const CARD_CATALOGUE = {
     preview: "v1784209539/wine-girls-preview_pnfprf.png",
     full: "v1784058128/wine-girl_lxwhit.png"
   },
-  // TODO: not shown in the shop yet -- add title/categories/preview to sell this card
   "yoga-girl": {
+    title: "Pilates Princess",
+    categories: ["all","for-her","sports","celebrations"],
+    preview: "v1784799276/pilates-princess-yoga_uiwtng.png",
     full: "v1784378957/yoga-girl_l1ilz8.png"
   }
 };
