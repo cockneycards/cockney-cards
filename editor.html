@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Personalise Your Card | Cockney Cards</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
 <style>
@@ -181,6 +182,12 @@
         </div>
 
         <button id="buy-now-btn" class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
+
+        <!-- TESTING ONLY — downloads the print-ready PDFs straight to your
+             downloads folder so you can test-print and set up guillotine/cut
+             settings. Remove this button before going live. -->
+        <button id="test-download-btn" class="btn" style="background-color:#1A73E8;" onclick="testDownloadPrintPDFs()">Test: Download Print PDFs</button>
+
         <button class="btn btn-close" onclick="window.location.href='shop-cards.html'">Cancel & Return</button>
     </div>
 </div>
@@ -209,9 +216,20 @@
 </footer>
 
 <script>
-const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
-const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET_HERE";
+const CLOUDINARY_CLOUD_NAME = "uzf4eeky"; // still used to load the card template artwork below
 const CLOUD_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/`;
+
+// ---- Print-ready PDF settings ----
+// Trim (cut) size of ONE card panel, before folding, in millimetres.
+const PRINT_PANEL_MM = { width: 133, height: 184 };
+// Bleed added to the outer edges of the flat spread only — not at the
+// centre fold, since nothing gets cut there.
+const PRINT_BLEED_MM = 2;
+// Both captured spreads (outside = back+front, inside = both message
+// panels) are two panels joined side by side.
+const PRINT_PANELS_PER_SPREAD = 2;
+// Spreads are wider than tall, so they're printed on landscape A4.
+const A4_LANDSCAPE_MM = { width: 297, height: 210 };
 
 // ---- Text style defaults (reused / overridden per template) ----
 const DEFAULT_NAME_SETTINGS = {
@@ -890,46 +908,128 @@ function captureFullSpread() {
     });
 }
 
+// Draws one spread onto the current page of a jsPDF doc: the artwork at
+// exact bleed-inclusive size, centred on A4 landscape, plus trim marks at
+// the four corners of the cut line.
+function drawPrintPage(doc, imageDataUrl) {
+    const spreadWidthMM = (PRINT_PANEL_MM.width * PRINT_PANELS_PER_SPREAD) + (PRINT_BLEED_MM * 2);
+    const spreadHeightMM = PRINT_PANEL_MM.height + (PRINT_BLEED_MM * 2);
+
+    if (spreadWidthMM > A4_LANDSCAPE_MM.width || spreadHeightMM > A4_LANDSCAPE_MM.height) {
+        console.warn(`Print spread (${spreadWidthMM}x${spreadHeightMM}mm) exceeds A4 landscape — check PRINT_PANEL_MM / bleed settings.`);
+    }
+
+    const offsetX = (A4_LANDSCAPE_MM.width - spreadWidthMM) / 2;
+    const offsetY = (A4_LANDSCAPE_MM.height - spreadHeightMM) / 2;
+
+    // Card artwork, centred, at exact bleed-inclusive size.
+    doc.addImage(imageDataUrl, 'PNG', offsetX, offsetY, spreadWidthMM, spreadHeightMM);
+
+    // Trim marks at the four corners of the cut line (inset from the
+    // bleed edge by PRINT_BLEED_MM).
+    const trimX0 = offsetX + PRINT_BLEED_MM;
+    const trimY0 = offsetY + PRINT_BLEED_MM;
+    const trimX1 = offsetX + spreadWidthMM - PRINT_BLEED_MM;
+    const trimY1 = offsetY + spreadHeightMM - PRINT_BLEED_MM;
+    const markLen = 5; // mm
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.15);
+    [
+        [trimX0, trimY0, -1, -1],
+        [trimX1, trimY0, 1, -1],
+        [trimX0, trimY1, -1, 1],
+        [trimX1, trimY1, 1, 1],
+    ].forEach(([x, y, dx, dy]) => {
+        doc.line(x, y, x + dx * markLen, y);
+        doc.line(x, y, x, y + dy * markLen);
+    });
+}
+
+// Builds a single A4-landscape PDF with one page per spread passed in —
+// page 1 = outside spread, page 2 = inside spread. Returns the jsPDF doc,
+// ready for either .save() (local download) or .output('datauristring')
+// (for emailing later).
+async function buildPrintReadyPDF(imageDataUrls) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    imageDataUrls.forEach((imageDataUrl, i) => {
+        if (i > 0) doc.addPage('a4', 'landscape');
+        drawPrintPage(doc, imageDataUrl);
+    });
+
+    return doc;
+}
+
+// Captures both spreads (outside, inside) straight off the live editor
+// canvas and builds a single two-page print-ready PDF (page 1 = outside,
+// page 2 = inside). Shared by the real checkout flow and the local
+// test-download button so the capture logic — panel switching, hiding
+// editor-only borders/dashes, etc — only lives once.
+async function captureAndBuildPrintPDF() {
+    switchPage('front', false);
+    const outsideDataUrl = await captureFullSpread();
+
+    switchPage('inside', false);
+    resetBordersToDashed();
+    insideBgRects.forEach((r) => r.set({ visible: false }));
+    insideTexts.forEach((t) => t.set({ borderDashArray: null, borderColor: "transparent" }));
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+
+    const insideDataUrl = await captureFullSpread();
+
+    insideBgRects.forEach((r) => r.set({ visible: true }));
+    switchPage('inside', false);
+
+    return buildPrintReadyPDF([outsideDataUrl, insideDataUrl]);
+}
+
+// TESTING ONLY — downloads the print-ready PDF (outside spread on page 1,
+// inside spread on page 2) straight to the browser's downloads folder so
+// you can test-print and dial in guillotine/cut settings without going
+// through a real checkout. Remove this button (and its entry in the
+// controls markup) once you're ready to go live.
+async function testDownloadPrintPDFs() {
+    const testBtn = $('test-download-btn');
+    const originalText = testBtn.innerText;
+    testBtn.innerText = "Generating...";
+    testBtn.disabled = true;
+
+    try {
+        const doc = await captureAndBuildPrintPDF();
+        doc.save('card-print-TEST.pdf');
+    } catch (err) {
+        console.error(err);
+        alert("Test download failed — check the console for details.");
+    } finally {
+        testBtn.innerText = originalText;
+        testBtn.disabled = false;
+    }
+}
+
 async function uploadAndGoToCheckout() {
     const buyBtn = $('buy-now-btn');
     buyBtn.innerText = "Generating high-res pages...";
     buyBtn.disabled = true;
 
     try {
-        switchPage('front', false);
-        const page1DataUrl = await captureFullSpread();
+        buyBtn.innerText = "Building print files...";
+        const doc = await captureAndBuildPrintPDF();
 
-        switchPage('inside', false);
-        resetBordersToDashed();
-        insideBgRects.forEach((r) => r.set({ visible: false }));
-        insideTexts.forEach((t) => t.set({ borderDashArray: null, borderColor: "transparent" }));
-        canvas.discardActiveObject();
-        canvas.requestRenderAll();
-
-        const page2DataUrl = await captureFullSpread();
-
-        insideBgRects.forEach((r) => r.set({ visible: true }));
-        switchPage('inside', false);
-
-        buyBtn.innerText = "Uploading templates...";
-
-        // Upload both pages in parallel for faster checkout
-        const [p1Upload, p2Upload] = await Promise.all([
-            uploadToCloudinary(page1DataUrl),
-            uploadToCloudinary(page2DataUrl)
-        ]);
-
-        if (!p1Upload?.secure_url || !p2Upload?.secure_url) {
-            throw new Error("Upload failed. Verify Cloudinary credentials.");
-        }
+        // TODO once the business email address + a serverless email step
+        // (e.g. Resend/SendGrid via a Netlify function) are set up: attach
+        // doc.output('datauristring') to the request below so create-checkout
+        // can email the print-ready PDF to the business inbox after payment
+        // succeeds. For now, nothing is uploaded or emailed — use the
+        // "Test: Download Print PDFs" button to check the PDF locally.
 
         buyBtn.innerText = "Connecting checkout...";
 
         const checkoutData = {
             name: activeTemplate.name ? ($('name-input').value.toUpperCase() || "NAME") : "N/A",
-            age: ageText?.text ?? "N/A",
-            outsideImageUrl: p1Upload.secure_url,
-            insideImageUrl: p2Upload.secure_url
+            age: ageText?.text ?? "N/A"
         };
 
         const response = await fetch('/.netlify/functions/create-checkout', {
@@ -948,22 +1048,10 @@ async function uploadAndGoToCheckout() {
         }
     } catch (err) {
         console.error(err);
-        alert("Processing failed. Check Cloudinary settings!");
+        alert("Checkout processing failed. Check the console for details.");
         buyBtn.innerText = "Buy Now";
         buyBtn.disabled = false;
     }
-}
-
-async function uploadToCloudinary(base64Data) {
-    const formData = new FormData();
-    formData.append("file", base64Data);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-        method: "POST",
-        body: formData
-    });
-    return res.json();
 }
 
 function updateLoginUI(user) {
