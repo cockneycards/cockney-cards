@@ -401,12 +401,6 @@ const CARD_CATALOGUE = {
       }
     ]
   },
-  "charlie-says": {
-    title: "Charlie Says..",
-    categories: ["all","for-her","for-him"],
-    preview: "v1784209519/charlie-says-preview_iemrbl.png",
-    full: "v1784058139/charlie-says_legryi.png"
-  },
   "city-ladies-celebrating": {
     title: "City Ladies Celebrating Card",
     categories: ["all","sports","for-her"],
@@ -1183,5 +1177,10 @@ const CARD_CATALOGUE = {
     preview: "v1784800830/marathon-boy-preview_eg1m43.png",
     full: "v1784800919/marathon-boy_cqsrtw.png"
   },
+  "charlie-says": {
+    title: "Charlie Says..",
+    categories: ["all","for-her","for-him","celebrations"],
+    preview: "v1784209519/charlie-says-preview_iemrbl.png",
+    full: "v1784058139/charlie-says_legryi.png"
   }
 };
