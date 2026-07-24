@@ -179,6 +179,8 @@ const CARD_CATALOGUE = {
   "mothers-day1": { title: "Mothers Day", categories: ["all", "for-her", "seasonal", "mothersday-fathersday"], preview: "v1784815425/mothers-day1-preview_kaeipg.png", full: "v1784815626/mothers-day1_klzjdi.png" },
   
   "mothers-day2": { title: "Mothers Day", categories: ["all", "for-her", "seasonal", "mothersday-fathersday"], preview: "v1784815423/mothers-day2-preview_hvfvat.png", full: "v1784815624/mothers-day2_bsei4w.png" },
+
+  "mothers-day3": { title: "Mothers Day", categories: ["all", "for-her", "seasonal", "mothersday-fathersday"], preview: "v1784879975/mothers-day3-preview_f6pukx.png", full: "v1784879879/mothers-day3_i3ri9c.png" },
   
   "fathers-day-sopranos": { title: "Fathers Day Sopranos Dad", categories: ["all", "for-him", "mothersday-fathersday", "seasonal"], preview: "v1784815426/fathers-day-sopranos-preview_hikmeb.png", full: "v1784815629/fathers-day-sopranos_b83i2i.png" },
   
