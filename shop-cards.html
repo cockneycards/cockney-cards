@@ -32,7 +32,7 @@
         .shop-header p { font-size: 13px; color: #555; line-height: 1.6; margin: 0; max-width: 800px; }
 
         /* MAIN SHOP LAYOUT */
-        .shop-container { max-width: 1280px; margin: 0 auto; display: flex; gap: 40px; padding: 0 40px 60px 40px; box-sizing: border-box; }
+        .shop-container { max-width: 1280px; margin: 0 auto; display: flex; gap: 40px; padding: 0 40px 60px 40px; box-sizing: border-box; overflow-x: auto; min-width: 1180px; }
 
         /* SIDEBAR */
         .sidebar { width: 220px; flex-shrink: 0; }
@@ -42,7 +42,7 @@
         .category-list li a:hover, .category-list li a.active { color: #111; font-weight: bold; }
 
         /* PRODUCT GRID & SORTING */
-        .catalog-content { flex-grow: 1; }
+        .catalog-content { flex-grow: 1; flex-shrink: 0; min-width: 900px; }
         .catalog-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; font-size: 12px; color: #666; }
         .sort-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
         .sort-label select { font-size: 12px; color: #333; border: 1px solid var(--border-color); padding: 6px 10px; background: white; cursor: pointer; font-family: var(--font-family); border-radius: 3px; }
@@ -62,20 +62,14 @@
 
         /* FOOTER */
         footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; }
-        .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; }
+        .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
         .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
         .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
         .footer-col p { margin: 0 0 15px 0; }
         .footer-col a { color: #111; text-decoration: underline; }
         .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
 
-        @media (max-width: 1100px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 850px) {
-            .shop-container { flex-direction: column; }
-            .sidebar { width: 100%; }
-            .product-grid { grid-template-columns: repeat(2, 1fr); }
-            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
-        }
+
     </style>
 </head>
 <body>
