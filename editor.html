@@ -302,11 +302,14 @@ const BOX_WIDTH = 495, BOX_LEFT = 50 + PANEL_WIDTH;
 // - To let a panel fit more/fewer lines, change its `height`
 //   (roughly: lines x fontSize x 1.16, plus a little breathing room).
 const BOX_CONFIGS = [
-    { top: 55, height: 120 },  // top panel — ~2 lines
+    { top: 107, height: 120 }, // top panel — ~2 lines (moved down one line, closer to the middle panel)
     { top: 305, height: 225 }, // middle panel
     { top: 570, height: 225 }  // bottom panel
 ];
-const BOX_DEFAULT_TEXTS = ["Add Message Here", "Happy Birthday!\nHave a great day!", "Add Message Here"];
+const BOX_DEFAULT_TEXTS = ["Add Message Here", "Add\nMessage\nHere", "Add Message Here"];
+// Max number of lines (hard returns AND wrapped lines) allowed in each inside
+// box — top, middle, bottom. Typing/returning past this limit is blocked.
+const BOX_MAX_LINES = [2, 3, 2];
 
 const STYLE_DASHED = { borderDashArray: [4, 4], borderColor: "#cccccc", strokeWidth: 1.5 };
 const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth: 2 };
@@ -671,11 +674,40 @@ function setupTextEvents() {
     });
 
     canvas.on('text:editing:entered', ({ target }) => {
-        if (target.text === "Add Message Here") {
-            target.text = "";
-            target.hiddenTextarea.value = "";
+        const idx = insideTexts.indexOf(target);
+        if (idx !== -1 && target.text === BOX_DEFAULT_TEXTS[idx]) {
+            // Keep the placeholder text visible on click — select it all
+            // instead of wiping it, so it stays on screen until the
+            // customer actually starts typing (which replaces the
+            // selection in one go, same as any pre-filled text field).
+            target.selectAll();
             canvas.requestRenderAll();
         }
+        target._lastValidText = target.text;
+    });
+
+    // Enforce each box's max line count (BOX_MAX_LINES) — blocks typing or
+    // pressing return once the box has wrapped/broken to the limit, by
+    // reverting to the last valid text and restoring the cursor position.
+    insideTexts.forEach((textbox, i) => {
+        textbox._lastValidText = textbox.text;
+        const maxLines = BOX_MAX_LINES[i];
+
+        textbox.on('changed', () => {
+            if (textbox._textLines.length > maxLines) {
+                const cursorPos = textbox.selectionStart;
+                textbox.text = textbox._lastValidText;
+                const pos = Math.max(0, Math.min(cursorPos - 1, textbox.text.length));
+                textbox.selectionStart = textbox.selectionEnd = pos;
+                textbox.hiddenTextarea.value = textbox.text;
+                textbox.hiddenTextarea.selectionStart = textbox.hiddenTextarea.selectionEnd = pos;
+                textbox.initDimensions();
+                textbox.setCoords();
+            } else {
+                textbox._lastValidText = textbox.text;
+            }
+            canvas.requestRenderAll();
+        });
     });
 }
 
