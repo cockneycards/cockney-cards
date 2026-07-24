@@ -780,26 +780,6 @@ function drawPrintPage(doc, imageDataUrl) {
 
     // Card artwork, centred, at exact bleed-inclusive size.
     doc.addImage(imageDataUrl, 'PNG', offsetX, offsetY, spreadWidthMM, spreadHeightMM);
-
-    // Trim marks at the four corners of the cut line (inset from the
-    // bleed edge by PRINT_BLEED_MM).
-    const trimX0 = offsetX + PRINT_BLEED_MM;
-    const trimY0 = offsetY + PRINT_BLEED_MM;
-    const trimX1 = offsetX + spreadWidthMM - PRINT_BLEED_MM;
-    const trimY1 = offsetY + spreadHeightMM - PRINT_BLEED_MM;
-    const markLen = 5; // mm
-
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.15);
-    [
-        [trimX0, trimY0, -1, -1],
-        [trimX1, trimY0, 1, -1],
-        [trimX0, trimY1, -1, 1],
-        [trimX1, trimY1, 1, 1],
-    ].forEach(([x, y, dx, dy]) => {
-        doc.line(x, y, x + dx * markLen, y);
-        doc.line(x, y, x, y + dy * markLen);
-    });
 }
 
 // Builds a single A4-landscape PDF with one page per spread passed in —
