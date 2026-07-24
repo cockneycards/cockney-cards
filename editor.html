@@ -58,8 +58,8 @@
     .nav-links a:hover { color: #888; }
 
     /* EDITOR WORKSPACE */
-    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; }
-    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; max-width: 100%; }
+    .editor-workspace { display: flex; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; overflow-x: auto; min-width: 900px; }
+    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
     #canvas { border: 1px solid #e2e2e2; }
     .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
@@ -88,18 +88,14 @@
 
     /* FOOTER */
     footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
-    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
     .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
     .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
     .footer-col p { margin: 0 0 15px 0; }
     .footer-col a { color: #111; text-decoration: underline; }
     .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
 
-    @media (max-width: 900px) {
-        .editor-workspace { flex-direction: column; align-items: center; }
-        .controls { width: 100%; max-width: 595px; }
-        .footer-grid { grid-template-columns: 1fr; gap: 30px; }
-    }
+
 </style>
 </head>
 <body>
