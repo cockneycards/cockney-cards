@@ -20,7 +20,7 @@
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
 const DEFAULT_PRICE = "£2.49";
 
-const CATEGORIES = [["all", "All Cards"], ["for-her", "Cards For Her"], ["for-him", "Cards For Him"], ["birthdays", "Birthday Cards"], ["sports", "Sports Cards"], ["thank-you", "Thank You! Cards"], ["weddings-engagements", "Wedding & Engagement Cards"], ["home", "New Home Cards"], ["school-cards", "School Cards"], ["work-related", "Work Related Cards"], ["achievements", "Personal Achievement Cards"], ["children", "Childrens Cards"], ["tv-movies", "TV / Movie Cards "], ["seasonal", "Seasonal Cards"]];
+const CATEGORIES = [["all", "All Cards"], ["for-her", "Cards For Her"], ["for-him", "Cards For Him"], ["birthdays", "Birthday Cards"], ["sports", "Sports Cards"], ["thank-you", "Thank You! Cards"], ["weddings-engagements", "Wedding & Engagement Cards"], ["home", "New Home Cards"], ["school-cards", "School Cards"], ["work-related", "Work Related Cards"], ["achievements", "Personal Achievement Cards"], ["children", "Childrens Cards"], ["tv-movies", "TV / Movie Cards"], ["mothersday-fathersday", "Mothers & Fathers Day Cards "], ["seasonal", "Seasonal Cards"]];
 
 const CARD_CATALOGUE = {
   "11plus-boy": { title: "11 Plus Boy Card", categories: ["all", "for-him", "school-cards", "children"], preview: "v1784209507/11plus-boy-preview_sf4n9y.png", full: "v1784058134/11plus-boy_umzz8e.png" },
