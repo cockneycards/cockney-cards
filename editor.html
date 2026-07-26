@@ -175,6 +175,11 @@
                 <input type="color" id="inside-color" class="color-picker" value="#000000" onchange="updateInsideColor(this.value)">
                 <span style="font-size: 12px; color: #666;">Choose Inside Colour</span>
             </div>
+
+            <div class="flex-row" style="margin-top: 20px; align-items: center; gap: 10px;">
+                <input type="checkbox" id="blank-message-checkbox" onchange="toggleBlankMessage(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Leave Message Blank — I'll write my own inside</label>
+            </div>
         </div>
 
         <button id="buy-now-btn" class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
@@ -709,6 +714,37 @@ function setupTextEvents() {
 
 function resetBordersToDashed() {
     insideTexts.forEach((t) => t.set(STYLE_DASHED));
+}
+
+// Holds whatever the customer had typed into each message box just before
+// they ticked "Leave Message Blank", so it can be restored if they untick
+// it. Reset to null whenever the box goes back to holding real text.
+let savedInsideMessages = null;
+
+// Ticking "Leave Message Blank" wipes all three inside message boxes so the
+// printed card has no text at all (the customer will write their own
+// message by hand once it arrives). Unticking restores whatever was typed
+// before, or the default placeholder if nothing had been.
+function toggleBlankMessage(isChecked) {
+    canvas.discardActiveObject();
+
+    if (isChecked) {
+        savedInsideMessages = insideTexts.map((t) => t.text);
+        insideTexts.forEach((t) => {
+            t.set({ text: "", editable: false, selectable: false, evented: false });
+        });
+    } else {
+        insideTexts.forEach((t, i) => {
+            t.set({
+                text: (savedInsideMessages && savedInsideMessages[i]) || BOX_DEFAULT_TEXTS[i],
+                editable: true, selectable: true, evented: true
+            });
+        });
+        savedInsideMessages = null;
+    }
+
+    resetBordersToDashed();
+    canvas.requestRenderAll();
 }
 
 // Builds the name as a Fabric Group of individually-rotated characters
