@@ -206,7 +206,9 @@ const CARD_CATALOGUE = {
   
   "tvmovies-inbetweeners": { title: "The Inbetweeners TV Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209439/tvmovies-inbetweeners-preview_srj2ni.png", full: "v1784058166/tvmovies-inbetweeners.png" },
   
-  "tvmovies-jaws1": { title: "JAWS \"We're Gonna Need a Bigger Boat\" Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209440/tvmovies-jaws1-preview_vsu0rh.png", full: "v1784058069/tvmovies-jaws_sfqlhq.png", variants: [{ id: "tvmovies-jaws2", full: "v1784208083/tvmovies-jaws2_ohhblo.png" }] },
+  "tvmovies-jaws1": { title: "JAWS \"We're Gonna Need a Bigger..\" Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209440/tvmovies-jaws1-preview_vsu0rh.png", full: "v1784058069/tvmovies-jaws_sfqlhq.png" },
+  
+  "jaws-smile": { title: "JAWS Smile You Son of..", categories: ["all", "for-him", "tv-movies", "birthdays"], preview: "v1784815433/jaws-smile-preview_i1hlcp.png", full: "v1784815613/jaws-smile_zguweo.png" },
   
   "tvmovies-ofah": { title: "Only Fools and Horses TV Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209442/tvmovies-ofah_preview_f21tnx.png", full: "v1784058159/ofah.png" },
   
@@ -231,8 +233,6 @@ const CARD_CATALOGUE = {
   "fathers-day-peaky": { title: "Fathers Day Peaky Dad", categories: ["all", "for-him", "mothersday-fathersday"], preview: "v1784815430/fathers-day-peaky-preview_aytfhw.png", full: "v1784815611/fathers-day-peaky_ha6rdy.png" },
     
   "fathers-day-pub": { title: "Fathers Day Pub", categories: ["all", "for-him", "mothersday-fathersday"], preview: "v1784815435/fathers-day-pub-preview_bfkz7s.png", full: "v1784815614/fathers-day-pub_j9km04.png" },
-
-  "jaws-smile": { title: "JAWS Smile You..", categories: ["all", "for-him", "tv-movies", "birthdays"], preview: "v1784815433/jaws-smile-preview_i1hlcp.png", full: "v1784815613/jaws-smile_zguweo.png" },
   
   "teaching-assistant1": { title: "Teaching Assistant - Thank you", categories: ["all", "for-her", "school-cards", "thank-you"], preview: "v1784815440/teaching-assistant1-preview_ri6gvt.png", full: "v1784815619/teaching-assistant1_s8xbel.png" },
   
