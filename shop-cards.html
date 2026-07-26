@@ -217,7 +217,13 @@ window.addEventListener('DOMContentLoaded', () => {
         const catLink = e.target.closest('[data-cat]');
         if (catLink) filterProducts(catLink.dataset.cat);
     });
-    filterProducts('all');
+
+    if (isBackForwardNavigation()) {
+        restoreShopState();
+    } else {
+        sessionStorage.removeItem(SHOP_STATE_KEY);
+        filterProducts('all');
+    }
 
     netlifyIdentity.on('init', (user) => updateLoginUI(user));
     netlifyIdentity.on('login', (user) => {
@@ -226,6 +232,68 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     netlifyIdentity.on('logout', () => updateLoginUI(null));
 });
+
+// Covers the case where the browser restores this page from bfcache
+// (back/forward without a real reload) -- DOMContentLoaded won't fire
+// again, so we re-sync the view here instead.
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) restoreShopState();
+});
+
+// --- Navigation state persistence (so back / cancel-and-return can restore
+// exactly where the user left off, category tree and all) ---
+const SHOP_STATE_KEY = 'shopCardsState';
+
+function saveShopState() {
+    try {
+        sessionStorage.setItem(SHOP_STATE_KEY, JSON.stringify({
+            currentCategory, viewMode, currentLeague, currentTeam, currentSort
+        }));
+    } catch (e) { /* sessionStorage unavailable -- fail silently */ }
+}
+
+// True only when this page load came from a browser back/forward action
+// (not a fresh click on a nav link, not a normal reload).
+function isBackForwardNavigation() {
+    const entries = performance.getEntriesByType('navigation');
+    return entries.length > 0 && entries[0].type === 'back_forward';
+}
+
+// Expands every ancestor branch of the sidebar tree that leads to `key`,
+// so the category structure stays visible instead of collapsing back down.
+function expandPathTo(key) {
+    const path = findPath(key) || [];
+    path.forEach(([k]) => {
+        const link = document.querySelector(`.category-list a[data-cat="${k}"]`);
+        const li = link && link.closest('li');
+        if (li && li.classList.contains('has-children')) li.classList.add('expanded');
+    });
+}
+
+function restoreShopState() {
+    const raw = sessionStorage.getItem(SHOP_STATE_KEY);
+    if (!raw) { filterProducts('all'); return; }
+
+    let state;
+    try { state = JSON.parse(raw); } catch (e) { filterProducts('all'); return; }
+
+    currentSort = state.currentSort || 'featured';
+    const sortSelect = $('sort-select');
+    if (sortSelect) sortSelect.value = currentSort;
+
+    if (state.viewMode === 'team' && state.currentLeague && state.currentTeam) {
+        expandPathTo(state.currentLeague);
+        openTeamPage(state.currentLeague, state.currentTeam);
+    } else if (state.viewMode === 'gallery' && state.currentLeague) {
+        expandPathTo(state.currentLeague);
+        openTeamGallery(state.currentLeague);
+    } else if (state.currentCategory && state.currentCategory !== 'all') {
+        expandPathTo(state.currentCategory);
+        filterProducts(state.currentCategory);
+    } else {
+        filterProducts('all');
+    }
+}
 
 // True if this category (or any of its still-visible children) has at
 // least one matching card -- lets empty leagues/sub-categories stay hidden
@@ -458,6 +526,7 @@ function sortProducts(sortKey) {
 }
 
 function goToEditor(productId) {
+    saveShopState();
     window.location.href = `editor.html?card=${productId}`;
 }
 
