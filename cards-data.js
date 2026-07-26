@@ -50,7 +50,6 @@ const CATEGORIES = [
         ["chelsea", "Chelsea"],
         ["liverpool", "Liverpool"],
         ["tottenham", "Tottenham"],
-        ["brighton", "Brighton"],
       ]],
       ["championship", "Championship", [
         ["millwall", "Millwall"],
@@ -63,6 +62,7 @@ const CATEGORIES = [
         ["man-city", "Man City"],
         ["liverpool", "Liverpool"],
         ["tottenham", "Tottenham"],
+        ["brighton", "Brighton"],
       ]],
     ]],
     ["golf", "Golf"],
@@ -110,7 +110,13 @@ const CARD_CATALOGUE = {
   
   "brighton-celebrating": { title: "Brighton Celebrating Card", categories: ["all", "sports", "football", "premiership", "brighton"], preview: "v1784384910/brighton-celebrating-preview_dl45ok.png", full: "v1784378932/brighton-celebrating_rx9o8w.png" },
   
-  "brighton-girl1": { title: "Brighton Girl Card", categories: ["all", "sports", "football", "premiership", "brighton"], price: "£3.49", preview: "v1784385725/brighton-girl1-preview_ind2xy.png", full: "v1784378932/brighton-girl1_hkhhlx.png", name: { left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 890, top: 525, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" }, variants: [{ id: "brighton-girl2", full: "v1784378932/brighton-girl2_qfggnh.png" }, { id: "brighton-girl3", full: "v1784378933/brighton-girl3_felwps.png" }, { id: "brighton-girl4", full: "v1784378933/brighton-girl4_aau0lo.png" }] },
+  "brighton-girl1": { title: "Brighton Girl Card", categories: ["sports", "football", "wsl", "brighton"], price: "£3.49", preview: "v1784385725/brighton-girl1-preview_ind2xy.png", full: "v1784378932/brighton-girl1_hkhhlx.png", name: { left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 890, top: 525, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" },
+
+  "brighton-girl2": { title: "Brighton Girl Card", categories: ["sports", "football", "wsl", "brighton"], price: "£3.49", preview: "v1784385730/brighton-girl2-preview_ki1srp.png", full: "v1784378932/brighton-girl2_qfggnh.png", name: { left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 890, top: 525, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" },
+
+  "brighton-girl3": { title: "Brighton Girl Card", categories: ["sports", "football", "wsl", "brighton"], price: "£3.49", preview: "v1784385734/brighton-girl3-preview_up0cxl.png", full: "v1784378933/brighton-girl3_felwps.png", name: { left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 890, top: 525, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" },
+
+  "brighton-girl4": { title: "Brighton Girl Card", categories: ["sports", "football", "wsl", "brighton"], price: "£3.49", preview: "v1784385739/brighton-girl4-preview_hyzcis.png", full: "v1784378933/brighton-girl4_aau0lo.png", name: { left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 890, top: 525, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" },
   
   "cfc-shirt": { title: "Chelsea Birthday Shirt Card", categories: ["all", "sports", "football", "premiership", "chelsea"], price: "£3.49", preview: "v1784384824/cfc-shirt-preview_lpmnh6.png", full: "v1784378933/cfc-shirt_te7yee.png", name: { left: 883, top: 548, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 883, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" } },
   
