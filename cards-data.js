@@ -206,7 +206,7 @@ const CARD_CATALOGUE = {
   
   "tvmovies-inbetweeners": { title: "The Inbetweeners TV Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209439/tvmovies-inbetweeners-preview_srj2ni.png", full: "v1784058166/tvmovies-inbetweeners.png" },
   
-  "tvmovies-jaws1": { title: "JAWS \"We're Gonna Need a Bigger..\" Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209440/tvmovies-jaws1-preview_vsu0rh.png", full: "v1784058069/tvmovies-jaws_sfqlhq.png" },
+  "tvmovies-jaws1": { title: "JAWS \"We're Gonna Need a Bigger..\" Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209490/tvmovies-jaws2-preview_m1eren.png", full: "v1784208083/tvmovies-jaws2_ohhblo.png" },
   
   "jaws-smile": { title: "JAWS Smile You Son of..", categories: ["all", "for-him", "tv-movies", "birthdays"], preview: "v1784815433/jaws-smile-preview_i1hlcp.png", full: "v1784815613/jaws-smile_zguweo.png" },
   
