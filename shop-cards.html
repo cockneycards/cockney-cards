@@ -38,16 +38,38 @@
         .sidebar { width: 220px; flex-shrink: 0; }
         .sidebar h2 { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
         .category-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
-        .category-list li a { text-decoration: none; color: #555; font-size: 13px; transition: color 0.2s; cursor: pointer; display: block; }
+        .category-list li a { text-decoration: none; color: #555; font-size: 13px; transition: color 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
         .category-list li a:hover, .category-list li a.active { color: #111; font-weight: bold; }
+
+        /* nested sub-category lists (Sports > Football > Premiership, etc.) */
+        .category-list .subcat-list { list-style: none; margin: 12px 0 0 4px; padding: 0 0 0 12px; display: none; flex-direction: column; gap: 10px; border-left: 1px solid var(--border-color); }
+        .category-list li.expanded > .subcat-list { display: flex; }
+        .category-list .subcat-list a { font-size: 12px; color: #777; }
+        .category-list .subcat-list .subcat-list a { font-size: 11.5px; color: #999; }
+        .category-list .arrow { font-size: 9px; color: #aaa; transition: transform 0.2s ease; flex-shrink: 0; }
+        .category-list li.expanded > a .arrow { transform: rotate(180deg); }
 
         /* PRODUCT GRID & SORTING */
         .catalog-content { flex-grow: 1; }
+        .breadcrumb { font-size: 12px; color: #999; margin-bottom: 15px; min-height: 14px; }
+        .breadcrumb .crumb { color: #999; text-decoration: none; cursor: pointer; }
+        .breadcrumb a.crumb:hover { color: #111; text-decoration: underline; }
+        .breadcrumb .crumb.current { color: #111; font-weight: bold; cursor: default; }
+        .breadcrumb .crumb-sep { margin: 0 8px; color: #ccc; }
         .catalog-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; font-size: 12px; color: #666; }
         .sort-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
         .sort-label select { font-size: 12px; color: #333; border: 1px solid var(--border-color); padding: 6px 10px; background: white; cursor: pointer; font-family: var(--font-family); border-radius: 3px; }
         .sort-label select:focus { outline: none; border-color: #999; }
         .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+        /* TEAM GALLERY (shown when a league like Premiership is clicked) */
+        .team-gallery { display: none; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .team-tile { border: 1px solid var(--border-color); background: #fff; padding: 15px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .team-tile:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .team-image-wrapper { aspect-ratio: 4 / 5; background-color: #fbfbfb; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 15px; }
+        .team-image-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+        .team-name { font-size: 14px; font-weight: bold; margin: 0 0 4px 0; color: #111; }
+        .team-count { font-size: 12px; color: #888; margin: 0; }
 
         /* PRODUCT CARD */
         .product-card { border: 1px solid var(--border-color); background: #fff; padding: 15px; display: flex; flex-direction: column; box-sizing: border-box; transition: transform 0.2s, box-shadow 0.2s; }
@@ -69,11 +91,11 @@
         .footer-col a { color: #111; text-decoration: underline; }
         .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
 
-        @media (max-width: 1100px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 1100px) { .product-grid, .team-gallery { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 850px) {
             .shop-container { flex-direction: column; }
             .sidebar { width: 100%; }
-            .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .product-grid, .team-gallery { grid-template-columns: repeat(2, 1fr); }
             .footer-grid { grid-template-columns: 1fr; gap: 30px; }
         }
     </style>
@@ -117,7 +139,8 @@
     </aside>
 
     <main class="catalog-content">
-        <div class="catalog-meta">
+        <div class="breadcrumb" id="breadcrumb"></div>
+        <div class="catalog-meta" id="catalog-meta">
             <span id="product-count">0 products</span>
             <label class="sort-label">
                 Sort by:
@@ -131,6 +154,7 @@
             </label>
         </div>
         <div class="product-grid" id="product-grid"></div>
+        <div class="team-gallery" id="team-gallery"></div>
     </main>
 </div>
 
@@ -176,10 +200,24 @@ const $ = (id) => document.getElementById(id);
 
 let currentCategory = 'all';
 let currentSort = 'featured';
+let viewMode = 'grid';       // 'grid' | 'gallery' | 'team'
+let currentLeague = null;    // e.g. "premiership" -- set when viewMode is 'gallery' or 'team'
+let currentTeam = null;      // e.g. "arsenal"      -- set when viewMode is 'team'
 
 window.addEventListener('DOMContentLoaded', () => {
     renderCategories();
-    applyView();
+    $('team-gallery').addEventListener('click', (e) => {
+        const tile = e.target.closest('.team-tile');
+        if (tile) openTeamPage(currentLeague, tile.dataset.team);
+    });
+    $('breadcrumb').addEventListener('click', (e) => {
+        e.preventDefault();
+        const galleryLink = e.target.closest('[data-gallery-league]');
+        if (galleryLink) { openTeamGallery(galleryLink.dataset.galleryLeague); return; }
+        const catLink = e.target.closest('[data-cat]');
+        if (catLink) filterProducts(catLink.dataset.cat);
+    });
+    filterProducts('all');
 
     netlifyIdentity.on('init', (user) => updateLoginUI(user));
     netlifyIdentity.on('login', (user) => {
@@ -189,16 +227,98 @@ window.addEventListener('DOMContentLoaded', () => {
     netlifyIdentity.on('logout', () => updateLoginUI(null));
 });
 
+// True if this category (or any of its still-visible children) has at
+// least one matching card -- lets empty leagues/sub-categories stay hidden
+// automatically instead of showing an empty shelf.
+function categoryHasProducts(node) {
+    const [key, , children] = node;
+    if (PRODUCTS.some((p) => p.categories.includes(key))) return true;
+    if (Array.isArray(children)) {
+        return children.some((c) => c[3] !== false && categoryHasProducts(c));
+    }
+    return false;
+}
+
+function findCategoryNode(key, nodes = CATEGORIES) {
+    for (const node of nodes) {
+        if (node[0] === key) return node;
+        if (Array.isArray(node[2])) {
+            const found = findCategoryNode(key, node[2]);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+// Returns the chain of [key, label] nodes from the CATEGORIES root down to `key`.
+function findPath(key, nodes = CATEGORIES, trail = []) {
+    for (const node of nodes) {
+        const newTrail = [...trail, node];
+        if (node[0] === key) return newTrail;
+        if (Array.isArray(node[2])) {
+            const found = findPath(key, node[2], newTrail);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+// depth 0 = top-level (Sports), 1 = Football/Golf/etc, 2 = leagues.
+// Leagues (depth 2) that have a team list open the team gallery on click
+// instead of expanding inline -- so the sidebar never nests past 3 levels.
+function renderCategoryLevel(categories, depth) {
+    return categories.map(([key, label, children, enabled = true]) => {
+        if (enabled === false) return '';
+        if (!categoryHasProducts([key, label, children])) return '';
+
+        const visibleKids = Array.isArray(children)
+            ? children.filter((c) => c[3] !== false && categoryHasProducts(c))
+            : [];
+        const hasKids = visibleKids.length > 0;
+        const inlineExpand = hasKids && depth <= 1;
+        const isGallery = hasKids && depth >= 2;
+
+        return `
+            <li class="${inlineExpand ? 'has-children' : ''}"${isGallery ? ' data-gallery="true"' : ''}>
+                <a data-cat="${key}">${label}${hasKids ? '<span class="arrow">&#9662;</span>' : ''}</a>
+                ${inlineExpand ? `<ul class="subcat-list">${renderCategoryLevel(visibleKids, depth + 1)}</ul>` : ''}
+            </li>`;
+    }).join('');
+}
+
 function renderCategories() {
     const list = $('category-list');
-    list.innerHTML = CATEGORIES.map(([key, label], i) =>
-        `<li><a data-cat="${key}" class="${i === 0 ? 'active' : ''}">${label}</a></li>`
-    ).join('');
+    list.innerHTML = renderCategoryLevel(CATEGORIES, 0);
 
     // Single delegated click handler instead of one inline handler per item
     list.addEventListener('click', (e) => {
         const link = e.target.closest('a[data-cat]');
-        if (link) filterProducts(link.dataset.cat);
+        if (!link) return;
+        const li = link.closest('li');
+        const key = link.dataset.cat;
+
+        if (li.dataset.gallery === 'true') {
+            openTeamGallery(key);
+            return;
+        }
+        if (li.classList.contains('has-children')) {
+            toggleExpandSubtree(li);
+        }
+        filterProducts(key);
+    });
+}
+
+// Expands/collapses a category AND every nested category inside it at once,
+// so clicking "Sports" reveals Football/Golf/Cricket... all in one click.
+function toggleExpandSubtree(li) {
+    const expanding = !li.classList.contains('expanded');
+    li.classList.toggle('expanded', expanding);
+    li.querySelectorAll('li.has-children').forEach((child) => child.classList.toggle('expanded', expanding));
+}
+
+function setActiveCategory(key) {
+    document.querySelectorAll('.category-list a').forEach((a) => {
+        a.classList.toggle('active', a.dataset.cat === key);
     });
 }
 
@@ -218,6 +338,59 @@ function renderGrid(productsToRender) {
     `).join('');
 }
 
+function renderTeamGallery(leagueKey) {
+    const node = findCategoryNode(leagueKey);
+    const teams = (node && Array.isArray(node[2]) ? node[2] : [])
+        .filter((t) => t[3] !== false)
+        .map(([key, label]) => {
+            const teamProducts = PRODUCTS.filter((p) => p.categories.includes(leagueKey) && p.categories.includes(key));
+            return { key, label, count: teamProducts.length, image: teamProducts[0] ? teamProducts[0].image : '' };
+        })
+        .filter((t) => t.count > 0);
+
+    $('team-gallery').innerHTML = teams.map((t) => `
+        <div class="team-tile" data-team="${t.key}">
+            <div class="team-image-wrapper"><img src="${t.image}" alt="${t.label}" loading="lazy"></div>
+            <h3 class="team-name">${t.label}</h3>
+            <p class="team-count">${t.count} card${t.count === 1 ? '' : 's'}</p>
+        </div>
+    `).join('');
+}
+
+function renderBreadcrumb() {
+    if (viewMode === 'grid') {
+        if (currentCategory === 'all') return '';
+        const path = findPath(currentCategory) || [];
+        if (path.length <= 1) return '';
+        return path.map(([key, label], i) => {
+            const isLast = i === path.length - 1;
+            return isLast
+                ? `<span class="crumb current">${label}</span>`
+                : `<a href="#" class="crumb" data-cat="${key}">${label}</a>`;
+        }).join('<span class="crumb-sep">/</span>');
+    }
+
+    // 'gallery' or 'team' -- both are rooted at the current league
+    const leaguePath = findPath(currentLeague) || [];
+    const ancestorCrumbs = leaguePath.slice(0, -1).map(([key, label]) =>
+        `<a href="#" class="crumb" data-cat="${key}">${label}</a>`
+    );
+    const last = leaguePath[leaguePath.length - 1] || [currentLeague, currentLeague];
+    const leagueCrumb = viewMode === 'gallery'
+        ? `<span class="crumb current">${last[1]}</span>`
+        : `<a href="#" class="crumb" data-gallery-league="${last[0]}">${last[1]}</a>`;
+
+    const crumbs = [...ancestorCrumbs, leagueCrumb];
+
+    if (viewMode === 'team') {
+        const leagueNode = findCategoryNode(currentLeague);
+        const teamNode = (leagueNode && Array.isArray(leagueNode[2]) ? leagueNode[2] : []).find((t) => t[0] === currentTeam);
+        crumbs.push(`<span class="crumb current">${teamNode ? teamNode[1] : currentTeam}</span>`);
+    }
+
+    return crumbs.join('<span class="crumb-sep">/</span>');
+}
+
 function sortItems(items) {
     const sorted = [...items];
     switch (currentSort) {
@@ -230,22 +403,58 @@ function sortItems(items) {
     return sorted;
 }
 
-function applyView() {
-    const filtered = currentCategory === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.categories.includes(currentCategory));
+function renderView() {
+    const grid = $('product-grid');
+    const gallery = $('team-gallery');
+    const meta = $('catalog-meta');
+
+    if (viewMode === 'gallery') {
+        meta.style.display = 'none';
+        grid.style.display = 'none';
+        gallery.style.display = 'grid';
+        renderTeamGallery(currentLeague);
+        $('breadcrumb').innerHTML = renderBreadcrumb();
+        return;
+    }
+
+    gallery.style.display = 'none';
+    meta.style.display = 'flex';
+    grid.style.display = 'grid';
+
+    const filtered = viewMode === 'team'
+        ? PRODUCTS.filter((p) => p.categories.includes(currentLeague) && p.categories.includes(currentTeam))
+        : (currentCategory === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.categories.includes(currentCategory)));
+
     renderGrid(sortItems(filtered));
+    $('breadcrumb').innerHTML = renderBreadcrumb();
 }
 
 function filterProducts(categoryKey) {
     currentCategory = categoryKey;
-    document.querySelectorAll('.category-list a').forEach((a) => {
-        a.classList.toggle('active', a.dataset.cat === categoryKey);
-    });
-    applyView();
+    viewMode = 'grid';
+    setActiveCategory(categoryKey);
+    renderView();
+}
+
+function openTeamGallery(leagueKey) {
+    currentLeague = leagueKey;
+    currentTeam = null;
+    viewMode = 'gallery';
+    setActiveCategory(leagueKey);
+    renderView();
+}
+
+function openTeamPage(leagueKey, teamKey) {
+    currentLeague = leagueKey;
+    currentTeam = teamKey;
+    viewMode = 'team';
+    setActiveCategory(leagueKey);
+    renderView();
 }
 
 function sortProducts(sortKey) {
     currentSort = sortKey;
-    applyView();
+    renderView();
 }
 
 function goToEditor(productId) {
