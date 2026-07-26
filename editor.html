@@ -184,7 +184,7 @@
              settings. Remove this button before going live. -->
         <button id="test-download-btn" class="btn" style="background-color:#1A73E8;" onclick="testDownloadPrintPDFs()">Test: Download Print PDFs</button>
 
-        <button class="btn btn-close" onclick="window.location.href='shop-cards.html'">Cancel & Return</button>
+        <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
     </div>
 </div>
 
@@ -915,6 +915,20 @@ async function uploadAndGoToCheckout() {
         alert("Checkout processing failed. Check the console for details.");
         buyBtn.innerText = "Buy Now";
         buyBtn.disabled = false;
+    }
+}
+
+// Goes back to shop-cards.html the same way the browser's own back button
+// would, so its saved category/gallery state gets restored instead of
+// resetting to "all cards". Falls back to a normal navigation if the user
+// landed on the editor directly (e.g. a bookmark) and there's nothing to
+// go back to.
+function returnToShop() {
+    const cameFromShop = document.referrer && document.referrer.indexOf('shop-cards.html') !== -1;
+    if (cameFromShop && window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.location.href = 'shop-cards.html';
     }
 }
 
