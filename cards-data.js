@@ -189,6 +189,14 @@ const CARD_CATALOGUE = {
   "netball-queen2": { title: "Netball Queen Card", categories: ["sports", "netball"], price: "£3.49", preview: "v1784384859/netball-queen2-preview_gxkgfh.png" },
   
   "new-home": { title: "New Home Card", categories: ["all", "home"], preview: "v1784209536/new-home-preview_xnugt2.png", full: "v1784058157/new-home_wgtf1r.png" },
+  "newhome1": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141480/newhome1-preview_sqtuio.png", full: "v1785141071/newhome1_tasqqg.png" },
+  "newhome2": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141475/newhome2-preview_qkibme.png", full: "v1785141075/newhome2_tp8sxt.png" },
+  "newhome3": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome3-preview_n1uygl.png", full: "v1785141071/newhome3_d13zii.png" },
+  "newhome4": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141476/newhome4-preview_ussmxi.png", full: "v1785141070/newhome4_vnnzpa.png" },
+  "newhome5": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141480/newhome5-preview_lhsbiy.png", full: "v1785141067/newhome5_oygjun.jpg" },
+  "newhome6": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome6-preview_dst0lw.png", full: "v1785141067/newhome6_zm8i4d.jpg" },
+  "newhome7": { title: "University Accomodation New Home Card", categories: ["all", "home"], preview: "v1785141476/newhome7-preview_puq5vm.png", full: "v1785141067/newhome7_m5ufxx.jpg" },
+  "newhome8": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome8-preview_z2kkpm.png", full: "v1785141071/newhome8_mmbrxh.png" },
   
   "newjob-teacher-boy1": { title: "New Teacher Job Boy Card", categories: ["all", "for-him", "work-related"], preview: "v1784209456/newjob-teacher-boy1-preview_zlabbg.png", full: "v1784208072/newjob-teacher-boy1_qnrwb4.png" },
   "newjob-teacher-girl1": { title: "New Teacher Job Girl Card", categories: ["all", "for-her", "work-related"], preview: "v1784209478/newjob-teacher-girl1-preview_oyv8wd.png", full: "v1784208067/newjob-teacher-girl1_kkh4bb.png" },
