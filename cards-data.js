@@ -157,7 +157,7 @@ const CARD_CATALOGUE = {
   
   "gamer-girl": { title: "Gamer Girl Card", categories: ["all", "for-her", "birthdays", "children"], preview: "v1784209531/gamer-girl-preview_jmm03m.png", full: "v1784058096/gamer-girl_f8nufl.png" },
   
-  "golfer": { title: "Golf Card", categories: ["sports", "for-him", "golf"], price: "£3.49", preview: "v1784384800/golfer-preview_bwmbdo.png", full: "v1784378938/golfer_gxfwrs.png", name: { left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#112342", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 130, tiltAngle: 0, label: "Name", maxChars: 12 } },
+  "golfer": { title: "Golf Card", categories: ["sports", "for-him", "golf"], price: "£3.49", preview: "v1784384800/golfer-preview_bwmbdo.png", full: "v1784378938/golfer_gxfwrs.png", name: { left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#112342", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 12 } },
   
   "grandad-racing": { title: "Grandad Racing Card", categories: ["sports", "for-him", "racing"], preview: "v1784384853/grandad-racing-preview_tx5k2p.png", full: "v1784378939/grandad-racing_p7e3ov.png" },
   
