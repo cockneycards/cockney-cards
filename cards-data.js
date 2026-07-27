@@ -195,7 +195,7 @@ const CARD_CATALOGUE = {
   "newhome4": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141476/newhome4-preview_ussmxi.png", full: "v1785141070/newhome4_vnnzpa.png" },
   "newhome5": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141480/newhome5-preview_lhsbiy.png", full: "v1785141067/newhome5_oygjun.jpg" },
   "newhome6": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome6-preview_dst0lw.png", full: "v1785141067/newhome6_zm8i4d.jpg" },
-  "newhome7": { title: "University Campus Card", categories: ["all", "home"], preview: "v1785141476/newhome7-preview_puq5vm.png", full: "v1785141067/newhome7_m5ufxx.jpg" },
+  "newhome7": { title: "University Campus Card", categories: ["all", "school-cards", "home"], preview: "v1785141476/newhome7-preview_puq5vm.png", full: "v1785141067/newhome7_m5ufxx.jpg" },
   "newhome8": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome8-preview_z2kkpm.png", full: "v1785141071/newhome8_mmbrxh.png" },
   
   "newjob-teacher-boy1": { title: "New Teacher Job Boy Card", categories: ["all", "for-him", "work-related"], preview: "v1784209456/newjob-teacher-boy1-preview_zlabbg.png", full: "v1784208072/newjob-teacher-boy1_qnrwb4.png" },
