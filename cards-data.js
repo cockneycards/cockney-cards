@@ -111,10 +111,10 @@ const CARD_CATALOGUE = {
   "birthday-grandad1": { title: "Grandads Garden", categories: ["all", "for-him", "birthdays"], preview: "v1785221486/birthday-grandad1-preview_owoeql.png", full: "v1785221607/birthday-grandad1_v6hfnt.png" },
   "birthday-sweetie": { title: "Sweet Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785221487/birthday-sweetie-preview_aqzgqe.png", full: "v1785221602/birthday-sweetie_fctude.png" },
   
-  "birthday-mum-photo1": { title: "Happy Birthday Mum", categories: ["all", "for-her", "birthdays"], preview: "v1785262722/birthday-mum-photo1-preview_d2rnaf.png", full: "v1785263100/birthday-mum-photo1_dx93vs.png" },
-   photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-  "birthday-dad-photo1": { title: "Happy Birthday Dad", categories: ["all", "for-him", "birthdays"], preview: "v1785262721/birthday-dad-photo1-preview_o7vuke.png", full: "v1785263105/birthday-dad-photo1_p0dckg.png" },
-   photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+  "birthday-mum-photo1": { title: "Happy Birthday Mum", categories: ["all", "for-her", "birthdays"], preview: "v1785262722/birthday-mum-photo1-preview_d2rnaf.png", full: "v1785263100/birthday-mum-photo1_dx93vs.png",
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "birthday-dad-photo1": { title: "Happy Birthday Dad", categories: ["all", "for-him", "birthdays"], preview: "v1785262721/birthday-dad-photo1-preview_o7vuke.png", full: "v1785263105/birthday-dad-photo1_p0dckg.png",
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
   "brighton-celebrating": { title: "Brighton Celebrating Card", categories: ["sports", "football", "premiership", "brighton"], preview: "v1784384910/brighton-celebrating-preview_dl45ok.png", full: "v1784378932/brighton-celebrating_rx9o8w.png" },
   
@@ -162,9 +162,8 @@ const CARD_CATALOGUE = {
   "golfer": { title: "Golf Card", categories: ["sports", "for-him", "golf"], price: "£3.49", preview: "v1784384800/golfer-preview_bwmbdo.png", full: "v1784378938/golfer_gxfwrs.png", name: { left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#112342", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 12 } },
 
   "golfer-photo1": { title: "Golfer Fore!!", categories: ["sports", "for-him", "golf"], preview: "v1785262722/golfer-photo1-preview_plkxdb.png", full: "v1785265288/golfer-photo1_mer8bf.png", name: { left: 883, top: 548, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#032657", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 12 },
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 }, 
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
-  
   "grandad-racing": { title: "Grandad Racing Card", categories: ["sports", "for-him", "racing"], preview: "v1784384853/grandad-racing-preview_tx5k2p.png", full: "v1784378939/grandad-racing_p7e3ov.png" },
   
   "ladies-lunch": { title: "Ladies Lunch Card", categories: ["all", "for-her", "birthdays"], preview: "v1784209436/ladies-lunch-preview_apknm3.png", full: "v1784058155/ladies-lunch_et7asg.png" },
