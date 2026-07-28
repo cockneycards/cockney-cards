@@ -145,7 +145,7 @@
                 <label for="photo-input" style="display:block; margin-bottom: 6px;">Upload Photo:</label>
                 <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
                 <p style="font-size:12px; color:#666; margin-top:6px;">
-                    Drag the photo to reposition it, or use the corner handle to zoom — it'll stay inside the frame.
+                    Drag the photo to reposition it, or use the corner handle to resize — it'll stay inside the frame.
                 </p>
             </div>
 
@@ -262,14 +262,16 @@ const DEFAULT_AGE_SETTINGS = {
 };
 
 // ---- Photo-upload frame defaults (reused / overridden per template) ----
-// A "photo" card gets an upload button and a clipped frame on the canvas
-// for the customer's own picture. `shape` picks the mask: "heart",
-// "circle", or "square". left/top is the CENTER of the frame; width/height
-// is its bounding box, all in the same full-spread coordinates as
+// A "photo" card gets an upload button and places the customer's picture
+// as a BACKGROUND layer, directly behind the card artwork. The card's PNG
+// must have a genuinely transparent (alpha) cutout where the photo should
+// show through — this only works if that cutout is real transparency, not
+// just a solid white/coloured area. left/top is the CENTER of the cutout;
+// width/height is its bounding box — the photo is scaled to cover that box
+// (like CSS object-fit: cover). All in the same full-spread coordinates as
 // name/age settings. Use findCoords() (bottom of this script) to read off
 // coordinates by clicking on the canvas.
 const DEFAULT_PHOTO_SETTINGS = {
-    shape: "heart",
     left: 892.5, top: 400, width: 520, height: 520
 };
 
@@ -583,43 +585,6 @@ function setupTextsAndOverlays() {
     setupTextEvents();
 }
 
-// Traced from the artwork's actual heart cutout, normalised to a 0-100 box
-// so it can be scaled to any card's `photo` frame size. Using the exact
-// traced shape (instead of a generic heart curve) means the uploaded photo
-// fills the cutout with no gap or overlap at the pink border.
-const HEART_POINTS = [
-    {x:17.43,y:1.32}, {x:8.3,y:7.16}, {x:4.01,y:12.72}, {x:1.8,y:17.54}, {x:0.14,y:24.56},
-    {x:0.0,y:32.02}, {x:2.35,y:42.84}, {x:7.75,y:53.51}, {x:12.17,y:54.39}, {x:15.49,y:56.87},
-    {x:16.87,y:56.43}, {x:18.26,y:57.46}, {x:18.4,y:59.94}, {x:21.3,y:62.13}, {x:20.47,y:64.91},
-    {x:21.58,y:66.96}, {x:21.16,y:68.86}, {x:23.51,y:71.49}, {x:28.22,y:59.94}, {x:27.39,y:55.99},
-    {x:28.63,y:54.24}, {x:30.43,y:53.95}, {x:31.95,y:56.43}, {x:30.15,y:57.6}, {x:29.46,y:56.73},
-    {x:30.43,y:55.7}, {x:29.32,y:55.56}, {x:29.05,y:58.04}, {x:38.04,y:68.86}, {x:39.0,y:71.64},
-    {x:38.31,y:76.32}, {x:45.09,y:74.27}, {x:44.26,y:72.08}, {x:45.5,y:70.76}, {x:47.44,y:70.76},
-    {x:46.2,y:71.49}, {x:50.21,y:73.39}, {x:51.59,y:73.1}, {x:49.38,y:76.75}, {x:47.16,y:78.22},
-    {x:45.09,y:77.34}, {x:45.23,y:75.44}, {x:38.45,y:77.49}, {x:39.97,y:78.36}, {x:40.25,y:81.29},
-    {x:39.56,y:84.5}, {x:38.31,y:85.23}, {x:38.59,y:86.99}, {x:51.45,y:100.0}, {x:79.39,y:70.91},
-    {x:93.22,y:51.9}, {x:97.51,y:42.69}, {x:99.72,y:33.92}, {x:100.0,y:26.17}, {x:98.2,y:17.54},
-    {x:95.02,y:11.11}, {x:90.73,y:6.14}, {x:86.31,y:2.92}, {x:80.5,y:0.58}, {x:72.2,y:0.0},
-    {x:64.73,y:2.05}, {x:57.81,y:6.73}, {x:50.21,y:16.23}, {x:42.88,y:7.31}, {x:35.96,y:2.34}, {x:27.8,y:0.0}
-];
-
-// Builds a shape sized/positioned to a photo frame config, used as the
-// uploaded photo's clipPath.
-function buildFrameShape(p, opts) {
-    const shared = { left: p.left, top: p.top, originX: 'center', originY: 'center', ...opts };
-
-    if (p.shape === 'circle') {
-        return new fabric.Circle({ ...shared, radius: Math.min(p.width, p.height) / 2 });
-    }
-    if (p.shape === 'square') {
-        return new fabric.Rect({ ...shared, width: p.width, height: p.height });
-    }
-    // Default: heart, traced from the artwork itself
-    const poly = new fabric.Polygon(HEART_POINTS, shared);
-    poly.set({ scaleX: p.width / poly.width, scaleY: p.height / poly.height });
-    return poly;
-}
-
 // Reads the chosen file — the file-input "Choose File" button is the only
 // way a photo gets added, there's nothing clickable on the canvas itself.
 function handlePhotoUpload(inputEl) {
@@ -631,11 +596,12 @@ function handlePhotoUpload(inputEl) {
     reader.readAsDataURL(file);
 }
 
-// Adds the customer's photo, cover-fit and clipped to the card's configured
-// shape. The clipPath is absolutely positioned so it stays put on the card
-// while the customer drags/resizes the photo underneath it to reposition —
-// rotation is locked, and the selection border/corner handles are made
-// fully invisible so nothing shows while it's being moved or resized.
+// Adds the customer's photo as a BACKGROUND layer, sent behind the card
+// artwork — the artwork's own transparent cutout masks it, so the shape is
+// always a pixel-perfect match with soft anti-aliased edges (no synthetic
+// clipPath needed). Cover-fit sized into the configured frame box, then
+// the customer can drag to reposition or use the corner handle to resize —
+// shown with a normal visible blue selection box.
 function loadPhotoIntoFrame(dataUrl) {
     const p = activeTemplate?.photo;
     if (!p) return;
@@ -644,7 +610,7 @@ function loadPhotoIntoFrame(dataUrl) {
         if (photoImg) canvas.remove(photoImg);
 
         // Cover-fit: scale so the photo fully fills the frame, like CSS
-        // object-fit: cover, then let the customer zoom/pan from there.
+        // object-fit: cover, then let the customer drag/resize from there.
         const coverScale = Math.max(p.width / img.width, p.height / img.height);
 
         img.set({
@@ -652,17 +618,17 @@ function loadPhotoIntoFrame(dataUrl) {
             originX: 'center', originY: 'center',
             scaleX: coverScale, scaleY: coverScale,
             lockRotation: true,
-            clipPath: buildFrameShape(p, { absolutePositioned: true }),
-            hasBorders: false,
-            transparentCorners: true,
-            cornerColor: 'rgba(0,0,0,0)',
-            cornerStrokeColor: 'rgba(0,0,0,0)'
+            borderColor: '#1A73E8',
+            cornerColor: '#1A73E8',
+            cornerStrokeColor: '#1A73E8',
+            transparentCorners: false
         });
         img.setControlsVisibility({ mtr: false });
 
         photoImg = img;
         canvas.add(photoImg);
-        canvas.moveTo(photoImg, canvas.getObjects().indexOf(bgImg) + 1);
+        canvas.sendToBack(photoImg); // behind everything, including the artwork —
+                                      // its transparent cutout is what shows this
         canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
     }, { crossOrigin: 'anonymous' });
