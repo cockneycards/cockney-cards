@@ -160,6 +160,10 @@ const CARD_CATALOGUE = {
   "gamer-girl": { title: "Gamer Girl Card", categories: ["all", "for-her", "birthdays", "children"], preview: "v1784209531/gamer-girl-preview_jmm03m.png", full: "v1784058096/gamer-girl_f8nufl.png" },
   
   "golfer": { title: "Golf Card", categories: ["sports", "for-him", "golf"], price: "£3.49", preview: "v1784384800/golfer-preview_bwmbdo.png", full: "v1784378938/golfer_gxfwrs.png", name: { left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#112342", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 12 } },
+
+  "golfer-photo1": { title: "Golfer Fore!!", categories: ["sports", "for-him", "golf"], preview: "v1785262722/golfer-photo1-preview_plkxdb.png", full: "v1785262996/golfer-photo1_k997ys.png", name: { left: 883, top: 548, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 }, 
+
   
   "grandad-racing": { title: "Grandad Racing Card", categories: ["sports", "for-him", "racing"], preview: "v1784384853/grandad-racing-preview_tx5k2p.png", full: "v1784378939/grandad-racing_p7e3ov.png" },
   
@@ -204,6 +208,9 @@ const CARD_CATALOGUE = {
   "newhome9": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221487/newhome9-preview_h8qnga.png", full: "v1785221604/newhome9_rsqhpr.png" },
   "newhome10": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
   "newhome11": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221486/newhome11-preview_db8ghw.png", full: "v1785221607/newhome11_sjmymt.png" },
+  
+  "newhome1-photo": { title: "New Home Card", categories: ["all", "home"], preview: "v1785262722/newhome12-photo-preview_vtnuyn.png", full: "v1785263102/newhome12-photo_apyp0z.png" },
+  photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
   
   "newjob-teacher-boy1": { title: "New Teacher Job Boy Card", categories: ["all", "for-him", "work-related"], preview: "v1784209456/newjob-teacher-boy1-preview_zlabbg.png", full: "v1784208072/newjob-teacher-boy1_qnrwb4.png" },
   "newjob-teacher-girl1": { title: "New Teacher Job Girl Card", categories: ["all", "for-her", "work-related"], preview: "v1784209478/newjob-teacher-girl1-preview_oyv8wd.png", full: "v1784208067/newjob-teacher-girl1_kkh4bb.png" },
