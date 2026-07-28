@@ -87,13 +87,10 @@ const CATEGORIES = [
 
 const CARD_CATALOGUE = {
   "11plus-boy": { title: "11 Plus Boy Card", categories: ["all", "for-him", "school-cards", "children"], preview: "v1784209507/11plus-boy-preview_sf4n9y.png", full: "v1784058134/11plus-boy_umzz8e.png" },
-
   "11plus-girl": { title: "11 Plus Girl Card", categories: ["all", "for-her", "school-cards", "children"], preview: "v1784209509/11plus-girl-preview_xdyo0z.png", full: "v1784058129/11plus-girl_rmkpbe.png" },
-
   "11plus-kids": { title: "11 Plus Kids Card", categories: ["all", "school-cards", "children"], preview: "v1784209512/11plus-kids-preview_a1hxrs.png", full: "v1784058140/11plus-kids_wg25kp.png" },
 
   "80s-birthday": { title: "80s Retro Birthday Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209494/80s-birthday-preview_i8mnhc.png", full: "v1784208088/80s-birthday_jeq3bk.png" },
-  
   "90s-birthday": { title: "90s Retro Birthday Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209497/90s-birthday-preview_vmzyiu.png", full: "v1784208085/90s-birthday_ldr2pi.png" },
  
   "afc-ladies-celebrating": { title: "Arsenal Ladies Celebrating Card", categories: ["sports", "football", "wsl", "arsenal"], preview: "v1784384907/afc-ladies-celebrating-preview_y4roo9.png", full: "v1784378958/afc-ladies-celebrating_dbnjcj.png" },
@@ -138,23 +135,18 @@ const CARD_CATALOGUE = {
   "dj-boy": { title: "DJ Boy Card", categories: ["all", "for-him", "birthdays"], preview: "v1784209498/dj-boy-preview_yqclnk.png", full: "v1784208082/dj-boy_uyrjcy.png" },
   
   "drivingtest-boy1": { title: "Driving Test Boy Card", categories: ["all", "for-him", "achievements"], preview: "v1784209464/drivingtest-boy1-preview_mcgers.png", full: "v1784208057/drivingtest-boy1_icejra.png" },
-  
   "drivingtest-boy3": { title: "Driving Pass Congratulations Card", categories: ["all", "for-him", "achievements"], preview: "v1784209469/drivingtest-boy3-preview_eek6cj.png", full: "v1784208062/drivingtest-boy3_sqejou.png" },
-  
   "drivingtest-girl1": { title: "Driving Test Girl Card", categories: ["all", "for-her", "achievements"], preview: "v1784209469/drivingtest-girl1-preview_ilpeaq.png", full: "v1784206064/drivingtest-girl1_hw1a1t.png" },
-  
+  "drivingtest-girl4": { title: "Driving Pass Girl Card", categories: ["all", "for-her", "achievements"], preview: "v1784209476/drivingtest-girl4-preview_n0onrv.png", full: "v1784208061/drivingtest-girl4_grx0ed.png" },
+  "drivingtest-girl4": { title: "Driving Pass Girl Card", categories: ["all", "for-her", "achievements"], preview: "v1784209476/drivingtest-girl4-preview_n0onrv.png", full: "v1784208061/drivingtest-girl4_grx0ed.png" },
   "drivingtest-girl4": { title: "Driving Pass Girl Card", categories: ["all", "for-her", "achievements"], preview: "v1784209476/drivingtest-girl4-preview_n0onrv.png", full: "v1784208061/drivingtest-girl4_grx0ed.png" },
   
   "exams-boy": { title: "Exams Congratulations Boy Card", categories: ["all", "for-him", "achievements"], preview: "v1784209521/exams-boy-preview_pwc5me.png", full: "v1784058150/exams-boy_wuej29.png" },
-  
   "exams-girl": { title: "Exams Congratulations Girl Card", categories: ["all", "for-her", "achievements"], preview: "v1784209524/exams-girl-preview_tysy1h.png", full: "v1784058144/exams-girl_d2wyhs.png" },
   
   "gameboy-minecraft": { title: "Minecraft Gaming Boy Card", categories: ["all", "for-him", "birthdays", "children"], preview: "v1784209527/gameboy-minecraft-preview_smhncv.png", full: "v1784058080/gameboy-minecraft_qhzdje.png" },
-  
   "gamegirl-minecraft": { title: "Minecraft Gaming Girl Card", categories: ["all", "for-her", "birthdays", "children"], preview: "v1784209502/gamegirl-minecraft-preview_ccseer.png", full: "v1784058085/gamegirl-minecraft_kn2sex.png" },
-  
   "gamer-boy": { title: "Gamer Boy Card", categories: ["all", "for-him", "birthdays", "children"], preview: "v1784209529/gamer-boy-preview_zanxij.png", full: "v1784058090/gamer-boy_k6ntmo.png" },
-  
   "gamer-girl": { title: "Gamer Girl Card", categories: ["all", "for-her", "birthdays", "children"], preview: "v1784209531/gamer-girl-preview_jmm03m.png", full: "v1784058096/gamer-girl_f8nufl.png" },
   
   "golfer": { title: "Golf Card", categories: ["sports", "for-him", "golf"], price: "£3.49", preview: "v1784384800/golfer-preview_bwmbdo.png", full: "v1784378938/golfer_gxfwrs.png", name: { left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#112342", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 12 } },
@@ -162,7 +154,6 @@ const CARD_CATALOGUE = {
   "grandad-racing": { title: "Grandad Racing Card", categories: ["sports", "for-him", "racing"], preview: "v1784384853/grandad-racing-preview_tx5k2p.png", full: "v1784378939/grandad-racing_p7e3ov.png" },
   
   "ladies-lunch": { title: "Ladies Lunch Card", categories: ["all", "for-her", "birthdays"], preview: "v1784209436/ladies-lunch-preview_apknm3.png", full: "v1784058155/ladies-lunch_et7asg.png" },
-  
   "ladies-shopping": { title: "Ladies Shopping Card", categories: ["all", "for-her", "birthdays"], preview: "v1784209534/ladies-shopping-preview_hxo8bq.png", full: "v1784058157/ladies-shopping.png" },
   
   "leaving-boy": { title: "Sorry You're Leaving Boy Card", categories: ["all", "for-him", "work-related"], preview: "v1784209445/leaving-boy-preview_opwuv7.png", full: "v1784208051/leaving-boy_g8y7z0.png" },
@@ -197,6 +188,9 @@ const CARD_CATALOGUE = {
   "newhome6": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome6-preview_dst0lw.png", full: "v1785141067/newhome6_zm8i4d.jpg" },
   "newhome7": { title: "University Campus Card", categories: ["all", "school-cards", "home"], preview: "v1785141476/newhome7-preview_puq5vm.png", full: "v1785141067/newhome7_m5ufxx.jpg" },
   "newhome8": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome8-preview_z2kkpm.png", full: "v1785141071/newhome8_mmbrxh.png" },
+  "newhome9": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221487/newhome9-preview_h8qnga.png", full: "v1785221604/newhome9_rsqhpr.png" },
+  "newhome10": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
+  "newhome11": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221486/newhome11-preview_db8ghw.png", full: "v1785221607/newhome11_sjmymt.png" },
   
   "newjob-teacher-boy1": { title: "New Teacher Job Boy Card", categories: ["all", "for-him", "work-related"], preview: "v1784209456/newjob-teacher-boy1-preview_zlabbg.png", full: "v1784208072/newjob-teacher-boy1_qnrwb4.png" },
   "newjob-teacher-girl1": { title: "New Teacher Job Girl Card", categories: ["all", "for-her", "work-related"], preview: "v1784209478/newjob-teacher-girl1-preview_oyv8wd.png", full: "v1784208067/newjob-teacher-girl1_kkh4bb.png" },
