@@ -731,7 +731,7 @@ function switchPage(page, updateBuyBtn = true) {
     $('inside-controls').classList.toggle('active', !isFront);
     if (updateBuyBtn) $('buy-now-btn').style.display = isFront ? 'none' : 'block';
 
-    [backCoverImg, bgImg, nameText, ageText, photoImg].forEach((o) => o?.set({ visible: isFront, selectable: isFront, evented: isFront }));
+    [backCoverImg, bgImg, nameText, ageText].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o.set({ visible: !isFront }));
 
     canvas.discardActiveObject();
