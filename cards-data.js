@@ -274,7 +274,7 @@ const CARD_CATALOGUE = {
   "engagement5": { title: "Engagement Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896293/engagement5-preview_ued4t0.png", full: "v1784895841/engagement5_giwzii.png" },
 
   "valentines1-photo": { title: "Cupids Couple", categories: ["all", "for-her", "valentines"], preview: "v1785229353/valentines-photo1-preview_oqllmb.png", full: "v1785228622/valentines-photo1_ctoshq.png",
-    photo: { shape: "heart", left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
   "wedding1": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding1-preview_hxzzks.png", full: "v1784895840/wedding1_ripd1n.png" },
   "wedding2": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896288/wedding2-preview_vir2ip.png", full: "v1784895839/wedding2_q3nzee.png" },
