@@ -111,6 +111,11 @@ const CARD_CATALOGUE = {
   "birthday-grandad1": { title: "Grandads Garden", categories: ["all", "for-him", "birthdays"], preview: "v1785221486/birthday-grandad1-preview_owoeql.png", full: "v1785221607/birthday-grandad1_v6hfnt.png" },
   "birthday-sweetie": { title: "Sweet Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785221487/birthday-sweetie-preview_aqzgqe.png", full: "v1785221602/birthday-sweetie_fctude.png" },
   
+  "birthday-mum-photo1": { title: "Happy Birthday Mum", categories: ["all", "for-her", "birthdays"], preview: "v1785262722/birthday-mum-photo1-preview_d2rnaf.png", full: "v1785263100/birthday-mum-photo1_dx93vs.png" },
+   photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+  "birthday-dad-photo1": { title: "Happy Birthday Dad", categories: ["all", "for-him", "birthdays"], preview: "v1785262721/birthday-dad-photo1-preview_o7vuke.png", full: "v1785263105/birthday-dad-photo1_p0dckg.png" },
+   photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+  
   "brighton-celebrating": { title: "Brighton Celebrating Card", categories: ["sports", "football", "premiership", "brighton"], preview: "v1784384910/brighton-celebrating-preview_dl45ok.png", full: "v1784378932/brighton-celebrating_rx9o8w.png" },
   
   "brighton-girl1": { title: "Brighton Girl Card", categories: ["sports", "football", "wsl", "brighton"], price: "£3.49", preview: "v1784385725/brighton-girl1-preview_ind2xy.png", full: "v1784378932/brighton-girl1_hkhhlx.png", name: { left: 890, top: 470, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 890, top: 525, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" } },
