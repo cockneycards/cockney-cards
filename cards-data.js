@@ -161,7 +161,7 @@ const CARD_CATALOGUE = {
   
   "golfer": { title: "Golf Card", categories: ["sports", "for-him", "golf"], price: "£3.49", preview: "v1784384800/golfer-preview_bwmbdo.png", full: "v1784378938/golfer_gxfwrs.png", name: { left: 890, top: 300, startSize: 80, minSize: 70, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#112342", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 12 } },
 
-  "golfer-photo1": { title: "Golfer Fore!!", categories: ["sports", "for-him", "golf"], preview: "v1785262722/golfer-photo1-preview_plkxdb.png", full: "v1785262996/golfer-photo1_k997ys.png", name: { left: 883, top: 548, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+  "golfer-photo1": { title: "Golfer Fore!!", categories: ["sports", "for-him", "golf"], preview: "v1785262722/golfer-photo1-preview_plkxdb.png", full: "v1785265288/golfer-photo1_mer8bf.png", name: { left: 883, top: 548, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#032657", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 12 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 }, 
 
   
