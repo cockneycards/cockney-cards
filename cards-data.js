@@ -108,6 +108,7 @@ const CARD_CATALOGUE = {
   "beer-boy": { title: "Beer Boy Card", categories: ["all", "for-him", "birthdays"], preview: "v1784209517/beer-boy-preview_amm29h.png", full: "v1784058080/beer-boy_hscpkf.png" },
   "birthday-nan1": { title: "Nans Garden", categories: ["all", "for-her", "birthdays"], preview: "v1785221484/birthday-nan1-preview_aj4gr9.png", full: "v1785221602/birthday-nan1_wkck0d.png" },
   "birthday-grandad1": { title: "Grandads Garden", categories: ["all", "for-him", "birthdays"], preview: "v1785221486/birthday-grandad1-preview_owoeql.png", full: "v1785221607/birthday-grandad1_v6hfnt.png" },
+  "birthday-sweetie": { title: "Grandads Garden", categories: ["all", "for-him", "birthdays"], preview: "v1785221487/birthday-sweetie-preview_aqzgqe.png", full: "v1785221602/birthday-sweetie_fctude.png" },
   
   "brighton-celebrating": { title: "Brighton Celebrating Card", categories: ["sports", "football", "premiership", "brighton"], preview: "v1784384910/brighton-celebrating-preview_dl45ok.png", full: "v1784378932/brighton-celebrating_rx9o8w.png" },
   
