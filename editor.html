@@ -141,6 +141,14 @@
         <div id="front-controls" class="control-group active">
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
 
+            <div id="front-photo-upload" style="display:none; margin-bottom: 18px;">
+                <label for="photo-input" style="display:block; margin-bottom: 6px;">Upload Photo:</label>
+                <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
+                <p style="font-size:12px; color:#666; margin-top:6px;">
+                    Drag the photo to reposition it, or use the corner handle to zoom — it'll stay inside the frame.
+                </p>
+            </div>
+
             <div id="front-text-inputs">
                 <label id="label-name" for="name-input">Name:</label>
                 <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
@@ -253,6 +261,18 @@ const DEFAULT_AGE_SETTINGS = {
     defaultText: "40"   // placeholder text shown on the canvas before the customer types anything
 };
 
+// ---- Photo-upload frame defaults (reused / overridden per template) ----
+// A "photo" card gets an upload button and a clipped frame on the canvas
+// for the customer's own picture. `shape` picks the mask: "heart",
+// "circle", or "square". left/top is the CENTER of the frame; width/height
+// is its bounding box, all in the same full-spread coordinates as
+// name/age settings. Use findCoords() (bottom of this script) to read off
+// coordinates by clicking on the canvas.
+const DEFAULT_PHOTO_SETTINGS = {
+    shape: "heart",
+    left: 892.5, top: 400, width: 520, height: 520
+};
+
 // ---- Card catalogue: built from the shared CARD_CATALOGUE (cards-data.js) ----
 // CARD_TEMPLATES: what the editor actually needs per card -- full artwork
 // URL, plus name/age personalisation settings merged onto the defaults.
@@ -264,7 +284,8 @@ const CARD_TEMPLATES = Object.fromEntries(
             {
                 url: CLOUD_BASE + c.full,
                 name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
-                age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null
+                age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
+                photo: c.photo ? { ...DEFAULT_PHOTO_SETTINGS, ...c.photo } : null
             }
         ])
 );
@@ -317,6 +338,7 @@ const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth
 
 // ---- Mutable editor state ----
 let canvas, bgImg, backCoverImg, nameText, ageText;
+let photoImg, photoPlaceholder;
 let leftPageBg, rightPageBg;
 let insideBgRects = [];   // [top, middle, bottom]
 let insideTexts = [];     // [top, middle, bottom]
@@ -426,6 +448,11 @@ function initEditor(templateKey) {
     }
     if (activeTemplate.name?.maxChars) $('name-input').maxLength = activeTemplate.name.maxChars;
     if (activeTemplate.age?.maxChars) $('age-input').maxLength = activeTemplate.age.maxChars;
+
+    // Photo upload only shows up for cards with a `photo` frame configured.
+    photoImg = null;
+    $('front-photo-upload').style.display = activeTemplate.photo ? 'block' : 'none';
+    $('photo-input').value = '';
 
     loadFrontCover(activeTemplate.url);
 }
@@ -554,6 +581,92 @@ function setupTextsAndOverlays() {
 
     canvas.add(leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts);
     setupTextEvents();
+
+    if (activeTemplate.photo) showPhotoPlaceholder();
+}
+
+// SVG path for a heart, drawn in a 0-100 x 0-100 box — scaled to whatever
+// width/height the card's `photo` config asks for.
+const HEART_PATH = "M 50 88 C 20 65, 0 45, 0 25 C 0 10, 12 0, 25 0 C 35 0, 45 6, 50 18 " +
+                    "C 55 6, 65 0, 75 0 C 88 0, 100 10, 100 25 C 100 45, 80 65, 50 88 Z";
+
+// Builds a shape sized/positioned to a photo frame config. Used both as the
+// dashed on-canvas placeholder (before upload) and as the uploaded image's
+// clipPath (after upload) — `opts` is where those two cases differ.
+function buildFrameShape(p, opts) {
+    const shared = { left: p.left, top: p.top, originX: 'center', originY: 'center', ...opts };
+
+    if (p.shape === 'circle') {
+        return new fabric.Circle({ ...shared, radius: Math.min(p.width, p.height) / 2 });
+    }
+    if (p.shape === 'square') {
+        return new fabric.Rect({ ...shared, width: p.width, height: p.height });
+    }
+    // Default: heart
+    const path = new fabric.Path(HEART_PATH, shared);
+    path.set({ scaleX: p.width / path.width, scaleY: p.height / path.height });
+    return path;
+}
+
+// Dashed outline + hint shown on the canvas before the customer has
+// uploaded anything, so they can see where their photo will go. Clicking
+// it opens the file picker.
+function showPhotoPlaceholder() {
+    const p = activeTemplate.photo;
+    if (!p || photoImg) return;
+    if (photoPlaceholder) canvas.remove(photoPlaceholder);
+
+    photoPlaceholder = buildFrameShape(p, {
+        fill: 'rgba(255,255,255,0.55)',
+        stroke: '#1A73E8', strokeDashArray: [6, 6], strokeWidth: 2,
+        selectable: false, hoverCursor: 'pointer'
+    });
+    photoPlaceholder.on('mousedown', () => $('photo-input').click());
+    canvas.add(photoPlaceholder);
+    canvas.requestRenderAll();
+}
+
+// Reads the chosen file and loads it into the frame.
+function handlePhotoUpload(inputEl) {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => loadPhotoIntoFrame(e.target.result);
+    reader.readAsDataURL(file);
+}
+
+// Adds the customer's photo, cover-fit and clipped to the card's configured
+// shape. The clipPath is absolutely positioned so it stays put on the card
+// while the customer drags/resizes the photo underneath it to reposition —
+// rotation is locked so it can't be tilted out of alignment.
+function loadPhotoIntoFrame(dataUrl) {
+    const p = activeTemplate?.photo;
+    if (!p) return;
+
+    fabric.Image.fromURL(dataUrl, (img) => {
+        if (photoImg) canvas.remove(photoImg);
+        if (photoPlaceholder) { canvas.remove(photoPlaceholder); photoPlaceholder = null; }
+
+        // Cover-fit: scale so the photo fully fills the frame, like CSS
+        // object-fit: cover, then let the customer zoom/pan from there.
+        const coverScale = Math.max(p.width / img.width, p.height / img.height);
+
+        img.set({
+            left: p.left, top: p.top,
+            originX: 'center', originY: 'center',
+            scaleX: coverScale, scaleY: coverScale,
+            lockRotation: true,
+            clipPath: buildFrameShape(p, { absolutePositioned: true })
+        });
+        img.setControlsVisibility({ mtr: false });
+
+        photoImg = img;
+        canvas.add(photoImg);
+        canvas.moveTo(photoImg, canvas.getObjects().indexOf(bgImg) + 1);
+        canvas.setActiveObject(photoImg);
+        canvas.requestRenderAll();
+    }, { crossOrigin: 'anonymous' });
 }
 
 function updateNameText(inputEl) {
