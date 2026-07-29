@@ -316,7 +316,7 @@ const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 1191, CANVAS_HEIGHT = 840;
 // their normal full-spread coordinates (x = PANEL_WIDTH..CANVAS_WIDTH) — we
 // just pan the view so that range fills the visible canvas. The full spread
 // (both panels) is only ever rendered again briefly, off-screen, at checkout.
-const EDIT_WIDTH = PANEL_WIDTH, EDIT_HEIGHT = Math.round(PANEL_WIDTH * (297 / 210));
+const EDIT_WIDTH = PANEL_WIDTH, EDIT_HEIGHT = CANVAS_HEIGHT;
 
 const BOX_WIDTH = 495, BOX_LEFT = 50 + PANEL_WIDTH;
 // Each inside panel has its own top position + height now (rather than one
@@ -733,6 +733,7 @@ function switchPage(page, updateBuyBtn = true) {
 
     [backCoverImg, bgImg, nameText, ageText].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o.set({ visible: !isFront }));
+    photoImg?.set({ visible: isFront, selectable: isFront, evented: isFront });
 
     canvas.discardActiveObject();
     resetBordersToDashed();
