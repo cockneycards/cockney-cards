@@ -110,6 +110,22 @@ const CARD_CATALOGUE = {
   "birthday-nan1": { title: "Nans Garden", categories: ["all", "for-her", "birthdays"], preview: "v1785221484/birthday-nan1-preview_aj4gr9.png", full: "v1785221602/birthday-nan1_wkck0d.png" },
   "birthday-grandad1": { title: "Grandads Garden", categories: ["all", "for-him", "birthdays"], preview: "v1785221486/birthday-grandad1-preview_owoeql.png", full: "v1785221607/birthday-grandad1_v6hfnt.png" },
   "birthday-sweetie": { title: "Sweet Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785221487/birthday-sweetie-preview_aqzgqe.png", full: "v1785221602/birthday-sweetie_fctude.png" },
+  "birthday-horse-girl": { title: "Racing Lady", categories: ["all", "for-her", "birthdays"], preview: "v1785439371/birthday-horse-girl-preview_ohwctj.png", full: "v1785439591/birthday-horse-girl_bw60ol.png" },
+  "birthday-horse-boy": { title: "Racing Gent", categories: ["all", "for-him", "birthdays"], preview: "v1785439370/birthday-horse-boy-preview_tba18k.png", full: "v1785439589/birthday-horse-boy_lagokf.png" },
+  "birthday-gymgirl": { title: "Gym Birthday Babe", categories: ["all", "for-him", "birthdays"], preview: "v1785439370/birthday-gymgirl-preview_w3er8i.png", full: "v1785439589/birthday-gymgirl_pczkzl.png" },
+  "birthday-gymboy": { title: "Gym Bro Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439369/birthday-gymboy-preview_yn6iua.png", full: "v1785439579/birthday-gymboy_udnrfs.png" },
+  "birthday-girl1": { title: "Kids Birthday Girl", categories: ["all", "for-her", "birthdays", "children"], preview: "v1785439369/birthday-girl1-preview_pdxmlg.png", full: "v1785439579/birthday-girl1_je72sb.png" },
+  "birthday-boy1": { title: "Kids Birthday Boy", categories: ["all", "for-him", "birthdays", "children"], preview: "v1785439365/birthday-boy1-preview_xawjca.png", full: "v1785439575/birthday-boy1_xxigbv.png" },
+  "birthday-f1-racer": { title: "F1 Racer", categories: ["all", "for-him", "birthdays", "children"], preview: "v1785439367/birthday-f1-racer-preview_vq4z6n.png", full: "v1785439576/birthday-f1-racer_zq6d4u.png" },
+  "birthday-cake1": { title: "Birthday Cake", categories: ["all", "for-him", "birthdays"], preview: "v1785439365/birthday-cake1-preview_edrzab.png", full: "v1785439575/birthday-cake1_txue4o.png" },
+  "birthday-cake2": { title: "Piece of Cake", categories: ["all", "for-him", "birthdays"], preview: "v1785439366/birthday-cake2-preview_vhrdcj.png", full: "v1785439576/birthday-cake2_levpke.png" },
+  "birthday-baking-girl": { title: "Baking Girls Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439365/birthday-baking-girl-preview_kmxggv.png", full: "v1785439574/birthday-baking-girl_z6gcwv.png" },
+  "birthday-beachhut": { title: "Beach Hut Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439367/birthday-beachhut-preview_eb8bvv.png", full: "v1785439573/birthday-beachhut_ekivrq.png" },
+  "birthday-coffee-cake": { title: "Coffee & Cake", categories: ["all", "for-him", "birthdays"], preview: "v1785439368/birthday-coffee-cake-preview_nx9eid.png", full: "v1785439577/birthday-coffee-cake_one8az.png" },
+ 
+  "happy-hen-party1": { title: "Hen Party Sleep Over", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439372/happy-hen-party1-preview_we8x5z.png", full: "v1785439589/happy-hen-party1_itgqdm.png" },
+  "happy-hen-party2": { title: "Hen Party Girls", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439374/happy-hen-party2-preview_nlr0xa.png", full: "v1785439591/happy-hen-party2_wij3fl.png" },
+  
   
   "birthday-mum-photo1": { title: "Happy Birthday Mum", categories: ["all", "for-her", "birthdays"], preview: "v1785262722/birthday-mum-photo1-preview_d2rnaf.png", full: "v1785263100/birthday-mum-photo1_dx93vs.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
