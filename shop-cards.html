@@ -218,8 +218,15 @@ window.addEventListener('DOMContentLoaded', () => {
         if (catLink) filterProducts(catLink.dataset.cat);
     });
 
-    if (isBackForwardNavigation() || cameFromEditor()) {
+    if (isBackForwardNavigation() || shouldResumeFromEditor()) {
         restoreShopState();
+        // Clean the ?resume flag out of the address bar so a manual reload
+        // later doesn't keep forcing a restore.
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('resume')) {
+            url.searchParams.delete('resume');
+            window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+        }
     } else {
         sessionStorage.removeItem(SHOP_STATE_KEY);
         filterProducts('all');
@@ -259,13 +266,12 @@ function isBackForwardNavigation() {
     return entries.length > 0 && entries[0].type === 'back_forward';
 }
 
-// True when the visit is a normal (forward) navigation arriving straight
-// from the editor's "Cancel & Return" link. Browser back/forward-type
-// detection above is unreliable across browsers (bfcache quirks, iframes
-// from checkout, etc.), so this referrer check is the main mechanism that
-// makes "Cancel & Return" land back on the same category/gallery view.
-function cameFromEditor() {
-    return !!(document.referrer && document.referrer.indexOf('editor.html') !== -1);
+// True when the editor's "Cancel & Return" link sent us here with an
+// explicit ?resume=1 flag. This is used instead of document.referrer,
+// which some browsers/privacy settings strip even for same-site
+// navigations -- an explicit flag in the URL is deterministic everywhere.
+function shouldResumeFromEditor() {
+    return new URLSearchParams(window.location.search).get('resume') === '1';
 }
 
 // Expands every ancestor branch of the sidebar tree that leads to `key`,
