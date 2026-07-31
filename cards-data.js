@@ -122,6 +122,7 @@ const CARD_CATALOGUE = {
   "birthday-baking-girl": { title: "Baking Girls Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439365/birthday-baking-girl-preview_kmxggv.png", full: "v1785439574/birthday-baking-girl_z6gcwv.png" },
   "birthday-beachhut": { title: "Beach Hut Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439367/birthday-beachhut-preview_eb8bvv.png", full: "v1785439573/birthday-beachhut_ekivrq.png" },
   "birthday-coffee-cake": { title: "Coffee & Cake", categories: ["all", "for-him", "birthdays"], preview: "v1785439368/birthday-coffee-cake-preview_nx9eid.png", full: "v1785439577/birthday-coffee-cake_one8az.png" },
+  "Birthday-hydrangea": { title: "Birthday Hydrangea", categories: ["all", "for-her", "birthdays"], preview: "v1785492890/Birthday-hydrangea-preview_xnxvxe.png", full: "v1785492675/Birthday-hydrangea_x8zgzh.png" },
  
   "happy-hen-party1": { title: "Hen Party Sleep Over", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439372/happy-hen-party1-preview_we8x5z.png", full: "v1785439589/happy-hen-party1_itgqdm.png" },
   "happy-hen-party2": { title: "Hen Party Girls", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439374/happy-hen-party2-preview_nlr0xa.png", full: "v1785439591/happy-hen-party2_wij3fl.png" },
