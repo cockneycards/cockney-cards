@@ -1033,12 +1033,11 @@ async function uploadAndGoToCheckout() {
     }
 }
 
-// Returns to shop-cards.html. The category/gallery view the user left is
-// restored on arrival there (shop-cards.html checks that the visit came
-// from editor.html and reloads its saved state) instead of resetting to
-// "all cards" -- a plain navigation is enough, no history.back() needed.
+// Returns to shop-cards.html and tells it (via ?resume=1) to restore
+// whatever category, football league, or team page the user left --
+// instead of resetting to "all cards".
 function returnToShop() {
-    window.location.href = 'shop-cards.html';
+    window.location.href = 'shop-cards.html?resume=1';
 }
 
 function updateLoginUI(user) {
