@@ -210,8 +210,6 @@ const CARD_CATALOGUE = {
   "birthday-mfc-photo1": { title: "Lions Birthday", categories: ["sports", "football", "championship", "millwall"], preview: "v1785235108/birthday-mfc-photo1-preview_x5yj5l.png", full: "v1785235053/birthday-mfc-photo1_zv3ntf.png", name: { left: 892, top: 750, startSize: 65, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 12 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
-  "netball-queen2": { title: "Netball Queen Card", categories: ["sports", "netball"], price: "£3.49", preview: "v1784384859/netball-queen2-preview_gxkgfh.png" },
-  
   "new-home": { title: "New Home Card", categories: ["all", "home"], preview: "v1784209536/new-home-preview_xnugt2.png", full: "v1784058157/new-home_wgtf1r.png" },
   "newhome1": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141480/newhome1-preview_sqtuio.png", full: "v1785141071/newhome1_tasqqg.png" },
   "newhome2": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141475/newhome2-preview_qkibme.png", full: "v1785141075/newhome2_tp8sxt.png" },
