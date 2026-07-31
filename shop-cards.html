@@ -218,7 +218,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (catLink) filterProducts(catLink.dataset.cat);
     });
 
-    if (isBackForwardNavigation()) {
+    if (isBackForwardNavigation() || cameFromEditor()) {
         restoreShopState();
     } else {
         sessionStorage.removeItem(SHOP_STATE_KEY);
@@ -257,6 +257,15 @@ function saveShopState() {
 function isBackForwardNavigation() {
     const entries = performance.getEntriesByType('navigation');
     return entries.length > 0 && entries[0].type === 'back_forward';
+}
+
+// True when the visit is a normal (forward) navigation arriving straight
+// from the editor's "Cancel & Return" link. Browser back/forward-type
+// detection above is unreliable across browsers (bfcache quirks, iframes
+// from checkout, etc.), so this referrer check is the main mechanism that
+// makes "Cancel & Return" land back on the same category/gallery view.
+function cameFromEditor() {
+    return !!(document.referrer && document.referrer.indexOf('editor.html') !== -1);
 }
 
 // Expands every ancestor branch of the sidebar tree that leads to `key`,
@@ -346,17 +355,35 @@ function renderCategoryLevel(categories, depth) {
         const inlineExpand = hasKids && depth <= 1;
         const isGallery = hasKids && depth >= 2;
 
+        const showArrow = hasKids && !LOCKED_EXPANDED_CATEGORIES.includes(key);
+
         return `
             <li class="${inlineExpand ? 'has-children' : ''}"${isGallery ? ' data-gallery="true"' : ''}>
-                <a data-cat="${key}">${label}${hasKids ? '<span class="arrow">&#9662;</span>' : ''}</a>
+                <a data-cat="${key}">${label}${showArrow ? '<span class="arrow">&#9662;</span>' : ''}</a>
                 ${inlineExpand ? `<ul class="subcat-list">${renderCategoryLevel(visibleKids, depth + 1)}</ul>` : ''}
             </li>`;
     }).join('');
 }
 
+// Categories that should already be expanded when the page first loads
+// (their immediate children visible), without needing a click. Nested
+// grandchildren (e.g. Football's own leagues) still stay closed until
+// clicked directly.
+const DEFAULT_EXPANDED_CATEGORIES = ["sports"];
+
+// Categories in this list can never be collapsed -- their arrow is hidden
+// and clicking them never toggles them shut, only navigates/filters.
+const LOCKED_EXPANDED_CATEGORIES = ["sports"];
+
 function renderCategories() {
     const list = $('category-list');
     list.innerHTML = renderCategoryLevel(CATEGORIES, 0);
+
+    DEFAULT_EXPANDED_CATEGORIES.forEach((key) => {
+        const link = list.querySelector(`a[data-cat="${key}"]`);
+        const li = link && link.closest('li');
+        if (li && li.classList.contains('has-children')) li.classList.add('expanded');
+    });
 
     // Single delegated click handler instead of one inline handler per item
     list.addEventListener('click', (e) => {
@@ -369,7 +396,7 @@ function renderCategories() {
             openTeamGallery(key);
             return;
         }
-        if (li.classList.contains('has-children')) {
+        if (li.classList.contains('has-children') && !LOCKED_EXPANDED_CATEGORIES.includes(key)) {
             toggleExpandSubtree(li);
         }
         filterProducts(key);
@@ -381,7 +408,12 @@ function renderCategories() {
 function toggleExpandSubtree(li) {
     const expanding = !li.classList.contains('expanded');
     li.classList.toggle('expanded', expanding);
-    li.querySelectorAll('li.has-children').forEach((child) => child.classList.toggle('expanded', expanding));
+    // Only reset nested branches on collapse -- expanding a category should
+    // only open that one level; its children (e.g. Football) stay closed
+    // until clicked themselves.
+    if (!expanding) {
+        li.querySelectorAll('li.has-children').forEach((child) => child.classList.remove('expanded'));
+    }
 }
 
 function setActiveCategory(key) {
@@ -491,7 +523,7 @@ function renderView() {
 
     const filtered = viewMode === 'team'
         ? PRODUCTS.filter((p) => p.categories.includes(currentLeague) && p.categories.includes(currentTeam))
-        : (currentCategory === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.categories.includes(currentCategory)));
+        : PRODUCTS.filter((p) => p.categories.includes(currentCategory));
 
     renderGrid(sortItems(filtered));
     $('breadcrumb').innerHTML = renderBreadcrumb();
