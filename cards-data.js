@@ -73,7 +73,7 @@ const CATEGORIES = [
     ["netball", "Netball"],
     ["darts", "Darts"],
     ["running", "Running"],
-    ["racing", "Racing"],
+    ["horseracing", "Horse Racing"],
   ]],
   ["thank-you", "Thank You! Cards"],
   ["weddings-engagements", "Wedding & Engagement Cards"],
@@ -112,8 +112,8 @@ const CARD_CATALOGUE = {
   "birthday-nan1": { title: "Nans Garden", categories: ["all", "for-her", "birthdays"], preview: "v1785221484/birthday-nan1-preview_aj4gr9.png", full: "v1785221602/birthday-nan1_wkck0d.png" },
   "birthday-grandad1": { title: "Grandads Garden", categories: ["all", "for-him", "birthdays"], preview: "v1785221486/birthday-grandad1-preview_owoeql.png", full: "v1785221607/birthday-grandad1_v6hfnt.png" },
   "birthday-sweetie": { title: "Sweet Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785221487/birthday-sweetie-preview_aqzgqe.png", full: "v1785221602/birthday-sweetie_fctude.png" },
-  "birthday-horse-girl": { title: "Racing Lady", categories: ["all", "for-her", "racing", "birthdays"], preview: "v1785439371/birthday-horse-girl-preview_ohwctj.png", full: "v1785439591/birthday-horse-girl_bw60ol.png" },
-  "birthday-horse-boy": { title: "Racing Gent", categories: ["all", "for-him", "racing", "birthdays"], preview: "v1785439370/birthday-horse-boy-preview_tba18k.png", full: "v1785439589/birthday-horse-boy_lagokf.png" },
+  "birthday-horse-girl": { title: "Racing Lady", categories: ["all", "for-her", "horseracing", "birthdays"], preview: "v1785439371/birthday-horse-girl-preview_ohwctj.png", full: "v1785439591/birthday-horse-girl_bw60ol.png" },
+  "birthday-horse-boy": { title: "Racing Gent", categories: ["all", "for-him", "horseracing", "birthdays"], preview: "v1785439370/birthday-horse-boy-preview_tba18k.png", full: "v1785439589/birthday-horse-boy_lagokf.png" },
   "birthday-gymgirl": { title: "Gym Birthday Babe", categories: ["all", "for-him", "birthdays"], preview: "v1785439370/birthday-gymgirl-preview_w3er8i.png", full: "v1785439589/birthday-gymgirl_pczkzl.png" },
   "birthday-gymboy": { title: "Gym Bro Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439369/birthday-gymboy-preview_yn6iua.png", full: "v1785439579/birthday-gymboy_udnrfs.png" },
   "birthday-girl1": { title: "Kids Birthday Girl", categories: ["all", "for-her", "birthdays", "children"], preview: "v1785439369/birthday-girl1-preview_pdxmlg.png", full: "v1785439579/birthday-girl1_je72sb.png" },
@@ -182,7 +182,7 @@ const CARD_CATALOGUE = {
   "golfer-photo1": { title: "Golfer Fore!!", categories: ["sports", "for-him", "golf"], preview: "v1785262722/golfer-photo1-preview_plkxdb.png", full: "v1785338940/golfer-photo1_bibmdj.png", name: { left: 894, top: 230, startSize: 55, minSize: 50, maxSize: 58, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
-  "grandad-racing": { title: "Grandad Racing Card", categories: ["sports", "for-him", "racing"], preview: "v1784384853/grandad-racing-preview_tx5k2p.png", full: "v1784378939/grandad-racing_p7e3ov.png" },
+  "grandad-racing": { title: "Grandad Racing Card", categories: ["sports", "for-him", "horseracing"], preview: "v1784384853/grandad-racing-preview_tx5k2p.png", full: "v1784378939/grandad-racing_p7e3ov.png" },
   
   "ladies-lunch": { title: "Ladies Lunch Card", categories: ["all", "for-her", "birthdays"], preview: "v1784209436/ladies-lunch-preview_apknm3.png", full: "v1784058155/ladies-lunch_et7asg.png" },
   "ladies-shopping": { title: "Ladies Shopping Card", categories: ["all", "for-her", "birthdays"], preview: "v1784209534/ladies-shopping-preview_hxo8bq.png", full: "v1784058157/ladies-shopping.png" },
