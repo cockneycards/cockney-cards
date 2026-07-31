@@ -1033,18 +1033,12 @@ async function uploadAndGoToCheckout() {
     }
 }
 
-// Goes back to shop-cards.html the same way the browser's own back button
-// would, so its saved category/gallery state gets restored instead of
-// resetting to "all cards". Falls back to a normal navigation if the user
-// landed on the editor directly (e.g. a bookmark) and there's nothing to
-// go back to.
+// Returns to shop-cards.html. The category/gallery view the user left is
+// restored on arrival there (shop-cards.html checks that the visit came
+// from editor.html and reloads its saved state) instead of resetting to
+// "all cards" -- a plain navigation is enough, no history.back() needed.
 function returnToShop() {
-    const cameFromShop = document.referrer && document.referrer.indexOf('shop-cards.html') !== -1;
-    if (cameFromShop && window.history.length > 1) {
-        window.history.back();
-    } else {
-        window.location.href = 'shop-cards.html';
-    }
+    window.location.href = 'shop-cards.html';
 }
 
 function updateLoginUI(user) {
