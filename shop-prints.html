@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Prints | Cockney Cards</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="prints-data.js"></script>
 
     <style>
         :root {
@@ -453,24 +454,19 @@
     </footer>
 
     <script>
-        const PRODUCTS = [
-            {
-                id: 'millwall-dad-son-print',
-                title: 'Millwall Dad & Son A4 Print',
-                price: '£9.99',
-                priceValue: 9.99,
-                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png',
-                categories: ['all', 'sports']
-            },
-            {
-                id: 'bermondsey-legend-print',
-                title: 'Bermondsey Legend Framed Print',
-                price: '£12.99',
-                priceValue: 12.99,
-                image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png',
-                categories: ['all'] // TODO: 'legends' isn't one of the new sidebar categories — tag this sports/music/kitchen/childrens as appropriate
-            }
-        ];
+        // Built from PRINT_CATALOGUE (prints-data.js) — only entries with a
+        // `title` show up here; untitled entries (like the reference/sample
+        // ones in prints-data.js) are editor-only and stay hidden from the shop.
+        const PRODUCTS = Object.entries(PRINT_CATALOGUE)
+            .filter(([id, c]) => c.title)
+            .map(([id, c]) => ({
+                id,
+                title: c.title,
+                price: c.price,
+                priceValue: c.priceValue,
+                image: CLOUD_BASE + (c.preview || c.full),
+                categories: c.categories || ['all']
+            }));
 
         let currentCategory = 'all';
         let currentSort = 'featured';
