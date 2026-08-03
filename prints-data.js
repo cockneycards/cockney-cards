@@ -18,11 +18,16 @@
 //                 merged onto DEFAULT_NAME_SETTINGS in editor-prints.html.
 //                 Omit entirely if this print has no name personalisation.
 //   age         — optional, same idea, for an Age field.
+//   name2, age2 — optional. A SECOND name/age field, for two-person prints
+//                 (e.g. "First Name: / Age: / Second Name: / Age:"). Same
+//                 shape as name/age, merged onto DEFAULT_NAME2_SETTINGS /
+//                 DEFAULT_AGE2_SETTINGS. Use `label` to set what each input
+//                 is called (see the two-name example below).
 //   extraFields — optional, same idea, for any number of extra label+value
 //                 fields (e.g. "Event:", "Date:").
 //
-// Leave out `name`/`age`/`extraFields` completely for a print that's just
-// artwork with no personalisation at all.
+// Leave out `name`/`age`/`name2`/`age2`/`extraFields` completely for a
+// print that's just artwork with no personalisation at all.
 
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
 
@@ -44,11 +49,23 @@ const PRINT_CATALOGUE = {
     "bermondsey-legend-print": {
         full: "v1784120944/you-can-take_cbses4.png"
     },
-   "mfc-dad-son": { title: "MFC Dad & Son", categories: ["all", "sports"], preview: "v1784120947/millwall-dad-son_e48hgt.png", full: "v1785784030/mfc-dad-son_kh02zr.png" },
-   
+
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
         full: "v1784098145/prints/sample-print-full.png",
         name: { left: 297.75, top: 725, startSize: 52, color: "#FFFFFF" }
+    },
+
+    // Example of a TWO-PERSON print — "First Name: / Age: / Second Name: /
+    // Age:" — for reference. Copy this shape for your new test print once
+    // you've got its real Cloudinary paths and on-artwork coordinates
+    // (use the findCoords() console helper in editor-prints.html for the
+    // left/top numbers once the artwork is loaded).
+    "sample-two-person-print": {
+        full: "v1784098145/prints/sample-two-person-full.png",
+        name: { label: "First Name", left: 200, top: 725, startSize: 48, color: "#FFFFFF" },
+        age: { label: "Age", left: 200, top: 600, startSize: 56, color: "#FFFFFF" },
+        name2: { label: "Second Name", left: 400, top: 725, startSize: 48, color: "#FFFFFF" },
+        age2: { label: "Age", left: 400, top: 600, startSize: 56, color: "#FFFFFF" }
     }
 };
