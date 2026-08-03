@@ -29,14 +29,14 @@ const DEFAULT_PRICE = "£2.49";
 // each line below to change it -- all boy cards share RUNNING_CARD_FIELDS_BOY,
 // all girl cards share RUNNING_CARD_FIELDS_GIRL.
 const RUNNING_CARD_FIELDS_BOY = [
-  { key: "event", label: "Event", left: 900, top: 660, fontSize: 34, color: "#E2AB42", maxChars: 20 },
-  { key: "date", label: "Date", left: 898, top: 700, fontSize: 34, color: "#E2AB42", maxChars: 20 },
-  { key: "finishTime", label: "Finish Time", left: 915, top: 750, fontSize: 34, color: "#E2AB42", maxChars: 12 }
+  { key: "event", label: "Event", left: 920, top: 620, fontSize: 34, color: "#E2AB42", maxChars: 20 },
+  { key: "date", label: "Date", left: 900, top: 700, fontSize: 34, color: "#E2AB42", maxChars: 20 },
+  { key: "finishTime", label: "Time", left: 940, top: 750, fontSize: 34, color: "#E2AB42", maxChars: 12 }
 ];
 const RUNNING_CARD_FIELDS_GIRL = [
-  { key: "event", label: "Event", left: 900, top: 660, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
-  { key: "date", label: "Date", left: 898, top: 700, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
-  { key: "finishTime", label: "Finish Time", left: 915, top: 750, fontSize: 34, color: "#8B1E5C", maxChars: 12 }
+  { key: "event", label: "Event", left: 920, top: 620, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
+  { key: "date", label: "Date", left: 900, top: 700, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
+  { key: "finishTime", label: "Time", left: 940, top: 750, fontSize: 34, color: "#8B1E5C", maxChars: 12 }
 ];
 
 // Categories can now nest: a 3rd array item is an optional list of child
