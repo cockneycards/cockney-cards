@@ -158,7 +158,7 @@ const CARD_CATALOGUE = {
   "drivingtest-girl4": { title: "Driving Pass Girl Card", categories: ["all", "for-her", "achievements"], preview: "v1784209476/drivingtest-girl4-preview_n0onrv.png", full: "v1784208061/drivingtest-girl4_grx0ed.png" },
   "drivingtest-girl4": { title: "Driving Pass Girl Card", categories: ["all", "for-her", "achievements"], preview: "v1784209476/drivingtest-girl4-preview_n0onrv.png", full: "v1784208061/drivingtest-girl4_grx0ed.png" },
   "drivingtest-girl4": { title: "Driving Pass Girl Card", categories: ["all", "for-her", "achievements"], preview: "v1784209476/drivingtest-girl4-preview_n0onrv.png", full: "v1784208061/drivingtest-girl4_grx0ed.png" },
-  "learner1": { title: "Driving Test Pass Card", categories: ["all", "for-her", "achievements"], preview: "v1785221485/learner1-preview_bfnieg.png", full: "v1785221603/learner1_mvoirp.png" },
+  "learner1": { title: "Driving Test Pass Card", categories: ["all", "for-him", "achievements"], preview: "v1785221485/learner1-preview_bfnieg.png", full: "v1785221603/learner1_mvoirp.png" },
   "learner2": { title: "Driving Test Pass Card", categories: ["all", "for-her", "achievements"], preview: "v1785221485/learner2-preview_cnbcr5.png", full: "v1785221603/learner2_oevchg.png" },
   
   "exams-boy": { title: "Exams Congratulations Boy Card", categories: ["all", "for-him", "achievements"], preview: "v1784209521/exams-boy-preview_pwc5me.png", full: "v1784058150/exams-boy_wuej29.png" },
