@@ -271,7 +271,7 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
   "wedding1": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding1-preview_hxzzks.png", full: "v1784895840/wedding1_ripd1n.png" },
-  "wedding2": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896288/wedding2-preview_vir2ip.png", full: "v1784895839/wedding2_q3nzee.png" },
+  
   "wedding3": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896285/wedding3-preview_bwchrr.png", full: "v1784895839/wedding3_sm7ztz.png" },
   "wedding4": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding4-preview_zubyhl.png", full: "v1784895839/wedding4_qofbhe.png" },
   
