@@ -386,9 +386,9 @@ const CARD_CATALOGUE = {
   "5kboy-photo": { title: "5K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738247/5kboy-photo-preview_c2npct.png", full: "v1785738153/5kboy-photo_c116gx.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 892.5, top: 560, fontSize: 34, color: "#000000", maxChars: 20 },
-      { key: "date", label: "Date", left: 892.5, top: 610, fontSize: 34, color: "#000000", maxChars: 20 },
-      { key: "finishTime", label: "Finish Time", left: 892.5, top: 660, fontSize: 34, color: "#000000", maxChars: 12 }
+      { key: "event", label: "Event", left: 879, top: 590, fontSize: 34, color: "#000000", maxChars: 20 },
+      { key: "date", label: "Date", left: 877, top: 640, fontSize: 34, color: "#000000", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 897, top: 690, fontSize: 34, color: "#000000", maxChars: 12 }
     ] },
   "10kboy-photo": { title: "10K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738254/10kboy-photo-preview_rnq9xm.png", full: "v1785738143/10kboy-photo_qq6izl.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
