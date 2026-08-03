@@ -197,8 +197,8 @@ const CARD_CATALOGUE = {
   "newhome10": { title: "New Home, New Pad", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
   
   "newhome1-photo": { title: "New Home Card", categories: ["all", "home"], preview: "v1785262722/newhome12-photo-preview_vtnuyn.png", full: "v1785263102/newhome12-photo_apyp0z.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-  
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+
   "newjob-teacher-boy1": { title: "New Teacher Job Boy Card", categories: ["all", "for-him", "work-related"], preview: "v1784209456/newjob-teacher-boy1-preview_zlabbg.png", full: "v1784208072/newjob-teacher-boy1_qnrwb4.png" },
   "newjob-teacher-girl1": { title: "New Teacher Job Girl Card", categories: ["all", "for-her", "work-related"], preview: "v1784209478/newjob-teacher-girl1-preview_oyv8wd.png", full: "v1784208067/newjob-teacher-girl1_kkh4bb.png" },
 
@@ -246,8 +246,8 @@ const CARD_CATALOGUE = {
   "engagement5": { title: "The Propsal", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896293/engagement5-preview_ued4t0.png", full: "v1784895841/engagement5_giwzii.png" },
 
   "valentines1-photo": { title: "Cupids Couple", categories: ["all", "for-her", "valentines"], preview: "v1785229353/valentines-photo1-preview_oqllmb.png", full: "v1785228622/valentines-photo1_ctoshq.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-  
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+
   "wedding1": { title: "Over the Threshold", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding1-preview_hxzzks.png", full: "v1784895840/wedding1_ripd1n.png" },
   
   "wedding3": { title: "Wedding Bubbles", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896285/wedding3-preview_bwchrr.png", full: "v1784895839/wedding3_sm7ztz.png" },
