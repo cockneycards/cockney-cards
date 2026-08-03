@@ -125,8 +125,22 @@ const CARD_CATALOGUE = {
   "birthday-baking-girl": { title: "Baking Girls Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439365/birthday-baking-girl-preview_kmxggv.png", full: "v1785439574/birthday-baking-girl_z6gcwv.png" },
   "birthday-beachhut": { title: "Beach Hut Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439367/birthday-beachhut-preview_eb8bvv.png", full: "v1785439573/birthday-beachhut_ekivrq.png" },
   "birthday-coffee-cake": { title: "Coffee & Cake", categories: ["all", "for-him", "birthdays"], preview: "v1785439368/birthday-coffee-cake-preview_nx9eid.png", full: "v1785439577/birthday-coffee-cake_one8az.png" },
-  "Birthday-hydrangea": { title: "Birthday Hydrangea", categories: ["all", "for-her", "birthdays"], preview: "v1785492890/Birthday-hydrangea-preview_xnxvxe.png", full: "v1785492675/Birthday-hydrangea_x8zgzh.png" },
- 
+  "birthday-hydrangea": { title: "Birthday Hydrangea", categories: ["all", "for-her", "birthdays"], preview: "v1785492890/Birthday-hydrangea-preview_xnxvxe.png", full: "v1785492675/Birthday-hydrangea_x8zgzh.png" },
+  
+  "birthday-flowers": { title: "Birthday Flowers", categories: ["all", "for-her", "birthdays"], preview: "v1785737835/birthday-flowers-preview_kw7ujl.png", full: "v1785737924/birthday-flowers_qiqtr0.png" },
+  "birthday-vintagegolf": { title: "Vintage Golfer", categories: ["all", "for-her", "birthdays"], preview: "v1785737646/birthday-vintagegolf-preview_nsn3ti.png", full: "v1785737870/birthday-vintagegolf_jsk3lp.png" },
+  "birthday-vintagefootball": { title: "Vintage Footballer", categories: ["all", "for-her", "birthdays"], preview: "v1785737645/birthday-vintagefootball-preview_xz7tip.png", full: "v1785737926/birthday-vintagefootball_oqp3il.png" },
+  "birthday-vintagefishing": { title: "Vintage Fishing", categories: ["all", "for-her", "birthdays"], preview: "v1785737645/birthday-vintagefishing-preview_mvicup.png", full: "v1785737869/birthday-vintagefishing_itgqdg.png" },
+  "birthday-lavenderfield": { title: "Lavender Field", categories: ["all", "for-her", "birthdays"], preview: "v1785737645/birthday-lavenderfield-preview_emfsul.png", full: "v1785737930/birthday-lavenderfield_j4lq7d.png" },
+  "birthday-bikers": { title: "Biker Boy", categories: ["all", "for-her", "birthdays"], preview: "v1785737645/birthday-bikers-preview_njainm.png", full: "v1785737873/birthday-bikers_sdrptn.png" },
+  "birthday-secretgarden": { title: "Secret Garden", categories: ["all", "for-her", "birthdays"], preview: "v1785737645/birthday-secretgarden-preview_xtdig5.png", full: "v1785737868/birthday-secretgarden_gl6hll.png" },
+  "birthday-grandad-horseracingtv": { title: "Grandad's Horse Racing", categories: ["all", "for-her", "birthdays"], preview: "v1785737645/birthday-grandad-horseracingtv-preview_i2ke07.png", full: "v1785737925/birthday-grandad-horseracingtv_gqv6bl.png" },
+  "birthday-grandad-football-girl": { title: "Grandad & Granddaughter Football", categories: ["all", "for-her", "birthdays"], preview: "v1785737644/birthday-grandad-football-girl-preview_ythtgq.png", full: "v1785737935/birthday-grandad-football-girl_tdv7xa.png" },
+  "birthday-grandad-football-boy": { title: "Grandad & Grandson Football", categories: ["all", "for-her", "birthdays"], preview: "v1785737644/birthday-grandad-football-boy-preview_fqgjme.png", full: "v1785737936/birthday-grandad-football-boy_ffzt5p.png" },
+  "birthday-grandad-football-garden": { title: "Grandad's Garden Football", categories: ["all", "for-her", "birthdays"], preview: "v1785737644/birthday-grandad-football-garden-preview_zln43d.png", full: "v1785737931/birthday-grandad-football-garden_scgjkl.png" },
+  "birthday-grandad-catch-girl": { title: "Grandad & Granddaughter Playing Catch", categories: ["all", "for-her", "birthdays"], preview: "v1785737644/birthday-grandad-catch-girl-preview_b08pgo.png", full: "v1785737932/birthday-grandad-catch-girl_lemcjn.png" },
+  "birthday-grandad-fishing-boy": { title: "Grandad & Grandson Fishing", categories: ["all", "for-her", "birthdays"], preview: "v1785737644/birthday-grandad-fishing-boy-preview_ffdtiq.png", full: "v1785737926/birthday-grandad-fishing-boy_rptbik.png" },
+  
   "happy-hen-party1": { title: "Hen Party Sleep Over", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439372/happy-hen-party1-preview_we8x5z.png", full: "v1785439589/happy-hen-party1_itgqdm.png" },
   "happy-hen-party2": { title: "Hen Party Girls", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439374/happy-hen-party2-preview_nlr0xa.png", full: "v1785439591/happy-hen-party2_wij3fl.png" },
   
