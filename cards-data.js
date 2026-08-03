@@ -421,9 +421,9 @@ const CARD_CATALOGUE = {
   "26mgirl-photo": { title: "26M Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738251/26mgirl-photo-preview_n1juyo.png", full: "v1785738142/26mgirl-photo_apr3zk.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 876, top: 607, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
-      { key: "date", label: "Date", left: 860, top: 658, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 910, top: 711, fontSize: 20, color: "#8B1E5C", maxChars: 12 }
+      { key: "event", label: "Event", left: 866, top: 597, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
+      { key: "date", label: "Date", left: 860, top: 648, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 912, top: 701, fontSize: 20, color: "#8B1E5C", maxChars: 12 }
     ] },
 
   
