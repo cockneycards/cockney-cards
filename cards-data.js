@@ -23,10 +23,12 @@ const DEFAULT_PRICE = "£2.49";
 // "Event / Date / Finish Time" text fields for the 5K/10K/26.2 mile
 // achievement cards below. Each of the six cards has its own extraFields
 // array (see each card entry further down) so left/top/color can differ
-// per card. Positions below are an initial estimate (stacked centrally
-// below the photo frame) -- open each card in the editor and use
-// findCoords() (see bottom of editor.html) to fine-tune left/top, then
-// edit that card's own extraFields array with the real numbers.
+// per card. Text is LEFT-ALIGNED: `left` is the left edge the text starts
+// from (not its center), `top` is still its vertical center. Positions
+// below are an initial estimate (stacked below the photo frame) -- open
+// each card in the editor and use findCoords() (see bottom of editor.html)
+// to fine-tune left/top, then edit that card's own extraFields array with
+// the real numbers.
 
 // Categories can now nest: a 3rd array item is an optional list of child
 // [key, label] (or [key, label, children]) entries, exactly like this level.
