@@ -49,7 +49,9 @@ const PRINT_CATALOGUE = {
     "bermondsey-legend-print": {
         full: "v1784120944/you-can-take_cbses4.png"
     },
-
+    "bermondsey-legend-print": {
+        full: "v1784120944/you-can-take_cbses4.png"
+    },
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
         full: "v1784098145/prints/sample-print-full.png",
