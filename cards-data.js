@@ -29,14 +29,14 @@ const DEFAULT_PRICE = "£2.49";
 // each line below to change it -- all boy cards share RUNNING_CARD_FIELDS_BOY,
 // all girl cards share RUNNING_CARD_FIELDS_GIRL.
 const RUNNING_CARD_FIELDS_BOY = [
-  { key: "event", label: "Event", left: 892.5, top: 560, fontSize: 34, color: "#E2AB42", maxChars: 20 },
-  { key: "date", label: "Date", left: 892.5, top: 610, fontSize: 34, color: "#E2AB42", maxChars: 20 },
-  { key: "finishTime", label: "Finish Time", left: 892.5, top: 660, fontSize: 34, color: "#E2AB42", maxChars: 12 }
+  { key: "event", label: "Event", left: 900, top: 660, fontSize: 34, color: "#E2AB42", maxChars: 20 },
+  { key: "date", label: "Date", left: 898, top: 700, fontSize: 34, color: "#E2AB42", maxChars: 20 },
+  { key: "finishTime", label: "Finish Time", left: 915, top: 750, fontSize: 34, color: "#E2AB42", maxChars: 12 }
 ];
 const RUNNING_CARD_FIELDS_GIRL = [
-  { key: "event", label: "Event", left: 892.5, top: 560, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
-  { key: "date", label: "Date", left: 892.5, top: 610, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
-  { key: "finishTime", label: "Finish Time", left: 892.5, top: 660, fontSize: 34, color: "#8B1E5C", maxChars: 12 }
+  { key: "event", label: "Event", left: 900, top: 660, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
+  { key: "date", label: "Date", left: 898, top: 700, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
+  { key: "finishTime", label: "Finish Time", left: 915, top: 750, fontSize: 34, color: "#8B1E5C", maxChars: 12 }
 ];
 
 // Categories can now nest: a 3rd array item is an optional list of child
@@ -393,7 +393,7 @@ const CARD_CATALOGUE = {
   "whu-shirt": { title: "West Ham Shirt Card", categories: ["sports", "football", "championship", "west-ham"], price: "£3.49", preview: "v1784384829/whu-shirt-preview_azohtz.png", full: "v1784378957/whu-shirt_zj7c65.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" } },
 
   "5kboy-photo": { title: "5K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738247/5kboy-photo-preview_c2npct.png", full: "v1785738153/5kboy-photo_c116gx.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+    photo: { left: 930, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: RUNNING_CARD_FIELDS_BOY },
   "10kboy-photo": { title: "10K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738254/10kboy-photo-preview_rnq9xm.png", full: "v1785738143/10kboy-photo_qq6izl.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
