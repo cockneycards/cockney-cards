@@ -589,10 +589,12 @@ function setupTextsAndOverlays() {
     extraTexts = [];
     if (activeTemplate.extraFields) {
         activeTemplate.extraFields.forEach((f) => {
+            // Left-aligned: `left`/`top` mark the LEFT edge of the text
+            // (not its center) -- text grows rightward from that point.
             const t = new fabric.Text((f.label || f.key || '').toUpperCase(), {
-                left: f.left, top: f.top, originX: "center", originY: "center",
+                left: f.left, top: f.top, originX: "left", originY: "center",
                 fontSize: f.fontSize, fontFamily: f.fontFamily || "Arial",
-                fontWeight: f.fontWeight || "bold", fill: f.color, textAlign: "center",
+                fontWeight: f.fontWeight || "bold", fill: f.color, textAlign: "left",
                 hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
             });
             extraTexts.push(t);
@@ -709,7 +711,8 @@ function updateAgeText(inputEl) {
 // Builds one label+input pair per entry in activeTemplate.extraFields
 // (e.g. "Event:", "Date:", "Finish Time:") into #extra-fields-container.
 // Rebuilt fresh every time a template loads, since different cards can
-// have a different number/set of extra fields (or none at all).
+// have a different number/set of extra fields (or none at all). Colour is
+// NOT customer-editable here -- set each field's `color` in cards-data.js.
 function buildExtraFieldInputs() {
     const container = $('extra-fields-container');
     container.innerHTML = '';
