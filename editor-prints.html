@@ -134,6 +134,12 @@
                 <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
                 <input type="text" id="age-input" placeholder="Age:" inputmode="numeric" oninput="updateAgeText(this)">
 
+                <label id="label-name2" for="name2-input" style="margin-top: 10px; display: block;">Second Name:</label>
+                <input type="text" id="name2-input" placeholder="Second Name:" oninput="updateNameText2(this)">
+
+                <label id="label-age2" for="age2-input" style="margin-top: 10px; display: block;">Age:</label>
+                <input type="text" id="age2-input" placeholder="Age:" inputmode="numeric" oninput="updateAgeText2(this)">
+
                 <div id="extra-fields-container"></div>
 
                 <div class="flex-row">
@@ -232,6 +238,29 @@ const DEFAULT_AGE_SETTINGS = {
     defaultText: "40"
 };
 
+// ---- Second name/age (for two-person prints) — same shape as above, just
+// a separate set of coordinates/label since it's a different spot on the
+// artwork. Only used if a print's PRINT_CATALOGUE entry defines `name2`
+// and/or `age2`. Not tied to the front-size slider or curved text — these
+// two are always plain, fixed-size text; set their exact size/position per
+// print via the `name2`/`age2` overrides.
+const DEFAULT_NAME2_SETTINGS = {
+    left: EDIT_WIDTH / 2, top: 725, startSize: 52,
+    fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
+    label: "Second Name",
+    maxChars: 14
+};
+const DEFAULT_AGE2_SETTINGS = {
+    left: EDIT_WIDTH / 2, top: 600, startSize: 60,
+    fontFamily: "Arial", fontWeight: "bold", color: "#FFFFFF",
+    label: "Age",
+    maxChars: 3,
+    numericOnly: true,
+    lettersOnly: false,
+    forceUppercase: false,
+    defaultText: "40"
+};
+
 // ---- Extra text-field defaults (reused / overridden per print) ----
 const DEFAULT_EXTRA_FIELD_SETTINGS = {
     left: EDIT_WIDTH / 2, top: 600, fontSize: 32, minSize: 20, maxSize: 60,
@@ -249,6 +278,8 @@ const PRINT_TEMPLATES = Object.fromEntries(
                 url: CLOUD_BASE + c.full,
                 name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
                 age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
+                name2: c.name2 ? { ...DEFAULT_NAME2_SETTINGS, ...c.name2 } : null,
+                age2: c.age2 ? { ...DEFAULT_AGE2_SETTINGS, ...c.age2 } : null,
                 extraFields: c.extraFields
                     ? c.extraFields.map((f) => ({ ...DEFAULT_EXTRA_FIELD_SETTINGS, ...f }))
                     : null
@@ -257,7 +288,7 @@ const PRINT_TEMPLATES = Object.fromEntries(
 );
 
 // ---- Mutable editor state ----
-let canvas, bgImg, nameText, ageText;
+let canvas, bgImg, nameText, ageText, nameText2, ageText2;
 let extraTexts = [];
 let activeTemplate = null;
 
@@ -325,7 +356,7 @@ function initEditor(templateKey) {
     });
 
     // Show/hide the personalisation inputs based on what this print supports
-    const hasPersonalisation = activeTemplate.name || activeTemplate.age || activeTemplate.extraFields;
+    const hasPersonalisation = activeTemplate.name || activeTemplate.age || activeTemplate.name2 || activeTemplate.age2 || activeTemplate.extraFields;
     $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
     buildExtraFieldInputs();
     if (hasPersonalisation) {
@@ -342,9 +373,24 @@ function initEditor(templateKey) {
             $('age-input').placeholder = ageLabel + ':';
             $('age-input').setAttribute('inputmode', activeTemplate.age.lettersOnly ? 'text' : 'numeric');
         }
+        $('name2-input').style.display = $('label-name2').style.display = activeTemplate.name2 ? 'block' : 'none';
+        $('age2-input').style.display = $('label-age2').style.display = activeTemplate.age2 ? 'block' : 'none';
+        if (activeTemplate.name2) {
+            const name2Label = activeTemplate.name2.label || 'Second Name';
+            $('label-name2').textContent = name2Label + ':';
+            $('name2-input').placeholder = name2Label + ':';
+        }
+        if (activeTemplate.age2) {
+            const age2Label = activeTemplate.age2.label || 'Age';
+            $('label-age2').textContent = age2Label + ':';
+            $('age2-input').placeholder = age2Label + ':';
+            $('age2-input').setAttribute('inputmode', activeTemplate.age2.lettersOnly ? 'text' : 'numeric');
+        }
     }
     if (activeTemplate.name?.maxChars) $('name-input').maxLength = activeTemplate.name.maxChars;
     if (activeTemplate.age?.maxChars) $('age-input').maxLength = activeTemplate.age.maxChars;
+    if (activeTemplate.name2?.maxChars) $('name2-input').maxLength = activeTemplate.name2.maxChars;
+    if (activeTemplate.age2?.maxChars) $('age2-input').maxLength = activeTemplate.age2.maxChars;
 
     loadFrontArtwork(activeTemplate.url);
 }
@@ -401,6 +447,29 @@ function setupTextsAndOverlays() {
             fill: a.color, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
         });
         canvas.add(ageText);
+    }
+
+    if (activeTemplate.name2) {
+        const n2 = activeTemplate.name2;
+        nameText2 = n2.isCurved
+            ? buildCurvedNameGroup("NAME", n2.startSize, n2.color, n2)
+            : new fabric.Text("NAME", {
+                left: n2.left, top: n2.top, originX: "center", originY: "center",
+                fontSize: n2.startSize, fontFamily: n2.fontFamily || "Arial",
+                fontWeight: n2.fontWeight || "bold", fill: n2.color, textAlign: "center",
+                hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+            });
+        canvas.add(nameText2);
+    }
+
+    if (activeTemplate.age2) {
+        const a2 = activeTemplate.age2;
+        ageText2 = new fabric.Text(a2.defaultText || "40", {
+            left: a2.left, top: a2.top, originX: "center", originY: "center",
+            fontSize: a2.startSize, fontFamily: a2.fontFamily || "Arial", fontWeight: "bold",
+            fill: a2.color, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+        });
+        canvas.add(ageText2);
     }
 
     extraTexts = [];
@@ -460,8 +529,8 @@ function updateExtraFieldText(index, value) {
 // Builds the name as a Fabric Group of individually-rotated characters
 // arranged along a real circle of radius `curveRadius` — same approach as
 // the card editor, so an arched name behaves identically here.
-function buildCurvedNameGroup(rawValue, fontSize, color) {
-    const n = activeTemplate.name;
+function buildCurvedNameGroup(rawValue, fontSize, color, settings = activeTemplate.name) {
+    const n = settings;
     const text = (rawValue || "").toUpperCase() || "NAME";
     const fontFamily = n.fontFamily || "Arial";
     const fontWeight = n.fontWeight || "bold";
@@ -536,6 +605,47 @@ function updateAgeText(inputEl) {
     if (inputEl.value !== val) inputEl.value = val;
 
     ageText.set({ text: (val || a?.defaultText || "40").toUpperCase() });
+    canvas.requestRenderAll();
+}
+
+function replaceNameText2(newNameObj) {
+    if (nameText2) canvas.remove(nameText2);
+    nameText2 = newNameObj;
+    canvas.add(nameText2);
+}
+
+function updateNameText2(inputEl) {
+    const n2 = activeTemplate?.name2;
+    if (!nameText2 || !n2) return;
+
+    let rawVal = inputEl.value;
+    if (n2.maxChars) rawVal = rawVal.slice(0, n2.maxChars);
+
+    const displayVal = rawVal.toUpperCase();
+
+    if (inputEl.value !== rawVal) inputEl.value = rawVal;
+
+    if (n2.isCurved) {
+        replaceNameText2(buildCurvedNameGroup(displayVal, n2.startSize, n2.color, n2));
+    } else {
+        nameText2.set({ text: displayVal || "NAME" });
+    }
+    canvas.requestRenderAll();
+}
+
+function updateAgeText2(inputEl) {
+    if (!ageText2) return;
+    const a2 = activeTemplate?.age2;
+
+    let val = inputEl.value;
+    if (a2?.numericOnly) val = val.replace(/[^0-9]/g, "");
+    if (a2?.lettersOnly) val = val.replace(/[^a-zA-Z]/g, "");
+    if (a2?.forceUppercase) val = val.toUpperCase();
+    if (a2?.maxChars) val = val.slice(0, a2.maxChars);
+
+    if (inputEl.value !== val) inputEl.value = val;
+
+    ageText2.set({ text: (val || a2?.defaultText || "40").toUpperCase() });
     canvas.requestRenderAll();
 }
 
@@ -699,6 +809,8 @@ async function uploadAndGoToCheckout() {
         const checkoutData = {
             name: activeTemplate.name ? ($('name-input').value.toUpperCase() || "NAME") : "N/A",
             age: ageText?.text ?? "N/A",
+            name2: activeTemplate.name2 ? ($('name2-input').value.toUpperCase() || "NAME") : "N/A",
+            age2: ageText2?.text ?? "N/A",
             extraFields: (activeTemplate.extraFields || []).reduce((acc, f, i) => {
                 acc[f.key || f.label || `field${i}`] = $(`extra-input-${i}`)?.value || "";
                 return acc;
