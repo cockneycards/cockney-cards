@@ -275,7 +275,7 @@ const CARD_CATALOGUE = {
   "wedding3": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896285/wedding3-preview_bwchrr.png", full: "v1784895839/wedding3_sm7ztz.png" },
   "wedding4": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding4-preview_zubyhl.png", full: "v1784895839/wedding4_qofbhe.png" },
   
-  "charlie-says": { title: "Charlie Says..", categories: ["all", "for-her", "for-him", "celebrations"], preview: "v1784209519/charlie-says-preview_iemrbl.png", full: "v1784058139/charlie-says_legryi.png" },
+  "charlie-says": { title: "Charlie Says..", categories: ["all", "for-him", "birthdays"], preview: "v1784209519/charlie-says-preview_iemrbl.png", full: "v1784058139/charlie-says_legryi.png" },
 
 //SPORTS
 
