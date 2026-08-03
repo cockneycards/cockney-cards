@@ -28,29 +28,49 @@
 //
 // Leave out `name`/`age`/`name2`/`age2`/`extraFields` completely for a
 // print that's just artwork with no personalisation at all.
+//
+// ---- Shop-facing fields (shop-prints.html reads these directly) ----
+//   title       — required to appear in the shop. Entries WITHOUT a title
+//                 (like the reference examples below) are skipped by
+//                 shop-prints.html — they only exist for the editor.
+//   price       — required for shop display, e.g. "£9.99"
+//   priceValue  — required for shop sorting, e.g. 9.99 (matches `price`)
+//   preview     — optional. Path (appended to CLOUD_BASE) to a separate,
+//                 lighter thumbnail for the shop grid. Falls back to `full`
+//                 if omitted.
+//   categories  — required to appear under anything but "All Prints".
+//                 Must match the sidebar's filter keys exactly:
+//                 'all', 'sports', 'music', 'kitchen', 'childrens'.
 
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
 
 const PRINT_CATALOGUE = {
-    // Pulled straight from shop-prints.html's PRODUCTS list — same
-    // Cloudinary file used for both the shop thumbnail AND the editor
-    // artwork, since that's the only URL shop-prints.html had for each.
-    // If you've got a separate, higher-res "full" file for either print
-    // (better for actual A3 printing than a web thumbnail), swap the path
-    // below for that one.
-    //
-    // Neither has a `name` field yet — add one (see the sample below) if
-    // either print should let the customer personalise a name, then use
-    // the findCoords() console helper in editor-prints.html to get exact
-    // left/top numbers for that artwork.
+    // These two used to live in shop-prints.html's own PRODUCTS list —
+    // moved here so this file is the one place you edit for either the
+    // shop grid or the editor.
     "millwall-dad-son-print": {
+        title: "Millwall Dad & Son A4 Print",
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all", "sports"],
         full: "v1784120947/millwall-dad-son_e48hgt.png"
     },
     "bermondsey-legend-print": {
+        title: "Bermondsey Legend Framed Print",
+        price: "£12.99", priceValue: 12.99,
+        // TODO: 'legends' isn't one of the current sidebar categories —
+        // tag this sports/music/kitchen/childrens as appropriate.
+        categories: ["all"],
         full: "v1784120944/you-can-take_cbses4.png"
     },
-    "mfc-dad-son": { title: "MFC Dad & Son", categories: ["all prints", "sports"], preview: "v1784120947/millwall-dad-son_e48hgt.png", full: "v1785784030/mfc-dad-son_kh02zr.png",
+    "mfc-dad-son": {
+        title: "MFC Dad & Son",
+        // TODO: set a real price — placeholder so the shop doesn't break.
+        price: "£0.00", priceValue: 0,
+        categories: ["all", "sports"], // fixed from "all prints" — must match the sidebar's filter keys exactly
+        preview: "v1784120947/millwall-dad-son_e48hgt.png",
+        full: "v1785784030/mfc-dad-son_kh02zr.png"
     },
+
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
         full: "v1784098145/prints/sample-print-full.png",
