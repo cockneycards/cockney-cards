@@ -397,8 +397,9 @@
             <ul class="category-list">
                 <li><a onclick="filterProducts('all')" class="active" id="cat-all">All Prints</a></li>
                 <li><a onclick="filterProducts('sports')" id="cat-sports">Sports</a></li>
-                <li><a onclick="filterProducts('family')" id="cat-family">Family</a></li>
-                <li><a onclick="filterProducts('legends')" id="cat-legends">Bermondsey Legends</a></li>
+                <li><a onclick="filterProducts('music')" id="cat-music">Music</a></li>
+                <li><a onclick="filterProducts('kitchen')" id="cat-kitchen">Kitchen</a></li>
+                <li><a onclick="filterProducts('childrens')" id="cat-childrens">Childrens</a></li>
             </ul>
         </aside>
 
@@ -459,7 +460,7 @@
                 price: '£9.99',
                 priceValue: 9.99,
                 image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png',
-                categories: ['all', 'sports', 'family']
+                categories: ['all', 'sports']
             },
             {
                 id: 'bermondsey-legend-print',
@@ -467,7 +468,7 @@
                 price: '£12.99',
                 priceValue: 12.99,
                 image: 'https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png',
-                categories: ['all', 'legends']
+                categories: ['all'] // TODO: 'legends' isn't one of the new sidebar categories — tag this sports/music/kitchen/childrens as appropriate
             }
         ];
 
