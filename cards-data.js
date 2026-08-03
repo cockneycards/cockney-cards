@@ -115,7 +115,7 @@ const CARD_CATALOGUE = {
   "birthday-sweetie": { title: "Sweet Birthday", categories: ["all", "for-her", "birthdays"], preview: "v1785221487/birthday-sweetie-preview_aqzgqe.png", full: "v1785221602/birthday-sweetie_fctude.png" },
   "birthday-horse-girl": { title: "Racing Lady", categories: ["all", "for-her", "horseracing", "birthdays"], preview: "v1785439371/birthday-horse-girl-preview_ohwctj.png", full: "v1785439591/birthday-horse-girl_bw60ol.png" },
   "birthday-horse-boy": { title: "Racing Gent", categories: ["all", "for-him", "horseracing", "birthdays"], preview: "v1785439370/birthday-horse-boy-preview_tba18k.png", full: "v1785439589/birthday-horse-boy_lagokf.png" },
-  "birthday-gymgirl": { title: "Gym Birthday Babe", categories: ["all", "for-him", "birthdays"], preview: "v1785439370/birthday-gymgirl-preview_w3er8i.png", full: "v1785439589/birthday-gymgirl_pczkzl.png" },
+  "birthday-gymgirl": { title: "Gym Birthday Babe", categories: ["all", "for-her", "birthdays"], preview: "v1785439370/birthday-gymgirl-preview_w3er8i.png", full: "v1785439589/birthday-gymgirl_pczkzl.png" },
   "birthday-gymboy": { title: "Gym Bro Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785439369/birthday-gymboy-preview_yn6iua.png", full: "v1785439579/birthday-gymboy_udnrfs.png" },
   "birthday-girl1": { title: "Kids Birthday Girl", categories: ["all", "for-her", "birthdays", "children"], preview: "v1785439369/birthday-girl1-preview_pdxmlg.png", full: "v1785439579/birthday-girl1_je72sb.png" },
   "birthday-boy1": { title: "Kids Birthday Boy", categories: ["all", "for-him", "birthdays", "children"], preview: "v1785439365/birthday-boy1-preview_xawjca.png", full: "v1785439575/birthday-boy1_xxigbv.png" },
