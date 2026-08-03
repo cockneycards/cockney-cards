@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personalise Your Print | Cockney Cards</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="prints-data.js"></script>
+
+<style>
+    @font-face {
+        font-family: 'BubblegumSans';
+        src: url('fonts/BubblegumSans-Regular.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Anton';
+        src: url('assets/fonts/Anton-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'BebasNeue';
+        src: url('assets/fonts/BebasNeue-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    :root {
+        --primary: #1A73E8;
+        --dark: #1e1e24;
+        --light: #fcfcfc;
+        --border-color: #e0e0e0;
+        --font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); }
+
+    /* HEADER & NAVIGATION */
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+    .logo-container { text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
+    .login-btn:hover { color: #111; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+
+    /* EDITOR WORKSPACE */
+    .editor-workspace { display: flex; justify-content: center; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; overflow-x: auto; min-width: 900px; }
+    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
+    #canvas { border: 1px solid #e2e2e2; }
+    .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
+    .control-group { display: flex; flex-direction: column; gap: 15px; }
+    label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
+    input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    .flex-row { display: flex; align-items: center; gap: 10px; }
+    .color-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; }
+    .size-slider { flex: 1; }
+
+    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
+    .btn:hover { background-color: #444; }
+    .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+    .btn-close { background-color: #f0f0f0; color: #333; margin-top: 10px; }
+    .btn-close:hover { background-color: #e0e0e0; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+
+</style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
+            <div class="cart-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="editor-workspace">
+    <div id="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="controls">
+        <h2>Personalise Print</h2>
+
+        <!-- Prints are a single personalised page only — there's no
+             front/inside toggle here like the card editor. A second,
+             non-editable page (logo only) is added automatically when the
+             print-ready PDF is built, see buildBackPageDataUrl() below. -->
+        <div id="front-controls" class="control-group active">
+            <div id="front-text-inputs">
+                <label id="label-name" for="name-input">Name:</label>
+                <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
+
+                <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
+                <input type="text" id="age-input" placeholder="Age:" inputmode="numeric" oninput="updateAgeText(this)">
+
+                <div id="extra-fields-container"></div>
+
+                <div class="flex-row">
+                    <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
+                    <span>Choose Font Colour</span>
+                </div>
+
+                <div id="front-size-controls" style="display:none; margin-top:15px;">
+                    <label>Font Size:</label>
+                    <div class="flex-row">
+                        <input type="range" id="front-size" class="size-slider" min="20" max="120" value="52" oninput="updateFrontSize(this.value)">
+                        <span id="front-size-val">52px</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="buy-now-btn" class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
+
+        <!-- TESTING ONLY — downloads the print-ready PDF (personalised page
+             on page 1, logo-only page on page 2) straight to your downloads
+             folder so you can test-print and dial in settings without going
+             through a real checkout. Remove this button before going live. -->
+        <button id="test-download-btn" class="btn" style="background-color:#1A73E8;" onclick="testDownloadPrintPDFs()">Test: Download Print PDFs</button>
+
+        <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your print by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <p><strong>Email:</strong><br><a href="mailto:cockneycards@gmail.com">cockneycards@gmail.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
+
+<script>
+// CLOUD_BASE and PRINT_CATALOGUE come from prints-data.js (loaded above).
+
+// ---- Print-ready PDF settings ----
+// Unlike the card editor (which prints a folded 2-panel spread onto A4
+// landscape), a print is a single flat sheet — one full page of artwork,
+// output at true A3 portrait size. No panel maths / trim marks needed.
+const PRINT_PAGE_MM = { width: 297, height: 420 }; // A3 portrait
+
+// ---- On-screen canvas size ----
+// Kept identical to the existing card editor's on-screen (single-panel)
+// view size, purely for consistent viewing/zoom level — this has no direct
+// relationship to the A3 output size; that scaling happens only at PDF
+// export time in drawPrintPage().
+const EDIT_WIDTH = 595.5, EDIT_HEIGHT = 840;
+
+// ---- Logo settings for the fixed, non-editable back page ----
+// These numbers are copied straight from the card editor's back-cover logo
+// (left: PANEL_WIDTH/2, top: 710, scale: 0.15 against a PANEL_WIDTH x
+// CANVAS_HEIGHT = 595.5 x 840 panel) — i.e. exactly the same coordinate
+// space as EDIT_WIDTH/EDIT_HEIGHT above, so the logo lands in the same
+// place and at the same size as it does on the existing outside spread.
+const LOGO_SETTINGS = { left: EDIT_WIDTH / 2, top: 710, scale: 0.15 };
+
+// ---- Text style defaults (reused / overridden per print) ----
+const DEFAULT_NAME_SETTINGS = {
+    left: EDIT_WIDTH / 2, top: 725, startSize: 52, minSize: 20, maxSize: 120,
+    fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
+    canChangeSize: true, canChangeColor: false,
+    isCurved: false, curveRadius: 0,
+    tiltAngle: 0,  // rotates the whole curved arc (degrees, clockwise). No effect unless isCurved is true.
+    label: "Name",      // text shown on this print's label — override per print if needed
+    maxChars: 14   // hard cap on characters, also set as the input's maxlength
+};
+const DEFAULT_AGE_SETTINGS = {
+    left: EDIT_WIDTH / 2, top: 600, startSize: 60, minSize: 20, maxSize: 120,
+    fontFamily: "Arial", fontWeight: "bold", color: "#FFFFFF",
+    canChangeSize: true, canChangeColor: true,
+    label: "Age",
+    maxChars: 3,
+    numericOnly: true,
+    lettersOnly: false,
+    forceUppercase: false,
+    defaultText: "40"
+};
+
+// ---- Extra text-field defaults (reused / overridden per print) ----
+const DEFAULT_EXTRA_FIELD_SETTINGS = {
+    left: EDIT_WIDTH / 2, top: 600, fontSize: 32, minSize: 20, maxSize: 60,
+    fontFamily: "Arial", fontWeight: "bold", color: "#000000",
+    maxChars: 24
+};
+
+// ---- Print catalogue: built from the shared PRINT_CATALOGUE (prints-data.js) ----
+const PRINT_TEMPLATES = Object.fromEntries(
+    Object.entries(PRINT_CATALOGUE)
+        .filter(([id, c]) => c.full)
+        .map(([id, c]) => [
+            id,
+            {
+                url: CLOUD_BASE + c.full,
+                name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
+                age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
+                extraFields: c.extraFields
+                    ? c.extraFields.map((f) => ({ ...DEFAULT_EXTRA_FIELD_SETTINGS, ...f }))
+                    : null
+            }
+        ])
+);
+
+// ---- Mutable editor state ----
+let canvas, bgImg, nameText, ageText;
+let extraTexts = [];
+let activeTemplate = null;
+
+const $ = (id) => document.getElementById(id);
+
+// Scratch 2D context used to measure rendered text width for a given
+// font — used to lay out curved-text characters using the same metrics
+// the browser will actually render with.
+const measureCtx = document.createElement('canvas').getContext('2d');
+function measureTextWidth(text, fontSize, fontFamily, fontWeight) {
+    measureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    return measureCtx.measureText(text).width;
+}
+
+// Canvas text (unlike normal DOM text) does NOT wait for a @font-face font
+// to finish downloading — if the font isn't already loaded by the time we
+// draw, the canvas just uses a fallback and never redraws itself once the
+// real font arrives. So we explicitly ask the browser to load every custom
+// font up front and wait for that before building any text on the canvas.
+const CUSTOM_FONTS = ["BubblegumSans", "Anton", "BebasNeue"];
+function preloadCustomFonts() {
+    return Promise.all(
+        CUSTOM_FONTS.map((f) =>
+            document.fonts.load(`400 60px "${f}"`).catch((err) => {
+                console.warn(`Font "${f}" failed to load — check its file exists at the URL in its @font-face rule.`, err);
+            })
+        )
+    );
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const printId = params.get('print') || Object.keys(PRINT_TEMPLATES)[0];
+
+    preloadCustomFonts().finally(() => {
+        if (PRINT_TEMPLATES[printId]) {
+            initEditor(printId);
+        } else {
+            window.location.href = 'shop-prints.html';
+        }
+    });
+
+    netlifyIdentity.on('init', (user) => updateLoginUI(user));
+    netlifyIdentity.on('login', (user) => {
+        updateLoginUI(user);
+        netlifyIdentity.close();
+    });
+    netlifyIdentity.on('logout', () => updateLoginUI(null));
+});
+
+function initEditor(templateKey) {
+    activeTemplate = PRINT_TEMPLATES[templateKey];
+
+    $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
+    $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
+    $("front-color").value = activeTemplate.name?.color || "#FFFFFF";
+
+    const canvasElement = $("canvas");
+    canvasElement.width = EDIT_WIDTH;
+    canvasElement.height = EDIT_HEIGHT;
+
+    canvas = new fabric.Canvas(canvasElement, {
+        width: EDIT_WIDTH, height: EDIT_HEIGHT,
+        preserveObjectStacking: true, backgroundColor: '#ffffff'
+    });
+
+    // Show/hide the personalisation inputs based on what this print supports
+    const hasPersonalisation = activeTemplate.name || activeTemplate.age || activeTemplate.extraFields;
+    $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
+    buildExtraFieldInputs();
+    if (hasPersonalisation) {
+        $('name-input').style.display = $('label-name').style.display = activeTemplate.name ? 'block' : 'none';
+        $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
+        if (activeTemplate.name) {
+            const nameLabel = activeTemplate.name.label || 'Name';
+            $('label-name').textContent = nameLabel + ':';
+            $('name-input').placeholder = nameLabel + ':';
+        }
+        if (activeTemplate.age) {
+            const ageLabel = activeTemplate.age.label || 'Age';
+            $('label-age').textContent = ageLabel + ':';
+            $('age-input').placeholder = ageLabel + ':';
+            $('age-input').setAttribute('inputmode', activeTemplate.age.lettersOnly ? 'text' : 'numeric');
+        }
+    }
+    if (activeTemplate.name?.maxChars) $('name-input').maxLength = activeTemplate.name.maxChars;
+    if (activeTemplate.age?.maxChars) $('age-input').maxLength = activeTemplate.age.maxChars;
+
+    loadFrontArtwork(activeTemplate.url);
+}
+
+// Loads the print's artwork so it fills the ENTIRE canvas edge-to-edge —
+// there's no left/right panel split like the card editor, since a print is
+// just one flat page. No photo-upload layer here; the artwork itself is
+// this print's fixed image.
+function loadFrontArtwork(imageUrl) {
+    fabric.Image.fromURL(imageUrl, (img) => {
+        bgImg = img;
+        bgImg.set({
+            left: 0, top: 0,
+            scaleX: EDIT_WIDTH / bgImg.width,
+            scaleY: EDIT_HEIGHT / bgImg.height,
+            selectable: false, evented: false
+        });
+        canvas.add(bgImg);
+        canvas.sendToBack(bgImg);
+
+        setupTextsAndOverlays();
+        canvas.requestRenderAll();
+    }, { crossOrigin: 'anonymous' });
+}
+
+function setupTextsAndOverlays() {
+    if (activeTemplate.name) {
+        const n = activeTemplate.name;
+
+        nameText = n.isCurved
+            ? buildCurvedNameGroup("NAME", n.startSize, n.color)
+            : new fabric.Text("NAME", {
+                left: n.left, top: n.top, originX: "center", originY: "center",
+                fontSize: n.startSize, fontFamily: n.fontFamily || "Arial",
+                fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
+                hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+            });
+
+        if (n.canChangeSize) {
+            const slider = $("front-size");
+            slider.min = n.minSize;
+            slider.max = n.maxSize;
+            slider.value = n.startSize;
+            $("front-size-val").innerText = n.startSize + "px";
+        }
+        canvas.add(nameText);
+    }
+
+    if (activeTemplate.age) {
+        const a = activeTemplate.age;
+        ageText = new fabric.Text(a.defaultText || "40", {
+            left: a.left, top: a.top, originX: "center", originY: "center",
+            fontSize: a.startSize, fontFamily: a.fontFamily || "Arial", fontWeight: "bold",
+            fill: a.color, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+        });
+        canvas.add(ageText);
+    }
+
+    extraTexts = [];
+    if (activeTemplate.extraFields) {
+        activeTemplate.extraFields.forEach((f) => {
+            const t = new fabric.Text((f.label || f.key || '').toUpperCase(), {
+                left: f.left, top: f.top, originX: "left", originY: "center",
+                fontSize: f.fontSize, fontFamily: f.fontFamily || "Arial",
+                fontWeight: f.fontWeight || "bold", fill: f.color, textAlign: "left",
+                hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+            });
+            extraTexts.push(t);
+            canvas.add(t);
+        });
+    }
+}
+
+// Builds one label+input pair per entry in activeTemplate.extraFields.
+function buildExtraFieldInputs() {
+    const container = $('extra-fields-container');
+    container.innerHTML = '';
+
+    const fields = activeTemplate.extraFields;
+    if (!fields) return;
+
+    fields.forEach((f, i) => {
+        const label = document.createElement('label');
+        label.setAttribute('for', `extra-input-${i}`);
+        label.style.marginTop = '10px';
+        label.style.display = 'block';
+        label.textContent = (f.label || f.key) + ':';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `extra-input-${i}`;
+        input.placeholder = (f.label || f.key) + ':';
+        if (f.maxChars) input.maxLength = f.maxChars;
+        input.addEventListener('input', () => updateExtraFieldText(i, input.value));
+
+        container.appendChild(label);
+        container.appendChild(input);
+    });
+}
+
+function updateExtraFieldText(index, value) {
+    const f = activeTemplate?.extraFields?.[index];
+    const t = extraTexts[index];
+    if (!f || !t) return;
+
+    let val = value;
+    if (f.maxChars) val = val.slice(0, f.maxChars);
+
+    t.set({ text: val ? val.toUpperCase() : (f.label || f.key || '').toUpperCase() });
+    canvas.requestRenderAll();
+}
+
+// Builds the name as a Fabric Group of individually-rotated characters
+// arranged along a real circle of radius `curveRadius` — same approach as
+// the card editor, so an arched name behaves identically here.
+function buildCurvedNameGroup(rawValue, fontSize, color) {
+    const n = activeTemplate.name;
+    const text = (rawValue || "").toUpperCase() || "NAME";
+    const fontFamily = n.fontFamily || "Arial";
+    const fontWeight = n.fontWeight || "bold";
+    const radius = n.curveRadius;
+
+    measureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    const chars = text.split("");
+    const charWidths = chars.map((c) => measureCtx.measureText(c).width);
+    const totalAngle = charWidths.reduce((sum, w) => sum + w / radius, 0);
+
+    let angle = -totalAngle / 2;
+    const letters = chars.map((c, i) => {
+        const charAngle = charWidths[i] / radius;
+        const midAngle = angle + charAngle / 2;
+        angle += charAngle;
+
+        return new fabric.Text(c, {
+            fontSize, fontFamily, fontWeight, fill: color,
+            originX: "center", originY: "center",
+            left: radius * Math.sin(midAngle),
+            top: radius - radius * Math.cos(midAngle),
+            angle: (midAngle * 180) / Math.PI,
+            selectable: false, evented: false
+        });
+    });
+
+    return new fabric.Group(letters, {
+        left: n.left, top: n.top, originX: "center", originY: "center",
+        angle: n.tiltAngle || 0,
+        hasControls: false, hasBorders: false,
+        lockMovementX: true, lockMovementY: true
+    });
+}
+
+function replaceNameText(newNameObj) {
+    if (nameText) canvas.remove(nameText);
+    nameText = newNameObj;
+    canvas.add(nameText);
+}
+
+function updateNameText(inputEl) {
+    const n = activeTemplate?.name;
+    if (!nameText || !n) return;
+
+    let rawVal = inputEl.value;
+    if (n.maxChars) rawVal = rawVal.slice(0, n.maxChars);
+
+    const displayVal = rawVal.toUpperCase();
+
+    if (inputEl.value !== rawVal) inputEl.value = rawVal;
+
+    if (n.isCurved) {
+        const size = Number($("front-size").value) || n.startSize;
+        const color = n.canChangeColor ? ($("front-color").value || n.color) : n.color;
+        replaceNameText(buildCurvedNameGroup(displayVal, size, color));
+    } else {
+        nameText.set({ text: displayVal || "NAME" });
+    }
+    canvas.requestRenderAll();
+}
+
+function updateAgeText(inputEl) {
+    if (!ageText) return;
+    const a = activeTemplate?.age;
+
+    let val = inputEl.value;
+    if (a?.numericOnly) val = val.replace(/[^0-9]/g, "");
+    if (a?.lettersOnly) val = val.replace(/[^a-zA-Z]/g, "");
+    if (a?.forceUppercase) val = val.toUpperCase();
+    if (a?.maxChars) val = val.slice(0, a.maxChars);
+
+    if (inputEl.value !== val) inputEl.value = val;
+
+    ageText.set({ text: (val || a?.defaultText || "40").toUpperCase() });
+    canvas.requestRenderAll();
+}
+
+function updateFrontColor(hexColor) {
+    const n = activeTemplate?.name;
+    if (n?.isCurved) {
+        const val = $("name-input").value;
+        const size = Number($("front-size").value) || n.startSize;
+        replaceNameText(buildCurvedNameGroup(val, size, hexColor));
+    } else {
+        nameText?.set({ fill: hexColor });
+    }
+    ageText?.set({ fill: hexColor });
+    canvas.requestRenderAll();
+}
+
+function updateFrontSize(size) {
+    $("front-size-val").innerText = size + "px";
+    const n = activeTemplate?.name;
+    if (nameText && n) {
+        if (n.isCurved) {
+            const val = $("name-input").value;
+            const color = n.canChangeColor ? ($("front-color").value || n.color) : n.color;
+            replaceNameText(buildCurvedNameGroup(val, Number(size), color));
+        } else {
+            nameText.set({ fontSize: Number(size) });
+        }
+    }
+    canvas.requestRenderAll();
+}
+
+// Renders the current on-screen (personalised) page onto a completely
+// separate, invisible canvas, exactly like the card editor's
+// captureFullSpread() — the visible editor canvas is never touched.
+function captureFrontPage() {
+    return new Promise((resolve, reject) => {
+        const exportEl = document.createElement('canvas');
+        const exportCanvas = new fabric.StaticCanvas(exportEl, {
+            width: EDIT_WIDTH, height: EDIT_HEIGHT
+        });
+        exportCanvas.loadFromJSON(canvas.toJSON(), () => {
+            try {
+                exportCanvas.renderAll();
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0 });
+                exportCanvas.dispose();
+                resolve(dataUrl);
+            } catch (err) {
+                exportCanvas.dispose();
+                reject(err);
+            }
+        });
+    });
+}
+
+// Builds the fixed, non-editable "page 2" — a plain white page carrying
+// only the Cockney Cards logo, positioned via LOGO_SETTINGS at exactly the
+// same coordinates/scale as the logo on the existing card editor's back
+// cover, so it lands in the same place and at the same size once printed.
+function buildBackPageDataUrl() {
+    return new Promise((resolve, reject) => {
+        const exportEl = document.createElement('canvas');
+        const exportCanvas = new fabric.StaticCanvas(exportEl, {
+            width: EDIT_WIDTH, height: EDIT_HEIGHT, backgroundColor: '#ffffff'
+        });
+
+        fabric.Image.fromURL(`${CLOUD_BASE}v1784098145/logo.png`, (logoImg) => {
+            logoImg.set({
+                left: LOGO_SETTINGS.left, top: LOGO_SETTINGS.top,
+                originX: 'center', originY: 'center',
+                scaleX: LOGO_SETTINGS.scale, scaleY: LOGO_SETTINGS.scale,
+                selectable: false, evented: false
+            });
+            exportCanvas.add(logoImg);
+
+            try {
+                exportCanvas.renderAll();
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0 });
+                exportCanvas.dispose();
+                resolve(dataUrl);
+            } catch (err) {
+                exportCanvas.dispose();
+                reject(err);
+            }
+        }, { crossOrigin: 'anonymous' });
+    });
+}
+
+// Draws one page onto the current page of a jsPDF doc — the artwork fills
+// the ENTIRE A3 page edge-to-edge (a print is a single flat sheet, so
+// there's no centring/trim-mark maths needed here, unlike the card spread).
+function drawPrintPage(doc, imageDataUrl) {
+    doc.addImage(imageDataUrl, 'PNG', 0, 0, PRINT_PAGE_MM.width, PRINT_PAGE_MM.height);
+}
+
+// Builds a single A3-portrait PDF: page 1 = the personalised artwork,
+// page 2 = the fixed logo-only page. Returns the jsPDF doc, ready for
+// either .save() (local download) or .output('datauristring').
+async function buildPrintReadyPDF(imageDataUrls) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a3' });
+
+    imageDataUrls.forEach((imageDataUrl, i) => {
+        if (i > 0) doc.addPage('a3', 'portrait');
+        drawPrintPage(doc, imageDataUrl);
+    });
+
+    return doc;
+}
+
+// Captures the personalised page straight off the live editor canvas, builds
+// the fixed logo-only page, and combines them into a single two-page
+// print-ready PDF. Shared by the real checkout flow and the local
+// test-download button.
+async function captureAndBuildPrintPDF() {
+    const frontDataUrl = await captureFrontPage();
+    const backDataUrl = await buildBackPageDataUrl();
+    return buildPrintReadyPDF([frontDataUrl, backDataUrl]);
+}
+
+// TESTING ONLY — downloads the print-ready PDF (personalised page on page
+// 1, logo-only page on page 2) straight to the browser's downloads folder
+// so you can test-print and dial in settings without going through a real
+// checkout. Remove this button (and its entry in the controls markup) once
+// you're ready to go live.
+async function testDownloadPrintPDFs() {
+    const testBtn = $('test-download-btn');
+    const originalText = testBtn.innerText;
+    testBtn.innerText = "Generating...";
+    testBtn.disabled = true;
+
+    try {
+        const doc = await captureAndBuildPrintPDF();
+        doc.save('print-TEST.pdf');
+    } catch (err) {
+        console.error(err);
+        alert("Test download failed — check the console for details.");
+    } finally {
+        testBtn.innerText = originalText;
+        testBtn.disabled = false;
+    }
+}
+
+async function uploadAndGoToCheckout() {
+    const buyBtn = $('buy-now-btn');
+    buyBtn.innerText = "Generating high-res pages...";
+    buyBtn.disabled = true;
+
+    try {
+        buyBtn.innerText = "Building print files...";
+        const doc = await captureAndBuildPrintPDF();
+
+        // TODO once the business email address + a serverless email step
+        // (e.g. Resend/SendGrid via a Netlify function) are set up: attach
+        // doc.output('datauristring') to the request below so a checkout
+        // function can email the print-ready PDF to the business inbox
+        // after payment succeeds. For now, nothing is uploaded or emailed —
+        // use the "Test: Download Print PDFs" button to check the PDF locally.
+
+        buyBtn.innerText = "Connecting checkout...";
+
+        const checkoutData = {
+            name: activeTemplate.name ? ($('name-input').value.toUpperCase() || "NAME") : "N/A",
+            age: ageText?.text ?? "N/A",
+            extraFields: (activeTemplate.extraFields || []).reduce((acc, f, i) => {
+                acc[f.key || f.label || `field${i}`] = $(`extra-input-${i}`)?.value || "";
+                return acc;
+            }, {})
+        };
+
+        // NOTE: this assumes a separate serverless function for prints —
+        // create /.netlify/functions/create-checkout-print (mirroring the
+        // card editor's create-checkout) before going live, or point this
+        // at your existing one with a `type: "print"` flag added — whichever
+        // matches how your Stripe products/webhooks are set up.
+        const response = await fetch('/.netlify/functions/create-checkout-print', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(checkoutData)
+        });
+
+        const session = await response.json();
+        if (session.url) {
+            window.location.href = session.url;
+        } else {
+            alert("Checkout Error: " + (session.error || "Please verify environment settings."));
+            buyBtn.innerText = "Buy Now";
+            buyBtn.disabled = false;
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Checkout processing failed. Check the console for details.");
+        buyBtn.innerText = "Buy Now";
+        buyBtn.disabled = false;
+    }
+}
+
+// Returns to shop-prints.html and tells it (via ?resume=1) to restore
+// whatever category page the user left, instead of resetting.
+function returnToShop() {
+    window.location.href = 'shop-prints.html?resume=1';
+}
+
+function updateLoginUI(user) {
+    const loginBtn = $("login-button");
+    loginBtn.innerHTML = user ? "👤 Log Out" : "👤 Log In";
+    loginBtn.setAttribute("onclick", user ? "netlifyIdentity.logout()" : "netlifyIdentity.open()");
+}
+
+function handleMyOrdersClick(event) {
+    event.preventDefault();
+    if (netlifyIdentity.currentUser()) {
+        window.location.href = "orders.html";
+    } else {
+        alert("Please log in to view your order history.");
+        netlifyIdentity.open('login');
+    }
+}
+
+// DEV HELPER — not called automatically. Open this print in the editor,
+// open the browser console, run findCoords(), then click anywhere on the
+// canvas: it logs the {left, top} under your cursor so you can copy those
+// numbers straight into a new PRINT_CATALOGUE entry above.
+function findCoords() {
+    canvas.on('mouse:down', (e) => {
+        const p = canvas.getPointer(e.e);
+        console.log(`left: ${Math.round(p.x)}, top: ${Math.round(p.y)}`);
+    });
+    console.log('findCoords active — click anywhere on the canvas.');
+}
+</script>
+</body>
+</html>
