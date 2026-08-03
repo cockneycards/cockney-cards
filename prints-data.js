@@ -27,6 +27,25 @@
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
 
 const PRINT_CATALOGUE = {
+    // Pulled straight from shop-prints.html's PRODUCTS list — same
+    // Cloudinary file used for both the shop thumbnail AND the editor
+    // artwork, since that's the only URL shop-prints.html had for each.
+    // If you've got a separate, higher-res "full" file for either print
+    // (better for actual A3 printing than a web thumbnail), swap the path
+    // below for that one.
+    //
+    // Neither has a `name` field yet — add one (see the sample below) if
+    // either print should let the customer personalise a name, then use
+    // the findCoords() console helper in editor-prints.html to get exact
+    // left/top numbers for that artwork.
+    "millwall-dad-son-print": {
+        full: "v1784120947/millwall-dad-son_e48hgt.png"
+    },
+    "bermondsey-legend-print": {
+        full: "v1784120944/you-can-take_cbses4.png"
+    },
+
+    // Example of a print WITH name personalisation, for reference:
     "sample-print": {
         full: "v1784098145/prints/sample-print-full.png",
         name: { left: 297.75, top: 725, startSize: 52, color: "#FFFFFF" }
