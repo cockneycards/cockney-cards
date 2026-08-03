@@ -197,7 +197,7 @@ const CARD_CATALOGUE = {
   "newhome10": { title: "New Home, New Pad", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
   
   "newhome1-photo": { title: "New Home Card", categories: ["all", "home"], preview: "v1785262722/newhome12-photo-preview_vtnuyn.png", full: "v1785263102/newhome12-photo_apyp0z.png",
-  photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
   
   "newjob-teacher-boy1": { title: "New Teacher Job Boy Card", categories: ["all", "for-him", "work-related"], preview: "v1784209456/newjob-teacher-boy1-preview_zlabbg.png", full: "v1784208072/newjob-teacher-boy1_qnrwb4.png" },
   "newjob-teacher-girl1": { title: "New Teacher Job Girl Card", categories: ["all", "for-her", "work-related"], preview: "v1784209478/newjob-teacher-girl1-preview_oyv8wd.png", full: "v1784208067/newjob-teacher-girl1_kkh4bb.png" },
