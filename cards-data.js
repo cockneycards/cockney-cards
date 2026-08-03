@@ -193,7 +193,7 @@ const CARD_CATALOGUE = {
   "newhome6": { title: "New Home, New Memories", categories: ["all", "home"], preview: "v1785141478/newhome6-preview_dst0lw.png", full: "v1785141067/newhome6_zm8i4d.jpg" },
   "newhome7": { title: "New University Home", categories: ["all", "school-cards", "home"], preview: "v1785141476/newhome7-preview_puq5vm.png", full: "v1785141067/newhome7_m5ufxx.jpg" },
   "newhome8": { title: "New Home, New Dreams", categories: ["all", "home"], preview: "v1785141478/newhome8-preview_z2kkpm.png", full: "v1785141071/newhome8_mmbrxh.png" },
-  "newhome9": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221487/newhome9-preview_h8qnga.png", full: "v1785221604/newhome9_rsqhpr.png" },
+  "newhome9": { title: "New Home Love", categories: ["all", "home"], preview: "v1785221487/newhome9-preview_h8qnga.png", full: "v1785221604/newhome9_rsqhpr.png" },
   "newhome10": { title: "New Home, New Pad", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
   
   "newhome1-photo": { title: "New Home Card", categories: ["all", "home"], preview: "v1785262722/newhome12-photo-preview_vtnuyn.png", full: "v1785263102/newhome12-photo_apyp0z.png",
