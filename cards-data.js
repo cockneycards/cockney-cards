@@ -20,16 +20,23 @@
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
 const DEFAULT_PRICE = "£2.49";
 
-// Shared "Event / Date / Finish Time" text fields used by the 5K/10K/26.2
-// mile achievement cards below (5kboy-photo, 5kgirl-photo, 10kboy-photo,
-// 10kgirl-photo, 26mboy-photo, 26mgirl-photo). Positions are an initial
-// estimate (stacked centrally below the photo frame) -- open each card in
-// the editor and use findCoords() (see bottom of editor.html) to fine-tune
-// left/top per card if needed, then adjust the numbers below.
-const RUNNING_CARD_FIELDS = [
-  { key: "event", label: "Event", left: 892.5, top: 560, fontSize: 34, color: "#000000", maxChars: 20 },
-  { key: "date", label: "Date", left: 892.5, top: 610, fontSize: 34, color: "#000000", maxChars: 20 },
-  { key: "finishTime", label: "Finish Time", left: 892.5, top: 660, fontSize: 34, color: "#000000", maxChars: 12 }
+// "Event / Date / Finish Time" text fields used by the 5K/10K/26.2 mile
+// achievement cards below. Positions/colours are an initial estimate
+// (stacked centrally below the photo frame) -- open each card in the
+// editor and use findCoords() (see bottom of editor.html) to fine-tune
+// left/top if needed. Boy and girl cards use separate arrays so each can
+// have its own colours for Event/Date/Finish Time; edit the `color` on
+// each line below to change it -- all boy cards share RUNNING_CARD_FIELDS_BOY,
+// all girl cards share RUNNING_CARD_FIELDS_GIRL.
+const RUNNING_CARD_FIELDS_BOY = [
+  { key: "event", label: "Event", left: 892.5, top: 560, fontSize: 34, color: "#E2AB42", maxChars: 20 },
+  { key: "date", label: "Date", left: 892.5, top: 610, fontSize: 34, color: "#E2AB42", maxChars: 20 },
+  { key: "finishTime", label: "Finish Time", left: 892.5, top: 660, fontSize: 34, color: "#E2AB42", maxChars: 12 }
+];
+const RUNNING_CARD_FIELDS_GIRL = [
+  { key: "event", label: "Event", left: 892.5, top: 560, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
+  { key: "date", label: "Date", left: 892.5, top: 610, fontSize: 34, color: "#8B1E5C", maxChars: 20 },
+  { key: "finishTime", label: "Finish Time", left: 892.5, top: 660, fontSize: 34, color: "#8B1E5C", maxChars: 12 }
 ];
 
 // Categories can now nest: a 3rd array item is an optional list of child
@@ -387,22 +394,22 @@ const CARD_CATALOGUE = {
 
   "5kboy-photo": { title: "5K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738247/5kboy-photo-preview_c2npct.png", full: "v1785738153/5kboy-photo_c116gx.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-    extraFields: RUNNING_CARD_FIELDS },
+    extraFields: RUNNING_CARD_FIELDS_BOY },
   "10kboy-photo": { title: "10K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738254/10kboy-photo-preview_rnq9xm.png", full: "v1785738143/10kboy-photo_qq6izl.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-    extraFields: RUNNING_CARD_FIELDS },
+    extraFields: RUNNING_CARD_FIELDS_BOY },
   "26mboy-photo": { title: "26M Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738258/26mboy-photo-preview_fml8xv.png", full: "v1785738149/26mboy-photo_qxv3ns.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-    extraFields: RUNNING_CARD_FIELDS },
+    extraFields: RUNNING_CARD_FIELDS_BOY },
   "5kgirl-photo": { title: "5K Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738249/5kgirl-photo-preview_loxgls.png", full: "v1785738147/5kgirl-photo_hd2sv5.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-    extraFields: RUNNING_CARD_FIELDS },
+    extraFields: RUNNING_CARD_FIELDS_GIRL },
   "10kgirl-photo": { title: "10K Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738256/10kgirl-photo-preview_zyzc4l.png", full: "v1785738145/10kgirl-photo_qdsoyb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-    extraFields: RUNNING_CARD_FIELDS },
+    extraFields: RUNNING_CARD_FIELDS_GIRL },
   "26mgirl-photo": { title: "26M Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738251/26mgirl-photo-preview_n1juyo.png", full: "v1785738142/26mgirl-photo_apr3zk.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
-    extraFields: RUNNING_CARD_FIELDS },
+    extraFields: RUNNING_CARD_FIELDS_GIRL },
 
   
 };
