@@ -49,8 +49,7 @@ const PRINT_CATALOGUE = {
     "bermondsey-legend-print": {
         full: "v1784120944/you-can-take_cbses4.png"
     },
-    "bermondsey-legend-print": {
-        full: "v1784120944/you-can-take_cbses4.png"
+    "mfc-dad-son": { title: "MFC Dad & Son", categories: ["all prints", "sports"], preview: "v1784120947/millwall-dad-son_e48hgt.png", full: "v1785784030/mfc-dad-son_kh02zr.png",
     },
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
