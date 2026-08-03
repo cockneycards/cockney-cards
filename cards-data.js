@@ -20,6 +20,18 @@
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
 const DEFAULT_PRICE = "£2.49";
 
+// Shared "Event / Date / Finish Time" text fields used by the 5K/10K/26.2
+// mile achievement cards below (5kboy-photo, 5kgirl-photo, 10kboy-photo,
+// 10kgirl-photo, 26mboy-photo, 26mgirl-photo). Positions are an initial
+// estimate (stacked centrally below the photo frame) -- open each card in
+// the editor and use findCoords() (see bottom of editor.html) to fine-tune
+// left/top per card if needed, then adjust the numbers below.
+const RUNNING_CARD_FIELDS = [
+  { key: "event", label: "Event", left: 892.5, top: 560, fontSize: 34, color: "#000000", maxChars: 20 },
+  { key: "date", label: "Date", left: 892.5, top: 610, fontSize: 34, color: "#000000", maxChars: 20 },
+  { key: "finishTime", label: "Finish Time", left: 892.5, top: 660, fontSize: 34, color: "#000000", maxChars: 12 }
+];
+
 // Categories can now nest: a 3rd array item is an optional list of child
 // [key, label] (or [key, label, children]) entries, exactly like this level.
 // A card belongs to a sub-category by simply including that key in its own
@@ -374,17 +386,23 @@ const CARD_CATALOGUE = {
   "whu-shirt": { title: "West Ham Shirt Card", categories: ["sports", "football", "championship", "west-ham"], price: "£3.49", preview: "v1784384829/whu-shirt-preview_azohtz.png", full: "v1784378957/whu-shirt_zj7c65.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" } },
 
   "5kboy-photo": { title: "5K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738247/5kboy-photo-preview_c2npct.png", full: "v1785738153/5kboy-photo_c116gx.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+    extraFields: RUNNING_CARD_FIELDS },
   "10kboy-photo": { title: "10K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738254/10kboy-photo-preview_rnq9xm.png", full: "v1785738143/10kboy-photo_qq6izl.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+    extraFields: RUNNING_CARD_FIELDS },
   "26mboy-photo": { title: "26M Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738258/26mboy-photo-preview_fml8xv.png", full: "v1785738149/26mboy-photo_qxv3ns.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+    extraFields: RUNNING_CARD_FIELDS },
   "5kgirl-photo": { title: "5K Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738249/5kgirl-photo-preview_loxgls.png", full: "v1785738147/5kgirl-photo_hd2sv5.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+    extraFields: RUNNING_CARD_FIELDS },
   "10kgirl-photo": { title: "10K Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738256/10kgirl-photo-preview_zyzc4l.png", full: "v1785738145/10kgirl-photo_qdsoyb.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+    extraFields: RUNNING_CARD_FIELDS },
   "26mgirl-photo": { title: "26M Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738251/26mgirl-photo-preview_n1juyo.png", full: "v1785738142/26mgirl-photo_apr3zk.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
+    extraFields: RUNNING_CARD_FIELDS },
 
   
 };
