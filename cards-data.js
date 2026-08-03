@@ -331,14 +331,6 @@ const CARD_CATALOGUE = {
   
   "yoga-girl": { title: "Pilates Princess", categories: ["all", "for-her", "sports", "birthdays", "fitness"], preview: "v1784799276/pilates-princess-yoga_uiwtng.png", full: "v1784378957/yoga-girl_l1ilz8.png" },
   
-  "10k-girl": { title: "10k Achievement Girls", categories: ["all", "for-her", "achievements", "sports", "running"], preview: "v1784800831/10k-girl-preview_h8h1e5.png", full: "v1784800916/10k-girl_rdxdeu.png" },
-  
-  "10k-boy": { title: "10k Achievement Boys", categories: ["all", "for-him", "achievements", "sports", "running"], preview: "v1784800831/10k-boy-preview_mfky72.png", full: "v1784800915/10k-boy_nxhe2v.png" },
-  
-  "marathon-girl": { title: "Marathon Achievement Girls", categories: ["all", "for-her", "achievements", "sports", "running"], preview: "v1784800829/marathon-girl-preview_pbagqz.png", full: "v1784800918/marathon-girl_h3zkmt.png" },
-  
-  "marathon-boy": { title: "Marathon Achievement ", categories: ["all", "for-him", "achievements", "sports", "running"], preview: "v1784800830/marathon-boy-preview_eg1m43.png", full: "v1784800919/marathon-boy_cqsrtw.png" },
-  
   "fathers-day-peaky": { title: "Fathers Day Peaky Dad", categories: ["all", "for-him", "mothersday-fathersday"], preview: "v1784815430/fathers-day-peaky-preview_aytfhw.png", full: "v1784815611/fathers-day-peaky_ha6rdy.png" },
   "fathers-day-pub": { title: "Fathers Day Pub", categories: ["all", "for-him", "mothersday-fathersday"], preview: "v1784815435/fathers-day-pub-preview_bfkz7s.png", full: "v1784815614/fathers-day-pub_j9km04.png" },
   "fathers-day-sopranos": { title: "Fathers Day Sopranos Dad", categories: ["all", "for-him", "mothersday-fathersday", "seasonal"], preview: "v1784815426/fathers-day-sopranos-preview_hikmeb.png", full: "v1784815629/fathers-day-sopranos_b83i2i.png" },
