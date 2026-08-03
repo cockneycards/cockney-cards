@@ -151,10 +151,6 @@ const CARD_CATALOGUE = {
   "birthday-grandad-catch-girl": { title: "Grandad & Granddaughter Playing Catch", categories: ["all", "for-him", "birthdays"], preview: "v1785737644/birthday-grandad-catch-girl-preview_b08pgo.png", full: "v1785737932/birthday-grandad-catch-girl_lemcjn.png" },
   "birthday-grandad-fishing-boy": { title: "Grandad & Grandson Fishing", categories: ["all", "for-him", "birthdays", "sports"], preview: "v1785737644/birthday-grandad-fishing-boy-preview_ffdtiq.png", full: "v1785737926/birthday-grandad-fishing-boy_rptbik.png" },
   
-  "happy-hen-party1": { title: "Hen Party Sleep Over", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439372/happy-hen-party1-preview_we8x5z.png", full: "v1785439589/happy-hen-party1_itgqdm.png" },
-  "happy-hen-party2": { title: "Hen Party Girls", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439374/happy-hen-party2-preview_nlr0xa.png", full: "v1785439591/happy-hen-party2_wij3fl.png" },
-  
-  
   "birthday-mum-photo1": { title: "Happy Birthday Mum", categories: ["all", "for-her", "birthdays"], preview: "v1785262722/birthday-mum-photo1-preview_d2rnaf.png", full: "v1785263100/birthday-mum-photo1_dx93vs.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   "birthday-dad-photo1": { title: "Happy Birthday Dad", categories: ["all", "for-him", "birthdays"], preview: "v1785262721/birthday-dad-photo1-preview_o7vuke.png", full: "v1785263105/birthday-dad-photo1_p0dckg.png",
@@ -188,18 +184,17 @@ const CARD_CATALOGUE = {
   "leaving-girl": { title: "Sorry You're Leaving Girl Card", categories: ["all", "for-her", "work-related"], preview: "v1784209454/leaving-girl-preview_sb81pd.png", full: "v1784208050/leaving-girl_cu4lci.png" },
   "leaving-girl1": { title: "We'll Miss You Girl Card", categories: ["all", "for-her", "work-related"], preview: "v1784209447/leaving-girl1-preview_awpheh.png", full: "v1784208050/leaving-girl1_s4n0bw.png" },
   
-  "new-home": { title: "New Home Card", categories: ["all", "home"], preview: "v1784209536/new-home-preview_xnugt2.png", full: "v1784058157/new-home_wgtf1r.png" },
-  "newhome1": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141480/newhome1-preview_sqtuio.png", full: "v1785141071/newhome1_tasqqg.png" },
-  "newhome2": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141475/newhome2-preview_qkibme.png", full: "v1785141075/newhome2_tp8sxt.png" },
-  "newhome3": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome3-preview_n1uygl.png", full: "v1785141071/newhome3_d13zii.png" },
-  "newhome4": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141476/newhome4-preview_ussmxi.png", full: "v1785141070/newhome4_vnnzpa.png" },
-  "newhome5": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141480/newhome5-preview_lhsbiy.png", full: "v1785141067/newhome5_oygjun.jpg" },
-  "newhome6": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome6-preview_dst0lw.png", full: "v1785141067/newhome6_zm8i4d.jpg" },
-  "newhome7": { title: "University Campus Card", categories: ["all", "school-cards", "home"], preview: "v1785141476/newhome7-preview_puq5vm.png", full: "v1785141067/newhome7_m5ufxx.jpg" },
-  "newhome8": { title: "New Home Card", categories: ["all", "home"], preview: "v1785141478/newhome8-preview_z2kkpm.png", full: "v1785141071/newhome8_mmbrxh.png" },
+  "new-home": { title: "Home Sweet Home", categories: ["all", "home"], preview: "v1784209536/new-home-preview_xnugt2.png", full: "v1784058157/new-home_wgtf1r.png" },
+  "newhome1": { title: "New Home, New Beginnings", categories: ["all", "home"], preview: "v1785141480/newhome1-preview_sqtuio.png", full: "v1785141071/newhome1_tasqqg.png" },
+  "newhome2": { title: "New Home Unboxed", categories: ["all", "home"], preview: "v1785141475/newhome2-preview_qkibme.png", full: "v1785141075/newhome2_tp8sxt.png" },
+  "newhome3": { title: "New Home, New Adventures", categories: ["all", "home"], preview: "v1785141478/newhome3-preview_n1uygl.png", full: "v1785141071/newhome3_d13zii.png" },
+  "newhome4": { title: "New Home Wishes", categories: ["all", "home"], preview: "v1785141476/newhome4-preview_ussmxi.png", full: "v1785141070/newhome4_vnnzpa.png" },
+  "newhome5": { title: "New Home Together", categories: ["all", "home"], preview: "v1785141480/newhome5-preview_lhsbiy.png", full: "v1785141067/newhome5_oygjun.jpg" },
+  "newhome6": { title: "New Home, New Memories", categories: ["all", "home"], preview: "v1785141478/newhome6-preview_dst0lw.png", full: "v1785141067/newhome6_zm8i4d.jpg" },
+  "newhome7": { title: "New University Home", categories: ["all", "school-cards", "home"], preview: "v1785141476/newhome7-preview_puq5vm.png", full: "v1785141067/newhome7_m5ufxx.jpg" },
+  "newhome8": { title: "New Home, New Dreams", categories: ["all", "home"], preview: "v1785141478/newhome8-preview_z2kkpm.png", full: "v1785141071/newhome8_mmbrxh.png" },
   "newhome9": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221487/newhome9-preview_h8qnga.png", full: "v1785221604/newhome9_rsqhpr.png" },
-  "newhome10": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
-  "newhome11": { title: "New Home Card", categories: ["all", "home"], preview: "v1785221486/newhome11-preview_db8ghw.png", full: "v1785221607/newhome11_sjmymt.png" },
+  "newhome10": { title: "New Home, New Pad", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
   
   "newhome1-photo": { title: "New Home Card", categories: ["all", "home"], preview: "v1785262722/newhome12-photo-preview_vtnuyn.png", full: "v1785263102/newhome12-photo_apyp0z.png" },
   photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
@@ -244,19 +239,22 @@ const CARD_CATALOGUE = {
   "mothers-day2": { title: "Mothers Day", categories: ["all", "for-her", "seasonal", "mothersday-fathersday"], preview: "v1784815423/mothers-day2-preview_hvfvat.png", full: "v1784815624/mothers-day2_bsei4w.png" },
   "mothers-day3": { title: "Mothers Day", categories: ["all", "for-her", "seasonal", "mothersday-fathersday"], preview: "v1784879975/mothers-day3-preview_f6pukx.png", full: "v1784879879/mothers-day3_i3ri9c.png" },
 
-  "engagement1": { title: "Engagement Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896295/engagement1-preview_soas0z.png", full: "v1784895840/engagement1_pyzdmf.png" },
-  "engagement2": { title: "Engagement Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896295/engagement2-preview_n4fr1q.png", full: "v1784895840/engagement2_urrxgf.png" },
-  "engagement3": { title: "Engagement Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896287/engagement3-preview_g2a07e.png", full: "v1784895840/engagement3_vlfjgj.png" },
-  "engagement4": { title: "Engagement Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896287/engagement4-preview_vemnd5.png", full: "v1784895840/engagement4_lxnrar.png" },
-  "engagement5": { title: "Engagement Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896293/engagement5-preview_ued4t0.png", full: "v1784895841/engagement5_giwzii.png" },
+  "engagement1": { title: "Engagement Hearts", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896295/engagement1-preview_soas0z.png", full: "v1784895840/engagement1_pyzdmf.png" },
+  "engagement2": { title: "Engagement Bubbles", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896295/engagement2-preview_n4fr1q.png", full: "v1784895840/engagement2_urrxgf.png" },
+  "engagement3": { title: "She Said Yes!", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896287/engagement3-preview_g2a07e.png", full: "v1784895840/engagement3_vlfjgj.png" },
+  "engagement4": { title: "Engagement Ring Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896287/engagement4-preview_vemnd5.png", full: "v1784895840/engagement4_lxnrar.png" },
+  "engagement5": { title: "The Propsal", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896293/engagement5-preview_ued4t0.png", full: "v1784895841/engagement5_giwzii.png" },
 
   "valentines1-photo": { title: "Cupids Couple", categories: ["all", "for-her", "valentines"], preview: "v1785229353/valentines-photo1-preview_oqllmb.png", full: "v1785228622/valentines-photo1_ctoshq.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
   
-  "wedding1": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding1-preview_hxzzks.png", full: "v1784895840/wedding1_ripd1n.png" },
+  "wedding1": { title: "Over the Threshold", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding1-preview_hxzzks.png", full: "v1784895840/wedding1_ripd1n.png" },
   
-  "wedding3": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896285/wedding3-preview_bwchrr.png", full: "v1784895839/wedding3_sm7ztz.png" },
-  "wedding4": { title: "Wedding Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding4-preview_zubyhl.png", full: "v1784895839/wedding4_qofbhe.png" },
+  "wedding3": { title: "Wedding Bubbles", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896285/wedding3-preview_bwchrr.png", full: "v1784895839/wedding3_sm7ztz.png" },
+  "wedding4": { title: "Just Married", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding4-preview_zubyhl.png", full: "v1784895839/wedding4_qofbhe.png" },
+
+  "happy-hen-party1": { title: "Hen Party Girls", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439372/happy-hen-party1-preview_we8x5z.png", full: "v1785439589/happy-hen-party1_itgqdm.png" },
+  "happy-hen-party2": { title: "Hen Party Sleep Over", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439374/happy-hen-party2-preview_nlr0xa.png", full: "v1785439591/happy-hen-party2_wij3fl.png" },
   
   "charlie-says": { title: "Charlie Says..", categories: ["all", "for-him", "birthdays"], preview: "v1784209519/charlie-says-preview_iemrbl.png", full: "v1784058139/charlie-says_legryi.png" },
 
