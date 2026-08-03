@@ -112,7 +112,7 @@ const CARD_CATALOGUE = {
   "beer-boy": { title: "Beer Boy Card", categories: ["all", "for-him", "birthdays"], preview: "v1784209517/beer-boy-preview_amm29h.png", full: "v1784058080/beer-boy_hscpkf.png" },
   "birthday-nan1": { title: "Nans Garden", categories: ["all", "for-her", "birthdays"], preview: "v1785221484/birthday-nan1-preview_aj4gr9.png", full: "v1785221602/birthday-nan1_wkck0d.png" },
   "birthday-grandad1": { title: "Grandads Garden", categories: ["all", "for-him", "birthdays"], preview: "v1785221486/birthday-grandad1-preview_owoeql.png", full: "v1785221607/birthday-grandad1_v6hfnt.png" },
-  "birthday-sweetie": { title: "Sweet Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785221487/birthday-sweetie-preview_aqzgqe.png", full: "v1785221602/birthday-sweetie_fctude.png" },
+  "birthday-sweetie": { title: "Sweet Birthday", categories: ["all", "for-her", "birthdays"], preview: "v1785221487/birthday-sweetie-preview_aqzgqe.png", full: "v1785221602/birthday-sweetie_fctude.png" },
   "birthday-horse-girl": { title: "Racing Lady", categories: ["all", "for-her", "horseracing", "birthdays"], preview: "v1785439371/birthday-horse-girl-preview_ohwctj.png", full: "v1785439591/birthday-horse-girl_bw60ol.png" },
   "birthday-horse-boy": { title: "Racing Gent", categories: ["all", "for-him", "horseracing", "birthdays"], preview: "v1785439370/birthday-horse-boy-preview_tba18k.png", full: "v1785439589/birthday-horse-boy_lagokf.png" },
   "birthday-gymgirl": { title: "Gym Birthday Babe", categories: ["all", "for-him", "birthdays"], preview: "v1785439370/birthday-gymgirl-preview_w3er8i.png", full: "v1785439589/birthday-gymgirl_pczkzl.png" },
