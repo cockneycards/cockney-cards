@@ -156,6 +156,8 @@
                 <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
                 <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)">
 
+                <div id="extra-fields-container"></div>
+
                 <div class="flex-row">
                     <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
                     <span>Choose Font Colour</span>
@@ -275,6 +277,20 @@ const DEFAULT_PHOTO_SETTINGS = {
     left: 892.5, top: 400, width: 520, height: 520
 };
 
+// ---- Extra text-field defaults (reused / overridden per template) ----
+// A card can define any number of simple extra text fields (e.g. "Event",
+// "Date", "Finish Time" on the running-achievement cards) via an
+// `extraFields` array in cards-data.js. Each entry needs at least
+// `key` (used internally) and `label` (shown on the input + as the
+// on-canvas placeholder); left/top/fontSize/color etc. fall back to these
+// defaults. Unlike name/age, there's no curve/curved-text support here --
+// these are always plain centered text.
+const DEFAULT_EXTRA_FIELD_SETTINGS = {
+    left: 892.5, top: 600, fontSize: 32, minSize: 20, maxSize: 60,
+    fontFamily: "Arial", fontWeight: "bold", color: "#000000",
+    maxChars: 24
+};
+
 // ---- Card catalogue: built from the shared CARD_CATALOGUE (cards-data.js) ----
 // CARD_TEMPLATES: what the editor actually needs per card -- full artwork
 // URL, plus name/age personalisation settings merged onto the defaults.
@@ -287,7 +303,10 @@ const CARD_TEMPLATES = Object.fromEntries(
                 url: CLOUD_BASE + c.full,
                 name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
                 age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
-                photo: c.photo ? { ...DEFAULT_PHOTO_SETTINGS, ...c.photo } : null
+                photo: c.photo ? { ...DEFAULT_PHOTO_SETTINGS, ...c.photo } : null,
+                extraFields: c.extraFields
+                    ? c.extraFields.map((f) => ({ ...DEFAULT_EXTRA_FIELD_SETTINGS, ...f }))
+                    : null
             }
         ])
 );
@@ -340,6 +359,7 @@ const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth
 
 // ---- Mutable editor state ----
 let canvas, bgImg, backCoverImg, nameText, ageText;
+let extraTexts = []; // fabric.Text objects, parallel to activeTemplate.extraFields
 let photoImg;
 let leftPageBg, rightPageBg;
 let insideBgRects = [];   // [top, middle, bottom]
@@ -431,8 +451,9 @@ function initEditor(templateKey) {
     }, { crossOrigin: 'anonymous' });
 
     // Show/hide the personalisation inputs based on what this card supports
-    const hasPersonalisation = activeTemplate.name || activeTemplate.age;
+    const hasPersonalisation = activeTemplate.name || activeTemplate.age || activeTemplate.extraFields;
     $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
+    buildExtraFieldInputs();
     if (hasPersonalisation) {
         $('name-input').style.display = $('label-name').style.display = activeTemplate.name ? 'block' : 'none';
         $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
@@ -565,6 +586,20 @@ function setupTextsAndOverlays() {
         canvas.add(ageText);
     }
 
+    extraTexts = [];
+    if (activeTemplate.extraFields) {
+        activeTemplate.extraFields.forEach((f) => {
+            const t = new fabric.Text((f.label || f.key || '').toUpperCase(), {
+                left: f.left, top: f.top, originX: "center", originY: "center",
+                fontSize: f.fontSize, fontFamily: f.fontFamily || "Arial",
+                fontWeight: f.fontWeight || "bold", fill: f.color, textAlign: "center",
+                hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+            });
+            extraTexts.push(t);
+            canvas.add(t);
+        });
+    }
+
     leftPageBg = new fabric.Rect({ left: 0, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
     rightPageBg = new fabric.Rect({ left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
 
@@ -671,6 +706,49 @@ function updateAgeText(inputEl) {
     canvas.requestRenderAll();
 }
 
+// Builds one label+input pair per entry in activeTemplate.extraFields
+// (e.g. "Event:", "Date:", "Finish Time:") into #extra-fields-container.
+// Rebuilt fresh every time a template loads, since different cards can
+// have a different number/set of extra fields (or none at all).
+function buildExtraFieldInputs() {
+    const container = $('extra-fields-container');
+    container.innerHTML = '';
+
+    const fields = activeTemplate.extraFields;
+    if (!fields) return;
+
+    fields.forEach((f, i) => {
+        const label = document.createElement('label');
+        label.setAttribute('for', `extra-input-${i}`);
+        label.style.marginTop = '10px';
+        label.style.display = 'block';
+        label.textContent = (f.label || f.key) + ':';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `extra-input-${i}`;
+        input.placeholder = (f.label || f.key) + ':';
+        if (f.maxChars) input.maxLength = f.maxChars;
+        input.addEventListener('input', () => updateExtraFieldText(i, input.value));
+
+        container.appendChild(label);
+        container.appendChild(input);
+    });
+}
+
+// Updates the on-canvas text for one extra field as the customer types.
+function updateExtraFieldText(index, value) {
+    const f = activeTemplate?.extraFields?.[index];
+    const t = extraTexts[index];
+    if (!f || !t) return;
+
+    let val = value;
+    if (f.maxChars) val = val.slice(0, f.maxChars);
+
+    t.set({ text: val ? val.toUpperCase() : (f.label || f.key || '').toUpperCase() });
+    canvas.requestRenderAll();
+}
+
 function updateFrontColor(hexColor) {
     const n = activeTemplate?.name;
     if (n?.isCurved) {
@@ -731,7 +809,7 @@ function switchPage(page, updateBuyBtn = true) {
     $('inside-controls').classList.toggle('active', !isFront);
     if (updateBuyBtn) $('buy-now-btn').style.display = isFront ? 'none' : 'block';
 
-    [backCoverImg, bgImg, nameText, ageText].forEach((o) => o?.set({ visible: isFront }));
+    [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o.set({ visible: !isFront }));
     photoImg?.set({ visible: isFront, selectable: isFront, evented: isFront });
 
@@ -1008,7 +1086,11 @@ async function uploadAndGoToCheckout() {
 
         const checkoutData = {
             name: activeTemplate.name ? ($('name-input').value.toUpperCase() || "NAME") : "N/A",
-            age: ageText?.text ?? "N/A"
+            age: ageText?.text ?? "N/A",
+            extraFields: (activeTemplate.extraFields || []).reduce((acc, f, i) => {
+                acc[f.key || f.label || `field${i}`] = $(`extra-input-${i}`)?.value || "";
+                return acc;
+            }, {})
         };
 
         const response = await fetch('/.netlify/functions/create-checkout', {
