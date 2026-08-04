@@ -465,7 +465,12 @@
                 price: c.price,
                 priceValue: c.priceValue,
                 image: CLOUD_BASE + (c.preview || c.full),
-                categories: c.categories || ['all']
+                categories: c.categories || ['all'],
+                // A print with any of these fields needs the customer to
+                // fill something in before checkout, so it goes to the
+                // editor ("Personalise Print"). One with none of them is
+                // ready to buy as-is ("Buy Now").
+                personalised: !!(c.name || c.age || c.name2 || c.age2 || c.extraFields)
             }));
 
         let currentCategory = 'all';
@@ -490,6 +495,7 @@
             countLabel.innerText = `${productsToRender.length} products`;
 
             productsToRender.forEach(prod => {
+                const buttonLabel = prod.personalised ? 'Personalise Print' : 'Buy Now';
                 const cardMarkup = `
                     <div class="product-card">
                         <div class="image-wrapper" onclick="goToEditor('${prod.id}')">
@@ -497,9 +503,9 @@
                         </div>
                         <div class="product-info">
                             <h3 class="product-title" onclick="goToEditor('${prod.id}')">${prod.title}</h3>
-                            <p class="product-price">${prod.price}</p>
+                            <p class="product-price">From ${prod.price}</p>
                         </div>
-                        <button class="btn-action" onclick="goToEditor('${prod.id}')">Personalise Print</button>
+                        <button class="btn-action" onclick="goToEditor('${prod.id}')">${buttonLabel}</button>
                     </div>
                 `;
                 grid.innerHTML += cardMarkup;
