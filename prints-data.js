@@ -129,9 +129,9 @@ const PRINT_CATALOGUE = {
         preview: "v1785832868/afc-girl2-preview_vbyq9q.png",
         full: "v1785833147/afc-girl2_smvcct.png",
         name: { label: "First Name", left: 297, top: 600, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
-        age: { label: "Age", left: 297, top: 660, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },   
-     },
-        
+        age: { label: "Age", left: 297, top: 660, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
+    },
+
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
         full: "v1784098145/prints/sample-print-full.png",
