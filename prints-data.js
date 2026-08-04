@@ -69,7 +69,7 @@ const PRINT_CATALOGUE = {
         full: "v1785823561/mfc-stone_otcbr5.png"
     },
     "mfc-boy1": {
-        title: "MFC Stone Island",
+        title: "MFC Boy 1",
         price: "£9.99", priceValue: 9.99,
         categories: ["all"],
         preview: "v1785827230/mfc-boy1-preview_atd6yj.png",
@@ -78,15 +78,61 @@ const PRINT_CATALOGUE = {
         age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     },
     "mfc-boy2": {
-        title: "MFC Stone Island",
+        title: "MFC Boy 2",
         price: "£9.99", priceValue: 9.99,
         categories: ["all"],
         preview: "v1785827231/mfc-boy2-preview_acy95s.png",
         full: "v1785827577/mfc-boy2_yfxjex.png",
         name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
-   
-
+    },
+    "afc-boy1": {
+        title: "AFC Boy 1",
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all"],
+        preview: "v1785832868/afc-boy1-preview_fk1pkz.png",
+        full: "v1785833148/afc-boy1_yubhjz.png",
+        name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
+    },
+    "afc-boy2": {
+        title: "AFC Boy 2",
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all"],
+        preview: "v1785832868/afc-boy2-preview_ex1356.png",
+        full: "v1785833148/afc-boy2_e6m5vw.png",
+        name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },   
+    },
+    "afc-boy3": {
+        title: "AFC Boy 3",
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all"],
+        preview: "v1785832868/afc-boy3-preview_sbq2z8.png",
+        full: "v1785833148/afc-boy3_mwlwu0.png",
+        name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },   
+    
+    },
+    "afc-girl1": {
+        title: "AFC Girl 1",
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all"],
+        preview: "v1785832868/afc-girl1-preview_w99q5x.png",
+        full: "v1785833147/afc-girl1_lnszx9.png",
+        name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
+    },
+    "afc-girl2": {
+        title: "AFC Girl 2",
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all"],
+        preview: "v1785832868/afc-girl2-preview_vbyq9q.png",
+        full: "v1785833147/afc-girl2_smvcct.png",
+        name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },   
+    
+        
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
         full: "v1784098145/prints/sample-print-full.png",
