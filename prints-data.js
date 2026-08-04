@@ -74,10 +74,10 @@ const PRINT_CATALOGUE = {
         categories: ["all", "sports"],
         preview: "v1784120947/millwall-dad-son_e48hgt.png",
         full: "v1785784030/mfc-dad-son_kh02zr.png",
-        name: { label: "First Name", left: 300, top: 490, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
-        age: { label: "Age", left: 300, top: 553, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
-        name2: { label: "Second Name", left: 400, top: 725, startSize: 48, color: "#FFFFFF" },
-        age2: { label: "Age", left: 400, top: 600, startSize: 56, color: "#FFFFFF" }
+        name: { label: "First Name", left: 250, top: 450, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        age: { label: "Age", left: 250, top: 513, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
+        name2: { label: "Second Name", left: 250, top: 610, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        age2: { label: "Age", left: 250, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     },
 
     // Example of a print WITH name personalisation, for reference:
