@@ -82,7 +82,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all", "b&w"],
+        categories: ["all", "b&w", "music"],
         preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
         full: "v1785823561/oasis-dontlookback_tjupo3.png"
     },
