@@ -70,7 +70,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "b&w"],
         preview: "v1785838174/itsnotwhatwehave-preview_xnh2nr.png",
         full: "v1785838415/itsnotwhatwehave_qey0yj.png"
     },
@@ -82,7 +82,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "b&w"],
         preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
         full: "v1785823561/oasis-dontlookback_tjupo3.png"
     },
@@ -94,7 +94,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "sports"],
         preview: "v1785823903/mfc-stone-preview_bqjjdm.png",
         full: "v1785823561/mfc-stone_otcbr5.png"
     },
@@ -106,7 +106,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "sports"],
         preview: "v1785827230/mfc-boy1-preview_atd6yj.png",
         full: "v1785827576/mfc-boy1_bwwx7b.png",
         name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
@@ -120,7 +120,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "sports"],
         preview: "v1785827231/mfc-boy2-preview_acy95s.png",
         full: "v1785827577/mfc-boy2_yfxjex.png",
         name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
@@ -134,7 +134,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "sports"],
         preview: "v1785832868/afc-boy1-preview_fk1pkz.png",
         full: "v1785833148/afc-boy1_yubhjz.png",
         name: { label: "First Name", left: 286, top: 610, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
@@ -148,7 +148,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "sports"],
         preview: "v1785832868/afc-boy2-preview_ex1356.png",
         full: "v1785833148/afc-boy2_e6m5vw.png",
         name: { label: "First Name", left: 286, top: 610, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
@@ -162,7 +162,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "sports"],
         preview: "v1785832868/afc-boy3-preview_sbq2z8.png",
         full: "v1785833148/afc-boy3_mwlwu0.png",
         name: { label: "First Name", left: 286, top: 610, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
@@ -176,7 +176,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "sports"],
         preview: "v1785832868/afc-girl1-preview_w99q5x.png",
         full: "v1785833147/afc-girl1_lnszx9.png",
         name: { label: "First Name", left: 305, top: 615, startSize: 28, minSize: 23, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
@@ -190,7 +190,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all"],
+        categories: ["all", "sports"],
         preview: "v1785832868/afc-girl2-preview_vbyq9q.png",
         full: "v1785833147/afc-girl2_smvcct.png",
         name: { label: "First Name", left: 294, top: 615, startSize: 28, minSize: 23, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
