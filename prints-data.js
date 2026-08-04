@@ -33,8 +33,22 @@
 //   title       — required to appear in the shop. Entries WITHOUT a title
 //                 (like the reference examples below) are skipped by
 //                 shop-prints.html — they only exist for the editor.
-//   price       — required for shop display, e.g. "£9.99"
-//   priceValue  — required for shop sorting, e.g. 9.99 (matches `price`)
+//   sizes       — required. Per-size pricing, one entry per size the print
+//                 is sold at:
+//                   sizes: {
+//                       A5: { price: "£4.99", priceValue: 4.99 },
+//                       A4: { price: "£6.99", priceValue: 6.99 },
+//                       A3: { price: "£9.99", priceValue: 9.99 }
+//                   }
+//                 editor-prints.html reads this to build the size picker
+//                 and price display. All three A-sizes share the same
+//                 portrait aspect ratio, so no artwork/coordinate changes
+//                 are needed per size — only the price and physical output
+//                 size change.
+//   price, priceValue — required for the shop grid's "from £X.99" price
+//                 and for sorting. Set these to the CHEAPEST size's price
+//                 (normally the A5 entry in `sizes`) so the grid shows a
+//                 starting price.
 //   preview     — optional. Path (appended to CLOUD_BASE) to a separate,
 //                 lighter thumbnail for the shop grid. Falls back to `full`
 //                 if omitted.
@@ -50,28 +64,48 @@ const PRINT_CATALOGUE = {
     // shop grid or the editor.
     "itsnotwhatwehave": {
         title: "It's Not What We Have In Life...",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785838174/itsnotwhatwehave-preview_xnh2nr.png",
         full: "v1785838415/itsnotwhatwehave_qey0yj.png"
     },
     "oasis-dontlookback": {
         title: "Oasis - Dont Look Back...",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
         full: "v1785823561/oasis-dontlookback_tjupo3.png"
     },
     "mfc-stone": {
         title: "MFC Stone Island",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785823903/mfc-stone-preview_bqjjdm.png",
         full: "v1785823561/mfc-stone_otcbr5.png"
     },
     "mfc-boy1": {
         title: "MFC Boy 1",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785827230/mfc-boy1-preview_atd6yj.png",
         full: "v1785827576/mfc-boy1_bwwx7b.png",
@@ -80,7 +114,12 @@ const PRINT_CATALOGUE = {
     },
     "mfc-boy2": {
         title: "MFC Boy 2",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785827231/mfc-boy2-preview_acy95s.png",
         full: "v1785827577/mfc-boy2_yfxjex.png",
@@ -89,7 +128,12 @@ const PRINT_CATALOGUE = {
     },
     "afc-boy1": {
         title: "AFC Boy 1",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785832868/afc-boy1-preview_fk1pkz.png",
         full: "v1785833148/afc-boy1_yubhjz.png",
@@ -98,7 +142,12 @@ const PRINT_CATALOGUE = {
     },
     "afc-boy2": {
         title: "AFC Boy 2",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785832868/afc-boy2-preview_ex1356.png",
         full: "v1785833148/afc-boy2_e6m5vw.png",
@@ -107,7 +156,12 @@ const PRINT_CATALOGUE = {
     },
     "afc-boy3": {
         title: "AFC Boy 3",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785832868/afc-boy3-preview_sbq2z8.png",
         full: "v1785833148/afc-boy3_mwlwu0.png",
@@ -116,7 +170,12 @@ const PRINT_CATALOGUE = {
     },
     "afc-girl1": {
         title: "AFC Girl 1",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785832868/afc-girl1-preview_w99q5x.png",
         full: "v1785833147/afc-girl1_lnszx9.png",
@@ -125,7 +184,12 @@ const PRINT_CATALOGUE = {
     },
     "afc-girl2": {
         title: "AFC Girl 2",
-        price: "£9.99", priceValue: 9.99,
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         categories: ["all"],
         preview: "v1785832868/afc-girl2-preview_vbyq9q.png",
         full: "v1785833147/afc-girl2_smvcct.png",
@@ -136,6 +200,12 @@ const PRINT_CATALOGUE = {
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
         full: "v1784098145/prints/sample-print-full.png",
+        price: "£4.99", priceValue: 4.99,
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         name: { left: 297.75, top: 725, startSize: 52, color: "#FFFFFF" }
     },
 
@@ -146,6 +216,12 @@ const PRINT_CATALOGUE = {
     // left/top numbers once the artwork is loaded).
     "sample-two-person-print": {
         full: "v1784098145/prints/sample-two-person-full.png",
+        price: "£4.99", priceValue: 4.99,
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
         name: { label: "First Name", left: 200, top: 725, startSize: 48, color: "#FFFFFF" },
         age: { label: "Age", left: 200, top: 600, startSize: 56, color: "#FFFFFF" },
         name2: { label: "Second Name", left: 400, top: 725, startSize: 48, color: "#FFFFFF" },
