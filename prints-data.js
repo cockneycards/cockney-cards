@@ -85,18 +85,7 @@ const PRINT_CATALOGUE = {
         full: "v1785827577/mfc-boy2_yfxjex.png",
         name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
-    },
-    "mfc-dad-son": {
-        title: "MFC Dad & Son",
-        price: "£9.99", priceValue: 9.99,
-        categories: ["all", "sports"],
-        preview: "v1784120947/millwall-dad-son_e48hgt.png",
-        full: "v1785784030/mfc-dad-son_kh02zr.png",
-        name: { label: "First Name", left: 215, top: 430, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
-        age: { label: "Age", left: 215, top: 493, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
-        name2: { label: "Second Name", left: 200, top: 636, startSize: 35, minSize: 35, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
-        age2: { label: "Age", left: 200, top: 720, startSize: 90, minSize: 90, maxSize: 90, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
-    },
+   
 
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
