@@ -48,11 +48,12 @@ const PRINT_CATALOGUE = {
     // These two used to live in shop-prints.html's own PRODUCTS list —
     // moved here so this file is the one place you edit for either the
     // shop grid or the editor.
-    "bermondsey-legend-print": {
-        title: "Bermondsey Legend",
+    "itsnotwhatwehave": {
+        title: "It's Not What We Have In Life...",
         price: "£9.99", priceValue: 9.99,
         categories: ["all"],
-        full: "v1784120944/you-can-take_cbses4.png"
+        preview: "v1785838174/itsnotwhatwehave-preview_xnh2nr.png",
+        full: "v1785838415/itsnotwhatwehave_qey0yj.png"
     },
     "oasis-dontlookback": {
         title: "Oasis - Dont Look Back...",
