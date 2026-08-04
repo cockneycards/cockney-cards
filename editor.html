@@ -977,7 +977,11 @@ function captureFullSpread() {
             try {
                 exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
                 exportCanvas.renderAll();
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0 });
+                // multiplier: 3 pushes the 1191x840 editor canvas up to
+                // ~3573x2520px, which lands at ~335 DPI once stretched to
+                // fill the real 270x188mm spread — without this, the export
+                // was going out at ~112 DPI and printing pixelated.
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier: 3 });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
