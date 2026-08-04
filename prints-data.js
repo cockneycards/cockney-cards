@@ -76,8 +76,6 @@ const PRINT_CATALOGUE = {
         full: "v1785784030/mfc-dad-son_kh02zr.png",
         name: { label: "First Name", left: 878, top: 490, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 880, top: 553, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
-       // name: { label: "First Name", left: 878, top: 490, startSize: 26, minSize: 20, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
-       // age: { label: "Age", left: 880, top: 553, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
         name2: { label: "Second Name", left: 400, top: 725, startSize: 48, color: "#FFFFFF" },
         age2: { label: "Age", left: 400, top: 600, startSize: 56, color: "#FFFFFF" }
     },
