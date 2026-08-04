@@ -71,6 +71,10 @@
     .size-slider { flex: 1; }
 
     .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
+    .size-option { flex: 1; padding: 10px 4px; border: 2px solid #ddd; border-radius: 6px; background: white; cursor: pointer; text-align: center; font-size: 13px; transition: border-color 0.15s; }
+    .size-option .size-label { display: block; font-weight: bold; letter-spacing: 0.5px; }
+    .size-option .size-price { display: block; font-size: 12px; color: #666; margin-top: 2px; }
+    .size-option.selected { border-color: #1a1a1a; background: #f5f5f5; }
     .btn:hover { background-color: #444; }
     .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
     .btn-close { background-color: #f0f0f0; color: #333; margin-top: 10px; }
@@ -157,6 +161,13 @@
             </div>
         </div>
 
+        <div id="print-size-controls" style="margin-top:20px;">
+            <label style="display:block; margin-bottom:8px;">Print Size:</label>
+            <div id="print-size-options" style="display:flex; gap:8px;">
+                <!-- One button per PRINT_SIZES entry, built in renderSizeOptions() -->
+            </div>
+        </div>
+
         <button id="buy-now-btn" class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
 
         <!-- TESTING ONLY — downloads the print-ready PDF (personalised page
@@ -198,14 +209,15 @@
 // ---- Print-ready PDF settings ----
 // Unlike the card editor (which prints a folded 2-panel spread onto A4
 // landscape), a print is a single flat sheet — one full page of artwork,
-// output at true A3 portrait size. No panel maths / trim marks needed.
-const PRINT_PAGE_MM = { width: 297, height: 420 }; // A3 portrait
+// output at true A-size portrait. No panel maths / trim marks needed.
+// The actual page size (A5/A4/A3) is chosen at export time from
+// PRINT_SIZES, based on the customer's `selectedSize` — see below.
 
 // ---- On-screen canvas size ----
 // Kept identical to the existing card editor's on-screen (single-panel)
 // view size, purely for consistent viewing/zoom level — this has no direct
-// relationship to the A3 output size; that scaling happens only at PDF
-// export time in drawPrintPage().
+// relationship to the physical output size; that scaling happens only at
+// PDF export time in drawPrintPage().
 const EDIT_WIDTH = 595.5, EDIT_HEIGHT = 840;
 
 // ---- Logo settings for the fixed, non-editable back page ----
@@ -276,6 +288,7 @@ const PRINT_TEMPLATES = Object.fromEntries(
             id,
             {
                 url: CLOUD_BASE + c.full,
+                sizes: c.sizes || null,
                 name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
                 age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
                 name2: c.name2 ? { ...DEFAULT_NAME2_SETTINGS, ...c.name2 } : null,
@@ -286,6 +299,20 @@ const PRINT_TEMPLATES = Object.fromEntries(
             }
         ])
 );
+
+// ---- Physical size options ----
+// A5/A4/A3 all share the same portrait aspect ratio (~0.707), same as the
+// editor's 595.5x840 canvas — so the exact same artwork and text
+// coordinates work at every size. Only the physical output size (mm) and
+// the export multiplier (to land at ~300 DPI at that size) change per
+// option. Per-print prices for each size come from PRINT_CATALOGUE's
+// `sizes` field (see prints-data.js).
+const PRINT_SIZES = {
+    A5: { label: "A5", mm: { width: 148, height: 210 }, multiplier: 3 },
+    A4: { label: "A4", mm: { width: 210, height: 297 }, multiplier: 4.2 },
+    A3: { label: "A3", mm: { width: 297, height: 420 }, multiplier: 6 }
+};
+let selectedSize = "A3";
 
 // ---- Mutable editor state ----
 let canvas, bgImg, nameText, ageText, nameText2, ageText2;
@@ -392,7 +419,54 @@ function initEditor(templateKey) {
     if (activeTemplate.name2?.maxChars) $('name2-input').maxLength = activeTemplate.name2.maxChars;
     if (activeTemplate.age2?.maxChars) $('age2-input').maxLength = activeTemplate.age2.maxChars;
 
+    renderSizeOptions();
     loadFrontArtwork(activeTemplate.url);
+}
+
+// Builds one button per PRINT_SIZES entry (A5/A4/A3), showing this print's
+// price at that size (from activeTemplate.sizes, set in prints-data.js).
+// Defaults to A3 selected; clicking a size updates `selectedSize` and the
+// Buy Now button's price.
+function renderSizeOptions() {
+    const container = $('print-size-options');
+    container.innerHTML = '';
+
+    if (!activeTemplate.sizes) {
+        // No per-size pricing on this entry — hide the picker rather than
+        // show broken/blank prices.
+        $('print-size-controls').style.display = 'none';
+        $('buy-now-btn').innerText = 'Buy Now';
+        return;
+    }
+    $('print-size-controls').style.display = 'block';
+
+    if (!activeTemplate.sizes[selectedSize]) {
+        selectedSize = Object.keys(activeTemplate.sizes)[0];
+    }
+
+    Object.keys(PRINT_SIZES).forEach((sizeKey) => {
+        const sizeInfo = activeTemplate.sizes[sizeKey];
+        if (!sizeInfo) return; // this print isn't sold at this size
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'size-option' + (sizeKey === selectedSize ? ' selected' : '');
+        btn.innerHTML = `<span class="size-label">${PRINT_SIZES[sizeKey].label}</span><span class="size-price">${sizeInfo.price}</span>`;
+        btn.onclick = () => selectSize(sizeKey);
+        container.appendChild(btn);
+    });
+
+    updateBuyButtonPrice();
+}
+
+function selectSize(sizeKey) {
+    selectedSize = sizeKey;
+    renderSizeOptions(); // rebuilds the buttons with the new one marked 'selected'
+}
+
+function updateBuyButtonPrice() {
+    const sizeInfo = activeTemplate.sizes?.[selectedSize];
+    $('buy-now-btn').innerText = sizeInfo ? `Buy Now — ${sizeInfo.price}` : 'Buy Now';
 }
 
 // Loads the print's artwork so it fills the ENTIRE canvas edge-to-edge —
@@ -680,7 +754,7 @@ function updateFrontSize(size) {
 // Renders the current on-screen (personalised) page onto a completely
 // separate, invisible canvas, exactly like the card editor's
 // captureFullSpread() — the visible editor canvas is never touched.
-function captureFrontPage() {
+function captureFrontPage(multiplier) {
     return new Promise((resolve, reject) => {
         const exportEl = document.createElement('canvas');
         const exportCanvas = new fabric.StaticCanvas(exportEl, {
@@ -689,11 +763,10 @@ function captureFrontPage() {
         exportCanvas.loadFromJSON(canvas.toJSON(), () => {
             try {
                 exportCanvas.renderAll();
-                // multiplier: 6 pushes the 595.5x840 editor canvas up to
-                // ~3573x5040px, which lands at ~300 DPI once stretched to
-                // fill the real A3 (297x420mm) print page — without this,
-                // the export was going out at ~51 DPI and printing pixelated.
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier: 6 });
+                // multiplier scales the 595.5x840 editor canvas up to
+                // ~300 DPI once stretched to fill the chosen print size —
+                // see PRINT_SIZES for the multiplier used per size.
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
@@ -708,7 +781,7 @@ function captureFrontPage() {
 // only the Cockney Cards logo, positioned via LOGO_SETTINGS at exactly the
 // same coordinates/scale as the logo on the existing card editor's back
 // cover, so it lands in the same place and at the same size once printed.
-function buildBackPageDataUrl() {
+function buildBackPageDataUrl(multiplier) {
     return new Promise((resolve, reject) => {
         const exportEl = document.createElement('canvas');
         const exportCanvas = new fabric.StaticCanvas(exportEl, {
@@ -728,7 +801,7 @@ function buildBackPageDataUrl() {
                 exportCanvas.renderAll();
                 // Same multiplier as captureFrontPage() so the back page
                 // matches the front page's export resolution.
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier: 6 });
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
@@ -740,22 +813,23 @@ function buildBackPageDataUrl() {
 }
 
 // Draws one page onto the current page of a jsPDF doc — the artwork fills
-// the ENTIRE A3 page edge-to-edge (a print is a single flat sheet, so
-// there's no centring/trim-mark maths needed here, unlike the card spread).
-function drawPrintPage(doc, imageDataUrl) {
-    doc.addImage(imageDataUrl, 'PNG', 0, 0, PRINT_PAGE_MM.width, PRINT_PAGE_MM.height);
+// the ENTIRE page edge-to-edge (a print is a single flat sheet, so there's
+// no centring/trim-mark maths needed here, unlike the card spread).
+function drawPrintPage(doc, imageDataUrl, mm) {
+    doc.addImage(imageDataUrl, 'PNG', 0, 0, mm.width, mm.height);
 }
 
-// Builds a single A3-portrait PDF: page 1 = the personalised artwork,
-// page 2 = the fixed logo-only page. Returns the jsPDF doc, ready for
-// either .save() (local download) or .output('datauristring').
-async function buildPrintReadyPDF(imageDataUrls) {
+// Builds a single portrait PDF at the customer's chosen size (A5/A4/A3):
+// page 1 = the personalised artwork, page 2 = the fixed logo-only page.
+// Returns the jsPDF doc, ready for either .save() (local download) or
+// .output('datauristring').
+async function buildPrintReadyPDF(imageDataUrls, mm) {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a3' });
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [mm.width, mm.height] });
 
     imageDataUrls.forEach((imageDataUrl, i) => {
-        if (i > 0) doc.addPage('a3', 'portrait');
-        drawPrintPage(doc, imageDataUrl);
+        if (i > 0) doc.addPage([mm.width, mm.height], 'portrait');
+        drawPrintPage(doc, imageDataUrl, mm);
     });
 
     return doc;
@@ -763,12 +837,14 @@ async function buildPrintReadyPDF(imageDataUrls) {
 
 // Captures the personalised page straight off the live editor canvas, builds
 // the fixed logo-only page, and combines them into a single two-page
-// print-ready PDF. Shared by the real checkout flow and the local
-// test-download button.
+// print-ready PDF, sized for whichever option (A5/A4/A3) is currently
+// selected. Shared by the real checkout flow and the local test-download
+// button.
 async function captureAndBuildPrintPDF() {
-    const frontDataUrl = await captureFrontPage();
-    const backDataUrl = await buildBackPageDataUrl();
-    return buildPrintReadyPDF([frontDataUrl, backDataUrl]);
+    const { mm, multiplier } = PRINT_SIZES[selectedSize];
+    const frontDataUrl = await captureFrontPage(multiplier);
+    const backDataUrl = await buildBackPageDataUrl(multiplier);
+    return buildPrintReadyPDF([frontDataUrl, backDataUrl], mm);
 }
 
 // TESTING ONLY — downloads the print-ready PDF (personalised page on page
@@ -812,7 +888,11 @@ async function uploadAndGoToCheckout() {
 
         buyBtn.innerText = "Connecting checkout...";
 
+        const sizeInfo = activeTemplate.sizes?.[selectedSize];
         const checkoutData = {
+            size: selectedSize,
+            price: sizeInfo?.price ?? "N/A",
+            priceValue: sizeInfo?.priceValue ?? null,
             name: activeTemplate.name ? ($('name-input').value.toUpperCase() || "NAME") : "N/A",
             age: ageText?.text ?? "N/A",
             name2: activeTemplate.name2 ? ($('name2-input').value.toUpperCase() || "NAME") : "N/A",
@@ -839,13 +919,13 @@ async function uploadAndGoToCheckout() {
             window.location.href = session.url;
         } else {
             alert("Checkout Error: " + (session.error || "Please verify environment settings."));
-            buyBtn.innerText = "Buy Now";
+            updateBuyButtonPrice();
             buyBtn.disabled = false;
         }
     } catch (err) {
         console.error(err);
         alert("Checkout processing failed. Check the console for details.");
-        buyBtn.innerText = "Buy Now";
+        updateBuyButtonPrice();
         buyBtn.disabled = false;
     }
 }
