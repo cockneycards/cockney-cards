@@ -239,7 +239,9 @@ const CARD_CATALOGUE = {
 
   "happy-hen-party1": { title: "Hen Party Girls", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439372/happy-hen-party1-preview_we8x5z.png", full: "v1785439589/happy-hen-party1_itgqdm.png" },
   "happy-hen-party2": { title: "Hen Party Sleep Over", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439374/happy-hen-party2-preview_nlr0xa.png", full: "v1785439591/happy-hen-party2_wij3fl.png" },
-  
+
+  "happycouple": { title: "Happy Couple", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785847365/happycouple-preview_owcuip.png", full: "v1785847229/happycouple_d8klwd.png",
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
 
 //SPORTS
