@@ -60,7 +60,25 @@
     /* EDITOR WORKSPACE */
     .editor-workspace { display: flex; justify-content: center; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; overflow-x: auto; min-width: 900px; }
     #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
+    /* Fixed to match EDIT_WIDTH/EDIT_HEIGHT in the script below, rather than
+       auto-sizing to the canvas — Fabric.js replaces the plain <canvas> with
+       its own wrapper/layered canvases at runtime, so relying on inline
+       auto-sizing around it is fragile. */
+    #canvas-stage { position: relative; width: 595.5px; height: 840px; }
     #canvas { border: 1px solid #e2e2e2; }
+    /* On-screen only — a tiled, semi-transparent watermark sat over the live
+       canvas so a screenshot/print-screen of the editor isn't directly
+       print-usable. It's a plain DOM overlay, not a Fabric object, so it's
+       never present in canvas.toJSON() and never appears in the exported
+       PDF (see captureFrontPage()/buildBackPageDataUrl()) — customers still
+       get a completely clean, unwatermarked print. */
+    #watermark-overlay {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none;
+        z-index: 10;
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMjAiIGhlaWdodD0iMzIwIj4KICA8dGV4dCB4PSIxMCIgeT0iMTYwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMTApIiB0cmFuc2Zvcm09InJvdGF0ZSgtMzAgMTYwIDE2MCkiPkNPQ0tORVkgQ0FSRFMgIOKAoiAgUFJFVklFVzwvdGV4dD4KPC9zdmc+");
+        background-repeat: repeat;
+    }
     .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
     .control-group { display: flex; flex-direction: column; gap: 15px; }
@@ -120,7 +138,10 @@
 
 <div class="editor-workspace">
     <div id="canvas-wrapper">
-        <canvas id="canvas"></canvas>
+        <div id="canvas-stage">
+            <canvas id="canvas"></canvas>
+            <div id="watermark-overlay"></div>
+        </div>
     </div>
 
     <div class="controls">
