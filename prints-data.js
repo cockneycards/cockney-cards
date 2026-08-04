@@ -40,7 +40,7 @@
 //                 if omitted.
 //   categories  — required to appear under anything but "All Prints".
 //                 Must match the sidebar's filter keys exactly:
-//                 'all', 'sports', 'music', 'kitchen', 'childrens'.
+//                 'all', 'sports', 'music', 'black & White', 'childrens'.
 
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
 
@@ -48,27 +48,36 @@ const PRINT_CATALOGUE = {
     // These two used to live in shop-prints.html's own PRODUCTS list —
     // moved here so this file is the one place you edit for either the
     // shop grid or the editor.
-    "millwall-dad-son-print": {
-        title: "Millwall Dad & Son A4 Print",
-        price: "£9.99", priceValue: 9.99,
-        categories: ["all", "sports"],
-        full: "v1784120947/millwall-dad-son_e48hgt.png"
-    },
     "bermondsey-legend-print": {
-        title: "Bermondsey Legend Framed Print",
-        price: "£12.99", priceValue: 12.99,
-        // TODO: 'legends' isn't one of the current sidebar categories —
-        // tag this sports/music/kitchen/childrens as appropriate.
+        title: "Bermondsey Legend",
+        price: "£9.99", priceValue: 9.99,
         categories: ["all"],
         full: "v1784120944/you-can-take_cbses4.png"
     },
+    "oasis-dontlookback": {
+        title: "Oasis - Dont Look Back...",
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all"],
+        preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
+        full: "v1785823561/oasis-dontlookback_tjupo3.png"
+    },
+    "mfc-stone": {
+        title: "MFC Stone Island",
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all"],
+        preview: "v1785823903/mfc-stone-preview_bqjjdm.png",
+        full: "v1785823561/mfc-stone_otcbr5.png"
+    },
     "mfc-dad-son": {
         title: "MFC Dad & Son",
-        // TODO: set a real price — placeholder so the shop doesn't break.
-        price: "£0.00", priceValue: 0,
-        categories: ["all", "sports"], // fixed from "all prints" — must match the sidebar's filter keys exactly
+        price: "£9.99", priceValue: 9.99,
+        categories: ["all", "sports"],
         preview: "v1784120947/millwall-dad-son_e48hgt.png",
-        full: "v1785784030/mfc-dad-son_kh02zr.png"
+        full: "v1785784030/mfc-dad-son_kh02zr.png",
+        name: { label: "First Name", left: 200, top: 725, startSize: 48, color: "#FFFFFF" },
+        age: { label: "Age", left: 200, top: 600, startSize: 56, color: "#FFFFFF" },
+        name2: { label: "Second Name", left: 400, top: 725, startSize: 48, color: "#FFFFFF" },
+        age2: { label: "Age", left: 400, top: 600, startSize: 56, color: "#FFFFFF" }
     },
 
     // Example of a print WITH name personalisation, for reference:
