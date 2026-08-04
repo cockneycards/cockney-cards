@@ -689,7 +689,11 @@ function captureFrontPage() {
         exportCanvas.loadFromJSON(canvas.toJSON(), () => {
             try {
                 exportCanvas.renderAll();
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0 });
+                // multiplier: 6 pushes the 595.5x840 editor canvas up to
+                // ~3573x5040px, which lands at ~300 DPI once stretched to
+                // fill the real A3 (297x420mm) print page — without this,
+                // the export was going out at ~51 DPI and printing pixelated.
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier: 6 });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
@@ -722,7 +726,9 @@ function buildBackPageDataUrl() {
 
             try {
                 exportCanvas.renderAll();
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0 });
+                // Same multiplier as captureFrontPage() so the back page
+                // matches the front page's export resolution.
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier: 6 });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
