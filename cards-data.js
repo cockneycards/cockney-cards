@@ -1,53 +1,6 @@
-// cards-data.js
-// Single source of truth for the card catalogue -- shop-cards.html and
-// editor.html both build themselves from this. Add a new card by copying
-// an existing entry below and changing its key + fields:
-//   title, categories, price(optional), preview, full   -- shop + editor basics
-//   name / age (optional)  -- personalisation fields; anything omitted falls
-//                             back to DEFAULT_NAME_SETTINGS / DEFAULT_AGE_SETTINGS in editor.html
-//      name        - { left, top, startSize, minSize, maxSize, color,
-//                      fontFamily, fontWeight, canChangeSize, canChangeColor,
-//                      isCurved, curveRadius, tiltAngle, label, maxChars }
-//      age         - same idea, for a second field (shirt number, age, etc.)
-//    Any field you leave out falls back to the defaults in editor.html
-//    (DEFAULT_NAME_SETTINGS / DEFAULT_AGE_SETTINGS).
-// 4. Only if the card has swappable picture options (like brighton-girl1
-//    having 4 alternate photos), also add:
-//      variants    - [ { id: "unique-id", full: "cloudinary/path.png" }, ... ]
-//    (the main card itself is always the first/default picture -- variants
-//    are just the EXTRA alternate pictures)
-
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
 const DEFAULT_PRICE = "£2.49";
 
-// "Event / Date / Finish Time" text fields for the 5K/10K/26.2 mile
-// achievement cards below. Each of the six cards has its own extraFields
-// array (see each card entry further down) so left/top/color can differ
-// per card. Text is LEFT-ALIGNED: `left` is the left edge the text starts
-// from (not its center), `top` is still its vertical center. Positions
-// below are an initial estimate (stacked below the photo frame) -- open
-// each card in the editor and use findCoords() (see bottom of editor.html)
-// to fine-tune left/top, then edit that card's own extraFields array with
-// the real numbers.
-
-// Categories can now nest: a 3rd array item is an optional list of child
-// [key, label] (or [key, label, children]) entries, exactly like this level.
-// A card belongs to a sub-category by simply including that key in its own
-// `categories` array (in addition to the parent key, e.g. "sports" +
-// "football" + "premiership") -- the shop page filters purely on membership,
-// so no other code needs to change when you add/rename a sub-category here.
-//
-// TWO SAFETY NETS keep the sidebar/gallery tidy automatically:
-//  1. Any category with zero matching cards (and no children that have
-//     cards) simply doesn't render -- so an empty "League 1" just stays
-//     hidden until you tag a card into it, no manual step needed.
-//  2. You can also force-hide a category regardless of whether it has
-//     cards, by adding `false` as a 4th array item, e.g.:
-//       ["league-1", "League 1", null, false]
-//     Flip it back to true (or remove the 4th item) to bring it back.
-//
-// Team lists nested under premiership/championship/wsl below power the
-// team-gallery view (click a league -> pick a team -> that team's cards).
 const CATEGORIES = [
   ["all", "All Cards"],
   ["for-her", "Cards For Her"],
