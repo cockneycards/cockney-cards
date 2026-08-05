@@ -140,6 +140,11 @@ const CARD_CATALOGUE = {
   "birthday-grandad-football-garden": { title: "Grandad's Garden Football", categories: ["all", "for-him", "birthdays", "football", "sports"], preview: "v1785737644/birthday-grandad-football-garden-preview_zln43d.png", full: "v1785737931/birthday-grandad-football-garden_scgjkl.png" },
   "birthday-grandad-catch-girl": { title: "Grandad & Granddaughter Playing Catch", categories: ["all", "for-him", "birthdays"], preview: "v1785737644/birthday-grandad-catch-girl-preview_b08pgo.png", full: "v1785737932/birthday-grandad-catch-girl_lemcjn.png" },
   "birthday-grandad-fishing-boy": { title: "Grandad & Grandson Fishing", categories: ["all", "for-him", "birthdays", "sports"], preview: "v1785737644/birthday-grandad-fishing-boy-preview_ffdtiq.png", full: "v1785737926/birthday-grandad-fishing-boy_rptbik.png" },
+
+  "birthdaycupcakes": { title: "Birthday Cupcakes", categories: ["all", "for-her", "birthdays"], preview: "v1785853707/birthdaycupcakes-preview_whscaq.png", full: "v1785853723/birthdaycupcakes_saqnrh.png" },
+  "greatestmum": { title: "Greatest Mum Birthday", categories: ["all", "for-her", "birthdays"], preview: "v1785853709/greatestmum-preview_ib6iyv.png", full: "v1785853726/greatestmum_vbz75z.png" },
+  "bbqboss": { title: "BBQ Boss Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785853703/bbqboss-preview_l5yosj.png", full: "v1785853780/bbqboss_cg4vx6.png" },
+  "birthdaybutterflies": { title: "Birthday Butterflies", categories: ["all", "for-her", "birthdays"], preview: "v1785853704/birthdaybutterflies-preview_wzoz20.png", full: "v1785908035/birthdaybutterflies_qbwpld.png" },
   
   "birthday-mum-photo1": { title: "Happy Birthday Mum", categories: ["all", "for-her", "birthdays"], preview: "v1785262722/birthday-mum-photo1-preview_d2rnaf.png", full: "v1785263100/birthday-mum-photo1_dx93vs.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
