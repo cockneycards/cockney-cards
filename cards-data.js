@@ -104,8 +104,7 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   "birthday-handsomehubby": { title: "Handsome Hubby Birthday", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1785909377/birthday-handsomehubby-preview_wgjgh1.png", full: "v1785909281/birthday-handsomehubby_nsdusn.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-
-  "birthday-modfather": { title: "Modfather's Birthday", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1785922335/birthday-modfather-preview_rbnbzi.png", full: "v1785909281/birthday-handsomehubby_nsdusn.png", name: { left: 895, top: 275, startSize: 83, minSize: 80, maxSize: 85, fontFamily: "Anton", fontWeight: "normal", color: "#000f42", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 510, tiltAngle: 0, label: "Name", maxChars: 12 } },
+  "birthday-modfather": { title: "Modfather's Birthday", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1785922335/birthday-modfather-preview_rbnbzi.png", full: "v1785922387/birthday-modfather_mbtlq2.png", name: { left: 895, top: 275, startSize: 83, minSize: 80, maxSize: 85, fontFamily: "Anton", fontWeight: "normal", color: "#000f42", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 510, tiltAngle: 0, label: "Name", maxChars: 12 } },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
   
   
