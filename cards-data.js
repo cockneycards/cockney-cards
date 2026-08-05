@@ -140,7 +140,6 @@ const CARD_CATALOGUE = {
   "birthday-grandad-football-garden": { title: "Grandad's Garden Football", categories: ["all", "for-him", "birthdays", "football", "sports"], preview: "v1785737644/birthday-grandad-football-garden-preview_zln43d.png", full: "v1785737931/birthday-grandad-football-garden_scgjkl.png" },
   "birthday-grandad-catch-girl": { title: "Grandad & Granddaughter Playing Catch", categories: ["all", "for-him", "birthdays"], preview: "v1785737644/birthday-grandad-catch-girl-preview_b08pgo.png", full: "v1785737932/birthday-grandad-catch-girl_lemcjn.png" },
   "birthday-grandad-fishing-boy": { title: "Grandad & Grandson Fishing", categories: ["all", "for-him", "birthdays", "sports"], preview: "v1785737644/birthday-grandad-fishing-boy-preview_ffdtiq.png", full: "v1785737926/birthday-grandad-fishing-boy_rptbik.png" },
-
   "birthdaycupcakes": { title: "Birthday Cupcakes", categories: ["all", "for-her", "birthdays"], preview: "v1785853707/birthdaycupcakes-preview_whscaq.png", full: "v1785853723/birthdaycupcakes_saqnrh.png" },
   "greatestmum": { title: "Greatest Mum Birthday", categories: ["all", "for-her", "birthdays"], preview: "v1785853709/greatestmum-preview_ib6iyv.png", full: "v1785853726/greatestmum_vbz75z.png" },
   "bbqboss": { title: "BBQ Boss Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785853703/bbqboss-preview_l5yosj.png", full: "v1785853780/bbqboss_cg4vx6.png" },
@@ -150,6 +149,9 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   "birthday-dad-photo1": { title: "Happy Birthday Dad", categories: ["all", "for-him", "birthdays"], preview: "v1785262721/birthday-dad-photo1-preview_o7vuke.png", full: "v1785263105/birthday-dad-photo1_p0dckg.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "birthday-handsomehubby": { title: "Handsome Hubby Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785909377/birthday-handsomehubby-preview_wgjgh1.png", full: "v1785909281/birthday-handsomehubby_nsdusn.png",
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+
   
   "dj-boy": { title: "DJ Boy Card", categories: ["all", "for-him", "birthdays"], preview: "v1784209498/dj-boy-preview_yqclnk.png", full: "v1784208082/dj-boy_uyrjcy.png" },
   
