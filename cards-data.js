@@ -189,7 +189,7 @@ const CARD_CATALOGUE = {
   "engagement4": { title: "Engagement Ring Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896287/engagement4-preview_vemnd5.png", full: "v1784895840/engagement4_lxnrar.png" },
   "engagement5": { title: "The Propsal", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896293/engagement5-preview_ued4t0.png", full: "v1784895841/engagement5_giwzii.png" },
 
-  "valentines1-photo": { title: "Cupids Couple", categories: ["all", "for-her", "valentines", "photo-upload"], preview: "v1785229353/valentines-photo1-preview_oqllmb.png", full: "v1785228622/valentines-photo1_ctoshq.png",
+  "valentines1-photo": { title: "Cupids Couple", categories: ["all", "for-her", "valentines", "photo-upload"], preview: "v1785910536/valentines-photo1-preview_d9fo0d.png", full: "v1785228622/valentines-photo1_ctoshq.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "wedding1": { title: "Over the Threshold", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding1-preview_hxzzks.png", full: "v1784895840/wedding1_ripd1n.png" },
