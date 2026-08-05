@@ -52,6 +52,7 @@ const CATEGORIES = [
   ["all", "All Cards"],
   ["for-her", "Cards For Her"],
   ["for-him", "Cards For Him"],
+  ["photo-upload", "Photo Upload Cards"],
   ["birthdays", "Birthday Cards"],
   ["sports", "Sports Cards", [
     ["football", "Football", [
@@ -95,7 +96,6 @@ const CATEGORIES = [
   ["children", "Childrens Cards"],
   ["tv-movies", "TV / Movie Cards"],
   ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
-  ["photo-upload", "Photo Upload Cards"],
   ["valentines", "Valentines"],
 ];
 
