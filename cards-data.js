@@ -365,11 +365,18 @@ const CARD_CATALOGUE = {
   
   "birthday-mfc-photo1": { title: "Lions Birthday", categories: ["sports", "football", "championship", "millwall"], preview: "v1785235108/birthday-mfc-photo1-preview_x5yj5l.png", full: "v1785235053/birthday-mfc-photo1_zv3ntf.png", name: { left: 892, top: 750, startSize: 65, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 12 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-
-  "grandad-racing": { title: "Grandad Racing Card", categories: ["sports", "for-him", "horseracing"], preview: "v1784384853/grandad-racing-preview_tx5k2p.png", full: "v1784378939/grandad-racing_p7e3ov.png" },
   
   "whu-shirt": { title: "West Ham Shirt Card", categories: ["sports", "football", "championship", "west-ham"], price: "£3.49", preview: "v1784384829/whu-shirt-preview_azohtz.png", full: "v1784378957/whu-shirt_zj7c65.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" } },
+  
+  "discodarts": { title: "Disco Darts", categories: ["sports", "for-him", "darts"], preview: "v1785853657/discodarts-preview_s4cnod.png", full: "v1785853614/discodarts_jkizjy.png" },
+  "anyoneforcricket": { title: "Anyone for Cricket", categories: ["sports", "for-him", "cricket"], preview: "v1785853658/anyoneforcricket-preview_z4vyxt.png", full: "v1785853625/anyoneforcricket_r1cv84.png" },
+  "golfmasters": { title: "Golf Masters", categories: ["sports", "for-him", "golf"], preview: "v1785908720/golfmasters-preview_bwuguf.png", full: "v1785853620/golfmasters_cak6d2.png" },
+  "dartschampion": { title: "Carts Champion", categories: ["sports", "for-him", "darts"], preview: "v1785853655/dartschampion-preview_mzcodb.png", full: "v1785853621/dartschampion_zz6lup.png" },
+  "vintagecricket": { title: "Vintage Cricket", categories: ["sports", "for-him", "cricket"], preview: "v1785853651/vintagecricket-preview_bthhsz.png", full: "v1785853615/vintagecricket_blr9ee.png" },
+  "dartsmaster": { title: "Darts Master", categories: ["sports", "for-him", "darts"], preview: "v1785853649/dartsmaster-preview_tvgihw.png", full: "v1785853616/dartsmaster_dkntgm.png" },
+  "golfpro": { title: "Golf Pro", categories: ["sports", "for-him", "golf"], preview: "v1785853653/golfpro-preview_hj4iri.png", full: "v1785853617/golfpro_utn9iz.png" },
 
+  
   "5kboy-photo": { title: "5K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738247/5kboy-photo-preview_c2npct.png", full: "v1785738153/5kboy-photo_c116gx.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
