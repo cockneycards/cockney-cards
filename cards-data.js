@@ -95,7 +95,7 @@ const CATEGORIES = [
   ["children", "Childrens Cards"],
   ["tv-movies", "TV / Movie Cards"],
   ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
-  ["seasonal", "Seasonal Cards"],
+  ["photo-upload", "Photo Upload Cards"],
   ["valentines", "Valentines"],
 ];
 
@@ -145,11 +145,11 @@ const CARD_CATALOGUE = {
   "bbqboss": { title: "BBQ Boss Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785853703/bbqboss-preview_l5yosj.png", full: "v1785853780/bbqboss_cg4vx6.png" },
   "birthdaybutterflies": { title: "Birthday Butterflies", categories: ["all", "for-her", "birthdays"], preview: "v1785853704/birthdaybutterflies-preview_wzoz20.png", full: "v1785908035/birthdaybutterflies_qbwpld.png" },
   
-  "birthday-mum-photo1": { title: "Happy Birthday Mum", categories: ["all", "for-her", "birthdays"], preview: "v1785262722/birthday-mum-photo1-preview_d2rnaf.png", full: "v1785263100/birthday-mum-photo1_dx93vs.png",
+  "birthday-mum-photo1": { title: "Happy Birthday Mum", categories: ["all", "for-her", "birthdays", "photo-upload"], preview: "v1785262722/birthday-mum-photo1-preview_d2rnaf.png", full: "v1785263100/birthday-mum-photo1_dx93vs.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-  "birthday-dad-photo1": { title: "Happy Birthday Dad", categories: ["all", "for-him", "birthdays"], preview: "v1785262721/birthday-dad-photo1-preview_o7vuke.png", full: "v1785263105/birthday-dad-photo1_p0dckg.png",
+  "birthday-dad-photo1": { title: "Happy Birthday Dad", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1785262721/birthday-dad-photo1-preview_o7vuke.png", full: "v1785263105/birthday-dad-photo1_p0dckg.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-  "birthday-handsomehubby": { title: "Handsome Hubby Birthday", categories: ["all", "for-him", "birthdays"], preview: "v1785909377/birthday-handsomehubby-preview_wgjgh1.png", full: "v1785909281/birthday-handsomehubby_nsdusn.png",
+  "birthday-handsomehubby": { title: "Handsome Hubby Birthday", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1785909377/birthday-handsomehubby-preview_wgjgh1.png", full: "v1785909281/birthday-handsomehubby_nsdusn.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   
@@ -191,7 +191,7 @@ const CARD_CATALOGUE = {
   "newhome9": { title: "New Home Love", categories: ["all", "home"], preview: "v1785221487/newhome9-preview_h8qnga.png", full: "v1785221604/newhome9_rsqhpr.png" },
   "newhome10": { title: "New Home, New Pad", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
   
-  "newhome1-photo": { title: "New Home Card", categories: ["all", "home"], preview: "v1785262722/newhome12-photo-preview_vtnuyn.png", full: "v1785263102/newhome12-photo_apyp0z.png",
+  "newhome1-photo": { title: "New Home Card", categories: ["all", "home", "photo-upload"], preview: "v1785262722/newhome12-photo-preview_vtnuyn.png", full: "v1785263102/newhome12-photo_apyp0z.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "tvmovies-bttf": { title: "Back to the Future TV Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209436/tvmovies-bttf_preview_kdtytk.png", full: "v1784058158/tvmovies-bttf.png" },
@@ -216,8 +216,8 @@ const CARD_CATALOGUE = {
   
   "fathers-day-peaky": { title: "Fathers Day Peaky Dad", categories: ["all", "for-him", "mothersday-fathersday"], preview: "v1784815430/fathers-day-peaky-preview_aytfhw.png", full: "v1784815611/fathers-day-peaky_ha6rdy.png" },
   "fathers-day-pub": { title: "Fathers Day Pub", categories: ["all", "for-him", "mothersday-fathersday"], preview: "v1784815435/fathers-day-pub-preview_bfkz7s.png", full: "v1784815614/fathers-day-pub_j9km04.png" },
-  "fathers-day-sopranos": { title: "Fathers Day Sopranos Dad", categories: ["all", "for-him", "mothersday-fathersday", "seasonal"], preview: "v1784815426/fathers-day-sopranos-preview_hikmeb.png", full: "v1784815629/fathers-day-sopranos_b83i2i.png" },
-  "fathers-day-godfather": { title: "Fathers Day Godfather Dad", categories: ["all", "for-him", "mothersday-fathersday", "seasonal"], preview: "v1784815429/fathers-day-godfather-preview_lao1vs.png", full: "v1784815632/fathers-day-godfather_gpwwf6.png" },
+  "fathers-day-sopranos": { title: "Fathers Day Sopranos Dad", categories: ["all", "for-him", "mothersday-fathersday"], preview: "v1784815426/fathers-day-sopranos-preview_hikmeb.png", full: "v1784815629/fathers-day-sopranos_b83i2i.png" },
+  "fathers-day-godfather": { title: "Fathers Day Godfather Dad", categories: ["all", "for-him", "mothersday-fathersday"], preview: "v1784815429/fathers-day-godfather-preview_lao1vs.png", full: "v1784815632/fathers-day-godfather_gpwwf6.png" },
   
   "teaching-assistant1": { title: "Best Teaching Assistant", categories: ["all", "for-her", "school-cards", "thank-you"], preview: "v1784815440/teaching-assistant1-preview_ri6gvt.png", full: "v1784815619/teaching-assistant1_s8xbel.png" },
   "teaching-assistant2": { title: "Teaching Assistant, Thank you", categories: ["all", "for-her", "school-cards", "thank-you"], preview: "v1784815438/teaching-assistant2-preview_ro8hej.png", full: "v1784815617/teaching-assistant2_y9dteu.png" },
@@ -226,9 +226,9 @@ const CARD_CATALOGUE = {
   "superteacher-girl": { title: "Super Teacher", categories: ["all", "for-her", "school-cards", "thank-you"], preview: "v1784209483/superteacher-girl-preview_cbxnp1.png", full: "v1784208066/superteacher-girl_iyeekh.png" },
   "thankyou-teacher": { title: "Thank You, Teacher Card", categories: ["all", "school-cards", "thank-you"], price: "£3.49", preview: "v1784209503/thankyou-teacher-preview_j609g7.png", full: "v1784058119/thankyou-teacher_vnh8yv.png", name: { left: 897, top: 728, startSize: 52, minSize: 35, maxSize: 60, fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FD7D96", canChangeSize: true, canChangeColor: true, canMove: false, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 14 } },
   
-  "mothers-day1": { title: "Mothers Day", categories: ["all", "for-her", "seasonal", "mothersday-fathersday"], preview: "v1784815425/mothers-day1-preview_kaeipg.png", full: "v1784815626/mothers-day1_klzjdi.png" },
-  "mothers-day2": { title: "Mothers Day", categories: ["all", "for-her", "seasonal", "mothersday-fathersday"], preview: "v1784815423/mothers-day2-preview_hvfvat.png", full: "v1784815624/mothers-day2_bsei4w.png" },
-  "mothers-day3": { title: "Mothers Day", categories: ["all", "for-her", "seasonal", "mothersday-fathersday"], preview: "v1784879975/mothers-day3-preview_f6pukx.png", full: "v1784879879/mothers-day3_i3ri9c.png" },
+  "mothers-day1": { title: "Mothers Day", categories: ["all", "for-her", "mothersday-fathersday"], preview: "v1784815425/mothers-day1-preview_kaeipg.png", full: "v1784815626/mothers-day1_klzjdi.png" },
+  "mothers-day2": { title: "Mothers Day", categories: ["all", "for-her", "mothersday-fathersday"], preview: "v1784815423/mothers-day2-preview_hvfvat.png", full: "v1784815624/mothers-day2_bsei4w.png" },
+  "mothers-day3": { title: "Mothers Day", categories: ["all", "for-her", "mothersday-fathersday"], preview: "v1784879975/mothers-day3-preview_f6pukx.png", full: "v1784879879/mothers-day3_i3ri9c.png" },
 
   "engagement1": { title: "Engagement Hearts", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896295/engagement1-preview_soas0z.png", full: "v1784895840/engagement1_pyzdmf.png" },
   "engagement2": { title: "Engagement Bubbles", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896295/engagement2-preview_n4fr1q.png", full: "v1784895840/engagement2_urrxgf.png" },
@@ -236,7 +236,7 @@ const CARD_CATALOGUE = {
   "engagement4": { title: "Engagement Ring Card", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896287/engagement4-preview_vemnd5.png", full: "v1784895840/engagement4_lxnrar.png" },
   "engagement5": { title: "The Propsal", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896293/engagement5-preview_ued4t0.png", full: "v1784895841/engagement5_giwzii.png" },
 
-  "valentines1-photo": { title: "Cupids Couple", categories: ["all", "for-her", "valentines"], preview: "v1785229353/valentines-photo1-preview_oqllmb.png", full: "v1785228622/valentines-photo1_ctoshq.png",
+  "valentines1-photo": { title: "Cupids Couple", categories: ["all", "for-her", "valentines", "photo-upload"], preview: "v1785229353/valentines-photo1-preview_oqllmb.png", full: "v1785228622/valentines-photo1_ctoshq.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "wedding1": { title: "Over the Threshold", categories: ["all", "for-her", "weddings-engagements"], preview: "v1784896291/wedding1-preview_hxzzks.png", full: "v1784895840/wedding1_ripd1n.png" },
@@ -247,7 +247,7 @@ const CARD_CATALOGUE = {
   "happy-hen-party1": { title: "Hen Party Girls", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439372/happy-hen-party1-preview_we8x5z.png", full: "v1785439589/happy-hen-party1_itgqdm.png" },
   "happy-hen-party2": { title: "Hen Party Sleep Over", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439374/happy-hen-party2-preview_nlr0xa.png", full: "v1785439591/happy-hen-party2_wij3fl.png" },
 
-  "happycouple": { title: "Happy Couple", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785847365/happycouple-preview_owcuip.png", full: "v1785847229/happycouple_d8klwd.png",
+  "happycouple": { title: "Happy Couple", categories: ["all", "for-her", "weddings-engagements", "photo-upload"], preview: "v1785847365/happycouple-preview_owcuip.png", full: "v1785847229/happycouple_d8klwd.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
 
@@ -348,7 +348,7 @@ const CARD_CATALOGUE = {
 
   "topboy-mfc": { title: "Topboy Millwall FC Card", categories: ["for-him", "sports", "football", "championship", "millwall"], preview: "v1784209485/topboy-mfc-preview_oe0tyj.png", full: "v1784208079/topboy-mfc_flvp3e.png" },
 
-  "golfer-photo1": { title: "Golfer Fore!!", categories: ["sports", "for-him", "golf"], preview: "v1785262722/golfer-photo1-preview_plkxdb.png", full: "v1785338940/golfer-photo1_bibmdj.png", name: { left: 894, top: 230, startSize: 55, minSize: 50, maxSize: 58, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
+  "golfer-photo1": { title: "Golfer Fore!!", categories: ["sports", "for-him", "golf", "photo-upload"], preview: "v1785262722/golfer-photo1-preview_plkxdb.png", full: "v1785338940/golfer-photo1_bibmdj.png", name: { left: 894, top: 230, startSize: 55, minSize: 50, maxSize: 58, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
   "liv-ladies-celebrating": { title: "Liverpool Ladies Celebrating Card", categories: ["sports", "football", "wsl", "liverpool"], preview: "v1784384933/liv-ladies-celebrating-preview_clqk5x.png", full: "v1784378940/liv-ladies-celebrating_ew6s9c.png" },
@@ -356,7 +356,7 @@ const CARD_CATALOGUE = {
   "liv-shirt": { title: "Liverpool Shirt Card", categories: ["sports", "football", "premiership", "liverpool"], price: "£3.49", preview: "v1784384862/liv-shirt-preview_v9mbzv.png", full: "v1784378940/liv-shirt_kbtxdd.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" } },
   
 
-  "mfc-christmas": { title: "Millwall Christmas Card", categories: ["sports", "seasonal", "football", "championship", "millwall"], preview: "v1784384874/mfc-christmas-preview_ellmj6.png", full: "v1784384302/mfc-christmas_xam3fy.png" },
+  "mfc-christmas": { title: "Millwall Christmas Card", categories: ["sports", "football", "championship", "millwall"], preview: "v1784384874/mfc-christmas-preview_ellmj6.png", full: "v1784384302/mfc-christmas_xam3fy.png" },
   
   "mfc-shirt1": { title: "Millwall Shirt Card", categories: ["sports", "football", "championship", "millwall"], price: "£3.49", preview: "v1784384805/mfc-shirt-preview_odzlng.png", full: "v1784889648/mfc-shirt_q9iuol.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" } },
   "mfc-shirt2": { title: "Millwall Shirt Card", categories: ["sports", "football", "championship", "millwall"], price: "£3.49", preview: "v1784881188/mfc-shirt2-preview_ztebkg.png", full: "v1784890303/mfc-shirt2_v0r7tb.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" } },
@@ -365,7 +365,7 @@ const CARD_CATALOGUE = {
 
   "nolu-lion1": { title: "No One Likes Us Lion Card", categories: ["sports", "football", "championship", "millwall"], preview: "v1784384877/nolu-lion1-preview_bggbwy.png", full: "v1784382014/nolu-lion1_fzvvj0.png", name: { left: 890, top: 246, startSize: 75, minSize: 70, maxSize: 78, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 610, tiltAngle: -3, label: "Name", maxChars: 12 } },
   
-  "birthday-mfc-photo1": { title: "Lions Birthday", categories: ["sports", "football", "championship", "millwall"], preview: "v1785235108/birthday-mfc-photo1-preview_x5yj5l.png", full: "v1785235053/birthday-mfc-photo1_zv3ntf.png", name: { left: 892, top: 750, startSize: 65, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 12 },
+  "birthday-mfc-photo1": { title: "Lions Birthday", categories: ["sports", "football", "championship", "millwall", "photo-upload"], preview: "v1785235108/birthday-mfc-photo1-preview_x5yj5l.png", full: "v1785235053/birthday-mfc-photo1_zv3ntf.png", name: { left: 892, top: 750, startSize: 65, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 12 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
   "whu-shirt": { title: "West Ham Shirt Card", categories: ["sports", "football", "championship", "west-ham"], price: "£3.49", preview: "v1784384829/whu-shirt-preview_azohtz.png", full: "v1784378957/whu-shirt_zj7c65.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" } },
@@ -379,42 +379,42 @@ const CARD_CATALOGUE = {
   "golfpro": { title: "Golf Pro", categories: ["sports", "for-him", "golf"], preview: "v1785853653/golfpro-preview_hj4iri.png", full: "v1785853617/golfpro_utn9iz.png" },
 
   
-  "5kboy-photo": { title: "5K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738247/5kboy-photo-preview_c2npct.png", full: "v1785738153/5kboy-photo_c116gx.png",
+  "5kboy-photo": { title: "5K Achievement Boy", categories: ["sports", "for-him", "running", "photo-upload"], preview: "v1785738247/5kboy-photo-preview_c2npct.png", full: "v1785738153/5kboy-photo_c116gx.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 20, color: "#D9971D", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 20, color: "#D9971D", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 20, color: "#D9971D", maxChars: 12 }
     ] },
-  "10kboy-photo": { title: "10K Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738254/10kboy-photo-preview_rnq9xm.png", full: "v1785738143/10kboy-photo_qq6izl.png",
+  "10kboy-photo": { title: "10K Achievement Boy", categories: ["sports", "for-him", "running", "photo-upload"], preview: "v1785738254/10kboy-photo-preview_rnq9xm.png", full: "v1785738143/10kboy-photo_qq6izl.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 20, color: "#F7CD4E", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 20, color: "#F7CD4E", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 20, color: "#F7CD4E", maxChars: 12 }
     ] },
-  "26mboy-photo": { title: "26M Achievement Boy", categories: ["sports", "for-him", "running"], preview: "v1785738258/26mboy-photo-preview_fml8xv.png", full: "v1785738149/26mboy-photo_qxv3ns.png",
+  "26mboy-photo": { title: "26M Achievement Boy", categories: ["sports", "for-him", "running", "photo-upload"], preview: "v1785738258/26mboy-photo-preview_fml8xv.png", full: "v1785738149/26mboy-photo_qxv3ns.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 20, color: "#F7CD4E", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 20, color: "#F7CD4E", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 20, color: "#F7CD4E", maxChars: 12 }
     ] },
-  "5kgirl-photo": { title: "5K Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738249/5kgirl-photo-preview_loxgls.png", full: "v1785738147/5kgirl-photo_hd2sv5.png",
+  "5kgirl-photo": { title: "5K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785738249/5kgirl-photo-preview_loxgls.png", full: "v1785738147/5kgirl-photo_hd2sv5.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 731, fontSize: 20, color: "#8B1E5C", maxChars: 12 }
     ] },
-  "10kgirl-photo": { title: "10K Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738256/10kgirl-photo-preview_zyzc4l.png", full: "v1785738145/10kgirl-photo_qdsoyb.png",
+  "10kgirl-photo": { title: "10K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785738256/10kgirl-photo-preview_zyzc4l.png", full: "v1785738145/10kgirl-photo_qdsoyb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 731, fontSize: 20, color: "#8B1E5C", maxChars: 12 }
     ] },
-  "26mgirl-photo": { title: "26M Achievement Girl", categories: ["sports", "for-her", "running"], preview: "v1785738251/26mgirl-photo-preview_n1juyo.png", full: "v1785738142/26mgirl-photo_apr3zk.png",
+  "26mgirl-photo": { title: "26M Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785738251/26mgirl-photo-preview_n1juyo.png", full: "v1785738142/26mgirl-photo_apr3zk.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 870, top: 599, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
