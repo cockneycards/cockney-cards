@@ -352,14 +352,14 @@ const CARD_CATALOGUE = {
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 19, color: "#F7CD4E", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 732, fontSize: 19, color: "#F7CD4E", maxChars: 12 }
     ] },
-  "5kgirl-photo": { title: "5K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785738249/5kgirl-photo-preview_loxgls.png", full: "v1785738147/5kgirl-photo_hd2sv5.png",
+  "5kgirl-photo": { title: "5K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785997188/5kgirl-photo-preview_loxgls.png", full: "v1785738147/5kgirl-photo_hd2sv5.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 19, color: "#8B1E5C", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 19, color: "#8B1E5C", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 731, fontSize: 19, color: "#8B1E5C", maxChars: 12 }
     ] },
-  "10kgirl-photo": { title: "10K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785738256/10kgirl-photo-preview_zyzc4l.png", full: "v1785738145/10kgirl-photo_qdsoyb.png",
+  "10kgirl-photo": { title: "10K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785997200/10kgirl-photo-preview_zyzc4l.png", full: "v1785738145/10kgirl-photo_qdsoyb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 19, color: "#8B1E5C", maxChars: 20 },
