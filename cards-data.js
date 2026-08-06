@@ -79,7 +79,6 @@ const CARD_CATALOGUE = {
   "birthday-beachhut": { title: "Beach Hut Birthday", categories: ["all", "for-him", "for-her", "birthdays"], preview: "v1785439367/birthday-beachhut-preview_eb8bvv.png", full: "v1785439573/birthday-beachhut_ekivrq.png" },
   "birthday-coffee-cake": { title: "Coffee & Cake", categories: ["all", "for-her", "birthdays"], preview: "v1785439368/birthday-coffee-cake-preview_nx9eid.png", full: "v1785439577/birthday-coffee-cake_one8az.png" },
   "birthday-hydrangea": { title: "Birthday Hydrangea", categories: ["all", "for-her", "birthdays"], preview: "v1785492890/Birthday-hydrangea-preview_xnxvxe.png", full: "v1785492675/Birthday-hydrangea_x8zgzh.png" },
-  
   "birthday-flowers": { title: "Birthday Flowers", categories: ["all", "for-her", "birthdays"], preview: "v1785737835/birthday-flowers-preview_kw7ujl.png", full: "v1785737924/birthday-flowers_qiqtr0.png" },
   "birthday-vintagegolf": { title: "Vintage Golfer", categories: ["all", "for-him", "birthdays", "golf", "sports"], preview: "v1785737646/birthday-vintagegolf-preview_nsn3ti.png", full: "v1785737870/birthday-vintagegolf_jsk3lp.png" },
   "birthday-vintagefootball": { title: "Vintage Footballer", categories: ["all", "for-him", "birthdays", "football", "sports"], preview: "v1785737645/birthday-vintagefootball-preview_xz7tip.png", full: "v1785737926/birthday-vintagefootball_oqp3il.png" },
@@ -303,7 +302,7 @@ const CARD_CATALOGUE = {
   "golfer-photo1": { title: "Golfer Fore!!", categories: ["sports", "for-him", "golf", "photo-upload"], preview: "v1785262722/golfer-photo1-preview_plkxdb.png", full: "v1785338940/golfer-photo1_bibmdj.png", name: { left: 894, top: 230, startSize: 55, minSize: 50, maxSize: 58, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
-  "golfer": { title: "Golfer", categories: ["all", "sports", "for-him", "golf", "birthdays"], preview: "v1785996481/golfer-preview_nmwp8r.png", full: "v1785996323/Golfer_iv9zvu.png" },
+  "golfer": { title: "Golfer", categories: ["all", "sports", "for-him", "golf", "birthdays"], preview: "v1785996481/golfer-preview_nmwp8r.png", full: "v1785996323/Golfer_iv9zvu.png", name: { left: 894, top: 230, startSize: 55, minSize: 50, maxSize: 58, fontFamily: "Anton", fontWeight: "normal", color: "#0f214b", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
   
   "liv-ladies-celebrating": { title: "Liverpool Ladies Celebrating Card", categories: ["sports", "football", "wsl", "liverpool"], preview: "v1784384933/liv-ladies-celebrating-preview_clqk5x.png", full: "v1784378940/liv-ladies-celebrating_ew6s9c.png" },
   
