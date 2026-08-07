@@ -327,51 +327,54 @@ const CARD_CATALOGUE = {
   "anyoneforcricket": { title: "Anyone for Cricket", categories: ["sports", "for-him", "cricket"], preview: "v1785853658/anyoneforcricket-preview_z4vyxt.png", full: "v1785853625/anyoneforcricket_r1cv84.png", name: { left: 900, top: 308, startSize: 40, minSize: 37, maxSize: 40, fontFamily: "Anton", fontWeight: "normal", color: "#01316e", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 520, tiltAngle: 0, label: "Name", maxChars: 12 } },
   "golfmasters": { title: "Golf Masters", categories: ["sports", "for-him", "golf"], preview: "v1785908720/golfmasters-preview_bwuguf.png", full: "v1785853620/golfmasters_cak6d2.png", name: { left: 895, top: 252, startSize: 75, minSize: 70, maxSize: 75, fontFamily: "Anton", fontWeight: "normal", color: "#f5b33a", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 470, tiltAngle: 0, label: "Name", maxChars: 12 } },
   "dartschampion": { title: "Darts Champion", categories: ["sports", "for-him", "darts"], preview: "v1785853655/dartschampion-preview_mzcodb.png", full: "v1785853621/dartschampion_zz6lup.png", name: { left: 894, top: 287, startSize: 83, minSize: 80, maxSize: 85, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 470, tiltAngle: 0, label: "Name", maxChars: 10 } },
-  "dartsmaster": { title: "Darts Master", categories: ["sports", "for-him", "darts"], preview: "v1785853649/dartsmaster-preview_tvgihw.png", full: "v1785933263/dartsmaster_dkntgm.png", name: { left: 892, top: 285, startSize: 38, minSize: 36, maxSize: 40, fontFamily: "Anton", fontWeight: "normal", color: "#015cab", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 520, tiltAngle: 0, label: "Name", maxChars: 12 } },
+  "dartsmaster": { title: "Bullseye", categories: ["sports", "for-him", "darts"], preview: "v1785853649/dartsmaster-preview_tvgihw.png", full: "v1785933263/dartsmaster_dkntgm.png", name: { left: 892, top: 285, startSize: 38, minSize: 36, maxSize: 40, fontFamily: "Anton", fontWeight: "normal", color: "#015cab", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 520, tiltAngle: 0, label: "Name", maxChars: 12 } },
   "golfpro": { title: "Golf Pro", categories: ["sports", "for-him", "golf"], preview: "v1785853653/golfpro-preview_hj4iri.png", full: "v1785853617/golfpro_utn9iz.png", name: { left: 897, top: 286, startSize: 40, minSize: 35, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#204420", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 11 } },
   "vintagecricket": { title: "Vintage Cricket", categories: ["sports", "for-him", "cricket"], preview: "v1785853651/vintagecricket-preview_bthhsz.png", full: "v1785853615/vintagecricket_blr9ee.png" },
+  "birthday-mfc-photo1": { title: "Darts Master", categories: ["sports", "darts", "for-him", "photo-upload"], preview: "v1786080613/dartsmasterphoto-preview_gm7qdc.png", full: "v1786080571/dartsmasterphoto_suqw0y.png", name: { left: 892, top: 750, startSize: 65, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 12 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  
   
   "5kboy-photo": { title: "5K Achievement Boy", categories: ["sports", "for-him", "running", "photo-upload"], preview: "v1785738247/5kboy-photo-preview_c2npct.png", full: "v1785738153/5kboy-photo_c116gx.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 866, top: 627, fontSize: 19, color: "#D9971D", maxChars: 20 },
-      { key: "date", label: "Date", left: 861, top: 678, fontSize: 19, color: "#D9971D", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 19, color: "#D9971D", maxChars: 12 }
+      { key: "event", label: "Event", left: 866, top: 627, fontSize: 17, color: "#D9971D", maxChars: 20 },
+      { key: "date", label: "Date", left: 861, top: 678, fontSize: 17, color: "#D9971D", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 17, color: "#D9971D", maxChars: 12 }
     ] },
   "10kboy-photo": { title: "10K Achievement Boy", categories: ["sports", "for-him", "running", "photo-upload"], preview: "v1785738254/10kboy-photo-preview_rnq9xm.png", full: "v1785738143/10kboy-photo_qq6izl.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 866, top: 627, fontSize: 19, color: "#F7CD4E", maxChars: 20 },
-      { key: "date", label: "Date", left: 861, top: 678, fontSize: 19, color: "#F7CD4E", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 19, color: "#F7CD4E", maxChars: 12 }
+      { key: "event", label: "Event", left: 866, top: 627, fontSize: 17, color: "#F7CD4E", maxChars: 20 },
+      { key: "date", label: "Date", left: 861, top: 678, fontSize: 17, color: "#F7CD4E", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 17, color: "#F7CD4E", maxChars: 12 }
     ] },
   "26mboy-photo": { title: "26M Achievement Boy", categories: ["sports", "for-him", "running", "photo-upload"], preview: "v1785738258/26mboy-photo-preview_fml8xv.png", full: "v1785738149/26mboy-photo_qxv3ns.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 866, top: 627, fontSize: 19, color: "#F7CD4E", maxChars: 20 },
-      { key: "date", label: "Date", left: 861, top: 678, fontSize: 19, color: "#F7CD4E", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 900, top: 732, fontSize: 19, color: "#F7CD4E", maxChars: 12 }
+      { key: "event", label: "Event", left: 866, top: 627, fontSize: 17, color: "#F7CD4E", maxChars: 20 },
+      { key: "date", label: "Date", left: 861, top: 678, fontSize: 17, color: "#F7CD4E", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 900, top: 732, fontSize: 17, color: "#F7CD4E", maxChars: 12 }
     ] },
   "5kgirl-photo": { title: "5K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785997188/5kgirl-photo-preview_loxgls.png", full: "v1785997348/5kgirl-photo_hd2sv5.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 866, top: 627, fontSize: 19, color: "#8B1E5C", maxChars: 20 },
-      { key: "date", label: "Date", left: 861, top: 678, fontSize: 19, color: "#8B1E5C", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 900, top: 731, fontSize: 19, color: "#8B1E5C", maxChars: 12 }
+      { key: "event", label: "Event", left: 870, top: 599, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
+      { key: "date", label: "Date", left: 860, top: 644, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 17, color: "#8B1E5C", maxChars: 12 }
     ] },
   "10kgirl-photo": { title: "10K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785997200/10kgirl-photo-preview_zyzc4l.png", full: "v1785997332/10kgirl-photo_qdsoyb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 866, top: 627, fontSize: 19, color: "#8B1E5C", maxChars: 20 },
-      { key: "date", label: "Date", left: 861, top: 678, fontSize: 19, color: "#8B1E5C", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 900, top: 731, fontSize: 19, color: "#8B1E5C", maxChars: 12 }
+      { key: "event", label: "Event", left: 870, top: 599, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
+      { key: "date", label: "Date", left: 860, top: 644, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 17, color: "#8B1E5C", maxChars: 12 }
     ] },
   "26mgirl-photo": { title: "26M Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785738251/26mgirl-photo-preview_n1juyo.png", full: "v1785738142/26mgirl-photo_apr3zk.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 870, top: 599, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
-      { key: "date", label: "Date", left: 860, top: 644, fontSize: 20, color: "#8B1E5C", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 20, color: "#8B1E5C", maxChars: 12 }
+      { key: "event", label: "Event", left: 870, top: 599, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
+      { key: "date", label: "Date", left: 860, top: 644, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 17, color: "#8B1E5C", maxChars: 12 }
     ] },
 
   
