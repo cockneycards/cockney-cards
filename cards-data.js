@@ -344,37 +344,37 @@ const CARD_CATALOGUE = {
   "10kboy-photo": { title: "10K Achievement Boy", categories: ["sports", "for-him", "running", "photo-upload"], preview: "v1785738254/10kboy-photo-preview_rnq9xm.png", full: "v1785738143/10kboy-photo_qq6izl.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 866, top: 627, fontSize: 17, color: "#F7CD4E", maxChars: 20 },
-      { key: "date", label: "Date", left: 861, top: 678, fontSize: 17, color: "#F7CD4E", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 17, color: "#F7CD4E", maxChars: 12 }
+      { key: "event", label: "Event", left: 866, top: 627, fontSize: 18, color: "#F7CD4E", maxChars: 20 },
+      { key: "date", label: "Date", left: 861, top: 678, fontSize: 18, color: "#F7CD4E", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 18, color: "#F7CD4E", maxChars: 12 }
     ] },
   "26mboy-photo": { title: "26M Achievement Boy", categories: ["sports", "for-him", "running", "photo-upload"], preview: "v1785738258/26mboy-photo-preview_fml8xv.png", full: "v1785738149/26mboy-photo_qxv3ns.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 866, top: 627, fontSize: 17, color: "#F7CD4E", maxChars: 20 },
-      { key: "date", label: "Date", left: 861, top: 678, fontSize: 17, color: "#F7CD4E", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 900, top: 732, fontSize: 17, color: "#F7CD4E", maxChars: 12 }
+      { key: "event", label: "Event", left: 866, top: 627, fontSize: 18, color: "#F7CD4E", maxChars: 20 },
+      { key: "date", label: "Date", left: 861, top: 678, fontSize: 18, color: "#F7CD4E", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 900, top: 732, fontSize: 18, color: "#F7CD4E", maxChars: 12 }
     ] },
   "5kgirl-photo": { title: "5K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785997188/5kgirl-photo-preview_loxgls.png", full: "v1785997348/5kgirl-photo_hd2sv5.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 870, top: 599, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
-      { key: "date", label: "Date", left: 860, top: 644, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 17, color: "#8B1E5C", maxChars: 12 }
+      { key: "event", label: "Event", left: 870, top: 599, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
+      { key: "date", label: "Date", left: 860, top: 644, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 18, color: "#8B1E5C", maxChars: 12 }
     ] },
   "10kgirl-photo": { title: "10K Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785997200/10kgirl-photo-preview_zyzc4l.png", full: "v1785997332/10kgirl-photo_qdsoyb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 870, top: 599, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
-      { key: "date", label: "Date", left: 860, top: 644, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 17, color: "#8B1E5C", maxChars: 12 }
+      { key: "event", label: "Event", left: 870, top: 599, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
+      { key: "date", label: "Date", left: 860, top: 644, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 18, color: "#8B1E5C", maxChars: 12 }
     ] },
   "26mgirl-photo": { title: "26M Achievement Girl", categories: ["sports", "for-her", "running", "photo-upload"], preview: "v1785738251/26mgirl-photo-preview_n1juyo.png", full: "v1785738142/26mgirl-photo_apr3zk.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 870, top: 599, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
-      { key: "date", label: "Date", left: 860, top: 644, fontSize: 17, color: "#8B1E5C", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 17, color: "#8B1E5C", maxChars: 12 }
+      { key: "event", label: "Event", left: 870, top: 599, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
+      { key: "date", label: "Date", left: 860, top: 644, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 912, top: 690, fontSize: 18, color: "#8B1E5C", maxChars: 12 }
     ] },
 
   
