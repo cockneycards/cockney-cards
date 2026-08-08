@@ -214,7 +214,7 @@ const CARD_CATALOGUE = {
   "christmas-nicest-children": { title: "Santa's Nicest Children", categories: ["christmas"], preview: "v1786197700/christmas-nicest-children-preview_ompran.png", full: "v1786197767/christmas-nicest-children_vglwrb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
  "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", categories: ["christmas"], preview: "v1786197700/christmas-kids-video-preview_aujgak.png", full: "v1786197768/christmas-kids-video_sm9nhs.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } }, //https://res.cloudinary.com/uzf4eeky/image/upload/v1786200419/santasmessgageqr_jq0qo3.png
 
 //SPORTS
 
