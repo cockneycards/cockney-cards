@@ -277,6 +277,19 @@ const DEFAULT_PHOTO_SETTINGS = {
     left: 892.5, top: 400, width: 520, height: 520
 };
 
+// ---- Static QR-code overlay defaults (reused / overridden per template) ----
+// Unlike `photo`, this is NOT a customer upload -- it's a fixed image (e.g.
+// a link to a personalised video/message) that we own. It sits ON TOP of a
+// plain white box already baked into the card artwork. It's kept invisible
+// throughout editing and only switched on for the instant the front spread
+// is captured for the print-ready PDF, so customers can't scan/see it (or
+// screenshot it) before they've actually bought the card. left/top is the
+// CENTER of the box; width/height is its bounding box -- the QR is scaled
+// to fit inside it (contain, not cover, so the whole code stays intact).
+const DEFAULT_QR_SETTINGS = {
+    left: 892.5, top: 400, width: 400, height: 400
+};
+
 // ---- Extra text-field defaults (reused / overridden per template) ----
 // A card can define any number of simple extra text fields (e.g. "Event",
 // "Date", "Finish Time" on the running-achievement cards) via an
@@ -304,6 +317,7 @@ const CARD_TEMPLATES = Object.fromEntries(
                 name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
                 age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
                 photo: c.photo ? { ...DEFAULT_PHOTO_SETTINGS, ...c.photo } : null,
+                qr: c.qr ? { ...DEFAULT_QR_SETTINGS, ...c.qr } : null,
                 extraFields: c.extraFields
                     ? c.extraFields.map((f) => ({ ...DEFAULT_EXTRA_FIELD_SETTINGS, ...f }))
                     : null
@@ -361,6 +375,9 @@ const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth
 let canvas, bgImg, backCoverImg, nameText, ageText;
 let extraTexts = []; // fabric.Text objects, parallel to activeTemplate.extraFields
 let photoImg;
+let qrImg; // static QR-code overlay -- stays hidden on-screen, only made
+           // visible for the brief moment the front spread is captured for
+           // print/checkout (see showQrForCapture / captureAndBuildPrintPDF)
 let leftPageBg, rightPageBg;
 let insideBgRects = [];   // [top, middle, bottom]
 let insideTexts = [];     // [top, middle, bottom]
@@ -476,6 +493,8 @@ function initEditor(templateKey) {
     photoImg = null;
     $('front-photo-upload').style.display = activeTemplate.photo ? 'block' : 'none';
     $('photo-input').value = '';
+
+    qrImg = null;
 
     loadFrontCover(activeTemplate.url);
 }
@@ -620,6 +639,27 @@ function setupTextsAndOverlays() {
 
     canvas.add(leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts);
     setupTextEvents();
+
+    // Static QR overlay (see DEFAULT_QR_SETTINGS above) -- loaded now so
+    // it's ready to go, but kept invisible/non-interactive the entire time
+    // the customer is editing. It's only revealed momentarily by
+    // showQrForCapture() while the print-ready spread is being captured.
+    if (activeTemplate.qr) {
+        const q = activeTemplate.qr;
+        fabric.Image.fromURL(q.url, (img) => {
+            const fitScale = Math.min(q.width / img.width, q.height / img.height);
+            img.set({
+                left: q.left, top: q.top,
+                originX: 'center', originY: 'center',
+                scaleX: fitScale, scaleY: fitScale,
+                selectable: false, evented: false, visible: false
+            });
+            qrImg = img;
+            canvas.add(qrImg);
+            canvas.bringToFront(qrImg); // sits on top of the white box in the artwork
+            canvas.requestRenderAll();
+        }, { crossOrigin: 'anonymous' });
+    }
 }
 
 // Reads the chosen file — the file-input "Choose File" button is the only
@@ -1026,6 +1066,16 @@ async function buildPrintReadyPDF(imageDataUrls) {
     return doc;
 }
 
+// Toggles the static QR overlay on/off. Only ever called around the front
+// capture in captureAndBuildPrintPDF -- never during normal editing -- so
+// the QR is invisible on-screen the whole time the customer is designing
+// the card, and only exists in the print-ready file generated at checkout.
+function showQrForCapture(show) {
+    if (!qrImg) return;
+    qrImg.set({ visible: show });
+    canvas.requestRenderAll();
+}
+
 // Captures both spreads (outside, inside) straight off the live editor
 // canvas and builds a single two-page print-ready PDF (page 1 = outside,
 // page 2 = inside). Shared by the real checkout flow and the local
@@ -1033,7 +1083,9 @@ async function buildPrintReadyPDF(imageDataUrls) {
 // editor-only borders/dashes, etc — only lives once.
 async function captureAndBuildPrintPDF() {
     switchPage('front', false);
+    showQrForCapture(true);
     const outsideDataUrl = await captureFullSpread();
+    showQrForCapture(false);
 
     switchPage('inside', false);
     resetBordersToDashed();
