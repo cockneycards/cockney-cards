@@ -108,7 +108,7 @@ const CARD_CATALOGUE = {
   "birthday-modfather": { title: "Modfather's Birthday", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1785922335/birthday-modfather-preview_rbnbzi.png", full: "v1785932140/birthday-modfather_mbtlq2.png", name: { left: 890, top: 183, startSize: 86, minSize: 80, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000f42", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
-  "birthday-taxi": { title: "Birthday Taxi", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786197700/birthday-taxi-preview_rqnaae.png", full: "v1786197771/birthday-taxi_c3rhjq.png", name: { left: 891, top: 663, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+  "birthday-taxi": { title: "Birthday Taxi", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786197700/birthday-taxi-preview_rqnaae.png", full: "v1786197771/birthday-taxi_c3rhjq.png", name: { left: 890, top: 183, startSize: 86, minSize: 80, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
   "dj-boy": { title: "DJ Boy Card", categories: ["all", "for-him", "birthdays"], preview: "v1784209498/dj-boy-preview_yqclnk.png", full: "v1784208082/dj-boy_uyrjcy.png" },
@@ -209,12 +209,22 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "christmas-santas-christmas": { title: "Santa's Christmas", categories: ["christmas"], preview: "v1786197700/christmas-santa-preview_hqmplx.png", full: "v1786197768/christmas-santa_l0s9eu.png" },
-  "christmas-taxi": { title: "Christmas Taxi", categories: ["christmas"], preview: "v1786197701/chritmas-taxi-preview_w3bmzc.png", full: "v1786197771/chritmas-taxi_gkqw7l.png", name: { left: 894, top: 667, startSize: 30, minSize: 30, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
+  "christmas-taxi": { title: "Christmas Taxi", categories: ["christmas"], preview: "v1786197701/chritmas-taxi-preview_w3bmzc.png", full: "v1786197771/chritmas-taxi_gkqw7l.png", name: { left: 894, top: 230, startSize: 55, minSize: 50, maxSize: 58, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   "christmas-nicest-children": { title: "Santa's Nicest Children", categories: ["christmas"], preview: "v1786197700/christmas-nicest-children-preview_ompran.png", full: "v1786197767/christmas-nicest-children_vglwrb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
  "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", categories: ["christmas"], preview: "v1786197700/christmas-kids-video-preview_aujgak.png", full: "v1786197768/christmas-kids-video_sm9nhs.png",
-    qr: { left: 915, top: 686, width: 130, height: 130, url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1786203141/santasmessgageqr_jq0qo3.png" } },
+    qr: { left: 909.6, top: 331.3, width: 408.1, height: 385.4, url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1786200419/santasmessgageqr_jq0qo3.png" } },
+
+  // TEST CARD ONLY -- reuses the naughty-or-nice artwork (it already has a
+  // white box in the right spot) but wires up `video` instead of a fixed
+  // `qr`, so you can upload a real video and confirm the whole pipeline:
+  // upload -> Cloudinary -> QR generated -> QR appears hidden -> appears in
+  // the test-download PDF. "test" isn't a real category so this shouldn't
+  // surface anywhere in normal browsing -- delete this entry once you've
+  // confirmed it works.
+  "test-video-upload": { title: "TEST - Customer Video Upload", categories: ["test"], preview: "v1786197700/christmas-kids-video-preview_aujgak.png", full: "v1786197768/christmas-kids-video_sm9nhs.png",
+    video: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
 //SPORTS
 
