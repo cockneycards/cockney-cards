@@ -108,7 +108,7 @@ const CARD_CATALOGUE = {
   "birthday-modfather": { title: "Modfather's Birthday", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1785922335/birthday-modfather-preview_rbnbzi.png", full: "v1785932140/birthday-modfather_mbtlq2.png", name: { left: 890, top: 183, startSize: 86, minSize: 80, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000f42", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
-  "birthday-taxi": { title: "Birthday Taxi", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786197700/birthday-taxi-preview_rqnaae.png", full: "v1786197771/birthday-taxi_c3rhjq.png", name: { left: 905, top: 680, startSize: 30, minSize: 30, maxSize: 30, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+  "birthday-taxi": { title: "Birthday Taxi", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786197700/birthday-taxi-preview_rqnaae.png", full: "v1786197771/birthday-taxi_c3rhjq.png", name: { left: 895, top: 670, startSize: 30, minSize: 30, maxSize: 30, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
   "dj-boy": { title: "DJ Boy Card", categories: ["all", "for-him", "birthdays"], preview: "v1784209498/dj-boy-preview_yqclnk.png", full: "v1784208082/dj-boy_uyrjcy.png" },
@@ -209,7 +209,7 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "christmas-santas-christmas": { title: "Santa's Christmas", categories: ["christmas"], preview: "v1786197700/christmas-santa-preview_hqmplx.png", full: "v1786197768/christmas-santa_l0s9eu.png" },
-  "christmas-taxi": { title: "Christmas Taxi", categories: ["christmas"], preview: "v1786197701/chritmas-taxi-preview_w3bmzc.png", full: "v1786197771/chritmas-taxi_gkqw7l.png", name: { left: 905, top: 680, startSize: 30, minSize: 30, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
+  "christmas-taxi": { title: "Christmas Taxi", categories: ["christmas"], preview: "v1786197701/chritmas-taxi-preview_w3bmzc.png", full: "v1786197771/chritmas-taxi_gkqw7l.png", name: { left: 895, top: 670, startSize: 30, minSize: 30, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   "christmas-nicest-children": { title: "Santa's Nicest Children", categories: ["christmas"], preview: "v1786197700/christmas-nicest-children-preview_ompran.png", full: "v1786197767/christmas-nicest-children_vglwrb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
