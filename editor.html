@@ -149,6 +149,15 @@
                 </p>
             </div>
 
+            <div id="front-video-upload" style="display:none; margin-bottom: 18px;">
+                <label for="video-input" style="display:block; margin-bottom: 6px;">Upload Your Video:</label>
+                <input type="file" id="video-input" accept="video/*" onchange="handleVideoUpload(this)">
+                <p style="font-size:12px; color:#666; margin-top:6px;">
+                    Max 60 seconds. We'll turn it into a scannable QR code on the card automatically — it stays hidden until checkout.
+                </p>
+                <p id="video-upload-status" style="font-size:13px; font-weight:bold; margin-top:8px;"></p>
+            </div>
+
             <div id="front-text-inputs">
                 <label id="label-name" for="name-input">Name:</label>
                 <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
@@ -290,6 +299,41 @@ const DEFAULT_QR_SETTINGS = {
     left: 892.5, top: 400, width: 400, height: 400
 };
 
+// ---- Customer-uploaded video defaults (reused / overridden per template) ----
+// For cards where the CUSTOMER supplies their own short video (as opposed
+// to `qr` above, which is a fixed video/message we already own). Flow:
+// customer picks a file -> we check its length client-side -> upload to
+// Cloudinary -> turn the resulting URL into a QR code -> drop that QR into
+// this box, same as the static `qr` overlay. left/top is the CENTER of the
+// box; width/height is its bounding box (QR fitted with "contain").
+const DEFAULT_VIDEO_SETTINGS = {
+    left: 892.5, top: 400, width: 400, height: 400
+};
+
+// Cloudinary account video uploads go to. Requires an UNSIGNED upload
+// preset created in the Cloudinary console (Settings -> Upload -> Add
+// upload preset), with:
+//   - Signing mode: Unsigned
+//   - Folder: something like "customer-videos" (keep it separate from
+//     your card artwork folder)
+//   - A file-size limit set on the preset itself (Cloudinary won't stop
+//     an unsigned upload otherwise, and this endpoint is public)
+// This is a genuinely public endpoint once shipped -- anyone who finds it
+// in devtools could POST files to your account, so the size cap on the
+// preset (plus keeping an eye on Cloudinary usage) matters. Worth moving
+// this behind a signed Netlify function later if abuse becomes an issue.
+const CLOUDINARY_CLOUD_NAME = "uzf4eeky";
+const CLOUDINARY_VIDEO_UPLOAD_PRESET = "REPLACE_WITH_YOUR_UNSIGNED_PRESET";
+
+const MAX_VIDEO_DURATION_SECONDS = 60;
+
+// QR generated via a free QR-image API (no extra library needed) -- swap
+// this for a self-hosted/client-side generator later if you'd rather not
+// depend on a third party seeing the video URLs.
+function qrApiUrlFor(targetUrl) {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(targetUrl)}`;
+}
+
 // ---- Extra text-field defaults (reused / overridden per template) ----
 // A card can define any number of simple extra text fields (e.g. "Event",
 // "Date", "Finish Time" on the running-achievement cards) via an
@@ -318,6 +362,7 @@ const CARD_TEMPLATES = Object.fromEntries(
                 age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
                 photo: c.photo ? { ...DEFAULT_PHOTO_SETTINGS, ...c.photo } : null,
                 qr: c.qr ? { ...DEFAULT_QR_SETTINGS, ...c.qr } : null,
+                video: c.video ? { ...DEFAULT_VIDEO_SETTINGS, ...c.video } : null,
                 extraFields: c.extraFields
                     ? c.extraFields.map((f) => ({ ...DEFAULT_EXTRA_FIELD_SETTINGS, ...f }))
                     : null
@@ -378,6 +423,9 @@ let photoImg;
 let qrImg; // static QR-code overlay -- stays hidden on-screen, only made
            // visible for the brief moment the front spread is captured for
            // print/checkout (see showQrForCapture / captureAndBuildPrintPDF)
+let customerVideoUrl; // set once a customer's uploaded video finishes
+                       // uploading to Cloudinary -- sent along at checkout
+                       // so the order includes the raw video link too
 let leftPageBg, rightPageBg;
 let insideBgRects = [];   // [top, middle, bottom]
 let insideTexts = [];     // [top, middle, bottom]
@@ -495,6 +543,10 @@ function initEditor(templateKey) {
     $('photo-input').value = '';
 
     qrImg = null;
+    customerVideoUrl = null;
+    $('front-video-upload').style.display = activeTemplate.video ? 'block' : 'none';
+    $('video-input').value = '';
+    $('video-upload-status').textContent = '';
 
     loadFrontCover(activeTemplate.url);
 }
@@ -708,6 +760,98 @@ function loadPhotoIntoFrame(dataUrl) {
                                       // its transparent cutout is what shows this
         canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
+    }, { crossOrigin: 'anonymous' });
+}
+
+// Reads the chosen video file, checks its length client-side (cheap and
+// instant -- no point uploading a 5-minute file just to reject it after),
+// then hands off to the Cloudinary upload.
+function handleVideoUpload(inputEl) {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file) return;
+
+    const statusEl = $('video-upload-status');
+    statusEl.style.color = '#444';
+    statusEl.textContent = 'Checking video...';
+
+    const probe = document.createElement('video');
+    probe.preload = 'metadata';
+    probe.onloadedmetadata = () => {
+        URL.revokeObjectURL(probe.src);
+        if (probe.duration > MAX_VIDEO_DURATION_SECONDS) {
+            statusEl.style.color = '#c0392b';
+            statusEl.textContent = `That video is ${Math.round(probe.duration)}s — please choose one under ${MAX_VIDEO_DURATION_SECONDS}s.`;
+            inputEl.value = '';
+            return;
+        }
+        uploadVideoToCloudinary(file);
+    };
+    probe.onerror = () => {
+        statusEl.style.color = '#c0392b';
+        statusEl.textContent = "Couldn't read that file — please try a different video.";
+        inputEl.value = '';
+    };
+    probe.src = URL.createObjectURL(file);
+}
+
+// Uploads the video to Cloudinary (unsigned preset -- see
+// CLOUDINARY_VIDEO_UPLOAD_PRESET above), then turns the resulting URL
+// into a QR code and drops it into the card exactly like the static `qr`
+// overlay: hidden the whole time the customer is editing, only revealed
+// for the instant the print-ready spread is captured (showQrForCapture).
+async function uploadVideoToCloudinary(file) {
+    const statusEl = $('video-upload-status');
+    statusEl.style.color = '#444';
+    statusEl.textContent = 'Uploading your video...';
+
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_VIDEO_UPLOAD_PRESET);
+
+        const uploadRes = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+            { method: 'POST', body: formData }
+        );
+        const uploadJson = await uploadRes.json();
+        if (!uploadRes.ok || !uploadJson.secure_url) {
+            throw new Error(uploadJson.error?.message || 'Upload failed');
+        }
+
+        customerVideoUrl = uploadJson.secure_url;
+        statusEl.textContent = 'Generating QR code...';
+        loadQrForVideo(customerVideoUrl);
+    } catch (err) {
+        console.error(err);
+        statusEl.style.color = '#c0392b';
+        statusEl.textContent = 'Upload failed — please try again.';
+    }
+}
+
+// Builds/loads the QR image for a given video URL into the `video` box
+// configured on the active template, replacing any previous one.
+function loadQrForVideo(videoUrl) {
+    const v = activeTemplate?.video;
+    if (!v) return;
+
+    fabric.Image.fromURL(qrApiUrlFor(videoUrl), (img) => {
+        if (qrImg) canvas.remove(qrImg);
+
+        const fitScale = Math.min(v.width / img.width, v.height / img.height);
+        img.set({
+            left: v.left, top: v.top,
+            originX: 'center', originY: 'center',
+            scaleX: fitScale, scaleY: fitScale,
+            selectable: false, evented: false, visible: false
+        });
+
+        qrImg = img;
+        canvas.add(qrImg);
+        canvas.bringToFront(qrImg);
+        canvas.requestRenderAll();
+
+        $('video-upload-status').style.color = '#1a7a3c';
+        $('video-upload-status').textContent = 'Video added! QR code ready (hidden until checkout).';
     }, { crossOrigin: 'anonymous' });
 }
 
@@ -1126,6 +1270,11 @@ async function testDownloadPrintPDFs() {
 }
 
 async function uploadAndGoToCheckout() {
+    if (activeTemplate.video && !customerVideoUrl) {
+        alert('Please upload your video before checking out.');
+        return;
+    }
+
     const buyBtn = $('buy-now-btn');
     buyBtn.innerText = "Generating high-res pages...";
     buyBtn.disabled = true;
@@ -1146,6 +1295,7 @@ async function uploadAndGoToCheckout() {
         const checkoutData = {
             name: activeTemplate.name ? ($('name-input').value.toUpperCase() || "NAME") : "N/A",
             age: ageText?.text ?? "N/A",
+            customerVideoUrl: customerVideoUrl || null,
             extraFields: (activeTemplate.extraFields || []).reduce((acc, f, i) => {
                 acc[f.key || f.label || `field${i}`] = $(`extra-input-${i}`)?.value || "";
                 return acc;
