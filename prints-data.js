@@ -86,6 +86,18 @@ const PRINT_CATALOGUE = {
         preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
         full: "v1785823561/oasis-dontlookback_tjupo3.png"
     },
+    "wham-massive": {
+        title: "West Ham Are Massive!",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "b&w", "music"],
+        preview: "v1785823902/wham-massive-preview_vljrfh.png",
+        full: "v1785823561/wham-massive_vj4kxq.png"
+    },
     "mfc-stone": {
         title: "MFC Stone Island",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
