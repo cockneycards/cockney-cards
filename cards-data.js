@@ -7,6 +7,18 @@ const CATEGORIES = [
   ["for-him", "Cards For Him"],
   ["photo-upload", "Photo Upload Cards"],
   ["birthdays", "Birthday Cards"],
+  ["newbaby", "New Baby"],
+  ["thank-you", "Thank You! Cards"],
+  ["weddings-engagements", "Wedding & Engagement Cards"],
+  ["home", "New Home Cards"],
+  ["school-cards", "School Cards"],
+  ["work-related", "Work Related Cards"],
+  ["achievements", "Personal Achievement Cards"],
+  ["children", "Childrens Cards"],
+  ["tv-movies", "TV / Movie Cards"],
+  ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
+  ["valentines", "Valentines"],
+  ["christmas", "Christmas"],
   ["sports", "Sports Cards", [
     ["football", "Football", [
       ["premiership", "Premiership", [
@@ -40,17 +52,7 @@ const CATEGORIES = [
     ["running", "Running"],
     ["horseracing", "Horse Racing"],
   ]],
-  ["thank-you", "Thank You! Cards"],
-  ["weddings-engagements", "Wedding & Engagement Cards"],
-  ["home", "New Home Cards"],
-  ["school-cards", "School Cards"],
-  ["work-related", "Work Related Cards"],
-  ["achievements", "Personal Achievement Cards"],
-  ["children", "Childrens Cards"],
-  ["tv-movies", "TV / Movie Cards"],
-  ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
-  ["valentines", "Valentines"],
-  ["christmas", "Christmas"],
+  
 ];
 
 const CARD_CATALOGUE = {
@@ -150,6 +152,30 @@ const CARD_CATALOGUE = {
   "newhome10": { title: "New Home, New Pad", categories: ["all", "home"], preview: "v1785221483/newhome10-preview_do10qc.png", full: "v1785221603/newhome10_heaoib.png" },
   
   "newhome1-photo": { title: "New Home Card", categories: ["all", "home", "photo-upload"], preview: "v1785262722/newhome12-photo-preview_vtnuyn.png", full: "v1785263102/newhome12-photo_apyp0z.png",
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+
+  "newbaby-beautifulbabygirl": { title: "Beautiful Baby Girl", categories: ["all", "home"], preview: "v1786294302/newbaby-beautifulbabygirl-preview_teij8y.png", full: "v1786294487/newbaby-beautifulbabygirl_uyfwzq.png" },
+  "newbaby-beautifulbabyboy": { title: "Beautiful Baby Boy", categories: ["all", "home"], preview: "v1786294300/newbaby-beautifulbabyboy-preview_ub2stb.png", full: "v1786294507/newbaby-beautifulbabyboy_pib2ab.png" },
+  "newbaby-hellolittleone": { title: "Hello Little One", categories: ["all", "home"], preview: "v1786294301/newbaby-hellolittleone-preview_svbiko.png", full: "v1786294484/newbaby-hellolittleone_lrqc1r.jpg" },
+  "newbaby-butterflies": { title: "Baby Butterflies", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294302/newbaby-butterflies-preview_xyhydc.png", full: "v1786294487/newbaby-butterflies_q9f6ez.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-itsaboy": { title: "It's a Boy", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294299/newbaby-itsaboy-preview_ucaicv.png", full: "v1786294510/newbaby-itsaboy_o7geiu.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#406f94", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-itsagirl": { title: "It's a Girl", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294298/newbaby-itsagirl-preview_pg4yrg.png", full: "v1786294489/newbaby-itsagirl_dnbcoz.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-mellowyellow": { title: "Baby Mellow Yellow", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294299/newbaby-mellowyellow-preview_jmc7d5.png", full: "v1786294496/newbaby-mellowyellow_wadao6.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#9a805a", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-underthesea": { title: "Under the Sea", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294301/newbaby-underthesea-preview_htdnmb.png", full: "v1786294489/newbaby-underthesea_qxvgg0.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-rainbows": { title: "Baby Rainbows", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294299/newbaby-rainbows-preview_fklafk.png", full: "v1786294495/newbaby-rainbows_ukfosd.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-baby-teddygirl": { title: "Teddy Girl", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294298/newbaby-baby-teddygirl-preview_kiztmg.png", full: "v1786294499/newbaby-baby-teddygirl_jkmboi.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ca3f63", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-baby-teddyboy": { title: "Teddy Boy", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294297/newbaby-baby-teddyboy-preview_noh1x1.png", full: "v1786294497/newbaby-baby-teddyboy_qfpq7z.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#386698", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-spacebaby": { title: "Baby Space", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "v1786294301/newbaby-spacebaby-preview_llzxjj.png", full: "v1786294499/newbaby-spacebaby_nh1wrm.png", name: { left: 891, top: 665, startSize: 28, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#2d659a", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+  "newbaby-new-addition": { title: "New Addition to Our Family", categories: ["all", "home", "photo-upload"], preview: "v1786294299/newbaby-new-addition-preview_gcqu3q.png", full: "v1786294496/newbaby-new-addition_wds0ae.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "tvmovies-bttf": { title: "Back to the Future TV Card", categories: ["all", "birthdays", "tv-movies"], preview: "v1784209436/tvmovies-bttf_preview_kdtytk.png", full: "v1784058158/tvmovies-bttf.png" },
