@@ -56,7 +56,7 @@ const CATEGORIES = [
 ];
 
 const CARD_CATALOGUE = {
-  "11plus-boy": { title: "11 Plus Boy Card", categories: ["all", "for-him", "school-cards", "achievements","children"], preview: "v1784209507/11plus-boy-preview_sf4n9y.png", full: "v1784058134/11plus-boy_umzz8e.png" },
+  "11plus-boy": { title: "11 Plus Boy Card", description: "A brilliant way to say congratulations on passing the 11 Plus! Add his name and school shirt colour to make it extra special.", categories: ["all", "for-him", "school-cards", "achievements","children"], preview: "v1784209507/11plus-boy-preview_sf4n9y.png", full: "v1784058134/11plus-boy_umzz8e.png" },
   "11plus-girl": { title: "11 Plus Girl Card", categories: ["all", "for-her", "school-cards", "achievements", "children"], preview: "v1784209509/11plus-girl-preview_xdyo0z.png", full: "v1784058129/11plus-girl_rmkpbe.png" },
   "11plus-kids": { title: "11 Plus Kids Card", categories: ["all", "school-cards", "achievements", "children"], preview: "v1784209512/11plus-kids-preview_a1hxrs.png", full: "v1784058140/11plus-kids_wg25kp.png" },
 
