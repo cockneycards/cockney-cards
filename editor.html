@@ -61,7 +61,11 @@
     .editor-workspace { display: flex; justify-content: center; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; overflow-x: auto; min-width: 900px; }
     #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
     #canvas { border: 1px solid #e2e2e2; }
-    .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .side-column { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
+    .controls { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    #card-description { width: 100%; background: white; padding: 20px 25px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    #card-description h3 { margin: 0 0 10px; font-size: 15px; font-weight: bold; }
+    #card-description p { margin: 0; font-size: 13px; line-height: 1.6; color: #555; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
     .page-toggle { display: flex; gap: 10px; margin-bottom: 25px; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
@@ -130,6 +134,7 @@
         <canvas id="canvas"></canvas>
     </div>
 
+    <div class="side-column">
     <div class="controls">
         <h2>Personalise Card</h2>
 
@@ -200,6 +205,12 @@
         <button id="test-download-btn" class="btn" style="background-color:#1A73E8;" onclick="testDownloadPrintPDFs()">Test: Download Print PDFs</button>
 
         <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
+    </div>
+
+    <div id="card-description" style="display:none;">
+        <h3 id="card-description-title"></h3>
+        <p id="card-description-text"></p>
+    </div>
     </div>
 </div>
 
@@ -496,7 +507,26 @@ function initEditor(templateKey) {
 
     qrImg = null;
 
+    updateCardDescription(activeTemplate);
+
     loadFrontCover(activeTemplate.url);
+}
+
+// Shows the card's blurb underneath the side panel, if the template has
+// one set. Expects an optional `description` string (and optional
+// `title`, falls back to the template's own name/label) on the
+// CARD_TEMPLATES entry, e.g.:
+//   CARD_TEMPLATES['11plus-boy'] = { ..., title: '11+ Boy Card',
+//     description: 'A colourful card celebrating passing the 11+.' }
+function updateCardDescription(template) {
+    const box = $('card-description');
+    if (!template || !template.description) {
+        box.style.display = 'none';
+        return;
+    }
+    $('card-description-title').textContent = template.title || 'About This Card';
+    $('card-description-text').textContent = template.description;
+    box.style.display = 'block';
 }
 
 function loadFrontCover(imageUrl) {
