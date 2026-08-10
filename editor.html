@@ -325,6 +325,8 @@ const CARD_TEMPLATES = Object.fromEntries(
             id,
             {
                 url: CLOUD_BASE + c.full,
+                title: c.title || null,
+                description: c.description || null,
                 name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
                 age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
                 photo: c.photo ? { ...DEFAULT_PHOTO_SETTINGS, ...c.photo } : null,
