@@ -230,9 +230,6 @@ const CARD_CATALOGUE = {
   "happy-hen-party1": { title: "Hen Party Girls", description: "A fun card to celebrate the bride-to-be's hen party.", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439372/happy-hen-party1-preview_we8x5z.png", full: "v1785439589/happy-hen-party1_itgqdm.png" },
   "happy-hen-party2": { title: "Hen Party Sleep Over", description: "A fun card to celebrate the bride-to-be's hen party.", categories: ["all", "for-her", "weddings-engagements"], preview: "v1785439374/happy-hen-party2-preview_nlr0xa.png", full: "v1785439591/happy-hen-party2_wij3fl.png" },
 
-  "happycouple": { title: "Happy Couple", description: "Celebrate their wedding day with this card. Add a photo of the happy couple.", categories: ["all", "for-her", "weddings-engagements", "photo-upload"], preview: "v1785847365/happycouple-preview_owcuip.png", full: "v1785847229/happycouple_d8klwd.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-
   "christmas-santas-christmas": { title: "Santa's Christmas", description: "A festive Christmas card for the whole family.", categories: ["christmas"], preview: "v1786197700/christmas-santa-preview_hqmplx.png", full: "v1786197768/christmas-santa_l0s9eu.png" },
   "christmas-taxi": { title: "Christmas Taxi", description: "A festive Christmas card for the whole family. Add a family photo to make it extra special.", categories: ["christmas"], preview: "v1786197701/chritmas-taxi-preview_w3bmzc.png", full: "v1786197771/chritmas-taxi_gkqw7l.png", name: { left: 894, top: 667, startSize: 30, minSize: 30, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
