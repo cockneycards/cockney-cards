@@ -94,7 +94,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all", "b&w", "music"],
+        categories: ["all", "sports"],
         preview: "v1785823902/wham-massive-preview_vljrfh.png",
         full: "v1785823561/wham-massive_vj4kxq.png"
     },
