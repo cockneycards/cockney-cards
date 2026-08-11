@@ -1,5 +1,5 @@
 const CLOUD_BASE = "https://res.cloudinary.com/uzf4eeky/image/upload/";
-const DEFAULT_PRICE = "£2.49";
+const DEFAULT_PRICE = "£2.99";
 
 const CATEGORIES = [
   ["all", "All Cards"],
