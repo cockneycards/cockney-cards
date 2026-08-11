@@ -235,7 +235,7 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   "christmas-nicest-children": { title: "Santa's Nicest Children", price: "£3.49", description: "A festive Christmas card for the whole family. Add a family photo to make it extra special.", categories: ["christmas"], preview: "v1786197700/christmas-nicest-children-preview_ompran.png", full: "v1786197767/christmas-nicest-children_vglwrb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
- "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", price: "£3.49", description: "A festive Christmas card with a personalised video message they can scan to watch.", categories: ["christmas"], preview: "v1786197700/christmas-kids-video-preview_aujgak.png", full: "v1786197768/christmas-kids-video_sm9nhs.png",
+ "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", price: "£3.49", description: "A festive Christmas card with a personalised video message they can scan to watch. *QR Code will be added on purchase of card", categories: ["christmas"], preview: "v1786197700/christmas-kids-video-preview_aujgak.png", full: "v1786197768/christmas-kids-video_sm9nhs.png",
     qr: { left: 915, top: 686, width: 130, height: 130, url: "https://res.cloudinary.com/uzf4eeky/image/upload/v1786203141/santasmessgageqr_jq0qo3.png" } },
 
 //SPORTS
