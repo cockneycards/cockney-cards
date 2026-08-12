@@ -85,7 +85,11 @@
         background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMjAiIGhlaWdodD0iMzIwIj4KICA8dGV4dCB4PSIxMCIgeT0iMTYwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJyZ2JhKDAsMCwwLDAuMTApIiB0cmFuc2Zvcm09InJvdGF0ZSgtMzAgMTYwIDE2MCkiPkNPQ0tORVkgQ0FSRFMgIOKAoiAgUFJFVklFVzwvdGV4dD4KPC9zdmc+");
         background-repeat: repeat;
     }
-    .controls { width: 380px; flex-shrink: 0; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .side-column { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
+    .controls { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    #print-description { width: 100%; background: white; padding: 20px 25px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    #print-description h3 { margin: 0 0 10px; font-size: 15px; font-weight: bold; }
+    #print-description p { margin: 0; font-size: 13px; line-height: 1.6; color: #555; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
     .control-group { display: flex; flex-direction: column; gap: 15px; }
     label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
@@ -156,6 +160,7 @@
         </div>
     </div>
 
+    <div class="side-column">
     <div class="controls">
         <h2>Personalise Print</h2>
 
@@ -221,6 +226,12 @@
         <button id="test-download-all-variants-btn" class="btn" style="background-color:#1A73E8; display:none;" onclick="testDownloadAllVariantsPDF()">Test: Download ALL Variants PDF</button>
 
         <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
+    </div>
+
+    <div id="print-description" style="display:none;">
+        <h3 id="print-description-title"></h3>
+        <p id="print-description-text"></p>
+    </div>
     </div>
 </div>
 
@@ -334,6 +345,8 @@ const PRINT_TEMPLATES = Object.fromEntries(
             id,
             {
                 url: CLOUD_BASE + c.full,
+                title: c.title || null,
+                description: c.description || null,
                 sizes: c.sizes || null,
                 name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
                 age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
@@ -485,7 +498,25 @@ function initEditor(templateKey) {
     if (activeTemplate.age2?.maxChars) $('age2-input').maxLength = activeTemplate.age2.maxChars;
 
     renderSizeOptions();
+    updatePrintDescription(activeTemplate);
     loadFrontArtwork(activeTemplate.url);
+}
+
+// Shows the print's blurb underneath the side panel, if the template has
+// one set. Expects an optional `description` string (and optional
+// `title`, falls back to the template's own name/label) on the
+// PRINT_TEMPLATES entry, e.g.:
+//   PRINT_TEMPLATES['dinosaurs'] = { ..., title: 'Dinosaur Duo',
+//     description: 'A fun dinosaur print for little dino-lovers.' }
+function updatePrintDescription(template) {
+    const box = $('print-description');
+    if (!template || !template.description) {
+        box.style.display = 'none';
+        return;
+    }
+    $('print-description-title').textContent = template.title || 'About This Print';
+    $('print-description-text').textContent = template.description;
+    box.style.display = 'block';
 }
 
 // Builds one button per PRINT_SIZES entry (A5/A4/A3), showing this print's
