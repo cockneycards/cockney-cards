@@ -96,7 +96,11 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "childrens"],
         preview: "v1786458212/underthesea_a-preview_adonqr.png",
-        full: "v1786457719/underthesea_a_lxanyr.png"
+        full: "v1786457719/underthesea_a_lxanyr.png",
+        variants: [
+      { id: "underthesea_b", full: "v1786457719/underthesea_b_pqbkux.png" },
+      { id: "underthesea_c", full: "v1786457718/underthesea_c_qrvctm.png" },
+    ]
     },
     "wham-massive": {
         title: "West Ham Are Massive!",
