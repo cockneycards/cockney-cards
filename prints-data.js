@@ -94,13 +94,14 @@ const PRINT_CATALOGUE = {
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all", "childrens"], name: { left: 890, top: 330, startSize: 85, minSize: 80, maxSize: 95, fontFamily: "LuckiestGuy", fontWeight: "normal", color: "#ffffff", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 12,
+        categories: ["all", "childrens"],
+        name: { left: 890, top: 330, startSize: 85, minSize: 80, maxSize: 95, fontFamily: "LuckiestGuy", fontWeight: "normal", color: "#ffffff", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 12 },
         preview: "v1786458212/underthesea_a-preview_adonqr.png",
         full: "v1786457719/underthesea_a_lxanyr.png",
         variants: [
-      { id: "underthesea_b", full: "v1786457719/underthesea_b_pqbkux.png" },
-      { id: "underthesea_c", full: "v1786457718/underthesea_c_qrvctm.png" },
-    ]
+          { id: "underthesea_b", full: "v1786457719/underthesea_b_pqbkux.png" },
+          { id: "underthesea_c", full: "v1786457718/underthesea_c_qrvctm.png" },
+        ]
     },
     "wham-massive": {
         title: "West Ham Are Massive!",
