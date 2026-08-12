@@ -83,7 +83,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£9.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
-        categories: ["all", "childrens"],
+        categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
@@ -104,7 +104,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£9.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
-        categories: ["all", "childrens"],
+        categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
@@ -125,7 +125,7 @@ const PRINT_CATALOGUE = {
             A4: { price: "£9.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
-        categories: ["all", "childrens"],
+        categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
@@ -137,25 +137,25 @@ const PRINT_CATALOGUE = {
             { id: "millwallgirl", full: "v1786525879/mfc-eatsleepgirl_mgpc3x.png" },
         ]
     },
-    "mfcduoprints": {
-        title: "MFC Prints - Eat, Sleep, Millwall, Repeat",
-        description: "MFC duo prints that will look great in a bedroom or office.",
+    "united-eatsleep": {
+        title: "Manchester United Prints - Eat, Sleep, United, Repeat",
+        description: "Manchester United duo prints that will look great in a bedroom or office.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
             A4: { price: "£9.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
-        categories: ["all", "childrens"],
+        categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
-            onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            onlyForVariants: ["unitedboy", "unitedgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
         },
-        preview: "v1786525808/mfc-eatsleep-preview_a4dou9.png",
-        full: "v1786525879/mfc-eatsleep_psnawt.png",
+        preview: "v1786536697/united-eatsleep-preview_nvhkbv.png",
+        full: "v1786532193/united-eatsleep_xi5vq1.png",
         variants: [
-          { id: "millwallboy", full: "v1786525880/mfc-eatsleepboy_l8kozj.png" },
-            { id: "millwallgirl", full: "v1786525879/mfc-eatsleepgirl_mgpc3x.png" },
+          { id: "unitedboy", full: "v1786532196/united-eatsleepboy_ljmjd8.png" },
+            { id: "unitedgirl", full: "v1786532191/united-eatsleepgirl_cvlkj4.png" },
         ]
     },    
    "dinosaurs": {
