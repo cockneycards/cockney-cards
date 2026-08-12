@@ -97,10 +97,10 @@ const PRINT_CATALOGUE = {
         categories: ["all", "childrens"],
         name: { label: "First Name", left: 370, top: 180, startSize: 65, minSize: 25, maxSize: 35, fontFamily: "LuckiestGuy", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         preview: "v1786458212/underthesea_a-preview_adonqr.png",
-        full: "v1786457719/underthesea_a_lxanyr.png",
+        full: "v1786513592/underthesea_a_lxanyr.png",
         variants: [
-          { id: "underthesea_b", full: "v1786457719/underthesea_b_pqbkux.png" },
-          { id: "underthesea_c", full: "v1786457718/underthesea_c_qrvctm.png" },
+          { id: "underthesea_b", full: "v1786513600/underthesea_b_pqbkux.png" },
+          { id: "underthesea_c", full: "v1786513581/underthesea_c_qrvctm.png" },
         ]
     },
     "wham-massive": {
