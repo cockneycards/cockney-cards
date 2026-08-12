@@ -73,18 +73,6 @@ const PRINT_CATALOGUE = {
         categories: ["all", "b&w"],
         preview: "v1785838174/itsnotwhatwehave-preview_xnh2nr.png",
         full: "v1785838415/itsnotwhatwehave_qey0yj.png"
-         },
-    "oasis-dontlookback": {
-        title: "Oasis - Dont Look Back...",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
-        sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
-        },
-        categories: ["all", "b&w", "music"],
-        preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
-        full: "v1785823561/oasis-dontlookback_tjupo3.png"
     },
     "underthesea": {
         title: "Under The Sea",
@@ -102,6 +90,18 @@ const PRINT_CATALOGUE = {
           { id: "underthesea_b", full: "v1786513600/underthesea_b_pqbkux.png" },
           { id: "underthesea_c", full: "v1786513581/underthesea_c_qrvctm.png" },
         ]
+    },
+    "oasis-dontlookback": {
+        title: "Oasis - Dont Look Back...",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "b&w", "music"],
+        preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
+        full: "v1785823561/oasis-dontlookback_tjupo3.png"
     },
     "wham-massive": {
         title: "West Ham Are Massive!",
