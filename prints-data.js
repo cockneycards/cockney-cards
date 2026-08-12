@@ -72,6 +72,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£9.99", priceValue: 9.99 }
         },
         categories: ["all", "childrens"],
+        preview: "v1786517574/dinosaurs_ks45z8.png",
         full: "v1786517645/dinosaurwoof_tojwk7.png",
         variants: [
           { id: "dinosauraghh", full: "v1786517644/dinosauraghh_pfrkfd.png" },
