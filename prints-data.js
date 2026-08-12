@@ -66,7 +66,7 @@ const PRINT_CATALOGUE = {
     // shop grid or the editor.
   
     "mfcduoprints": {
-        title: "MFC Duo Prints - Eat, Sleep, Millwall, Repeat",
+        title: "MFC Prints - Eat, Sleep, Millwall, Repeat",
         description: "MFC duo prints that will look great in a bedroom or office.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
