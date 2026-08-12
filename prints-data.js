@@ -75,7 +75,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "childrens"],
-        name: { label: "First Name", left: 294, top: 680, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        name: { label: "First Name", left: 294, top: 680, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9 },
         preview: "v1786525808/mfc-eatsleep-preview_a4dou9.png",
         full: "v1786525879/mfc-eatsleep_psnawt.png",
         variants: [
