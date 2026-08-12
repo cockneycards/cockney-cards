@@ -216,15 +216,6 @@
              through a real checkout. Remove this button before going live. -->
         <button id="test-download-btn" class="btn" style="background-color:#1A73E8;" onclick="testDownloadPrintPDFs()">Test: Download Print PDFs</button>
 
-        <!-- TESTING ONLY — only shown for prints with picture variants (see
-             setupVariantSelector()). Downloads ONE PDF containing every
-             variant's front page, each immediately followed by its own
-             logo-only back page — e.g. 2 variants = 4 pages (front A, back,
-             front B, back) — so a single order can be printed as one file
-             covering all the picture options. Remove this button before
-             going live if you don't want a combined download offered. -->
-        <button id="test-download-all-variants-btn" class="btn" style="background-color:#1A73E8; display:none;" onclick="testDownloadAllVariantsPDF()">Test: Download ALL Variants PDF</button>
-
         <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
     </div>
 
@@ -576,9 +567,6 @@ function setupVariantSelector(templateKey) {
     const variants = PRINT_VARIANTS[templateKey];
     const container = $("variant-selector");
     container.innerHTML = "";
-
-    const allVariantsBtn = $("test-download-all-variants-btn");
-    if (allVariantsBtn) allVariantsBtn.style.display = (variants && variants.length > 1) ? "block" : "none";
 
     if (!variants || variants.length < 2) {
         container.style.display = "none";
@@ -1075,10 +1063,10 @@ async function buildPrintReadyPDF(imageDataUrls, mm) {
 // Captures the personalised page straight off the live editor canvas, builds
 // the fixed logo-only page, and combines them into a single two-page
 // print-ready PDF, sized for whichever option (A5/A4/A3) is currently
-// selected. Used by the "Test: Download Print PDFs" button (single
-// currently-shown variant only) — the real checkout flow uses
-// captureAndBuildAllVariantsPDF() below instead, so every picture variant
-// gets included.
+// selected — just the single currently-shown page, no other variants.
+// Used by buildFinalOrderPDF() below when only one page is needed (either
+// a print with no variants at all, or the base/full version of a print
+// like mfcduoprints picked on its own).
 async function captureAndBuildPrintPDF() {
     const { mm, multiplier } = PRINT_SIZES[selectedSize];
     const frontDataUrl = await captureFrontPage(multiplier);
@@ -1098,7 +1086,7 @@ async function testDownloadPrintPDFs() {
     testBtn.disabled = true;
 
     try {
-        const doc = await captureAndBuildPrintPDF();
+        const doc = await buildFinalOrderPDF();
         doc.save('print-TEST.pdf');
     } catch (err) {
         console.error(err);
@@ -1107,6 +1095,31 @@ async function testDownloadPrintPDFs() {
         testBtn.innerText = originalText;
         testBtn.disabled = false;
     }
+}
+
+// Decides which pages actually belong in the customer's PDF and builds it —
+// shared by both the "Test: Download Print PDFs" button and the real
+// checkout flow, so what you preview while testing is exactly what gets
+// sent for real.
+//
+// Prints with an unrestricted variant set (e.g. dinosaurs) bundle every
+// variant together, since those are meant as one set.
+//
+// mfcduoprints works differently: the base/full version has no name field
+// (see `onlyForVariants` on its `name` config) and is the main design,
+// always sent alongside whichever personalised variant (boy/girl) is
+// picked — so selecting boy/girl bundles [base, that variant] = 2 fronts +
+// 2 backs = 4 pages total. Picking the base/full version on its own (no
+// personalised variant chosen) just sends that single front + back
+// (2 pages).
+async function buildFinalOrderPDF() {
+    const restrictedVariants = activeTemplate.name?.onlyForVariants;
+    if (restrictedVariants) {
+        return restrictedVariants.includes(activeVariantKey)
+            ? captureAndBuildAllVariantsPDF([activeTemplateId, activeVariantKey])
+            : captureAndBuildPrintPDF();
+    }
+    return captureAndBuildAllVariantsPDF();
 }
 
 // Builds ONE PDF covering a set of picture variants of the current print,
@@ -1136,29 +1149,6 @@ async function captureAndBuildAllVariantsPDF(variantKeysOverride) {
     return buildPrintReadyPDF(pages, mm);
 }
 
-// TESTING ONLY — downloads a single PDF containing every variant's front
-// page + its own back page (see captureAndBuildAllVariantsPDF() above).
-// Only shown for prints that actually have variants (setupVariantSelector
-// toggles this button's visibility). Remove before going live if you don't
-// want a combined download offered.
-async function testDownloadAllVariantsPDF() {
-    const testBtn = $('test-download-all-variants-btn');
-    const originalText = testBtn.innerText;
-    testBtn.innerText = "Generating...";
-    testBtn.disabled = true;
-
-    try {
-        const doc = await captureAndBuildAllVariantsPDF();
-        doc.save('print-ALL-VARIANTS-TEST.pdf');
-    } catch (err) {
-        console.error(err);
-        alert("Test download failed — check the console for details.");
-    } finally {
-        testBtn.innerText = originalText;
-        testBtn.disabled = false;
-    }
-}
-
 async function uploadAndGoToCheckout() {
     const buyBtn = $('buy-now-btn');
     buyBtn.innerText = "Generating high-res pages...";
@@ -1166,25 +1156,7 @@ async function uploadAndGoToCheckout() {
 
     try {
         buyBtn.innerText = "Building print files...";
-        // Prints with an unrestricted variant set (e.g. dinosaurs) bundle
-        // every variant together, since those are meant as one set.
-        //
-        // mfcduoprints works differently: the base/full version has no
-        // name field (see `onlyForVariants` on its `name` config) and is
-        // the main design, always sent alongside whichever personalised
-        // variant (boy/girl) is picked — so selecting boy/girl bundles
-        // [base, that variant] = 2 fronts + 2 backs = 4 pages total.
-        // Picking the base/full version on its own (no personalised
-        // variant chosen) just sends that single front + back (2 pages).
-        const restrictedVariants = activeTemplate.name?.onlyForVariants;
-        let doc;
-        if (restrictedVariants) {
-            doc = restrictedVariants.includes(activeVariantKey)
-                ? await captureAndBuildAllVariantsPDF([activeTemplateId, activeVariantKey])
-                : await captureAndBuildPrintPDF();
-        } else {
-            doc = await captureAndBuildAllVariantsPDF();
-        }
+        const doc = await buildFinalOrderPDF();
 
         // TODO once the business email address + a serverless email step
         // (e.g. Resend/SendGrid via a Netlify function) are set up: attach
