@@ -447,8 +447,6 @@ function initEditor(templateKey) {
     activeVariantKey = templateKey;
     setupVariantSelector(templateKey);
 
-    $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
-    $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
     $("front-color").value = activeTemplate.name?.color || "#FFFFFF";
 
     const canvasElement = $("canvas");
@@ -460,42 +458,39 @@ function initEditor(templateKey) {
         preserveObjectStacking: true, backgroundColor: '#ffffff'
     });
 
-    // Show/hide the personalisation inputs based on what this print supports
-    const hasPersonalisation = activeTemplate.name || activeTemplate.age || activeTemplate.name2 || activeTemplate.age2 || activeTemplate.extraFields;
-    $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
+    // Show/hide the personalisation inputs based on what this print (and,
+    // for the name field, this variant — see refreshNameVisibilityForVariant) supports
     buildExtraFieldInputs();
-    if (hasPersonalisation) {
-        $('name-input').style.display = $('label-name').style.display = activeTemplate.name ? 'block' : 'none';
-        $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
-        if (activeTemplate.name) {
-            const nameLabel = activeTemplate.name.label || 'Name';
-            $('label-name').textContent = nameLabel + ':';
-            $('name-input').placeholder = nameLabel + ':';
-        }
-        if (activeTemplate.age) {
-            const ageLabel = activeTemplate.age.label || 'Age';
-            $('label-age').textContent = ageLabel + ':';
-            $('age-input').placeholder = ageLabel + ':';
-            $('age-input').setAttribute('inputmode', activeTemplate.age.lettersOnly ? 'text' : 'numeric');
-        }
-        $('name2-input').style.display = $('label-name2').style.display = activeTemplate.name2 ? 'block' : 'none';
-        $('age2-input').style.display = $('label-age2').style.display = activeTemplate.age2 ? 'block' : 'none';
-        if (activeTemplate.name2) {
-            const name2Label = activeTemplate.name2.label || 'Second Name';
-            $('label-name2').textContent = name2Label + ':';
-            $('name2-input').placeholder = name2Label + ':';
-        }
-        if (activeTemplate.age2) {
-            const age2Label = activeTemplate.age2.label || 'Age';
-            $('label-age2').textContent = age2Label + ':';
-            $('age2-input').placeholder = age2Label + ':';
-            $('age2-input').setAttribute('inputmode', activeTemplate.age2.lettersOnly ? 'text' : 'numeric');
-        }
+    $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
+    if (activeTemplate.name) {
+        const nameLabel = activeTemplate.name.label || 'Name';
+        $('label-name').textContent = nameLabel + ':';
+        $('name-input').placeholder = nameLabel + ':';
+    }
+    if (activeTemplate.age) {
+        const ageLabel = activeTemplate.age.label || 'Age';
+        $('label-age').textContent = ageLabel + ':';
+        $('age-input').placeholder = ageLabel + ':';
+        $('age-input').setAttribute('inputmode', activeTemplate.age.lettersOnly ? 'text' : 'numeric');
+    }
+    $('name2-input').style.display = $('label-name2').style.display = activeTemplate.name2 ? 'block' : 'none';
+    $('age2-input').style.display = $('label-age2').style.display = activeTemplate.age2 ? 'block' : 'none';
+    if (activeTemplate.name2) {
+        const name2Label = activeTemplate.name2.label || 'Second Name';
+        $('label-name2').textContent = name2Label + ':';
+        $('name2-input').placeholder = name2Label + ':';
+    }
+    if (activeTemplate.age2) {
+        const age2Label = activeTemplate.age2.label || 'Age';
+        $('label-age2').textContent = age2Label + ':';
+        $('age2-input').placeholder = age2Label + ':';
+        $('age2-input').setAttribute('inputmode', activeTemplate.age2.lettersOnly ? 'text' : 'numeric');
     }
     if (activeTemplate.name?.maxChars) $('name-input').maxLength = activeTemplate.name.maxChars;
     if (activeTemplate.age?.maxChars) $('age-input').maxLength = activeTemplate.age.maxChars;
     if (activeTemplate.name2?.maxChars) $('name2-input').maxLength = activeTemplate.name2.maxChars;
     if (activeTemplate.age2?.maxChars) $('age2-input').maxLength = activeTemplate.age2.maxChars;
+    refreshNameVisibilityForVariant();
 
     renderSizeOptions();
     updatePrintDescription(activeTemplate);
@@ -603,6 +598,39 @@ function setupVariantSelector(templateKey) {
     });
 }
 
+// Some prints only want their name field shown for certain picture
+// variants — e.g. mfcduoprints' plain "Eat Sleep [Team] Repeat" version
+// has no name, but its "millwallboy"/"millwallgirl" variants are
+// personalised. Set this by adding `onlyForVariants: [...]` to that
+// print's `name` config in prints-data.js (list the variant ids the name
+// should appear for). Leave it out and the name field shows regardless of
+// which variant is selected, same as before.
+function nameAllowedForVariant(key) {
+    const restrict = activeTemplate?.name?.onlyForVariants;
+    return !restrict || restrict.includes(key);
+}
+
+// Re-applies name-field visibility — both the sidebar inputs and the
+// on-canvas text itself — for whichever picture variant is currently
+// selected. Called once from initEditor (before nameText exists, so it
+// only touches the sidebar) and again from selectVariant() (where it also
+// shows/hides the live nameText object).
+function refreshNameVisibilityForVariant() {
+    const allowed = !!(activeTemplate.name && nameAllowedForVariant(activeVariantKey));
+
+    $('name-input').style.display = $('label-name').style.display = allowed ? 'block' : 'none';
+    $('front-size-controls').style.display = (allowed && activeTemplate.name?.canChangeSize) ? 'block' : 'none';
+    $('front-color').parentElement.style.display = (allowed && activeTemplate.name?.canChangeColor) ? 'flex' : 'none';
+
+    if (nameText) {
+        nameText.set('visible', allowed);
+        canvas.requestRenderAll();
+    }
+
+    const hasPersonalisation = allowed || activeTemplate.age || activeTemplate.name2 || activeTemplate.age2 || activeTemplate.extraFields;
+    $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
+}
+
 // Swaps just the artwork for a different option from the same
 // PRINT_VARIANTS group, then re-fits it to the full canvas and highlights
 // the matching thumbnail.
@@ -610,6 +638,7 @@ function selectVariant(key) {
     const url = artUrlFor(key);
     if (!bgImg || key === activeVariantKey || !url) return;
     activeVariantKey = key;
+    refreshNameVisibilityForVariant();
 
     bgImg.setSrc(url, () => {
         bgImg.set({
@@ -655,8 +684,10 @@ function setupTextsAndOverlays() {
                 left: n.left, top: n.top, originX: "center", originY: "center",
                 fontSize: n.startSize, fontFamily: n.fontFamily || "Arial",
                 fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
+                shadow: n.shadow ? new fabric.Shadow(n.shadow) : null,
                 hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
             });
+        nameText.set('visible', nameAllowedForVariant(activeVariantKey));
 
         if (n.canChangeSize) {
             const slider = $("front-size");
@@ -782,6 +813,7 @@ function buildCurvedNameGroup(rawValue, fontSize, color, settings = activeTempla
             left: radius * Math.sin(midAngle),
             top: radius - radius * Math.cos(midAngle),
             angle: (midAngle * 180) / Math.PI,
+            shadow: n.shadow ? new fabric.Shadow(n.shadow) : null,
             selectable: false, evented: false
         });
     });
@@ -1116,12 +1148,18 @@ async function uploadAndGoToCheckout() {
 
     try {
         buyBtn.innerText = "Building print files...";
-        // Uses the all-variants builder so a print with picture options
-        // (e.g. dinosaurs) sends every variant's front page + its own back
-        // page in one PDF. For a print with no variants this produces the
-        // same single front+back pair as before — PRINT_VARIANTS falls
-        // back to [activeTemplateId] — so this is safe for every print.
-        const doc = await captureAndBuildAllVariantsPDF();
+        // Prints with picture options (e.g. dinosaurs) normally send every
+        // variant's front page + its own back page in one PDF, since those
+        // variants are meant to be a bundled set. But if the currently
+        // selected variant is one of a print's `name.onlyForVariants` list
+        // (a personalised single option, e.g. mfcduoprints' boy/girl
+        // versions), the customer has picked ONE specific personalised
+        // print — so only that variant's front + back page should be sent,
+        // not the whole bundle.
+        const sendOnlyCurrentVariant = activeTemplate.name?.onlyForVariants?.includes(activeVariantKey);
+        const doc = sendOnlyCurrentVariant
+            ? await captureAndBuildPrintPDF()
+            : await captureAndBuildAllVariantsPDF();
 
         // TODO once the business email address + a serverless email step
         // (e.g. Resend/SendGrid via a Netlify function) are set up: attach
