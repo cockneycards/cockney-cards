@@ -86,7 +86,7 @@ const PRINT_CATALOGUE = {
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
-            shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: 7, offsetY: 7 } // bold, hard, dark drop shadow matching the Danielle reference print
         },
         preview: "v1786525808/mfc-eatsleep-preview_a4dou9.png",
         full: "v1786525879/mfc-eatsleep_psnawt.png",
@@ -107,7 +107,7 @@ const PRINT_CATALOGUE = {
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["arsenalboy", "arsenalgirl"], // no name field on the plain full/duo version — only these two personalised variants
-            shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: 7, offsetY: 7 } // bold, hard, dark drop shadow matching the Danielle reference print
         },
         preview: "v1786536693/afc-eatsleep-preview_rrtfve.png",
         full: "v1786532185/afc-eatsleep_trxugb.png",
@@ -128,7 +128,7 @@ const PRINT_CATALOGUE = {
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["cityboy", "citygirl"], // no name field on the plain full/duo version — only these two personalised variants
-            shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: 7, offsetY: 7 } // bold, hard, dark drop shadow matching the Danielle reference print
         },
         preview: "v1786536695/city-eatsleep-preview_cktda8.png",
         full: "v1786532195/city-eatsleep_d3j7ca.png",
@@ -149,7 +149,7 @@ const PRINT_CATALOGUE = {
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["chelseaboy", "chelseagirl"], // no name field on the plain full/duo version — only these two personalised variants
-            shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: 7, offsetY: 7 } // bold, hard, dark drop shadow matching the Danielle reference print
         },
         preview: "v1786536692/chelsea-eatsleep-preview_uivgav.png",
         full: "v1786532189/chelsea-eatsleep_iqyj3n.png",
@@ -170,7 +170,7 @@ const PRINT_CATALOGUE = {
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["unitedboy", "unitedgirl"], // no name field on the plain full/duo version — only these two personalised variants
-            shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: 7, offsetY: 7 } // bold, hard, dark drop shadow matching the Danielle reference print
         },
         preview: "v1786536697/united-eatsleep-preview_nvhkbv.png",
         full: "v1786532193/united-eatsleep_xi5vq1.png",
