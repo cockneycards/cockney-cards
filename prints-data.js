@@ -95,7 +95,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£9.99", priceValue: 9.99 }
         },
         categories: ["all", "childrens"],
-        name: { label: "First Name", left: 320, top: 200, startSize: 70, minSize: 25, maxSize: 35, fontFamily: "LuckiestGuy", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
+        name: { label: "First Name", left: 370, top: 200, startSize: 65, minSize: 25, maxSize: 35, fontFamily: "LuckiestGuy", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         preview: "v1786458212/underthesea_a-preview_adonqr.png",
         full: "v1786457719/underthesea_a_lxanyr.png",
         variants: [
