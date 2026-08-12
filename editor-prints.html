@@ -94,6 +94,12 @@
     .color-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; }
     .size-slider { flex: 1; }
 
+    /* STYLE / VARIANT PICKER (e.g. underthesea's alternate artworks) */
+    .variant-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .variant-thumb { width: 56px; height: 56px; padding: 0; border: 2px solid #ccc; border-radius: 6px; overflow: hidden; cursor: pointer; background: none; }
+    .variant-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .variant-thumb.active { border-color: #111; }
+
     .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
     .size-option { flex: 1; padding: 10px 4px; border: 2px solid #ddd; border-radius: 6px; background: white; cursor: pointer; text-align: center; font-size: 13px; transition: border-color 0.15s; }
     .size-option .size-label { display: block; font-weight: bold; letter-spacing: 0.5px; }
@@ -158,6 +164,8 @@
              non-editable page (logo only) is added automatically when the
              print-ready PDF is built, see buildBackPageDataUrl() below. -->
         <div id="front-controls" class="control-group active">
+            <div id="variant-selector" class="variant-selector" style="display:none;"></div>
+
             <div id="front-text-inputs">
                 <label id="label-name" for="name-input">Name:</label>
                 <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
@@ -329,6 +337,22 @@ const PRINT_TEMPLATES = Object.fromEntries(
         ])
 );
 
+// PRINT_VARIANTS: swappable picture options per print, e.g. underthesea's
+// alternate artworks. Built from each catalogue entry's `variants` list.
+const PRINT_VARIANTS = Object.fromEntries(
+    Object.entries(PRINT_CATALOGUE)
+        .filter(([id, c]) => c.variants && c.variants.length)
+        .map(([id, c]) => [id, [id, ...c.variants.map(v => v.id)]])
+);
+
+// Cloudinary path lookup for every variant sub-image (the primary image for
+// each print already comes from PRINT_TEMPLATES[id].url above).
+const VARIANT_PATHS = Object.fromEntries(
+    Object.values(PRINT_CATALOGUE)
+        .filter(c => c.variants)
+        .flatMap(c => c.variants.map(v => [v.id, v.full]))
+);
+
 // ---- Physical size options ----
 // A5/A4/A3 all share the same portrait aspect ratio (~0.707), same as the
 // editor's 595.5x840 canvas — so the exact same artwork and text
@@ -346,7 +370,7 @@ let selectedSize = "A3";
 // ---- Mutable editor state ----
 let canvas, bgImg, nameText, ageText, nameText2, ageText2;
 let extraTexts = [];
-let activeTemplate = null;
+let activeTemplate = null, activeVariantKey = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -397,6 +421,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function initEditor(templateKey) {
     activeTemplate = PRINT_TEMPLATES[templateKey];
+    activeVariantKey = templateKey;
+    setupVariantSelector(templateKey);
 
     $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
     $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
@@ -496,6 +522,62 @@ function selectSize(sizeKey) {
 function updateBuyButtonPrice() {
     const sizeInfo = activeTemplate.sizes?.[selectedSize];
     $('buy-now-btn').innerText = sizeInfo ? `Buy Now — ${sizeInfo.price}` : 'Buy Now';
+}
+
+// Full artwork URL for any print id OR variant sub-id, from whichever of
+// the two catalogue-derived lookups has it.
+function artUrlFor(key) {
+    if (PRINT_TEMPLATES[key]) return PRINT_TEMPLATES[key].url;
+    if (VARIANT_PATHS[key]) return CLOUD_BASE + VARIANT_PATHS[key];
+    return null;
+}
+
+// Builds the row of thumbnail buttons for a print's picture options (if it
+// has any). Clicking a thumbnail just swaps the artwork via
+// selectVariant() below — name/age text, position, colour etc. all stay
+// exactly as defined by this print's entry in prints-data.js the whole time.
+function setupVariantSelector(templateKey) {
+    const variants = PRINT_VARIANTS[templateKey];
+    const container = $("variant-selector");
+    container.innerHTML = "";
+
+    if (!variants || variants.length < 2) {
+        container.style.display = "none";
+        return;
+    }
+
+    container.style.display = "flex";
+    variants.forEach((key) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "variant-thumb" + (key === activeVariantKey ? " active" : "");
+        btn.dataset.key = key;
+        btn.title = key;
+        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}">`;
+        btn.onclick = () => selectVariant(key);
+        container.appendChild(btn);
+    });
+}
+
+// Swaps just the artwork for a different option from the same
+// PRINT_VARIANTS group, then re-fits it to the full canvas and highlights
+// the matching thumbnail.
+function selectVariant(key) {
+    const url = artUrlFor(key);
+    if (!bgImg || key === activeVariantKey || !url) return;
+    activeVariantKey = key;
+
+    bgImg.setSrc(url, () => {
+        bgImg.set({
+            scaleX: EDIT_WIDTH / bgImg.width,
+            scaleY: EDIT_HEIGHT / bgImg.height
+        });
+        canvas.requestRenderAll();
+    }, { crossOrigin: "anonymous" });
+
+    document.querySelectorAll("#variant-selector .variant-thumb").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.key === key);
+    });
 }
 
 // Loads the print's artwork so it fills the ENTIRE canvas edge-to-edge —
