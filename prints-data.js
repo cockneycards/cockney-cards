@@ -86,17 +86,17 @@ const PRINT_CATALOGUE = {
         preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
         full: "v1785823561/oasis-dontlookback_tjupo3.png"
     },
-    "oasis-dontlookback": {
-        title: "Oasis - Dont Look Back...",
+    "underthesea": {
+        title: "Under The Sea",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
             A4: { price: "£6.99", priceValue: 6.99 },
             A3: { price: "£9.99", priceValue: 9.99 }
         },
-        categories: ["all", "b&w", "music"],
-        preview: "v1785823903/oasis-dontlookback-preview_yuwvyy.png",
-        full: "v1785823561/oasis-dontlookback_tjupo3.png"
+        categories: ["all", "childrens"],
+        preview: "v1786458212/underthesea_a-preview_adonqr.png",
+        full: "v1786457719/underthesea_a_lxanyr.png"
     },
     "wham-massive": {
         title: "West Ham Are Massive!",
