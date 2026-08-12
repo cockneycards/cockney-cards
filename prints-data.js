@@ -67,12 +67,12 @@ const PRINT_CATALOGUE = {
     
    "dinosaurs": {
         title: "Dinosaur Duo",
-        description: "A fun dinosaur print for little dino-lovers, personalised with their name.",
+        description: "Dinosaur duo prints that will look great in a bedroom or office.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "childrens"],
         preview: "v1786517574/dinosaurs_ks45z8.png",
