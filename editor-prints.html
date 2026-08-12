@@ -263,7 +263,8 @@ const DEFAULT_NAME_SETTINGS = {
     isCurved: false, curveRadius: 0,
     tiltAngle: 0,  // rotates the whole curved arc (degrees, clockwise). No effect unless isCurved is true.
     label: "Name",      // text shown on this print's label — override per print if needed
-    maxChars: 14   // hard cap on characters, also set as the input's maxlength
+    maxChars: 14,   // hard cap on characters, also set as the input's maxlength
+    forceUppercase: true   // set false per-print to allow mixed-case name text
 };
 const DEFAULT_AGE_SETTINGS = {
     left: EDIT_WIDTH / 2, top: 600, startSize: 60, minSize: 20, maxSize: 120,
@@ -287,7 +288,8 @@ const DEFAULT_NAME2_SETTINGS = {
     left: EDIT_WIDTH / 2, top: 725, startSize: 52,
     fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
     label: "Second Name",
-    maxChars: 14
+    maxChars: 14,
+    forceUppercase: true   // set false per-print to allow mixed-case name text
 };
 const DEFAULT_AGE2_SETTINGS = {
     left: EDIT_WIDTH / 2, top: 600, startSize: 60,
@@ -362,7 +364,7 @@ function measureTextWidth(text, fontSize, fontFamily, fontWeight) {
 // draw, the canvas just uses a fallback and never redraws itself once the
 // real font arrives. So we explicitly ask the browser to load every custom
 // font up front and wait for that before building any text on the canvas.
-const CUSTOM_FONTS = ["BubblegumSans", "Anton", "BebasNeue"];
+const CUSTOM_FONTS = ["BubblegumSans", "Anton", "BebasNeue", "LuckiestGuy"];
 function preloadCustomFonts() {
     return Promise.all(
         CUSTOM_FONTS.map((f) =>
@@ -632,7 +634,7 @@ function updateExtraFieldText(index, value) {
 // the card editor, so an arched name behaves identically here.
 function buildCurvedNameGroup(rawValue, fontSize, color, settings = activeTemplate.name) {
     const n = settings;
-    const text = (rawValue || "").toUpperCase() || "NAME";
+    const text = (n.forceUppercase ? (rawValue || "").toUpperCase() : (rawValue || "")) || "NAME";
     const fontFamily = n.fontFamily || "Arial";
     const fontWeight = n.fontWeight || "bold";
     const radius = n.curveRadius;
@@ -679,7 +681,7 @@ function updateNameText(inputEl) {
     let rawVal = inputEl.value;
     if (n.maxChars) rawVal = rawVal.slice(0, n.maxChars);
 
-    const displayVal = rawVal.toUpperCase();
+    const displayVal = n.forceUppercase ? rawVal.toUpperCase() : rawVal;
 
     if (inputEl.value !== rawVal) inputEl.value = rawVal;
 
@@ -722,7 +724,7 @@ function updateNameText2(inputEl) {
     let rawVal = inputEl.value;
     if (n2.maxChars) rawVal = rawVal.slice(0, n2.maxChars);
 
-    const displayVal = rawVal.toUpperCase();
+    const displayVal = n2.forceUppercase ? rawVal.toUpperCase() : rawVal;
 
     if (inputEl.value !== rawVal) inputEl.value = rawVal;
 
