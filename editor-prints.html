@@ -211,6 +211,15 @@
              through a real checkout. Remove this button before going live. -->
         <button id="test-download-btn" class="btn" style="background-color:#1A73E8;" onclick="testDownloadPrintPDFs()">Test: Download Print PDFs</button>
 
+        <!-- TESTING ONLY — only shown for prints with picture variants (see
+             setupVariantSelector()). Downloads ONE PDF containing every
+             variant's front page, each immediately followed by its own
+             logo-only back page — e.g. 2 variants = 4 pages (front A, back,
+             front B, back) — so a single order can be printed as one file
+             covering all the picture options. Remove this button before
+             going live if you don't want a combined download offered. -->
+        <button id="test-download-all-variants-btn" class="btn" style="background-color:#1A73E8; display:none;" onclick="testDownloadAllVariantsPDF()">Test: Download ALL Variants PDF</button>
+
         <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
     </div>
 </div>
@@ -370,7 +379,7 @@ let selectedSize = "A3";
 // ---- Mutable editor state ----
 let canvas, bgImg, nameText, ageText, nameText2, ageText2;
 let extraTexts = [];
-let activeTemplate = null, activeVariantKey = null;
+let activeTemplate = null, activeVariantKey = null, activeTemplateId = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -421,6 +430,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function initEditor(templateKey) {
     activeTemplate = PRINT_TEMPLATES[templateKey];
+    activeTemplateId = templateKey;
     activeVariantKey = templateKey;
     setupVariantSelector(templateKey);
 
@@ -540,6 +550,9 @@ function setupVariantSelector(templateKey) {
     const variants = PRINT_VARIANTS[templateKey];
     const container = $("variant-selector");
     container.innerHTML = "";
+
+    const allVariantsBtn = $("test-download-all-variants-btn");
+    if (allVariantsBtn) allVariantsBtn.style.display = (variants && variants.length > 1) ? "block" : "none";
 
     if (!variants || variants.length < 2) {
         container.style.display = "none";
@@ -888,6 +901,43 @@ function captureFrontPage(multiplier) {
     });
 }
 
+// Same idea as captureFrontPage(), but for a specific picture variant
+// rather than whatever's currently on screen — used to build a combined
+// PDF covering every variant without disturbing the live editor canvas.
+// The background artwork is always canvas object index 0 (it's added
+// first, then sent to back, in loadFrontArtwork()), so swapping just that
+// one entry's `src` in the serialised JSON — before it's loaded into a
+// throwaway export canvas — swaps only the picture; all personalisation
+// (name/age/extra fields, position, colour) comes along unchanged from
+// the live canvas.
+function captureFrontPageForVariant(variantKey, multiplier) {
+    return new Promise((resolve, reject) => {
+        const variantUrl = artUrlFor(variantKey);
+        if (!variantUrl) { reject(new Error(`Unknown print/variant id: ${variantKey}`)); return; }
+
+        const json = canvas.toJSON();
+        if (json.objects && json.objects[0] && json.objects[0].type === 'image') {
+            json.objects[0].src = variantUrl;
+        }
+
+        const exportEl = document.createElement('canvas');
+        const exportCanvas = new fabric.StaticCanvas(exportEl, {
+            width: EDIT_WIDTH, height: EDIT_HEIGHT
+        });
+        exportCanvas.loadFromJSON(json, () => {
+            try {
+                exportCanvas.renderAll();
+                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier });
+                exportCanvas.dispose();
+                resolve(dataUrl);
+            } catch (err) {
+                exportCanvas.dispose();
+                reject(err);
+            }
+        });
+    });
+}
+
 // Builds the fixed, non-editable "page 2" — a plain white page carrying
 // only the Cockney Cards logo, positioned via LOGO_SETTINGS at exactly the
 // same coordinates/scale as the logo on the existing card editor's back
@@ -949,8 +999,10 @@ async function buildPrintReadyPDF(imageDataUrls, mm) {
 // Captures the personalised page straight off the live editor canvas, builds
 // the fixed logo-only page, and combines them into a single two-page
 // print-ready PDF, sized for whichever option (A5/A4/A3) is currently
-// selected. Shared by the real checkout flow and the local test-download
-// button.
+// selected. Used by the "Test: Download Print PDFs" button (single
+// currently-shown variant only) — the real checkout flow uses
+// captureAndBuildAllVariantsPDF() below instead, so every picture variant
+// gets included.
 async function captureAndBuildPrintPDF() {
     const { mm, multiplier } = PRINT_SIZES[selectedSize];
     const frontDataUrl = await captureFrontPage(multiplier);
@@ -981,6 +1033,51 @@ async function testDownloadPrintPDFs() {
     }
 }
 
+// Builds ONE PDF covering every picture variant of the current print, each
+// front page immediately followed by its own logo-only back page — e.g.
+// dinosaurs' 2 variants (base + "dinosauraghh") produce 4 pages: front A,
+// back, front B, back. The logo back page is identical every time, so it's
+// only rendered once and reused. Personalisation (name/age/etc.) is
+// whatever's currently filled in and is carried onto every variant's page,
+// same as captureFrontPageForVariant() already does per-page.
+async function captureAndBuildAllVariantsPDF() {
+    const { mm, multiplier } = PRINT_SIZES[selectedSize];
+    const variantKeys = PRINT_VARIANTS[activeTemplateId] || [activeTemplateId];
+
+    const backDataUrl = await buildBackPageDataUrl(multiplier);
+
+    const pages = [];
+    for (const key of variantKeys) {
+        const frontDataUrl = await captureFrontPageForVariant(key, multiplier);
+        pages.push(frontDataUrl, backDataUrl);
+    }
+
+    return buildPrintReadyPDF(pages, mm);
+}
+
+// TESTING ONLY — downloads a single PDF containing every variant's front
+// page + its own back page (see captureAndBuildAllVariantsPDF() above).
+// Only shown for prints that actually have variants (setupVariantSelector
+// toggles this button's visibility). Remove before going live if you don't
+// want a combined download offered.
+async function testDownloadAllVariantsPDF() {
+    const testBtn = $('test-download-all-variants-btn');
+    const originalText = testBtn.innerText;
+    testBtn.innerText = "Generating...";
+    testBtn.disabled = true;
+
+    try {
+        const doc = await captureAndBuildAllVariantsPDF();
+        doc.save('print-ALL-VARIANTS-TEST.pdf');
+    } catch (err) {
+        console.error(err);
+        alert("Test download failed — check the console for details.");
+    } finally {
+        testBtn.innerText = originalText;
+        testBtn.disabled = false;
+    }
+}
+
 async function uploadAndGoToCheckout() {
     const buyBtn = $('buy-now-btn');
     buyBtn.innerText = "Generating high-res pages...";
@@ -988,7 +1085,12 @@ async function uploadAndGoToCheckout() {
 
     try {
         buyBtn.innerText = "Building print files...";
-        const doc = await captureAndBuildPrintPDF();
+        // Uses the all-variants builder so a print with picture options
+        // (e.g. dinosaurs) sends every variant's front page + its own back
+        // page in one PDF. For a print with no variants this produces the
+        // same single front+back pair as before — PRINT_VARIANTS falls
+        // back to [activeTemplateId] — so this is safe for every print.
+        const doc = await captureAndBuildAllVariantsPDF();
 
         // TODO once the business email address + a serverless email step
         // (e.g. Resend/SendGrid via a Netlify function) are set up: attach
