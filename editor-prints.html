@@ -983,6 +983,19 @@ function captureFrontPageForVariant(variantKey, multiplier) {
             json.objects[0].src = variantUrl;
         }
 
+        // The name field can be restricted to specific variants (see
+        // nameAllowedForVariant/onlyForVariants) — make sure THIS page
+        // shows/hides the name correctly for variantKey, regardless of
+        // whichever variant happens to be live on screen right now (e.g.
+        // when bundling the base page alongside a personalised variant
+        // page in the same PDF).
+        if (nameText) {
+            const nameIndex = canvas.getObjects().indexOf(nameText);
+            if (nameIndex !== -1 && json.objects[nameIndex]) {
+                json.objects[nameIndex].visible = nameAllowedForVariant(variantKey);
+            }
+        }
+
         const exportEl = document.createElement('canvas');
         const exportCanvas = new fabric.StaticCanvas(exportEl, {
             width: EDIT_WIDTH, height: EDIT_HEIGHT
@@ -1096,16 +1109,21 @@ async function testDownloadPrintPDFs() {
     }
 }
 
-// Builds ONE PDF covering every picture variant of the current print, each
-// front page immediately followed by its own logo-only back page — e.g.
-// dinosaurs' 2 variants (base + "dinosauraghh") produce 4 pages: front A,
-// back, front B, back. The logo back page is identical every time, so it's
-// only rendered once and reused. Personalisation (name/age/etc.) is
-// whatever's currently filled in and is carried onto every variant's page,
-// same as captureFrontPageForVariant() already does per-page.
-async function captureAndBuildAllVariantsPDF() {
+// Builds ONE PDF covering a set of picture variants of the current print,
+// each front page immediately followed by its own logo-only back page —
+// e.g. dinosaurs' 2 variants (base + "dinosauraghh") produce 4 pages:
+// front A, back, front B, back. The logo back page is identical every
+// time, so it's only rendered once and reused. Personalisation
+// (name/age/etc.) is whatever's currently filled in and is carried onto
+// every variant's page, same as captureFrontPageForVariant() already does
+// per-page (including per-page name visibility for prints that restrict
+// the name field to specific variants).
+// Pass variantKeysOverride to bundle a specific subset instead of every
+// variant this print has (see uploadAndGoToCheckout()); omit it to use
+// the print's full PRINT_VARIANTS list, as before.
+async function captureAndBuildAllVariantsPDF(variantKeysOverride) {
     const { mm, multiplier } = PRINT_SIZES[selectedSize];
-    const variantKeys = PRINT_VARIANTS[activeTemplateId] || [activeTemplateId];
+    const variantKeys = variantKeysOverride || PRINT_VARIANTS[activeTemplateId] || [activeTemplateId];
 
     const backDataUrl = await buildBackPageDataUrl(multiplier);
 
@@ -1148,18 +1166,25 @@ async function uploadAndGoToCheckout() {
 
     try {
         buyBtn.innerText = "Building print files...";
-        // Prints with picture options (e.g. dinosaurs) normally send every
-        // variant's front page + its own back page in one PDF, since those
-        // variants are meant to be a bundled set. But if the currently
-        // selected variant is one of a print's `name.onlyForVariants` list
-        // (a personalised single option, e.g. mfcduoprints' boy/girl
-        // versions), the customer has picked ONE specific personalised
-        // print — so only that variant's front + back page should be sent,
-        // not the whole bundle.
-        const sendOnlyCurrentVariant = activeTemplate.name?.onlyForVariants?.includes(activeVariantKey);
-        const doc = sendOnlyCurrentVariant
-            ? await captureAndBuildPrintPDF()
-            : await captureAndBuildAllVariantsPDF();
+        // Prints with an unrestricted variant set (e.g. dinosaurs) bundle
+        // every variant together, since those are meant as one set.
+        //
+        // mfcduoprints works differently: the base/full version has no
+        // name field (see `onlyForVariants` on its `name` config) and is
+        // the main design, always sent alongside whichever personalised
+        // variant (boy/girl) is picked — so selecting boy/girl bundles
+        // [base, that variant] = 2 fronts + 2 backs = 4 pages total.
+        // Picking the base/full version on its own (no personalised
+        // variant chosen) just sends that single front + back (2 pages).
+        const restrictedVariants = activeTemplate.name?.onlyForVariants;
+        let doc;
+        if (restrictedVariants) {
+            doc = restrictedVariants.includes(activeVariantKey)
+                ? await captureAndBuildAllVariantsPDF([activeTemplateId, activeVariantKey])
+                : await captureAndBuildPrintPDF();
+        } else {
+            doc = await captureAndBuildAllVariantsPDF();
+        }
 
         // TODO once the business email address + a serverless email step
         // (e.g. Resend/SendGrid via a Netlify function) are set up: attach
