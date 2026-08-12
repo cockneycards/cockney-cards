@@ -131,7 +131,7 @@ const PRINT_CATALOGUE = {
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
         preview: "v1786536695/city-eatsleep-preview_cktda8.png",
-        full: "v1786542481/city-eatsleep_d3j7ca.png",
+        full: "v1786532195/city-eatsleep_d3j7ca.png",
         variants: [
           { id: "cityboy", full: "v1786532198/city-eatsleepboy_ecpyd3.png" },
             { id: "citygirl", full: "v1786532200/city-eatsleepgirl_romiae.png" },
