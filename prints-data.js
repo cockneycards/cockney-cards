@@ -64,7 +64,24 @@ const PRINT_CATALOGUE = {
     // These two used to live in shop-prints.html's own PRODUCTS list —
     // moved here so this file is the one place you edit for either the
     // shop grid or the editor.
-    
+  
+    "mfcduoprints": {
+        title: "MFC Duo Prints - Eat, Sleep, Millwall, Repeat",
+        description: "MFC duo prints that will look great in a bedroom or office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "childrens"],
+        preview: "v1786525808/mfc-eatsleep-preview_a4dou9.png",
+        full: "v1786525879/mfc-eatsleep_psnawt.png",
+        variants: [
+          { id: "millwallboy", full: "v1786525880/mfc-eatsleepboy_l8kozj.png" },
+            { id: "millwallgirl", full: "v1786525879/mfc-eatsleepgirl_mgpc3x.png" },
+        ]
+    },    
    "dinosaurs": {
         title: "Dinosaur Duo",
         description: "Dinosaur duo prints that will look great in a bedroom or office.",
