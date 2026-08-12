@@ -17,6 +17,15 @@
 //   name        — optional. Personalisation settings for a Name field,
 //                 merged onto DEFAULT_NAME_SETTINGS in editor-prints.html.
 //                 Omit entirely if this print has no name personalisation.
+//                 Two extra sub-fields, both optional:
+//                   onlyForVariants — restrict the name field to only show
+//                     for specific picture variants (by their `variants[].id`)
+//                     — e.g. mfcduoprints' name only applies to its
+//                     "millwallboy"/"millwallgirl" variants, not the plain
+//                     base version. Omit to always show the name field.
+//                   shadow — a black/drop shadow behind the typed text, e.g.
+//                     { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 }
+//                     — handy for matching text onto a photographic background.
 //   age         — optional, same idea, for an Age field.
 //   name2, age2 — optional. A SECOND name/age field, for two-person prints
 //                 (e.g. "First Name: / Age: / Second Name: / Age:"). Same
@@ -75,7 +84,10 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "childrens"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9 },
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
+        },
         preview: "v1786525808/mfc-eatsleep-preview_a4dou9.png",
         full: "v1786525879/mfc-eatsleep_psnawt.png",
         variants: [
