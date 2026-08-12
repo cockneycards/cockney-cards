@@ -33,6 +33,8 @@
 //   title       — required to appear in the shop. Entries WITHOUT a title
 //                 (like the reference examples below) are skipped by
 //                 shop-prints.html — they only exist for the editor.
+//   description — required to appear in the shop (mirrors cards-data.js).
+//                 A short one- or two-sentence blurb about the print.
 //   sizes       — required. Per-size pricing, one entry per size the print
 //                 is sold at:
 //                   sizes: {
@@ -65,6 +67,7 @@ const PRINT_CATALOGUE = {
     
    "dinosaurs": {
         title: "Dinosaur Duo",
+        description: "A fun dinosaur print for little dino-lovers, personalised with their name.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -80,6 +83,7 @@ const PRINT_CATALOGUE = {
     },    
     "itsnotwhatwehave": {
         title: "It's Not What We Have In Life...",
+        description: "A heartfelt black & white quote print about family, love, and togetherness.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -92,6 +96,7 @@ const PRINT_CATALOGUE = {
     },
     "underthesea": {
         title: "Under The Sea",
+        description: "A colourful under-the-sea print for kids, personalised with their name.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -109,6 +114,7 @@ const PRINT_CATALOGUE = {
     },
     "oasis-dontlookback": {
         title: "Oasis - Dont Look Back...",
+        description: "A classic Britpop-inspired print for Oasis fans.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -121,6 +127,7 @@ const PRINT_CATALOGUE = {
     },
     "wham-massive": {
         title: "West Ham Are Massive!",
+        description: "A bold print for West Ham fans, celebrating the Irons.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -133,6 +140,7 @@ const PRINT_CATALOGUE = {
     },
     "mfc-stone": {
         title: "MFC Stone Island",
+        description: "A stylish sports-casual print for fans of the terrace look.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -145,6 +153,7 @@ const PRINT_CATALOGUE = {
     },
     "mfc-boy1": {
         title: "MFC Boy 1",
+        description: "A personalised football print for boys, add their name and shirt number.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -159,6 +168,7 @@ const PRINT_CATALOGUE = {
     },
     "mfc-boy2": {
         title: "MFC Boy 2",
+        description: "A personalised football print for boys, add their name and shirt number.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -173,6 +183,7 @@ const PRINT_CATALOGUE = {
     },
     "afc-boy1": {
         title: "AFC Boy 1",
+        description: "A personalised football print for boys, add their name and shirt number.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -187,6 +198,7 @@ const PRINT_CATALOGUE = {
     },
     "afc-boy2": {
         title: "AFC Boy 2",
+        description: "A personalised football print for boys, add their name and shirt number.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -201,6 +213,7 @@ const PRINT_CATALOGUE = {
     },
     "afc-boy3": {
         title: "AFC Boy 3",
+        description: "A personalised football print for boys, add their name and shirt number.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -215,6 +228,7 @@ const PRINT_CATALOGUE = {
     },
     "afc-girl1": {
         title: "AFC Girl 1",
+        description: "A personalised football print for girls, add their name and shirt number.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
@@ -229,6 +243,7 @@ const PRINT_CATALOGUE = {
     },
     "afc-girl2": {
         title: "AFC Girl 2",
+        description: "A personalised football print for girls, add their name and shirt number.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£4.99", priceValue: 4.99 },
