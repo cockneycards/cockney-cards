@@ -74,9 +74,9 @@ const PRINT_CATALOGUE = {
     // moved here so this file is the one place you edit for either the
     // shop grid or the editor.
 
-  "mfcduoprints": {
-        title: "MFC Prints - Eat, Sleep, Millwall, Repeat",
-        description: "MFC duo prints that will look great in a bedroom or office.",
+  "arsenal-eatsleep": {
+        title: "Arsenal Prints - Eat, Sleep, Arsenal, Repeat",
+        description: "Arsenal duo prints that will look great in a bedroom or office.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -85,19 +85,19 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
-            onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            onlyForVariants: ["arsenalboy", "arsenalgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
         },
-        preview: "v1786525808/mfc-eatsleep-preview_a4dou9.png",
-        full: "v1786525879/mfc-eatsleep_psnawt.png",
+        preview: "v1786536693/afc-eatsleep-preview_rrtfve.png",
+        full: "v1786532185/afc-eatsleep_trxugb.png",
         variants: [
-          { id: "millwallboy", full: "v1786525880/mfc-eatsleepboy_l8kozj.png" },
-            { id: "millwallgirl", full: "v1786525879/mfc-eatsleepgirl_mgpc3x.png" },
+          { id: "arsenalboy", full: "v1786532182/afc-eatsleepboy_kbfdah.png" },
+            { id: "arsenalgirl", full: "v1786532183/afc-eatsleepgirl_eljiif.png" },
         ]
     },
-    "mfcduoprints": {
-        title: "MFC Prints - Eat, Sleep, Millwall, Repeat",
-        description: "MFC duo prints that will look great in a bedroom or office.",
+    "city-eatsleep": {
+        title: "Manchester City Prints - Eat, Sleep, City, Repeat",
+        description: "Manchester City duo prints that will look great in a bedroom or office.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -106,19 +106,19 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
-            onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            onlyForVariants: ["cityboy", "citygirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
         },
-        preview: "v1786525808/mfc-eatsleep-preview_a4dou9.png",
-        full: "v1786525879/mfc-eatsleep_psnawt.png",
+        preview: "v1786536695/city-eatsleep-preview_cktda8.png",
+        full: "v1786532195/city-eatsleep_d3j7ca.png",
         variants: [
-          { id: "millwallboy", full: "v1786525880/mfc-eatsleepboy_l8kozj.png" },
-            { id: "millwallgirl", full: "v1786525879/mfc-eatsleepgirl_mgpc3x.png" },
+          { id: "cityboy", full: "v1786532198/city-eatsleepboy_ecpyd3.png" },
+            { id: "citygirl", full: "v1786532200/city-eatsleepgirl_romiae.png" },
         ]
     },
-    "mfcduoprints": {
-        title: "MFC Prints - Eat, Sleep, Millwall, Repeat",
-        description: "MFC duo prints that will look great in a bedroom or office.",
+    "chelsea-eatsleep": {
+        title: "Chelsea Prints - Eat, Sleep, Chelsea, Repeat",
+        description: "Chelsea duo prints that will look great in a bedroom or office.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -127,14 +127,14 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
-            onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            onlyForVariants: ["chelseaboy", "chelseagirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,0.75)", blur: 6, offsetX: 3, offsetY: 3 } // black drop shadow, to match the football player artwork
         },
-        preview: "v1786525808/mfc-eatsleep-preview_a4dou9.png",
-        full: "v1786525879/mfc-eatsleep_psnawt.png",
+        preview: "v1786536692/chelsea-eatsleep-preview_uivgav.png",
+        full: "v1786532189/chelsea-eatsleep_iqyj3n.png",
         variants: [
-          { id: "millwallboy", full: "v1786525880/mfc-eatsleepboy_l8kozj.png" },
-            { id: "millwallgirl", full: "v1786525879/mfc-eatsleepgirl_mgpc3x.png" },
+          { id: "chelseaboy", full: "v1786532188/chelsea-eatsleepboy_mcvzgh.png" },
+            { id: "chelseagirl", full: "v1786532186/chelsea-eatsleepgirl_lcgmib.png" },
         ]
     },
     "united-eatsleep": {
