@@ -62,6 +62,21 @@ const PRINT_CATALOGUE = {
     // These two used to live in shop-prints.html's own PRODUCTS list —
     // moved here so this file is the one place you edit for either the
     // shop grid or the editor.
+    
+   "dinosaurs": {
+        title: "Dinosaur Duo",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "childrens"],
+        full: "v1786517645/dinosaurwoof_tojwk7.png",
+        variants: [
+          { id: "dinosauraghh", full: "v1786517644/dinosauraghh_pfrkfd.png" },
+        ]
+    },    
     "itsnotwhatwehave": {
         title: "It's Not What We Have In Life...",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
