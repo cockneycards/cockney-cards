@@ -134,10 +134,11 @@ const CARD_CATALOGUE = {
   
   "drivingtest-boy1": { title: "Driving Test Pass Boy", description: "Celebrate passing their driving test with this fun congratulations card.", categories: ["all", "for-him", "achievements"], preview: "v1784209464/drivingtest-boy1-preview_mcgers.png", full: "v1784208057/drivingtest-boy1_icejra.png",
     variants: [
-      { id: "drivingtest-boy1-brown", full: "v1784208056/drivingtest-boy2_sujafv.png" },
+      { id: "drivingtest-boy1-brown", full: "v1786626776/drivingtest-boy3_fcltjx.png" },
       { id: "drivingtest-boy1-blonde", full: "v1786367581/drivingtest-boy2_afyn7b.png" },
     ] },                   
   "drivingtest-boy3": { title: "Driving Pass Congratulations", description: "Celebrate passing their driving test with this fun congratulations card.", categories: ["all", "for-him", "achievements"], preview: "v1784209469/drivingtest-boy3-preview_eek6cj.png", full: "v1784208062/drivingtest-boy3_sqejou.png" },
+  
   "drivingtest-girl1": { title: "Driving Test Pass Girl", description: "Celebrate passing their driving test with this fun congratulations card.", categories: ["all", "for-her", "achievements"], preview: "v1784209469/drivingtest-girl1-preview_ilpeaq.png", full: "v1784206064/drivingtest-girl1_hw1a1t.png",
     variants: [
       { id: "drivingtest-girl1-brown", full: "v1784206066/drivingtest-girl3_ocrrvd.png" },
