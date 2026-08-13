@@ -76,7 +76,7 @@ const PRINT_CATALOGUE = {
 
   "millwall-eatsleep": {
         title: "Millwall Prints - Eat, Sleep, Millwall, Repeat",
-        description: "Millwall duo prints that will look great in a bedroom or office.",
+        description: "Millwall duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -97,7 +97,7 @@ const PRINT_CATALOGUE = {
     },
     "arsenal-eatsleep": {
         title: "Arsenal Prints - Eat, Sleep, Arsenal, Repeat",
-        description: "Arsenal duo prints that will look great in a bedroom or office.",
+        description: "Arsenal duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -118,7 +118,7 @@ const PRINT_CATALOGUE = {
     },
     "city-eatsleep": {
         title: "Manchester City Prints - Eat, Sleep, City, Repeat",
-        description: "Manchester City duo prints that will look great in a bedroom or office.",
+        description: "Manchester City duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -139,7 +139,7 @@ const PRINT_CATALOGUE = {
     },
     "chelsea-eatsleep": {
         title: "Chelsea Prints - Eat, Sleep, Chelsea, Repeat",
-        description: "Chelsea duo prints that will look great in a bedroom or office.",
+        description: "Chelsea duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -160,7 +160,7 @@ const PRINT_CATALOGUE = {
     },
     "united-eatsleep": {
         title: "Manchester United Prints - Eat, Sleep, United, Repeat",
-        description: "Manchester United duo prints that will look great in a bedroom or office.",
+        description: "Manchester United duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
