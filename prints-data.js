@@ -84,7 +84,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
@@ -105,7 +105,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["arsenalboy", "arsenalgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
@@ -126,7 +126,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["cityboy", "citygirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
@@ -147,7 +147,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["chelseaboy", "chelseagirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
@@ -168,7 +168,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
             onlyForVariants: ["unitedboy", "unitedgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
