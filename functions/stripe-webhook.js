@@ -4,6 +4,10 @@
 // webhook once a customer has actually paid, pulls the matching print-ready
 // PDF back out of KV (stashed there by create-checkout.js /
 // create-checkout-print.js), and emails it to the business inbox via Resend.
+// It also writes a row to D1 (the same database account.html/orders.html
+// use) so logged-in customers can see their own order history — Checkout
+// Sessions here have no persistent Stripe Customer object to key off, so
+// the customer's email is the link between a Stripe order and their account.
 //
 // This only fires on confirmed payment — nothing is emailed for abandoned
 // or cancelled checkouts.
@@ -12,6 +16,9 @@
 //   STRIPE_WEBHOOK_SECRET  - from the Stripe Dashboard webhook endpoint
 //   RESEND_API_KEY         - from resend.com
 // Requires the same ORDER_PDFS KV binding as the two create-checkout* functions.
+// Requires a DB (D1) binding pointing at the same cockney-cards-db used by
+// the account/reminders Worker — add it under Pages > Settings > Functions
+// > D1 database bindings, variable name "DB".
 //
 // Setup: in the Stripe Dashboard > Developers > Webhooks, add an endpoint
 // pointing at https://cockneycards.com/stripe-webhook, subscribed to the
@@ -41,16 +48,44 @@ export async function onRequestPost(context) {
         const session = event.data.object;
         const meta = session.metadata || {};
         const orderId = meta.order_id;
+        const customerEmail = session.customer_details?.email || null;
 
         let pdfDataUri = null;
         if (orderId) {
             pdfDataUri = await env.ORDER_PDFS.get(orderId);
         }
 
+        // Record the order in D1 first — this is what powers "My Orders",
+        // and we want it saved even if the email send below fails.
+        try {
+            if (customerEmail) {
+                await env.DB.prepare(
+                    `INSERT OR IGNORE INTO orders
+                        (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, created_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                ).bind(
+                    session.id,
+                    customerEmail.toLowerCase(),
+                    meta.product_type || null,
+                    meta.custom_name || null,
+                    meta.custom_age || null,
+                    meta.custom_name2 || null,
+                    meta.custom_age2 || null,
+                    meta.size || null,
+                    session.amount_total ?? null,
+                    session.created ? session.created * 1000 : Date.now()
+                ).run();
+            } else {
+                console.error('Stripe webhook: no customer email on session, order not recorded in D1', session.id);
+            }
+        } catch (err) {
+            console.error('Failed to write order to D1:', err);
+        }
+
         try {
             await sendOrderEmail(env, {
                 productType: meta.product_type || 'unknown',
-                customerEmail: session.customer_details?.email || 'N/A',
+                customerEmail: customerEmail || 'N/A',
                 amountTotal: session.amount_total,
                 name: meta.custom_name,
                 age: meta.custom_age,
