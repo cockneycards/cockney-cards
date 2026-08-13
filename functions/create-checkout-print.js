@@ -35,6 +35,12 @@ export async function onRequestPost(context) {
         params.append('mode', 'payment');
         params.append('success_url', `${origin}/?status=success`);
         params.append('cancel_url', `${origin}/?status=cancel`);
+        // Pre-fills Stripe's checkout email field when the customer is
+        // logged into their Cockney Cards account — see create-checkout.js
+        // for why this matters (matches orders to accounts by email).
+        if (data.customerEmail) {
+            params.append('customer_email', data.customerEmail);
+        }
         params.append('line_items[0][price_data][currency]', 'gbp');
         params.append(
             'line_items[0][price_data][product_data][name]',
