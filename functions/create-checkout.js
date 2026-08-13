@@ -34,6 +34,14 @@ export async function onRequestPost(context) {
         params.append('mode', 'payment');
         params.append('success_url', `${origin}/?status=success`);
         params.append('cancel_url', `${origin}/?status=cancel`);
+        // Pre-fills Stripe's checkout email field when the customer is
+        // logged into their Cockney Cards account — makes it far more
+        // likely the order lands under the same email as their account,
+        // since that's how "My Orders" matches things up (see
+        // stripe-webhook.js). Guest checkout still works fine without it.
+        if (data.customerEmail) {
+            params.append('customer_email', data.customerEmail);
+        }
         params.append('line_items[0][price_data][currency]', 'gbp');
         params.append(
             'line_items[0][price_data][product_data][name]',
