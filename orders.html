@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders | Cockney Cards</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="auth.js"></script>
 
     <style>
         :root {
@@ -222,7 +222,7 @@
             </div>
             
             <div class="header-right">
-                <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
+                <button id="login-button" class="login-btn">👤 Log In</button>
                 <div class="cart-icon">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -238,6 +238,7 @@
                 <li><a href="shop-cards.html">Shop Cards</a></li>
                 <li><a href="shop-prints.html">Shop Prints</a></li>
                 <li><a href="#" id="my-orders-link" class="active" onclick="handleMyOrdersClick(event)">My Orders</a></li>
+            <li><a href="account.html">My Account</a></li>
             </ul>
         </nav>
     </header>
@@ -278,32 +279,30 @@
     </footer>
 
     <script>
+        // Point this at your deployed Worker URL (same as account.html)
+        const API_BASE = "https://cockney-cards-api.YOUR-SUBDOMAIN.workers.dev";
+
         window.addEventListener('DOMContentLoaded', () => {
-            netlifyIdentity.on('init', user => {
-                updateLoginUI(user);
-                fetchOrders(user);
-            });
-            netlifyIdentity.on('login', user => {
-                updateLoginUI(user);
-                fetchOrders(user);
-                netlifyIdentity.close();
-            });
-            netlifyIdentity.on('logout', () => {
-                updateLoginUI(null);
+            ccUpdateLoginUI();
+            if (ccIsLoggedIn()) {
+                fetchOrders();
+            } else {
                 document.getElementById("orders-list").innerHTML = '<p style="color: #666; font-size: 14px;">Log in to view past order activities.</p>';
-            });
+            }
         });
 
-        async function fetchOrders(user) {
-            if (!user) return;
+        async function fetchOrders() {
             const container = document.getElementById("orders-list");
             container.innerHTML = "<p>Retrieving purchase histories...</p>";
 
             try {
-                // Fetch dynamic Stripe metadata list from Netlify secure functions
-                const response = await fetch('/.netlify/functions/get-orders', {
-                    headers: { 'Authorization': `Bearer ${user.token.access_token}` }
+                const response = await fetch(`${API_BASE}/api/orders`, {
+                    headers: { 'Authorization': `Bearer ${ccGetSession()}` }
                 });
+                if (response.status === 401) {
+                    container.innerHTML = '<p style="color: #666; font-size: 14px;">Log in to view past order activities.</p>';
+                    return;
+                }
                 const orders = await response.json();
 
                 if (orders.length === 0) {
@@ -314,18 +313,33 @@
                 container.innerHTML = "";
                 orders.forEach(order => {
                     const formattedDate = new Date(order.created * 1000).toLocaleDateString();
+                    const isPrint = order.product_type === 'print';
+                    const priceLine = typeof order.amount_total === 'number'
+                        ? `£${(order.amount_total / 100).toFixed(2)}`
+                        : 'N/A';
+
+                    const detailLines = isPrint
+                        ? `
+                            <p style="margin:0 0 5px 0;"><strong>Print Size:</strong> ${order.size || 'N/A'}</p>
+                            <p style="margin:0 0 5px 0;"><strong>Name:</strong> ${order.name || 'N/A'}${order.age && order.age !== 'N/A' ? ` (${order.age})` : ''}</p>
+                            ${order.name2 && order.name2 !== 'N/A' ? `<p style="margin:0 0 5px 0;"><strong>Name 2:</strong> ${order.name2}${order.age2 && order.age2 !== 'N/A' ? ` (${order.age2})` : ''}</p>` : ''}
+                        `
+                        : `
+                            <p style="margin:0 0 5px 0;"><strong>Card Name:</strong> ${order.name || 'N/A'}</p>
+                            <p style="margin:0;"><strong>Age:</strong> ${order.age || 'N/A'}</p>
+                        `;
+
                     const orderItem = `
                         <div class="order-card">
                             <div class="order-header">
-                                <span>Order No: ${order.id.substring(3, 12).toUpperCase()}</span>
+                                <span>Order No: ${order.id.slice(-12).toUpperCase()}</span>
                                 <span>Date: ${formattedDate}</span>
                             </div>
                             <div class="order-details">
-                                <img src="${order.outsideImageUrl || 'https://via.placeholder.com/150'}" alt="Card preview">
                                 <div class="order-info">
-                                    <p style="margin:0 0 5px 0;"><strong>Card Name:</strong> ${order.name}</p>
-                                    <p style="margin:0 0 5px 0;"><strong>Custom Name Added:</strong> ${order.custom_text || 'N/A'}</p>
-                                    <p style="margin:0;"><strong>Age:</strong> ${order.custom_age || 'N/A'}</p>
+                                    <p style="margin:0 0 5px 0;"><strong>Item:</strong> ${isPrint ? 'Photo Print' : 'Personalised Card'}</p>
+                                    ${detailLines}
+                                    <p style="margin:0;"><strong>Paid:</strong> ${priceLine}</p>
                                 </div>
                             </div>
                         </div>
@@ -335,28 +349,6 @@
 
             } catch (err) {
                 container.innerHTML = '<p style="color: red; font-size: 13px;">Error fetching order metadata.</p>';
-            }
-        }
-
-        function updateLoginUI(user) {
-            const loginBtn = document.getElementById("login-button");
-            if (user) {
-                loginBtn.innerHTML = "👤 Log Out";
-                loginBtn.setAttribute("onclick", "netlifyIdentity.logout()");
-            } else {
-                loginBtn.innerHTML = "👤 Log In";
-                loginBtn.setAttribute("onclick", "netlifyIdentity.open()");
-            }
-        }
-
-        function handleMyOrdersClick(event) {
-            event.preventDefault();
-            const currentUser = netlifyIdentity.currentUser();
-            if (currentUser) {
-                window.location.href = "orders.html";
-            } else {
-                alert("Please log in to view your order history.");
-                netlifyIdentity.open('login');
             }
         }
     </script>
