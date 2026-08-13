@@ -178,7 +178,20 @@ const PRINT_CATALOGUE = {
           { id: "unitedboy", full: "v1786532196/united-eatsleepboy_ljmjd8.png" },
             { id: "unitedgirl", full: "v1786532191/united-eatsleepgirl_cvlkj4.png" },
         ]
-    },    
+    },   
+    "houserules": {
+        title: "Dog's House Rules",
+        description: "Based on a quote from the film Turner & Hooch. Great for all Dog lover's.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "b&w"],
+        preview: "v1786542740/houserules-preview_tv9joy.png",
+        full: "v1786542740/houserules-preview_tv9joy.png"
+    },
    "dinosaurs": {
         title: "Dinosaur Duo",
         description: "Dinosaur duo prints that will look great in a bedroom or office.",
