@@ -1166,12 +1166,12 @@ async function uploadAndGoToCheckout() {
         buyBtn.innerText = "Building print files...";
         const doc = await captureAndBuildPrintPDF();
 
-        // TODO once the business email address + a serverless email step
-        // (e.g. Resend/SendGrid via a Netlify function) are set up: attach
-        // doc.output('datauristring') to the request below so create-checkout
-        // can email the print-ready PDF to the business inbox after payment
-        // succeeds. For now, nothing is uploaded or emailed — use the
-        // "Test: Download Print PDFs" button to check the PDF locally.
+        // The print-ready PDF is handed to create-checkout, which stashes
+        // it in KV until Stripe confirms payment — stripe-webhook.js then
+        // emails it to the business inbox. Nothing is emailed until payment
+        // actually succeeds. Use "Test: Download Print PDFs" to check the
+        // PDF locally without going through checkout.
+        const pdfDataUri = doc.output('datauristring');
 
         buyBtn.innerText = "Connecting checkout...";
 
@@ -1181,10 +1181,11 @@ async function uploadAndGoToCheckout() {
             extraFields: (activeTemplate.extraFields || []).reduce((acc, f, i) => {
                 acc[f.key || f.label || `field${i}`] = $(`extra-input-${i}`)?.value || "";
                 return acc;
-            }, {})
+            }, {}),
+            pdfDataUri
         };
 
-        const response = await fetch('/.netlify/functions/create-checkout', {
+        const response = await fetch('/create-checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(checkoutData)
