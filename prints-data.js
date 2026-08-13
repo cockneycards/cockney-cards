@@ -189,7 +189,7 @@ const PRINT_CATALOGUE = {
             A3: { price: "£9.99", priceValue: 9.99 }
         },
         categories: ["all", "b&w"],
-        preview: "v1786542740/houserules-preview_tv9joy.png",
+        preview: "v1786542901/doghouserules-preview_iwabv0.png",
         full: "v1786542740/houserules-preview_tv9joy.png"
     },
    "dinosaurs": {
