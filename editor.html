@@ -581,7 +581,7 @@ function setupVariantSelector(templateKey) {
         btn.className = "variant-thumb" + (key === activeVariantKey ? " active" : "");
         btn.dataset.key = key;
         btn.title = key;
-        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}">`;
+        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}" crossorigin="anonymous">`;
         btn.onclick = () => selectVariant(key);
         container.appendChild(btn);
     });
