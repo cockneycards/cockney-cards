@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop Cards | Cockney Cards</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="auth.js"></script>
     <script src="cards-data.js"></script>
 
     <style>
@@ -108,7 +108,7 @@
             <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
         </div>
         <div class="header-right">
-            <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
+            <button id="login-button" class="login-btn">👤 Log In</button>
             <div class="cart-icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -233,12 +233,6 @@ window.addEventListener('DOMContentLoaded', () => {
         filterProducts('all');
     }
 
-    netlifyIdentity.on('init', (user) => updateLoginUI(user));
-    netlifyIdentity.on('login', (user) => {
-        updateLoginUI(user);
-        netlifyIdentity.close();
-    });
-    netlifyIdentity.on('logout', () => updateLoginUI(null));
 });
 
 // Covers the case where the browser restores this page from bfcache
@@ -569,20 +563,7 @@ function goToEditor(productId) {
     window.location.href = `editor.html?card=${productId}`;
 }
 
-function updateLoginUI(user) {
-    const loginBtn = $("login-button");
-    loginBtn.innerHTML = user ? "👤 Log Out" : "👤 Log In";
-    loginBtn.setAttribute("onclick", user ? "netlifyIdentity.logout()" : "netlifyIdentity.open()");
-}
 
-function handleMyOrdersClick(event) {
-    event.preventDefault();
-    if (netlifyIdentity.currentUser()) {
-        window.location.href = "orders.html";
-    } else {
-        alert("Please log in to view your order history.");
-        netlifyIdentity.open('login');
-    }
 }
 </script>
 </body>
