@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | Cockney Cards</title>
+
+    <style>
+        :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --font-family: 'Helvetica Neue', Arial, sans-serif; }
+        body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #fcfcfc; color: var(--dark); }
+
+        header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+        .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+        .logo-container { text-align: center; }
+        .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+        nav { margin-top: 15px; text-align: center; }
+        .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+        .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+        .nav-links a:hover { color: #888; }
+        .nav-links a.active { font-weight: bold; }
+
+        .account-container { max-width: 700px; margin: 50px auto; padding: 0 20px; min-height: 400px; }
+        .account-container h1 { font-size: 26px; font-weight: 300; letter-spacing: 0.5px; margin-bottom: 10px; }
+        .account-container p.lead { font-size: 13px; color: #666; margin-bottom: 30px; }
+
+        .card { background: white; border: 1px solid var(--border-color); padding: 25px; border-radius: 6px; margin-bottom: 25px; }
+
+        .login-form input { width: 100%; box-sizing: border-box; padding: 12px; font-size: 14px; border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 12px; }
+        .btn { background-color: #1a1a1a; color: white; border: none; padding: 12px 20px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 4px; }
+        .btn:hover { background-color: #444; }
+        .btn-secondary { background: none; border: 1px solid var(--border-color); color: #555; }
+        .btn-secondary:hover { background: #f5f5f5; color: #111; }
+        .status-msg { font-size: 13px; margin-top: 10px; }
+        .status-msg.error { color: #c0392b; }
+        .status-msg.success { color: #1a7a3c; }
+
+        .reminder-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .reminder-row:last-child { border-bottom: none; }
+        .reminder-info strong { display: block; }
+        .reminder-info span { font-size: 12px; color: #888; }
+        .delete-btn { background: none; border: none; color: #c0392b; cursor: pointer; font-size: 12px; text-decoration: underline; }
+
+        .add-form { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr auto; gap: 10px; align-items: end; margin-top: 20px; }
+        .add-form div { display: flex; flex-direction: column; }
+        .add-form label { font-size: 11px; color: #666; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .add-form input, .add-form select { padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; font-family: var(--font-family); }
+
+        @media (max-width: 700px) {
+            .add-form { grid-template-columns: 1fr 1fr; }
+        }
+
+        #logged-out-view, #logged-in-view { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="orders.html">My Orders</a></li>
+            <li><a href="account.html" class="active">My Account</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="account-container">
+
+    <!-- LOGGED OUT: request magic link -->
+    <div id="logged-out-view">
+        <h1>My Account</h1>
+        <p class="lead">Log in to manage your saved birthdays and reminders.</p>
+        <div class="card login-form">
+            <input type="email" id="email-input" placeholder="you@example.com" autocomplete="email">
+            <button class="btn" onclick="requestLink()">Email Me a Login Link</button>
+            <div id="login-status" class="status-msg"></div>
+        </div>
+    </div>
+
+    <!-- LOGGED IN: reminders calendar -->
+    <div id="logged-in-view">
+        <h1>My Reminders</h1>
+        <p class="lead">Add birthdays and important dates for friends and family — we'll email you a reminder 2 weeks before, every year.</p>
+
+        <div class="card">
+            <div id="reminders-list"><p style="color:#888; font-size:13px;">Loading...</p></div>
+
+            <div class="add-form">
+                <div>
+                    <label>Who / What</label>
+                    <input type="text" id="new-name" placeholder="e.g. Mum's Birthday">
+                </div>
+                <div>
+                    <label>Relationship (optional)</label>
+                    <input type="text" id="new-relationship" placeholder="e.g. Mum">
+                </div>
+                <div>
+                    <label>Month</label>
+                    <select id="new-month"></select>
+                </div>
+                <div>
+                    <label>Day</label>
+                    <select id="new-day"></select>
+                </div>
+                <button class="btn" onclick="addReminder()">Add</button>
+            </div>
+            <div id="add-status" class="status-msg"></div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="logout()">Log Out</button>
+    </div>
+
+</div>
+
+<script>
+    // Point this at your deployed Worker URL
+    const API_BASE = "https://old-bush-4d25cockney-cards-api.cockneycards.workers.dev";
+
+    const $ = (id) => document.getElementById(id);
+    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+    function getSessionToken() { return localStorage.getItem("cc_session"); }
+    function setSessionToken(t) { localStorage.setItem("cc_session", t); }
+    function clearSessionToken() { localStorage.removeItem("cc_session"); localStorage.removeItem("cc_email"); }
+
+    function populateDateSelects() {
+        const monthSel = $("new-month");
+        MONTHS.forEach((m, i) => {
+            const opt = document.createElement("option");
+            opt.value = i + 1;
+            opt.textContent = m;
+            monthSel.appendChild(opt);
+        });
+        const daySel = $("new-day");
+        for (let d = 1; d <= 31; d++) {
+            const opt = document.createElement("option");
+            opt.value = d;
+            opt.textContent = d;
+            daySel.appendChild(opt);
+        }
+    }
+
+    async function requestLink() {
+        const email = $("email-input").value.trim();
+        const statusEl = $("login-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+
+        if (!email) {
+            statusEl.textContent = "Please enter your email.";
+            statusEl.classList.add("error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/request-link`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            statusEl.textContent = "Check your email for a login link!";
+            statusEl.classList.add("success");
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+        }
+    }
+
+    async function verifyTokenFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            setSessionToken(data.sessionToken);
+            localStorage.setItem("cc_email", data.email);
+            window.history.replaceState({}, document.title, "account.html");
+            return true;
+        } catch (err) {
+            $("login-status").textContent = err.message;
+            $("login-status").classList.add("error");
+            return false;
+        }
+    }
+
+    async function loadReminders() {
+        const listEl = $("reminders-list");
+        try {
+            const res = await fetch(`${API_BASE}/api/reminders`, {
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            if (res.status === 401) { showLoggedOut(); return; }
+            const data = await res.json();
+
+            if (!data.reminders.length) {
+                listEl.innerHTML = '<p style="color:#888; font-size:13px;">No reminders saved yet — add one below.</p>';
+                return;
+            }
+
+            listEl.innerHTML = data.reminders.map(r => `
+                <div class="reminder-row">
+                    <div class="reminder-info">
+                        <strong>${r.occasion_name}</strong>
+                        <span>${MONTHS[r.month - 1]} ${r.day}${r.relationship ? " · " + r.relationship : ""}</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteReminder('${r.id}')">Remove</button>
+                </div>
+            `).join("");
+        } catch (err) {
+            listEl.innerHTML = '<p style="color:red; font-size:13px;">Could not load reminders.</p>';
+        }
+    }
+
+    async function addReminder() {
+        const statusEl = $("add-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+
+        const occasion_name = $("new-name").value.trim();
+        const relationship = $("new-relationship").value.trim();
+        const month = $("new-month").value;
+        const day = $("new-day").value;
+
+        if (!occasion_name) {
+            statusEl.textContent = "Please give it a name.";
+            statusEl.classList.add("error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/reminders`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${getSessionToken()}` },
+                body: JSON.stringify({ occasion_name, relationship, month, day })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+
+            $("new-name").value = "";
+            $("new-relationship").value = "";
+            loadReminders();
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+        }
+    }
+
+    async function deleteReminder(id) {
+        await fetch(`${API_BASE}/api/reminders/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${getSessionToken()}` }
+        });
+        loadReminders();
+    }
+
+    function logout() {
+        clearSessionToken();
+        showLoggedOut();
+    }
+
+    function showLoggedOut() {
+        $("logged-out-view").style.display = "block";
+        $("logged-in-view").style.display = "none";
+    }
+
+    function showLoggedIn() {
+        $("logged-out-view").style.display = "none";
+        $("logged-in-view").style.display = "block";
+        loadReminders();
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        populateDateSelects();
+        const justLoggedIn = await verifyTokenFromUrl();
+        if (justLoggedIn || getSessionToken()) {
+            showLoggedIn();
+        } else {
+            showLoggedOut();
+        }
+    });
+</script>
+</body>
+</html>
