@@ -79,7 +79,7 @@
 <header>
     <div class="header-top">
         <div class="logo-container" onclick="window.location.href='index.html';">
-            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
         </div>
         <div class="header-right">
             <button id="login-button" class="login-btn" onclick="netlifyIdentity.open()">👤 Log In</button>
@@ -97,6 +97,7 @@
             <li><a href="shop-cards.html">Shop Cards</a></li>
             <li><a href="shop-prints.html">Shop Prints</a></li>
             <li><a href="#" id="my-orders-link" onclick="handleMyOrdersClick(event)">My Orders</a></li>
+            <li><a href="account.html">My Account</a></li>
         </ul>
     </nav>
 </header>
@@ -107,14 +108,14 @@
     <div class="gallery-grid">
         <div class="gallery-column">
             <div class="gallery-item large-box" onclick="goToPrintsShop()">
-                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png" alt="Millwall Dad and Son Print" class="gallery-img">
+                <img src="https://images.cockneycards.com/millwall-dad-son_e48hgt.png" alt="Millwall Dad and Son Print" class="gallery-img">
             </div>
             <div class="gallery-row">
                 <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784209442/tvmovies-ofah_preview_f21tnx.png" alt="Only Fools and Horses Card" class="gallery-img">
+                    <img src="https://images.cockneycards.com/tvmovies-ofah_preview_f21tnx.png" alt="Only Fools and Horses Card" class="gallery-img">
                 </div>
                 <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784209447/leaving-girl1-preview_awpheh.png" alt="Sorry You're Leaving Card" class="gallery-img">
+                    <img src="https://images.cockneycards.com/leaving-girl1-preview_awpheh.png" alt="Sorry You're Leaving Card" class="gallery-img">
                 </div>
             </div>
         </div>
@@ -122,27 +123,27 @@
         <div class="gallery-column">
             <div class="gallery-row">
                 <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784209503/thankyou-teacher-preview_j609g7.png" alt="Thank You Teacher Card" class="gallery-img">
+                    <img src="https://images.cockneycards.com/thankyou-teacher-preview_j609g7.png" alt="Thank You Teacher Card" class="gallery-img">
                 </div>
                 <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784209436/ladies-lunch-preview_apknm3.png" alt="Ladies Lunch Card" class="gallery-img">
+                    <img src="https://images.cockneycards.com/ladies-lunch-preview_apknm3.png" alt="Ladies Lunch Card" class="gallery-img">
                 </div>
             </div>
             <div class="gallery-item large-box logo-bg">
-                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098369/lion_smdinc.png" alt="Cockney Cards Logo Lion" class="gallery-img logo-img">
+                <img src="https://images.cockneycards.com/lion_smdinc.png" alt="Cockney Cards Logo Lion" class="gallery-img logo-img">
             </div>
         </div>
 
         <div class="gallery-column">
             <div class="gallery-item large-box" onclick="goToPrintsShop()">
-                <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png" alt="Bermondsey Legend Print" class="gallery-img">
+                <img src="https://images.cockneycards.com/you-can-take_cbses4.png" alt="Bermondsey Legend Print" class="gallery-img">
             </div>
             <div class="gallery-row">
                 <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784209529/gamer-boy-preview_zanxij.png" alt="Gamer Boy Card" class="gallery-img">
+                    <img src="https://images.cockneycards.com/gamer-boy-preview_zanxij.png" alt="Gamer Boy Card" class="gallery-img">
                 </div>
                 <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784209536/new-home-preview_xnugt2.png" alt="Congratulations New Home Card" class="gallery-img">
+                    <img src="https://images.cockneycards.com/new-home-preview_xnugt2.png" alt="Congratulations New Home Card" class="gallery-img">
                 </div>
             </div>
         </div>
@@ -188,12 +189,12 @@ const INSTAGRAM_URL = "https://www.instagram.com/cockneycards.ig";
 // Instagram profile but you can point an individual photo at a specific
 // post by giving it its own URL.
 const GALLERY_PHOTOS = [
-    { image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120947/millwall-dad-son_e48hgt.png" },
-    { image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784120944/you-can-take_cbses4.png" },
-    { image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209503/thankyou-teacher-preview_j609g7.png" },
-    { image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209529/gamer-boy-preview_zanxij.png" },
-    { image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209447/leaving-girl1-preview_awpheh.png" }, // placeholder — swap for a real Instagram photo
-    { image: "https://res.cloudinary.com/uzf4eeky/image/upload/v1784209536/new-home-preview_xnugt2.png" }       // placeholder — swap for a real Instagram photo
+    { image: "https://images.cockneycards.com/millwall-dad-son_e48hgt.png" },
+    { image: "https://images.cockneycards.com/you-can-take_cbses4.png" },
+    { image: "https://images.cockneycards.com/thankyou-teacher-preview_j609g7.png" },
+    { image: "https://images.cockneycards.com/gamer-boy-preview_zanxij.png" },
+    { image: "https://images.cockneycards.com/leaving-girl1-preview_awpheh.png" }, // placeholder — swap for a real Instagram photo
+    { image: "https://images.cockneycards.com/new-home-preview_xnugt2.png" }       // placeholder — swap for a real Instagram photo
 ];
 
 const $ = (id) => document.getElementById(id);
