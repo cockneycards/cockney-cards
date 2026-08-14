@@ -236,7 +236,7 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   "christmas-nicest-children": { title: "Santa's Nicest Children", price: "£3.49", description: "A festive Christmas card for the whole family. Add a family photo to make it extra special.", categories: ["christmas"], preview: "christmas-nicest-children-preview_ompran.png", full: "christmas-nicest-children_vglwrb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
- "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", price: "£3.49", description: "A festive Christmas card with a personalised video message they can scan to watch. *QR Code will be added on purchase of card", categories: ["christmas"], preview: "christmas-kids-video-preview_aujgak.png", full: "christmas-kids-video_sm9nhs.png",
+ "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", price: "£3.49", description: "A festive Christmas card with a video message from Santa they can scan to watch.", categories: ["christmas"], preview: "christmas-kids-video-preview_aujgak.png", full: "christmas-kids-video_sm9nhs.png",
     qr: { left: 915, top: 686, width: 130, height: 130, url: "https://images.cockneycards.com/santas-message-qr.png" } },
 
 //SPORTS
@@ -418,4 +418,5 @@ const CARD_CATALOGUE = {
 
   
 };
+
 
