@@ -107,7 +107,7 @@
 <header>
     <div class="header-top">
         <div class="logo-container" onclick="window.location.href='index.html';">
-            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
         </div>
         <div class="header-right">
             <button id="login-button" class="login-btn">👤 Log In</button>
@@ -472,7 +472,7 @@ function initEditor(templateKey) {
     canvas.calcOffset();
 
     // Logo on the back cover panel
-    fabric.Image.fromURL(`${CLOUD_BASE}v1784098145/logo.png`, (logoImg) => {
+    fabric.Image.fromURL(`${CLOUD_BASE}logo.png`, (logoImg) => {
         backCoverImg = logoImg;
         backCoverImg.set({
             left: PANEL_WIDTH / 2, top: 710,
@@ -1217,9 +1217,6 @@ async function uploadAndGoToCheckout() {
 // instead of resetting to "all cards".
 function returnToShop() {
     window.location.href = 'shop-cards.html?resume=1';
-}
-
-
 }
 
 // DEV HELPER — not called automatically. Open this card in the editor,
