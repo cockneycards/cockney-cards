@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Basket | Cockney Cards</title>
+<script src="auth.js"></script>
+<script src="cart.js"></script>
+
+<style>
+    :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --font-family: 'Helvetica Neue', Arial, sans-serif; }
+    html { overflow-y: scroll; scrollbar-gutter: stable; }
+    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); }
+
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+    .logo-container { text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+
+    .basket-page { max-width: 1000px; margin: 40px auto 80px; padding: 0 40px; box-sizing: border-box; }
+    .basket-page h1 { font-size: 26px; font-weight: 300; margin: 0 0 30px; letter-spacing: 0.5px; }
+
+    .basket-layout { display: flex; gap: 40px; align-items: flex-start; }
+    .basket-items { flex: 1; min-width: 0; }
+    .basket-summary { width: 300px; flex-shrink: 0; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; box-sizing: border-box; position: sticky; top: 20px; }
+
+    .basket-item { display: flex; gap: 18px; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 18px; margin-bottom: 15px; align-items: center; }
+    .basket-item img { width: 90px; height: 90px; object-fit: contain; background: #fafafa; border: 1px solid #eee; border-radius: 4px; flex-shrink: 0; }
+    .item-info { flex: 1; min-width: 0; }
+    .item-title { font-size: 14px; font-weight: bold; margin: 0 0 4px; color: #111; }
+    .item-options { font-size: 12px; color: #777; margin: 0 0 8px; }
+    .item-price { font-size: 13px; color: #444; font-weight: bold; margin: 0; }
+    .item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+    .qty-control { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+    .qty-control button { width: 28px; height: 28px; border: none; background: #f5f5f5; cursor: pointer; font-size: 14px; }
+    .qty-control button:hover { background: #eaeaea; }
+    .qty-control input { width: 34px; height: 28px; border: none; text-align: center; font-size: 13px; -moz-appearance: textfield; }
+    .qty-control input::-webkit-outer-spin-button, .qty-control input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .remove-link { font-size: 12px; color: #999; background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+    .remove-link:hover { color: #c0392b; }
+
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 10px; }
+    .summary-row.total { font-size: 16px; font-weight: bold; color: #111; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
+    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 15px; letter-spacing: 1px; text-transform: uppercase; box-sizing: border-box; }
+    .btn:hover { background-color: #444; }
+    .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+    .btn-secondary { background: none; border: 1px solid var(--border-color); color: #555; text-transform: none; letter-spacing: normal; font-weight: normal; }
+    .btn-secondary:hover { background: #f5f5f5; color: #111; }
+
+    .empty-basket { text-align: center; padding: 80px 20px; color: #888; }
+    .empty-basket .empty-title { font-size: 18px; color: #333; margin-bottom: 10px; }
+    .empty-basket a { color: var(--primary); text-decoration: none; font-size: 13px; }
+    .empty-basket a:hover { text-decoration: underline; }
+
+    #checkout-error { font-size: 12px; color: #c0392b; margin-top: 10px; display: none; }
+
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+
+    @media (max-width: 700px) {
+        .basket-layout { flex-direction: column; }
+        .basket-summary { width: 100%; position: static; }
+        .basket-item { flex-wrap: wrap; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon"></div>
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="account.html">My Account</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="basket-page">
+    <h1>Your Basket</h1>
+    <div id="basket-content"></div>
+</div>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+window.addEventListener('DOMContentLoaded', renderBasket);
+window.addEventListener('cc-cart-updated', renderBasket);
+
+function renderBasket() {
+    const items = ccCart.getCart();
+    const content = $('basket-content');
+
+    if (!items.length) {
+        content.innerHTML = `
+            <div class="empty-basket">
+                <p class="empty-title">Your basket is empty</p>
+                <a href="shop-cards.html">Browse cards</a> &nbsp;·&nbsp; <a href="shop-prints.html">Browse prints</a>
+            </div>
+        `;
+        return;
+    }
+
+    const total = ccCart.getCartTotal();
+    const count = ccCart.getCartCount();
+
+    content.innerHTML = `
+        <div class="basket-layout">
+            <div class="basket-items">
+                ${items.map(renderItem).join('')}
+            </div>
+            <div class="basket-summary">
+                <div class="summary-row"><span>Items</span><span>${count}</span></div>
+                <div class="summary-row total"><span>Subtotal</span><span>${ccCart.formatGBP(total)}</span></div>
+                <button class="btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
+                <button class="btn btn-secondary" onclick="window.location.href='shop-cards.html'">Keep Shopping</button>
+                <p id="checkout-error"></p>
+            </div>
+        </div>
+    `;
+}
+
+function renderItem(item) {
+    return `
+        <div class="basket-item" data-id="${item.id}">
+            <img src="${item.thumbnail || ''}" alt="${item.title || ''}">
+            <div class="item-info">
+                <p class="item-title">${item.title || 'Personalised item'}</p>
+                <p class="item-options">${item.optionsSummary || ''}</p>
+                <p class="item-price">${item.price || ccCart.formatGBP(item.priceValue)} each</p>
+            </div>
+            <div class="item-actions">
+                <div class="qty-control">
+                    <button type="button" onclick="changeQty('${item.id}', ${item.quantity - 1})">−</button>
+                    <input type="number" min="1" max="20" value="${item.quantity}" onchange="changeQty('${item.id}', this.value)">
+                    <button type="button" onclick="changeQty('${item.id}', ${item.quantity + 1})">+</button>
+                </div>
+                <button class="remove-link" onclick="removeItem('${item.id}')">Remove</button>
+            </div>
+        </div>
+    `;
+}
+
+function changeQty(id, value) {
+    ccCart.updateCartQuantity(id, parseInt(value, 10));
+    renderBasket();
+}
+
+async function removeItem(id) {
+    await ccCart.removeFromCart(id);
+    renderBasket();
+}
+
+// Sends every basket line (each already carrying its own print-ready PDF
+// and quantity) to the backend in one go, and expects the same shape of
+// response as the existing single-item checkouts: { url } to redirect to,
+// or { error } to show.
+//
+// NOTE: this posts to a NEW endpoint, /create-checkout-basket, which
+// doesn't exist yet server-side — the existing /create-checkout and
+// /create-checkout-print endpoints (used by editor.html and
+// editor-prints.html) only ever handled a single item. That backend work
+// (building a multi-item Stripe session, and having stripe-webhook.js
+// email every item's PDF once payment succeeds) needs to be added
+// alongside this page before real checkout will work end-to-end.
+async function goToCheckout() {
+    const btn = $('checkout-btn');
+    const errorEl = $('checkout-error');
+    errorEl.style.display = 'none';
+    btn.disabled = true;
+    btn.innerText = 'Preparing checkout...';
+
+    try {
+        const items = await ccCart.getCartWithPdfs();
+
+        const checkoutData = {
+            customerEmail: (typeof ccIsLoggedIn === 'function' && ccIsLoggedIn()) ? ccGetEmail() : null,
+            items: items.map((item) => ({
+                kind: item.kind,
+                templateId: item.templateId,
+                variantId: item.variantId,
+                title: item.title,
+                optionsSummary: item.optionsSummary,
+                price: item.price,
+                priceValue: item.priceValue,
+                quantity: item.quantity,
+                pdfDataUri: item.pdfDataUri
+            }))
+        };
+
+        const response = await fetch('/create-checkout-basket', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(checkoutData)
+        });
+
+        const session = await response.json();
+        if (session.url) {
+            window.location.href = session.url;
+        } else {
+            throw new Error(session.error || 'Please verify environment settings.');
+        }
+    } catch (err) {
+        console.error(err);
+        errorEl.textContent = 'Checkout Error: ' + err.message;
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.innerText = 'Checkout';
+    }
+}
+</script>
+</body>
+</html>
