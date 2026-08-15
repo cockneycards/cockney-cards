@@ -13,6 +13,8 @@
         .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
         .logo-container { text-align: center; }
         .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .cart-icon { position: relative; cursor: pointer; }
         nav { margin-top: 15px; text-align: center; }
         .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
         .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
@@ -113,6 +115,15 @@
     <div class="header-top">
         <div class="logo-container" onclick="window.location.href='index.html';">
             <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
         </div>
     </div>
     <nav>
