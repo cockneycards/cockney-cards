@@ -19,9 +19,10 @@
         .nav-links a:hover { color: #888; }
         .nav-links a.active { font-weight: bold; }
 
-        .account-container { max-width: 700px; margin: 50px auto; padding: 0 20px; min-height: 400px; }
-        .account-container h1 { font-size: 26px; font-weight: 300; letter-spacing: 0.5px; margin-bottom: 10px; }
-        .account-container p.lead { font-size: 13px; color: #666; margin-bottom: 30px; }
+        /* ---- Logged-out (unchanged pattern) ---- */
+        .login-container { max-width: 420px; margin: 60px auto; padding: 0 20px; }
+        .login-container h1 { font-size: 26px; font-weight: 300; letter-spacing: 0.5px; margin-bottom: 10px; }
+        .login-container p.lead { font-size: 13px; color: #666; margin-bottom: 30px; }
 
         .card { background: white; border: 1px solid var(--border-color); padding: 25px; border-radius: 6px; margin-bottom: 25px; }
 
@@ -30,10 +31,36 @@
         .btn:hover { background-color: #444; }
         .btn-secondary { background: none; border: 1px solid var(--border-color); color: #555; }
         .btn-secondary:hover { background: #f5f5f5; color: #111; }
+        .btn-danger { background: none; border: 1px solid #e0b4b0; color: #c0392b; }
+        .btn-danger:hover { background: #fdf2f1; }
         .status-msg { font-size: 13px; margin-top: 10px; }
         .status-msg.error { color: #c0392b; }
         .status-msg.success { color: #1a7a3c; }
 
+        /* ---- Logged-in account shell ---- */
+        .account-shell { max-width: 1100px; margin: 40px auto 80px; padding: 0 20px; display: grid; grid-template-columns: 230px 1fr; gap: 40px; }
+
+        .account-sidebar { border-right: 1px solid var(--border-color); padding-right: 20px; }
+        .account-sidebar .user-email { font-size: 12px; color: #888; margin-bottom: 18px; word-break: break-all; }
+        .sidebar-links { list-style: none; padding: 0; margin: 0; }
+        .sidebar-links li { margin-bottom: 4px; }
+        .sidebar-links a { display: block; padding: 10px 12px; font-size: 13px; color: #333; text-decoration: none; border-radius: 4px; letter-spacing: 0.3px; }
+        .sidebar-links a:hover { background: #f2f2f2; }
+        .sidebar-links a.active { background: #1a1a1a; color: white; font-weight: 600; }
+        .sidebar-links .logout-link { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+        .sidebar-links .logout-link a { color: #c0392b; }
+        .sidebar-links .logout-link a:hover { background: #fdf2f1; }
+
+        .account-main h1 { font-size: 24px; font-weight: 300; letter-spacing: 0.5px; margin: 0 0 6px; }
+        .account-main p.lead { font-size: 13px; color: #666; margin: 0 0 24px; }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .empty-state { text-align: center; padding: 50px 20px; color: #888; font-size: 13px; }
+        .empty-state .empty-title { font-size: 15px; color: #444; margin-bottom: 6px; }
+
+        /* ---- Reminders ---- */
         .reminder-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         .reminder-row:last-child { border-bottom: none; }
         .reminder-info strong { display: block; }
@@ -45,7 +72,35 @@
         .add-form label { font-size: 11px; color: #666; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .add-form input, .add-form select { padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; font-family: var(--font-family); }
 
-        @media (max-width: 700px) {
+        /* ---- Order history ---- */
+        .order-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .order-row:last-child { border-bottom: none; }
+        .order-row .order-id { font-weight: 600; }
+        .order-row .order-date { color: #888; font-size: 12px; }
+        .order-status { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 20px; background: #eef6ee; color: #1a7a3c; }
+
+        /* ---- Addresses / Payment cards ---- */
+        .info-card { border: 1px solid var(--border-color); border-radius: 6px; padding: 16px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; }
+        .info-card .info-main strong { display: block; margin-bottom: 4px; }
+        .info-card .info-main span { color: #666; line-height: 1.5; }
+        .info-card .info-actions a { font-size: 12px; color: var(--primary); text-decoration: none; margin-left: 12px; }
+        .add-new-link { display: inline-block; margin-top: 6px; font-size: 13px; color: var(--primary); text-decoration: none; }
+
+        /* ---- Account settings ---- */
+        .settings-group { margin-bottom: 30px; }
+        .settings-group h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 12px; }
+        .settings-field { margin-bottom: 14px; }
+        .settings-field label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
+        .settings-field input { width: 100%; max-width: 360px; box-sizing: border-box; padding: 10px 12px; font-size: 14px; border: 1px solid var(--border-color); border-radius: 4px; }
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; max-width: 360px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+        .toggle-row:last-child { border-bottom: none; }
+
+        @media (max-width: 800px) {
+            .account-shell { grid-template-columns: 1fr; }
+            .account-sidebar { border-right: none; border-bottom: 1px solid var(--border-color); padding-right: 0; padding-bottom: 15px; margin-bottom: 15px; }
+            .sidebar-links { display: flex; flex-wrap: wrap; gap: 6px; }
+            .sidebar-links li { margin-bottom: 0; }
+            .sidebar-links .logout-link { margin-top: 0; padding-top: 0; border-top: none; width: 100%; }
             .add-form { grid-template-columns: 1fr 1fr; }
         }
 
@@ -64,59 +119,162 @@
         <ul class="nav-links">
             <li><a href="shop-cards.html">Shop Cards</a></li>
             <li><a href="shop-prints.html">Shop Prints</a></li>
-            <li><a href="orders.html">My Orders</a></li>
             <li><a href="account.html" class="active">My Account</a></li>
         </ul>
     </nav>
 </header>
 
-<div class="account-container">
-
     <!-- LOGGED OUT: request magic link -->
     <div id="logged-out-view">
-        <h1>My Account</h1>
-        <p class="lead">Log in to manage your saved birthdays and reminders.</p>
-        <div class="card login-form">
-            <input type="email" id="email-input" placeholder="you@example.com" autocomplete="email">
-            <button class="btn" onclick="requestLink()">Email Me a Login Link</button>
-            <div id="login-status" class="status-msg"></div>
-        </div>
-    </div>
-
-    <!-- LOGGED IN: reminders calendar -->
-    <div id="logged-in-view">
-        <h1>My Reminders</h1>
-        <p class="lead">Add birthdays and important dates for friends and family — we'll email you a reminder 2 weeks before, every year.</p>
-
-        <div class="card">
-            <div id="reminders-list"><p style="color:#888; font-size:13px;">Loading...</p></div>
-
-            <div class="add-form">
-                <div>
-                    <label>Who / What</label>
-                    <input type="text" id="new-name" placeholder="e.g. Mum's Birthday">
-                </div>
-                <div>
-                    <label>Relationship (optional)</label>
-                    <input type="text" id="new-relationship" placeholder="e.g. Mum">
-                </div>
-                <div>
-                    <label>Month</label>
-                    <select id="new-month"></select>
-                </div>
-                <div>
-                    <label>Day</label>
-                    <select id="new-day"></select>
-                </div>
-                <button class="btn" onclick="addReminder()">Add</button>
+        <div class="login-container">
+            <h1>My Account</h1>
+            <p class="lead">Log in to view orders, manage your details, and set reminders.</p>
+            <div class="card login-form">
+                <input type="email" id="email-input" placeholder="you@example.com" autocomplete="email">
+                <button class="btn" onclick="requestLink()">Email Me a Login Link</button>
+                <div id="login-status" class="status-msg"></div>
             </div>
-            <div id="add-status" class="status-msg"></div>
         </div>
-
-        <button class="btn btn-secondary" onclick="logout()">Log Out</button>
     </div>
 
-</div>
+    <!-- LOGGED IN: account shell with sidebar tabs -->
+    <div id="logged-in-view">
+        <div class="account-shell">
+
+            <aside class="account-sidebar">
+                <div class="user-email" id="user-email-display"></div>
+                <ul class="sidebar-links">
+                    <li><a href="#" class="tab-link active" data-tab="orders">Order History</a></li>
+                    <li><a href="#" class="tab-link" data-tab="addresses">Saved Addresses</a></li>
+                    <li><a href="#" class="tab-link" data-tab="payment">Payment Methods</a></li>
+                    <li><a href="#" class="tab-link" data-tab="reminders">Calendar Reminders</a></li>
+                    <li><a href="#" class="tab-link" data-tab="settings">Account Settings</a></li>
+                    <li class="logout-link"><a href="#" onclick="logout(); return false;">Log Out</a></li>
+                </ul>
+            </aside>
+
+            <main class="account-main">
+
+                <!-- Order History -->
+                <div class="tab-panel active" id="tab-orders">
+                    <h1>Order History</h1>
+                    <p class="lead">Track and review everything you've ordered from us.</p>
+                    <div class="card" id="orders-list">
+                        <div class="empty-state">
+                            <div class="empty-title">No orders yet</div>
+                            Once you place an order, you'll be able to track it here.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Addresses -->
+                <div class="tab-panel" id="tab-addresses">
+                    <h1>Saved Addresses</h1>
+                    <p class="lead">Save addresses so checkout is faster next time.</p>
+                    <div class="card" id="addresses-list">
+                        <div class="empty-state">
+                            <div class="empty-title">No saved addresses</div>
+                            Add an address to speed up your next checkout.
+                        </div>
+                        <a href="#" class="add-new-link">+ Add a new address</a>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="tab-panel" id="tab-payment">
+                    <h1>Payment Methods</h1>
+                    <p class="lead">Manage the cards saved to your account.</p>
+                    <div class="card" id="payment-list">
+                        <div class="empty-state">
+                            <div class="empty-title">No payment methods saved</div>
+                            Add a card to check out faster next time.
+                        </div>
+                        <a href="#" class="add-new-link">+ Add a payment method</a>
+                    </div>
+                </div>
+
+                <!-- Calendar Reminders (existing functionality) -->
+                <div class="tab-panel" id="tab-reminders">
+                    <h1>Calendar Reminders</h1>
+                    <p class="lead">Add birthdays and important dates for friends and family — we'll email you a reminder 2 weeks before, every year.</p>
+
+                    <div class="card">
+                        <div id="reminders-list"><p style="color:#888; font-size:13px;">Loading...</p></div>
+
+                        <div class="add-form">
+                            <div>
+                                <label>Who / What</label>
+                                <input type="text" id="new-name" placeholder="e.g. Mum's Birthday">
+                            </div>
+                            <div>
+                                <label>Relationship (optional)</label>
+                                <input type="text" id="new-relationship" placeholder="e.g. Mum">
+                            </div>
+                            <div>
+                                <label>Month</label>
+                                <select id="new-month"></select>
+                            </div>
+                            <div>
+                                <label>Day</label>
+                                <select id="new-day"></select>
+                            </div>
+                            <button class="btn" onclick="addReminder()">Add</button>
+                        </div>
+                        <div id="add-status" class="status-msg"></div>
+                    </div>
+                </div>
+
+                <!-- Account Settings -->
+                <div class="tab-panel" id="tab-settings">
+                    <h1>Account Settings</h1>
+                    <p class="lead">Manage your login details and how we contact you.</p>
+
+                    <div class="card">
+                        <div class="settings-group">
+                            <h3>Personal Details</h3>
+                            <div class="settings-field">
+                                <label>Full name</label>
+                                <input type="text" id="settings-name" placeholder="Your name">
+                            </div>
+                            <div class="settings-field">
+                                <label>Email address</label>
+                                <input type="email" id="settings-email" placeholder="you@example.com">
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Communication Preferences</h3>
+                            <div class="toggle-row">
+                                <span>Order updates &amp; shipping notifications</span>
+                                <input type="checkbox" checked disabled>
+                            </div>
+                            <div class="toggle-row">
+                                <span>Reminder emails (birthdays &amp; occasions)</span>
+                                <input type="checkbox" checked disabled>
+                            </div>
+                            <div class="toggle-row">
+                                <span>Offers, new ranges &amp; newsletter</span>
+                                <input type="checkbox" disabled>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Security</h3>
+                            <p style="font-size:13px; color:#666; margin-bottom:12px;">We use passwordless login — a fresh link is emailed to you each time, so there's no password to manage.</p>
+                            <button class="btn btn-secondary" disabled>Save Changes</button>
+                        </div>
+
+                        <div class="settings-group" style="margin-bottom: 0;">
+                            <h3>Danger Zone</h3>
+                            <p style="font-size:13px; color:#666; margin-bottom:12px;">Permanently delete your account and all saved data, including reminders, addresses and payment methods.</p>
+                            <button class="btn btn-danger">Delete Account</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
 
 <script>
     // Point this at your deployed Worker URL
@@ -143,6 +301,28 @@
             opt.value = d;
             opt.textContent = d;
             daySel.appendChild(opt);
+        }
+    }
+
+    // ---- Tab switching ----
+    function initTabs() {
+        document.querySelectorAll(".tab-link").forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const tabId = link.getAttribute("data-tab");
+                document.querySelectorAll(".tab-link").forEach(l => l.classList.remove("active"));
+                document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+                link.classList.add("active");
+                $(`tab-${tabId}`).classList.add("active");
+                window.location.hash = tabId;
+            });
+        });
+
+        // Support deep-linking, e.g. account.html#reminders
+        const hash = window.location.hash.replace("#", "");
+        if (hash) {
+            const match = document.querySelector(`.tab-link[data-tab="${hash}"]`);
+            if (match) match.click();
         }
     }
 
@@ -281,11 +461,17 @@
     function showLoggedIn() {
         $("logged-out-view").style.display = "none";
         $("logged-in-view").style.display = "block";
+        const email = localStorage.getItem("cc_email");
+        if (email) {
+            $("user-email-display").textContent = email;
+            $("settings-email").value = email;
+        }
         loadReminders();
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
         populateDateSelects();
+        initTabs();
         const justLoggedIn = await verifyTokenFromUrl();
         if (justLoggedIn || getSessionToken()) {
             showLoggedIn();
