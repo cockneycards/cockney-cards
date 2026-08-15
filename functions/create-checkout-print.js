@@ -23,11 +23,15 @@ export async function onRequestPost(context) {
 
         const origin = new URL(request.url).origin;
 
-        // priceValue is expected in pence (matches Stripe's unit_amount).
-        // Falls back to a safe default if it's missing so checkout never
-        // silently charges £0 — flagged clearly in the product name if so.
+        // priceValue arrives in POUNDS from the editor (e.g. 6.99 for a
+        // £6.99 print — same convention prints-data.js's sizes.*.priceValue
+        // uses, and the same one the shop/basket price displays are built
+        // from), so convert to pence here for Stripe's unit_amount rather
+        // than assuming the front end already did it. Falls back to a safe
+        // default if it's missing so checkout never silently charges £0 —
+        // flagged clearly in the product name if so.
         const hasPrice = typeof data.priceValue === 'number' && data.priceValue > 0;
-        const unitAmount = hasPrice ? Math.round(data.priceValue) : 999; // £9.99 fallback
+        const unitAmount = hasPrice ? Math.round(data.priceValue * 100) : 999; // £9.99 fallback
         const sizeLabel = data.size || 'N/A';
 
         const params = new URLSearchParams();
