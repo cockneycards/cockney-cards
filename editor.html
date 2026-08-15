@@ -107,7 +107,7 @@
 <header>
     <div class="header-top">
         <div class="logo-container" onclick="window.location.href='index.html';">
-            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
         </div>
         <div class="header-right">
             <button id="login-button" class="login-btn">👤 Log In</button>
@@ -472,7 +472,7 @@ function initEditor(templateKey) {
     canvas.calcOffset();
 
     // Logo on the back cover panel
-    fabric.Image.fromURL(`${CLOUD_BASE}logo.png`, (logoImg) => {
+    fabric.Image.fromURL(`${CLOUD_BASE}v1784098145/logo.png`, (logoImg) => {
         backCoverImg = logoImg;
         backCoverImg.set({
             left: PANEL_WIDTH / 2, top: 710,
@@ -581,7 +581,7 @@ function setupVariantSelector(templateKey) {
         btn.className = "variant-thumb" + (key === activeVariantKey ? " active" : "");
         btn.dataset.key = key;
         btn.title = key;
-        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}" crossorigin="anonymous">`;
+        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}">`;
         btn.onclick = () => selectVariant(key);
         container.appendChild(btn);
     });
@@ -1057,7 +1057,12 @@ function captureFullSpread() {
                 // ~3573x2520px, which lands at ~335 DPI once stretched to
                 // fill the real 270x188mm spread — without this, the export
                 // was going out at ~112 DPI and printing pixelated.
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier: 3 });
+                // JPEG at 0.92 quality rather than lossless PNG — visually
+                // identical at print size/distance, but a fraction of the
+                // file size (PNG was producing ~90MB+ files that blew past
+                // storage limits; JPEG at this quality typically lands
+                // under 10MB for the same artwork).
+                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.92, multiplier: 3 });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
@@ -1083,7 +1088,7 @@ function drawPrintPage(doc, imageDataUrl) {
     const offsetY = (A4_LANDSCAPE_MM.height - spreadHeightMM) / 2;
 
     // Card artwork, centred, at exact bleed-inclusive size.
-    doc.addImage(imageDataUrl, 'PNG', offsetX, offsetY, spreadWidthMM, spreadHeightMM);
+    doc.addImage(imageDataUrl, 'JPEG', offsetX, offsetY, spreadWidthMM, spreadHeightMM);
 }
 
 // Builds a single A4-landscape PDF with one page per spread passed in —
