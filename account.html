@@ -145,6 +145,9 @@
                 <button class="btn" onclick="requestLink()">Email Me a Login Link</button>
                 <div id="login-status" class="status-msg"></div>
             </div>
+            <p style="text-align:center; margin-top:10px;">
+                <a href="#" onclick="previewAsTestUser(); return false;" style="font-size:12px; color:#aaa; text-decoration:underline;">⚠ Preview as test user (dev only — remove before launch)</a>
+            </p>
         </div>
     </div>
 
@@ -297,6 +300,17 @@
     function getSessionToken() { return localStorage.getItem("cc_session"); }
     function setSessionToken(t) { localStorage.setItem("cc_session", t); }
     function clearSessionToken() { localStorage.removeItem("cc_session"); localStorage.removeItem("cc_email"); }
+
+    // DEV ONLY — lets you preview the logged-in account view without a real
+    // magic-link login. Reminders (and any future tab hitting the real API)
+    // won't have real data since the token isn't valid — everything else
+    // (Orders, Addresses, Payment, Settings) can be clicked through freely.
+    // Remove this function and its link in the logged-out view before launch.
+    function previewAsTestUser() {
+        setSessionToken("test-preview-token");
+        localStorage.setItem("cc_email", "preview@test.com");
+        showLoggedIn();
+    }
 
     function populateDateSelects() {
         const monthSel = $("new-month");
