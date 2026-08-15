@@ -109,7 +109,7 @@
 <header>
     <div class="header-top">
         <div class="logo-container" onclick="window.location.href='index.html';">
-            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
         </div>
         <div class="header-right">
             <div class="cart-icon">
@@ -472,7 +472,7 @@ function initEditor(templateKey) {
     canvas.calcOffset();
 
     // Logo on the back cover panel
-    fabric.Image.fromURL(`${CLOUD_BASE}v1784098145/logo.png`, (logoImg) => {
+    fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
         backCoverImg = logoImg;
         backCoverImg.set({
             left: PANEL_WIDTH / 2, top: 710,
