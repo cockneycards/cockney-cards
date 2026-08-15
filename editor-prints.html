@@ -1010,6 +1010,16 @@ function captureFrontPageForVariant(variantKey, multiplier) {
 // only the Cockney Cards logo, positioned via LOGO_SETTINGS at exactly the
 // same coordinates/scale as the logo on the existing card editor's back
 // cover, so it lands in the same place and at the same size once printed.
+// Uses the same URL as the card editor's back-cover logo (editor.html)
+// instead of a reconstructed Cloudinary URL — a hardcoded Cloudinary
+// version segment (e.g. v1784098145) silently breaks the moment that
+// asset is replaced or CLOUD_BASE changes shape, and fabric.Image.fromURL
+// does NOT throw or reject on a failed load: it still calls the callback,
+// just with a broken/empty image, so a bad URL here fails completely
+// silently (no console error, no crash — just a missing logo). The checks
+// below make a failure visible instead of silent.
+const LOGO_URL = 'https://images.cockneycards.com/logo.png';
+
 function buildBackPageDataUrl(multiplier) {
     return new Promise((resolve, reject) => {
         const exportEl = document.createElement('canvas');
@@ -1017,7 +1027,17 @@ function buildBackPageDataUrl(multiplier) {
             width: EDIT_WIDTH, height: EDIT_HEIGHT, backgroundColor: '#ffffff'
         });
 
-        fabric.Image.fromURL(`${CLOUD_BASE}v1784098145/logo.png`, (logoImg) => {
+        fabric.Image.fromURL(LOGO_URL, (logoImg, isError) => {
+            // fabric still fires this callback on a failed load (isError
+            // will be true and logoImg will have no real image data) —
+            // check for that explicitly rather than assuming the callback
+            // firing means the logo actually loaded.
+            if (isError || !logoImg || !logoImg.width || !logoImg.height) {
+                exportCanvas.dispose();
+                reject(new Error(`Logo image failed to load from ${LOGO_URL} — check the URL is reachable and CORS-enabled.`));
+                return;
+            }
+
             logoImg.set({
                 left: LOGO_SETTINGS.left, top: LOGO_SETTINGS.top,
                 originX: 'center', originY: 'center',
