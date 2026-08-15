@@ -3,3 +3,4 @@ node_modules
 netlify
 package.json
 package-lock.json
+functions
