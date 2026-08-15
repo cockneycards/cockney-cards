@@ -1213,7 +1213,13 @@ async function addCurrentPrintToBasket() {
             thumbnail: artUrlFor(activeVariantKey) || activeTemplate.url,
             optionsSummary: optionsParts.join(' · '),
             price: sizeInfo?.price || null,
-            priceValue: sizeInfo?.priceValue ?? 0,
+            // sizeInfo.priceValue is in PENCE (see create-checkout-print.js,
+            // which feeds it straight into Stripe's unit_amount) — but the
+            // basket works in pounds throughout (same convention as the
+            // card editor's CARD_TEMPLATES priceValue, used for the
+            // subtotal on basket.html), so convert here rather than mixing
+            // units between the two product types.
+            priceValue: sizeInfo?.priceValue ? sizeInfo.priceValue / 100 : 0,
             pdfDataUri
         });
 
