@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="auth.js"></script>
+<script src="cart.js"></script>
 <script src="cards-data.js"></script>
 
 <style>
@@ -200,6 +201,7 @@
 
         <p id="account-nudge" style="font-size: 12px; color: #666; text-align: center; margin: 15px 0 10px 0;"></p>
 
+        <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentCardToBasket()">Add to Basket</button>
         <button id="buy-now-btn" class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
 
         <!-- TESTING ONLY — downloads the print-ready PDFs straight to your
@@ -324,12 +326,18 @@ const DEFAULT_EXTRA_FIELD_SETTINGS = {
 const CARD_TEMPLATES = Object.fromEntries(
     Object.entries(CARD_CATALOGUE)
         .filter(([id, c]) => c.full)
-        .map(([id, c]) => [
+        .map(([id, c]) => {
+            const priceLabel = c.price || DEFAULT_PRICE;
+            return [
             id,
             {
                 url: CLOUD_BASE + c.full,
                 title: c.title || null,
                 description: c.description || null,
+                // Same price the card is listed at in shop-cards.html —
+                // used on the "Add to Basket" button and the basket page.
+                price: priceLabel,
+                priceValue: parseFloat(priceLabel.replace(/[^0-9.]/g, '')),
                 name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
                 age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
                 photo: c.photo ? { ...DEFAULT_PHOTO_SETTINGS, ...c.photo } : null,
@@ -338,7 +346,8 @@ const CARD_TEMPLATES = Object.fromEntries(
                     ? c.extraFields.map((f) => ({ ...DEFAULT_EXTRA_FIELD_SETTINGS, ...f }))
                     : null
             }
-        ])
+            ];
+        })
 );
 
 // CARD_VARIANTS: swappable picture options per card, e.g. brighton-girl1's
@@ -451,6 +460,8 @@ function initEditor(templateKey) {
     activeTemplate = CARD_TEMPLATES[templateKey];
     activeVariantKey = templateKey;
     setupVariantSelector(templateKey);
+
+    $('add-to-basket-btn').innerText = activeTemplate.price ? `Add to Basket — ${activeTemplate.price}` : 'Add to Basket';
 
     $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
     $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
@@ -886,7 +897,10 @@ function switchPage(page, updateBuyBtn = true) {
     $('toggle-inside').classList.toggle('active', !isFront);
     $('front-controls').classList.toggle('active', isFront);
     $('inside-controls').classList.toggle('active', !isFront);
-    if (updateBuyBtn) $('buy-now-btn').style.display = isFront ? 'none' : 'block';
+    if (updateBuyBtn) {
+        $('buy-now-btn').style.display = isFront ? 'none' : 'block';
+        $('add-to-basket-btn').style.display = isFront ? 'none' : 'block';
+    }
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o.set({ visible: !isFront }));
@@ -1163,6 +1177,54 @@ async function testDownloadPrintPDFs() {
     } finally {
         testBtn.innerText = originalText;
         testBtn.disabled = false;
+    }
+}
+
+// Builds the same print-ready PDF as "Buy Now"/the test-download button,
+// but instead of going straight to checkout it stashes the PDF + this
+// card's personalisation into the shared basket (see cart.js) so the
+// customer can keep personalising more cards before paying for all of
+// them together.
+async function addCurrentCardToBasket() {
+    const addBtn = $('add-to-basket-btn');
+    const originalText = addBtn.innerText;
+    addBtn.innerText = "Adding...";
+    addBtn.disabled = true;
+
+    try {
+        const doc = await captureAndBuildPrintPDF();
+        const pdfDataUri = doc.output('datauristring');
+
+        const optionsParts = [];
+        if (activeTemplate.name) optionsParts.push(`${activeTemplate.name.label || 'Name'}: ${$('name-input').value || '—'}`);
+        if (activeTemplate.age) optionsParts.push(`${activeTemplate.age.label || 'Age'}: ${ageText?.text ?? '—'}`);
+        (activeTemplate.extraFields || []).forEach((f, i) => {
+            const val = $(`extra-input-${i}`)?.value;
+            if (val) optionsParts.push(`${f.label || f.key || 'Field'}: ${val}`);
+        });
+
+        await ccCart.addToCart({
+            kind: 'card',
+            templateId: activeVariantKey,
+            variantId: activeVariantKey,
+            title: activeTemplate.title || activeVariantKey,
+            thumbnail: activeTemplate.url,
+            optionsSummary: optionsParts.join(' · '),
+            price: activeTemplate.price || null,
+            priceValue: activeTemplate.priceValue || 0,
+            pdfDataUri
+        });
+
+        addBtn.innerText = "Added to Basket ✓";
+        setTimeout(() => {
+            addBtn.innerText = originalText;
+            addBtn.disabled = false;
+        }, 1500);
+    } catch (err) {
+        console.error(err);
+        alert("Couldn't add this card to your basket — check the console for details.");
+        addBtn.innerText = originalText;
+        addBtn.disabled = false;
     }
 }
 
