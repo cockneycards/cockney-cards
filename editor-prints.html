@@ -130,7 +130,7 @@
 <header>
     <div class="header-top">
         <div class="logo-container" onclick="window.location.href='index.html';">
-            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+            <img src="https://res.cloudinary.com/uzf4eeky/image/upload/v1784098145/logo.png" alt="Cockney Cards">
         </div>
         <div class="header-right">
             <button id="login-button" class="login-btn">👤 Log In</button>
@@ -584,7 +584,7 @@ function setupVariantSelector(templateKey) {
         btn.className = "variant-thumb" + (key === activeVariantKey ? " active" : "");
         btn.dataset.key = key;
         btn.title = key;
-        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}" crossorigin="anonymous">`;
+        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}">`;
         btn.onclick = () => selectVariant(key);
         container.appendChild(btn);
     });
@@ -945,7 +945,7 @@ function captureFrontPage(multiplier) {
                 // multiplier scales the 595.5x840 editor canvas up to
                 // ~300 DPI once stretched to fill the chosen print size —
                 // see PRINT_SIZES for the multiplier used per size.
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier });
+                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.92, multiplier });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
@@ -995,7 +995,7 @@ function captureFrontPageForVariant(variantKey, multiplier) {
         exportCanvas.loadFromJSON(json, () => {
             try {
                 exportCanvas.renderAll();
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier });
+                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.92, multiplier });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
@@ -1017,7 +1017,7 @@ function buildBackPageDataUrl(multiplier) {
             width: EDIT_WIDTH, height: EDIT_HEIGHT, backgroundColor: '#ffffff'
         });
 
-        fabric.Image.fromURL(`${CLOUD_BASE}logo.png`, (logoImg) => {
+        fabric.Image.fromURL(`${CLOUD_BASE}v1784098145/logo.png`, (logoImg) => {
             logoImg.set({
                 left: LOGO_SETTINGS.left, top: LOGO_SETTINGS.top,
                 originX: 'center', originY: 'center',
@@ -1030,7 +1030,7 @@ function buildBackPageDataUrl(multiplier) {
                 exportCanvas.renderAll();
                 // Same multiplier as captureFrontPage() so the back page
                 // matches the front page's export resolution.
-                const dataUrl = exportCanvas.toDataURL({ format: 'png', quality: 1.0, multiplier });
+                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.92, multiplier });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
@@ -1045,7 +1045,7 @@ function buildBackPageDataUrl(multiplier) {
 // the ENTIRE page edge-to-edge (a print is a single flat sheet, so there's
 // no centring/trim-mark maths needed here, unlike the card spread).
 function drawPrintPage(doc, imageDataUrl, mm) {
-    doc.addImage(imageDataUrl, 'PNG', 0, 0, mm.width, mm.height);
+    doc.addImage(imageDataUrl, 'JPEG', 0, 0, mm.width, mm.height);
 }
 
 // Builds a single portrait PDF at the customer's chosen size (A5/A4/A3):
