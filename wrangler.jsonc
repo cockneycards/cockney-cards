@@ -1,0 +1,13 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "cockney-cards",
+    "compatibility_date": "2026-08-15",
+    "main": "_worker.js",
+    "observability": {
+        "enabled": true
+    },
+    "assets": {
+        "directory": ".",
+        "binding": "ASSETS"
+    }
+}
