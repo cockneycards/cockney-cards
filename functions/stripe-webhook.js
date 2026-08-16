@@ -2,9 +2,9 @@
 //
 // Cloudflare Pages Function — receives Stripe's `checkout.session.completed`
 // webhook once a customer has actually paid, pulls the matching print-ready
-// PDF(s) back out of KV (stashed there by create-checkout.js /
+// PDF(s) back out of R2 (stashed there by create-checkout.js /
 // create-checkout-print.js / create-checkout-basket.js), and emails them to
-// the business inbox via Resend. It also writes a row to D1 (the same
+// the business inbox via ZeptoMail. It also writes a row to D1 (the same
 // database account.html/orders.html use) so logged-in customers can see
 // their own order history — Checkout Sessions here have no persistent
 // Stripe Customer object to key off, so the customer's email is the link
@@ -16,21 +16,22 @@
 // Three shapes of order can arrive here, distinguished by
 // metadata.product_type:
 //   'card' / 'print'  - single-item checkout (create-checkout.js /
-//                        create-checkout-print.js). The KV entry for
+//                        create-checkout-print.js). The R2 object for
 //                        order_id is the raw PDF data URI string.
 //   'basket'          - multi-item checkout (create-checkout-basket.js).
-//                        The KV entry for order_id is a JSON blob:
+//                        The R2 object for order_id is a JSON blob:
 //                        { items: [{ index, kind, title, optionsSummary,
 //                                    price, priceValue, quantity,
 //                                    pdfDataUri }, ...] }
 //
-// Requires (Cloudflare Pages env vars):
+// Requires (Cloudflare env vars/secrets):
 //   STRIPE_WEBHOOK_SECRET  - from the Stripe Dashboard webhook endpoint
-//   RESEND_API_KEY         - from resend.com
-// Requires the same ORDER_PDFS KV binding as the three create-checkout* functions.
+//   ZEPTOMAIL_TOKEN        - ZeptoMail Send Mail Token (Mail Agent > SMTP/API)
+//   FROM_EMAIL             - the verified sending address for that Agent
+// Requires the same ORDER_PDFS R2 bucket binding as the three create-checkout* functions.
 // Requires a DB (D1) binding pointing at the same cockney-cards-db used by
-// the account/reminders Worker — add it under Pages > Settings > Functions
-// > D1 database bindings, variable name "DB".
+// the account/reminders Worker — add it under Settings > Bindings,
+// variable name "DB".
 //
 // Setup: in the Stripe Dashboard > Developers > Webhooks, add an endpoint
 // pointing at https://cockneycards.com/stripe-webhook, subscribed to the
@@ -63,13 +64,18 @@ export async function onRequestPost(context) {
         const customerEmail = session.customer_details?.email || null;
         const isBasket = meta.product_type === 'basket';
 
-        // For 'card'/'print', this KV entry is the raw PDF data URI (as
-        // before). For 'basket', it's a JSON blob holding every line
-        // item's own PDF + details — see the comment above.
+        // For 'card'/'print', this R2 object's contents are the raw PDF
+        // data URI (as before). For 'basket', it's a JSON blob holding
+        // every line item's own PDF + details — see the comment above.
+        // ORDER_PDFS is an R2 bucket, not a KV namespace — .get() returns
+        // an R2ObjectBody (or null), not the stored value directly the
+        // way KV's .get() does, so its contents need reading out with
+        // .text() before they're usable.
         let pdfDataUri = null;
         let basketItems = null;
         if (orderId) {
-            const raw = await env.ORDER_PDFS.get(orderId);
+            const object = await env.ORDER_PDFS.get(orderId);
+            const raw = object ? await object.text() : null;
             if (raw && isBasket) {
                 try {
                     basketItems = JSON.parse(raw).items || [];
@@ -201,6 +207,49 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
     return computedSig === expectedSig;
 }
 
+// Shared by sendOrderEmail() and sendBasketOrderEmail() — both build the
+// same subject/body/attachments shape, just from different order data.
+// Uses ZeptoMail (env.ZEPTOMAIL_TOKEN, env.FROM_EMAIL) — NOT Resend. The
+// account this webhook actually runs under (old-bush-4d25cockney-cards-api)
+// has a ZEPTOMAIL_TOKEN secret and a FROM_EMAIL var configured, with no
+// RESEND_API_KEY at all, so that's the real mail provider in use here.
+//
+// ZeptoMail's attachment `content` field wants base64 with no data URI
+// prefix, same shape this code already builds. Docs:
+// https://www.zoho.com/zeptomail/help/api/email-sending.html
+async function sendViaZeptoMail(env, { subject, text, attachments }) {
+    const res = await fetch('https://api.zeptomail.com/v1.1/email', {
+        method: 'POST',
+        headers: {
+            // env.FROM_EMAIL is used as both the reply-to-able sender
+            // address and — since ZeptoMail is set up as a single
+            // transactional agent here — where the mail token authorises
+            // sending from. If ZEPTOMAIL_TOKEN was saved WITH the
+            // "Zoho-enczapikey " prefix already included, drop the prefix
+            // below to avoid doubling it up.
+            Authorization: `Zoho-enczapikey ${env.ZEPTOMAIL_TOKEN}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        body: JSON.stringify({
+            from: { address: env.FROM_EMAIL, name: 'Cockney Cards Orders' },
+            to: [{ email_address: { address: 'orders@cockneycards.com', name: 'Cockney Cards Orders' } }],
+            subject,
+            textbody: text,
+            attachments: attachments.map((a) => ({
+                content: a.content,
+                mime_type: 'application/pdf',
+                name: a.filename,
+            })),
+        }),
+    });
+
+    if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`ZeptoMail API error: ${errText}`);
+    }
+}
+
 async function sendOrderEmail(env, order) {
     const attachments = [];
     if (order.pdfDataUri) {
@@ -225,30 +274,16 @@ async function sendOrderEmail(env, order) {
         order.name2 && order.name2 !== 'N/A' ? `Name 2: ${order.name2}` : null,
         order.age2 && order.age2 !== 'N/A' ? `Age 2: ${order.age2}` : null,
         order.size ? `Size: ${order.size}` : null,
-        !order.pdfDataUri ? '\n⚠️ No PDF was found in storage for this order — check KV/logs.' : null,
+        !order.pdfDataUri ? '\n⚠️ No PDF was found in storage for this order — check R2/logs.' : null,
     ]
         .filter(Boolean)
         .join('\n');
 
-    const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            from: 'Cockney Cards Orders <orders@cockneycards.com>',
-            to: ['orders@cockneycards.com'],
-            subject: `New order — ${subjectBits}`,
-            text: lines,
-            attachments,
-        }),
+    await sendViaZeptoMail(env, {
+        subject: `New order — ${subjectBits}`,
+        text: lines,
+        attachments,
     });
-
-    if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Resend API error: ${errText}`);
-    }
 }
 
 // Same idea as sendOrderEmail(), but for a basket of several items —
@@ -286,28 +321,14 @@ async function sendBasketOrderEmail(env, order) {
         order.amountTotal != null ? `Amount paid: £${(order.amountTotal / 100).toFixed(2)}` : null,
         '',
         ...itemLines,
-        missingPdfCount > 0 ? `\n⚠️ ${missingPdfCount} item(s) were missing their PDF — check KV/logs.` : null,
+        missingPdfCount > 0 ? `\n⚠️ ${missingPdfCount} item(s) were missing their PDF — check R2/logs.` : null,
     ]
         .filter((line) => line !== null)
         .join('\n');
 
-    const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            from: 'Cockney Cards Orders <orders@cockneycards.com>',
-            to: ['orders@cockneycards.com'],
-            subject: `New order — Basket (${order.items.length} item${order.items.length === 1 ? '' : 's'})`,
-            text: lines,
-            attachments,
-        }),
+    await sendViaZeptoMail(env, {
+        subject: `New order — Basket (${order.items.length} item${order.items.length === 1 ? '' : 's'})`,
+        text: lines,
+        attachments,
     });
-
-    if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Resend API error: ${errText}`);
-    }
 }
