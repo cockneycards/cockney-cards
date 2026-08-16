@@ -1180,6 +1180,46 @@ async function testDownloadPrintPDFs() {
     }
 }
 
+// Builds a small, low-quality preview of the actual personalised front
+// page (photo, text, everything) for the basket list — NOT the print-ready
+// capture (that's high-res/high-quality and meant for printing, far too
+// large to store as basket metadata). Grabs the front page's JSON, then
+// immediately restores whatever page was showing before, so this doesn't
+// visibly disrupt the customer's current view even though the "Add to
+// Basket" button only shows while viewing the inside page.
+function captureFrontThumbnail() {
+    const pageBeforeCapture = currentPage;
+    switchPage('front', false);
+    const frontJson = canvas.toJSON();
+    switchPage(pageBeforeCapture, false);
+
+    return new Promise((resolve, reject) => {
+        const exportEl = document.createElement('canvas');
+        const exportCanvas = new fabric.StaticCanvas(exportEl, {
+            width: CANVAS_WIDTH, height: CANVAS_HEIGHT
+        });
+        exportCanvas.loadFromJSON(frontJson, () => {
+            try {
+                exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+                // qrImg is part of the cloned JSON but stays hidden here —
+                // showQrForCapture() is never called during this capture,
+                // so it keeps whatever visibility it already had (false,
+                // same as during normal editing).
+                exportCanvas.renderAll();
+                // Small + low quality on purpose — this is a basket list
+                // thumbnail, not a print asset. multiplier: 0.3 on the
+                // 1191x840 editor canvas lands around 357x252px.
+                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.6, multiplier: 0.3 });
+                exportCanvas.dispose();
+                resolve(dataUrl);
+            } catch (err) {
+                exportCanvas.dispose();
+                reject(err);
+            }
+        });
+    });
+}
+
 // Builds the same print-ready PDF as "Buy Now"/the test-download button,
 // but instead of going straight to checkout it stashes the PDF + this
 // card's personalisation into the shared basket (see cart.js) so the
@@ -1194,6 +1234,7 @@ async function addCurrentCardToBasket() {
     try {
         const doc = await captureAndBuildPrintPDF();
         const pdfDataUri = doc.output('datauristring');
+        const thumbnail = await captureFrontThumbnail();
 
         const optionsParts = [];
         if (activeTemplate.name) optionsParts.push(`${activeTemplate.name.label || 'Name'}: ${$('name-input').value || '—'}`);
@@ -1208,7 +1249,7 @@ async function addCurrentCardToBasket() {
             templateId: activeVariantKey,
             variantId: activeVariantKey,
             title: activeTemplate.title || activeVariantKey,
-            thumbnail: activeTemplate.url,
+            thumbnail,
             optionsSummary: optionsParts.join(' · '),
             price: activeTemplate.price || null,
             priceValue: activeTemplate.priceValue || 0,
