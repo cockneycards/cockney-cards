@@ -2,13 +2,13 @@
 //
 // Cloudflare Pages Function — replaces the old Netlify create-checkout.js.
 // Creates a Stripe Checkout session for a personalised card and stashes
-// the print-ready PDF in KV (keyed by a fresh order id) so stripe-webhook.js
+// the print-ready PDF in R2 (keyed by a fresh order id) so stripe-webhook.js
 // can email it to the business inbox once payment actually succeeds.
 //
 // Requires (set in Cloudflare Pages > Settings > Environment variables):
 //   STRIPE_SECRET_KEY   - your Stripe secret key (sk_live_... / sk_test_...)
-// Requires (set in Cloudflare Pages > Settings > Functions > KV bindings):
-//   ORDER_PDFS           - a KV namespace, variable name "ORDER_PDFS"
+// Requires (set in Cloudflare Pages > Settings > Functions > R2 bindings):
+//   ORDER_PDFS           - an R2 bucket, variable name "ORDER_PDFS"
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -16,15 +16,16 @@ export async function onRequestPost(context) {
     try {
         const data = await request.json();
 
-        // Stash the PDF in KV so the webhook can pick it up after payment.
-        // 24h TTL is just a safety net for orphaned entries if a webhook
-        // never fires (abandoned checkout, etc.) — it's deleted immediately
-        // on the success path.
+        // Stash the PDF in R2 so the webhook can pick it up after payment.
+        // ORDER_PDFS is an R2 bucket, not a KV namespace — no
+        // expirationTtl option here (R2 doesn't support per-object TTL
+        // the way KV does; passing it silently does nothing, it isn't a
+        // recognised R2PutOptions field). Use an R2 Lifecycle rule on the
+        // bucket itself if abandoned checkouts' PDFs need auto-cleanup —
+        // this call no longer even claims to provide that safety net.
         const orderId = crypto.randomUUID();
         if (data.pdfDataUri) {
-            await env.ORDER_PDFS.put(orderId, data.pdfDataUri, {
-                expirationTtl: 60 * 60 * 24,
-            });
+            await env.ORDER_PDFS.put(orderId, data.pdfDataUri);
         }
 
         const origin = new URL(request.url).origin;
