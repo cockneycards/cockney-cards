@@ -218,7 +218,11 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
 // prefix, same shape this code already builds. Docs:
 // https://www.zoho.com/zeptomail/help/api/email-sending.html
 async function sendViaZeptoMail(env, { subject, text, attachments }) {
-    const res = await fetch('https://api.zeptomail.com/v1.1/email', {
+    // This account is hosted on ZeptoMail's EU cluster (confirmed on the
+    // Agent's own SMTP/API settings page: Host = api.zeptomail.eu) — a
+    // token created there isn't recognised by the .com endpoint, which is
+    // what was producing the clean "Invalid API Token" 401 rejection.
+    const res = await fetch('https://api.zeptomail.eu/v1.1/email', {
         method: 'POST',
         headers: {
             // ZEPTOMAIL_TOKEN is stored WITH the "Zoho-enczapikey " prefix
