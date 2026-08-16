@@ -9,5 +9,18 @@
     "assets": {
         "directory": ".",
         "binding": "ASSETS"
-    }
+    },
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "cockney-cards-db",
+            "database_id": "8e2f554f-822b-47ac-9f93-768a5421cdb5"
+        }
+    ],
+    "r2_buckets": [
+        {
+            "binding": "ORDER_PDFS",
+            "bucket_name": "order-pdfs-r2"
+        }
+    ]
 }
