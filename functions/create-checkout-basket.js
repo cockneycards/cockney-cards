@@ -16,8 +16,9 @@
 // KV for the PDF, so it's a small extension to read the rest of the order
 // details from there too.
 //
-// Requires the same STRIPE_SECRET_KEY env var and ORDER_PDFS KV binding
-// as create-checkout.js / create-checkout-print.js (all three share both).
+// Requires the same STRIPE_SECRET_KEY env var and ORDER_PDFS R2 bucket
+// binding as create-checkout.js / create-checkout-print.js (all three
+// share it).
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -72,12 +73,13 @@ export async function onRequestPost(context) {
             });
         }
 
-        // 24h TTL as a safety net for orphaned entries if a webhook never
-        // fires (abandoned checkout etc.) — deleted immediately on the
-        // success path by stripe-webhook.js.
-        await env.ORDER_PDFS.put(orderId, JSON.stringify({ items }), {
-            expirationTtl: 60 * 60 * 24,
-        });
+        // ORDER_PDFS is an R2 bucket (confirmed via the dashboard's
+        // Bindings tab), not a KV namespace — R2's put() doesn't take an
+        // expirationTtl option the way KV's does. If abandoned baskets'
+        // PDFs need auto-cleanup, add an R2 Lifecycle rule on the
+        // order-pdfs-r2 bucket itself (R2 > order-pdfs-r2 > Settings >
+        // Object lifecycle rules) rather than relying on this call.
+        await env.ORDER_PDFS.put(orderId, JSON.stringify({ items }));
 
         const origin = new URL(request.url).origin;
 
