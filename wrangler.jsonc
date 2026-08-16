@@ -6,6 +6,11 @@
     "observability": {
         "enabled": true
     },
+    "vars": {
+        "ALLOWED_ORIGIN": "https://cockneycards.com",
+        "FROM_EMAIL": "reminders@cockneycards.com",
+        "SITE_URL": "https://cockneycards.com"
+    },
     "assets": {
         "directory": ".",
         "binding": "ASSETS"
