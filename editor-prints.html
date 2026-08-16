@@ -1193,6 +1193,11 @@ async function addCurrentPrintToBasket() {
         const doc = await buildFinalOrderPDF();
         const pdfDataUri = doc.output('datauristring');
         const sizeInfo = activeTemplate.sizes?.[selectedSize];
+        // Small + low-quality preview of the actual personalised design
+        // (name/age text etc.) for the basket list — not the print-ready
+        // capture, which is high-res and far too large for basket
+        // metadata. Same idea as the card editor's captureFrontThumbnail().
+        const thumbnail = await captureFrontPage(0.3);
 
         const optionsParts = [];
         if (PRINT_SIZES[selectedSize]) optionsParts.push(`Size: ${PRINT_SIZES[selectedSize].label}`);
@@ -1210,7 +1215,7 @@ async function addCurrentPrintToBasket() {
             templateId: activeTemplateId,
             variantId: activeVariantKey,
             title: activeTemplate.title || activeTemplateId,
-            thumbnail: artUrlFor(activeVariantKey) || activeTemplate.url,
+            thumbnail,
             optionsSummary: optionsParts.join(' · '),
             price: sizeInfo?.price || null,
             // sizeInfo.priceValue is in POUNDS, e.g. 6.99 for a £6.99 print
