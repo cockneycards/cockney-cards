@@ -221,13 +221,13 @@ async function sendViaZeptoMail(env, { subject, text, attachments }) {
     const res = await fetch('https://api.zeptomail.com/v1.1/email', {
         method: 'POST',
         headers: {
-            // env.FROM_EMAIL is used as both the reply-to-able sender
-            // address and — since ZeptoMail is set up as a single
-            // transactional agent here — where the mail token authorises
-            // sending from. If ZEPTOMAIL_TOKEN was saved WITH the
-            // "Zoho-enczapikey " prefix already included, drop the prefix
-            // below to avoid doubling it up.
-            Authorization: `Zoho-enczapikey ${env.ZEPTOMAIL_TOKEN}`,
+            // ZEPTOMAIL_TOKEN is stored WITH the "Zoho-enczapikey " prefix
+            // already included (confirmed against the actual saved
+            // secret), so it's used directly here rather than prefixing
+            // it again — that double-prefixing was the original bug
+            // (Authorization: "Zoho-enczapikey Zoho-enczapikey <token>"),
+            // which ZeptoMail rejected with an empty-body error.
+            Authorization: env.ZEPTOMAIL_TOKEN,
             'Content-Type': 'application/json',
             Accept: 'application/json',
         },
@@ -246,7 +246,7 @@ async function sendViaZeptoMail(env, { subject, text, attachments }) {
 
     if (!res.ok) {
         const errText = await res.text();
-        throw new Error(`ZeptoMail API error: ${errText}`);
+        throw new Error(`ZeptoMail API error (${res.status} ${res.statusText}): ${errText || '(empty response body)'}`);
     }
 }
 
