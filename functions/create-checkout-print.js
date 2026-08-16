@@ -2,11 +2,11 @@
 //
 // Cloudflare Pages Function — mirrors create-checkout.js for photo print
 // orders from editor-prints.html. Creates a Stripe Checkout session and
-// stashes the print-ready PDF in KV for stripe-webhook.js to email once
+// stashes the print-ready PDF in R2 for stripe-webhook.js to email once
 // payment succeeds.
 //
-// Requires the same STRIPE_SECRET_KEY env var and ORDER_PDFS KV binding
-// as create-checkout.js (they can share both).
+// Requires the same STRIPE_SECRET_KEY env var and ORDER_PDFS R2 bucket
+// binding as create-checkout.js (they can share both).
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -16,9 +16,11 @@ export async function onRequestPost(context) {
 
         const orderId = crypto.randomUUID();
         if (data.pdfDataUri) {
-            await env.ORDER_PDFS.put(orderId, data.pdfDataUri, {
-                expirationTtl: 60 * 60 * 24,
-            });
+            // ORDER_PDFS is an R2 bucket, not a KV namespace — no
+            // expirationTtl option here (R2 doesn't support per-object
+            // TTL like KV does). Use an R2 Lifecycle rule on the bucket
+            // itself if abandoned checkouts' PDFs need auto-cleanup.
+            await env.ORDER_PDFS.put(orderId, data.pdfDataUri);
         }
 
         const origin = new URL(request.url).origin;
