@@ -64,8 +64,8 @@ export async function onRequestPost(context) {
                 quantity,
                 pdfDataUri: item.pdfDataUri || null,
                 // Per-item delivery choice — "self" (customer writes in it
-                // themselves) or "recipient" (goes straight to them, with
-                // a printable address label attached in the order email).
+                // themselves) or "recipient" (goes straight to them; their
+                // address is included in the order email text).
                 delivery: wantsRecipient ? {
                     type: 'recipient',
                     recipient: {
@@ -78,7 +78,6 @@ export async function onRequestPost(context) {
                         country: (item.delivery.recipient.country || 'United Kingdom').toString().slice(0, 100),
                     }
                 } : { type: 'self' },
-                labelPdfDataUri: wantsRecipient ? (item.labelPdfDataUri || null) : null,
             };
         });
 
