@@ -51,6 +51,7 @@ export async function onRequestPost(context) {
         const items = rawItems.map((item, i) => {
             const quantity = Math.max(1, Math.min(20, Math.round(item.quantity) || 1));
             const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
+            const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
             return {
                 index: i,
                 kind: item.kind === 'print' ? 'print' : 'card',
@@ -62,6 +63,22 @@ export async function onRequestPost(context) {
                 priceValue: hasPrice ? item.priceValue : null,
                 quantity,
                 pdfDataUri: item.pdfDataUri || null,
+                // Per-item delivery choice — "self" (customer writes in it
+                // themselves) or "recipient" (goes straight to them, with
+                // a printable address label attached in the order email).
+                delivery: wantsRecipient ? {
+                    type: 'recipient',
+                    recipient: {
+                        name: (item.delivery.recipient.name || '').toString().slice(0, 200),
+                        address1: (item.delivery.recipient.address1 || '').toString().slice(0, 200),
+                        address2: (item.delivery.recipient.address2 || '').toString().slice(0, 200),
+                        city: (item.delivery.recipient.city || '').toString().slice(0, 200),
+                        county: (item.delivery.recipient.county || '').toString().slice(0, 200),
+                        postcode: (item.delivery.recipient.postcode || '').toString().slice(0, 50),
+                        country: (item.delivery.recipient.country || 'United Kingdom').toString().slice(0, 100),
+                    }
+                } : { type: 'self' },
+                labelPdfDataUri: wantsRecipient ? (item.labelPdfDataUri || null) : null,
             };
         });
 
