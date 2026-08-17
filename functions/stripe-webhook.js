@@ -64,26 +64,35 @@ export async function onRequestPost(context) {
         const customerEmail = session.customer_details?.email || null;
         const isBasket = meta.product_type === 'basket';
 
-        // For 'card'/'print', this R2 object's contents are the raw PDF
-        // data URI (as before). For 'basket', it's a JSON blob holding
-        // every line item's own PDF + details — see the comment above.
-        // ORDER_PDFS is an R2 bucket, not a KV namespace — .get() returns
-        // an R2ObjectBody (or null), not the stored value directly the
-        // way KV's .get() does, so its contents need reading out with
-        // .text() before they're usable.
+        // Both 'card'/'print' and 'basket' orders now store a JSON blob in
+        // R2 (create-checkout.js / create-checkout-print.js /
+        // create-checkout-basket.js) — single-item orders as
+        // { pdfDataUri, delivery, labelPdfDataUri }, basket orders as
+        // { items: [...] }, each item carrying its own copy of those same
+        // three fields. ORDER_PDFS is an R2 bucket, not a KV namespace —
+        // .get() returns an R2ObjectBody (or null), not the stored value
+        // directly the way KV's .get() does, so its contents need reading
+        // out with .text() before they're usable.
         let pdfDataUri = null;
+        let labelPdfDataUri = null;
+        let delivery = { type: 'self' };
         let basketItems = null;
         if (orderId) {
             const object = await env.ORDER_PDFS.get(orderId);
             const raw = object ? await object.text() : null;
-            if (raw && isBasket) {
+            if (raw) {
                 try {
-                    basketItems = JSON.parse(raw).items || [];
+                    const parsed = JSON.parse(raw);
+                    if (isBasket) {
+                        basketItems = parsed.items || [];
+                    } else {
+                        pdfDataUri = parsed.pdfDataUri || null;
+                        labelPdfDataUri = parsed.labelPdfDataUri || null;
+                        delivery = parsed.delivery || { type: 'self' };
+                    }
                 } catch (err) {
-                    console.error('Stripe webhook: could not parse basket payload for order', orderId, err);
+                    console.error('Stripe webhook: could not parse order payload for order', orderId, err);
                 }
-            } else {
-                pdfDataUri = raw;
             }
         }
 
@@ -163,6 +172,8 @@ export async function onRequestPost(context) {
                     age2: meta.custom_age2,
                     size: meta.size,
                     pdfDataUri,
+                    delivery,
+                    labelPdfDataUri,
                 });
             }
         } catch (err) {
@@ -264,10 +275,21 @@ async function sendOrderEmail(env, order) {
         });
     }
 
+    const wantsRecipient = order.delivery?.type === 'recipient' && order.delivery?.recipient;
+    if (wantsRecipient && order.labelPdfDataUri) {
+        const base64 = order.labelPdfDataUri.split(',')[1] || order.labelPdfDataUri;
+        attachments.push({
+            filename: `order-${order.productType}-address-label.pdf`,
+            content: base64,
+        });
+    }
+
     const subjectBits =
         order.productType === 'print'
             ? `Print order (${order.size || 'size N/A'})`
             : `Card order (${order.name || 'N/A'})`;
+
+    const r = wantsRecipient ? order.delivery.recipient : null;
 
     const lines = [
         `Product: ${order.productType}`,
@@ -279,8 +301,21 @@ async function sendOrderEmail(env, order) {
         order.age2 && order.age2 !== 'N/A' ? `Age 2: ${order.age2}` : null,
         order.size ? `Size: ${order.size}` : null,
         !order.pdfDataUri ? '\n⚠️ No PDF was found in storage for this order — check R2/logs.' : null,
+        '',
+        wantsRecipient
+            ? [
+                'DELIVERY: send directly to the recipient (see attached address label)',
+                `  ${r.name}`,
+                r.address1 ? `  ${r.address1}` : null,
+                r.address2 ? `  ${r.address2}` : null,
+                [r.city, r.county].filter(Boolean).join(', ') ? `  ${[r.city, r.county].filter(Boolean).join(', ')}` : null,
+                r.postcode ? `  ${r.postcode}` : null,
+                r.country ? `  ${r.country}` : null,
+                wantsRecipient && !order.labelPdfDataUri ? '  ⚠️ No address label PDF was found for this order.' : null,
+            ].filter(Boolean).join('\n')
+            : 'DELIVERY: to the customer themselves (they\'ll write in it)',
     ]
-        .filter(Boolean)
+        .filter((line) => line !== null)
         .join('\n');
 
     await sendViaZeptoMail(env, {
@@ -296,25 +331,46 @@ async function sendOrderEmail(env, order) {
 // with its options and quantity, rather than the single set of
 // name/age/size fields the single-item version uses.
 async function sendBasketOrderEmail(env, order) {
-    const attachments = order.items
-        .filter((item) => item.pdfDataUri)
-        .map((item) => {
-            const base64 = item.pdfDataUri.split(',')[1] || item.pdfDataUri;
-            const safeTitle = (item.title || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-            return {
+    const attachments = [];
+    order.items.forEach((item) => {
+        const safeTitle = (item.title || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        if (item.pdfDataUri) {
+            attachments.push({
                 filename: `order-item-${item.index + 1}-${item.kind}-${safeTitle}.pdf`,
-                content: base64,
-            };
-        });
+                content: item.pdfDataUri.split(',')[1] || item.pdfDataUri,
+            });
+        }
+        const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+        if (wantsRecipient && item.labelPdfDataUri) {
+            attachments.push({
+                filename: `order-item-${item.index + 1}-${item.kind}-${safeTitle}-address-label.pdf`,
+                content: item.labelPdfDataUri.split(',')[1] || item.labelPdfDataUri,
+            });
+        }
+    });
 
-    const missingPdfCount = order.items.length - attachments.length;
+    const missingPdfCount = order.items.filter((item) => !item.pdfDataUri).length;
 
     const itemLines = order.items.map((item, i) => {
+        const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+        const r = wantsRecipient ? item.delivery.recipient : null;
         const bits = [
             `${i + 1}. ${item.title || 'Personalised item'} (${item.kind})`,
             item.optionsSummary ? `   ${item.optionsSummary}` : null,
             `   Qty: ${item.quantity}${item.price ? ` · ${item.price} each` : ''}`,
             !item.pdfDataUri ? '   ⚠️ No PDF found in storage for this item.' : null,
+            wantsRecipient
+                ? [
+                    '   Delivery: send directly to the recipient (see attached address label)',
+                    `     ${r.name}`,
+                    r.address1 ? `     ${r.address1}` : null,
+                    r.address2 ? `     ${r.address2}` : null,
+                    [r.city, r.county].filter(Boolean).join(', ') ? `     ${[r.city, r.county].filter(Boolean).join(', ')}` : null,
+                    r.postcode ? `     ${r.postcode}` : null,
+                    r.country ? `     ${r.country}` : null,
+                    wantsRecipient && !item.labelPdfDataUri ? '     ⚠️ No address label PDF was found for this item.' : null,
+                ].filter(Boolean).join('\n')
+                : '   Delivery: to the customer themselves',
         ];
         return bits.filter(Boolean).join('\n');
     });
