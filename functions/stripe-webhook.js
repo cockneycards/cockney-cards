@@ -67,14 +67,13 @@ export async function onRequestPost(context) {
         // Both 'card'/'print' and 'basket' orders now store a JSON blob in
         // R2 (create-checkout.js / create-checkout-print.js /
         // create-checkout-basket.js) — single-item orders as
-        // { pdfDataUri, delivery, labelPdfDataUri }, basket orders as
-        // { items: [...] }, each item carrying its own copy of those same
-        // three fields. ORDER_PDFS is an R2 bucket, not a KV namespace —
-        // .get() returns an R2ObjectBody (or null), not the stored value
-        // directly the way KV's .get() does, so its contents need reading
-        // out with .text() before they're usable.
+        // { pdfDataUri, delivery }, basket orders as { items: [...] },
+        // each item carrying its own copy of those same two fields.
+        // ORDER_PDFS is an R2 bucket, not a KV namespace — .get() returns
+        // an R2ObjectBody (or null), not the stored value directly the
+        // way KV's .get() does, so its contents need reading out with
+        // .text() before they're usable.
         let pdfDataUri = null;
-        let labelPdfDataUri = null;
         let delivery = { type: 'self' };
         let basketItems = null;
         if (orderId) {
@@ -87,7 +86,6 @@ export async function onRequestPost(context) {
                         basketItems = parsed.items || [];
                     } else {
                         pdfDataUri = parsed.pdfDataUri || null;
-                        labelPdfDataUri = parsed.labelPdfDataUri || null;
                         delivery = parsed.delivery || { type: 'self' };
                     }
                 } catch (err) {
@@ -173,7 +171,6 @@ export async function onRequestPost(context) {
                     size: meta.size,
                     pdfDataUri,
                     delivery,
-                    labelPdfDataUri,
                 });
             }
         } catch (err) {
@@ -276,13 +273,6 @@ async function sendOrderEmail(env, order) {
     }
 
     const wantsRecipient = order.delivery?.type === 'recipient' && order.delivery?.recipient;
-    if (wantsRecipient && order.labelPdfDataUri) {
-        const base64 = order.labelPdfDataUri.split(',')[1] || order.labelPdfDataUri;
-        attachments.push({
-            filename: `order-${order.productType}-address-label.pdf`,
-            content: base64,
-        });
-    }
 
     const subjectBits =
         order.productType === 'print'
@@ -304,14 +294,13 @@ async function sendOrderEmail(env, order) {
         '',
         wantsRecipient
             ? [
-                'DELIVERY: send directly to the recipient (see attached address label)',
+                'DELIVERY: send directly to the recipient',
                 `  ${r.name}`,
                 r.address1 ? `  ${r.address1}` : null,
                 r.address2 ? `  ${r.address2}` : null,
                 [r.city, r.county].filter(Boolean).join(', ') ? `  ${[r.city, r.county].filter(Boolean).join(', ')}` : null,
                 r.postcode ? `  ${r.postcode}` : null,
                 r.country ? `  ${r.country}` : null,
-                wantsRecipient && !order.labelPdfDataUri ? '  ⚠️ No address label PDF was found for this order.' : null,
             ].filter(Boolean).join('\n')
             : 'DELIVERY: to the customer themselves (they\'ll write in it)',
     ]
@@ -340,13 +329,6 @@ async function sendBasketOrderEmail(env, order) {
                 content: item.pdfDataUri.split(',')[1] || item.pdfDataUri,
             });
         }
-        const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
-        if (wantsRecipient && item.labelPdfDataUri) {
-            attachments.push({
-                filename: `order-item-${item.index + 1}-${item.kind}-${safeTitle}-address-label.pdf`,
-                content: item.labelPdfDataUri.split(',')[1] || item.labelPdfDataUri,
-            });
-        }
     });
 
     const missingPdfCount = order.items.filter((item) => !item.pdfDataUri).length;
@@ -361,14 +343,13 @@ async function sendBasketOrderEmail(env, order) {
             !item.pdfDataUri ? '   ⚠️ No PDF found in storage for this item.' : null,
             wantsRecipient
                 ? [
-                    '   Delivery: send directly to the recipient (see attached address label)',
+                    '   Delivery: send directly to the recipient',
                     `     ${r.name}`,
                     r.address1 ? `     ${r.address1}` : null,
                     r.address2 ? `     ${r.address2}` : null,
                     [r.city, r.county].filter(Boolean).join(', ') ? `     ${[r.city, r.county].filter(Boolean).join(', ')}` : null,
                     r.postcode ? `     ${r.postcode}` : null,
                     r.country ? `     ${r.country}` : null,
-                    wantsRecipient && !item.labelPdfDataUri ? '     ⚠️ No address label PDF was found for this item.' : null,
                 ].filter(Boolean).join('\n')
                 : '   Delivery: to the customer themselves',
         ];
