@@ -22,7 +22,6 @@
     .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
     .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
     .nav-links a:hover { color: #888; }
-    .nav-links a.active { font-weight: bold; }
 
     .basket-page { max-width: 1000px; margin: 40px auto 80px; padding: 0 40px; box-sizing: border-box; }
     .basket-page h1 { font-size: 26px; font-weight: 300; margin: 0 0 30px; letter-spacing: 0.5px; }
@@ -84,13 +83,7 @@
             <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
         </div>
         <div class="header-right">
-            <div class="cart-icon" onclick="window.location.href='basket.html';">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-            </div>
+            <div class="cart-icon"></div>
         </div>
     </div>
     <nav>
@@ -134,18 +127,7 @@
 const $ = (id) => document.getElementById(id);
 
 window.addEventListener('DOMContentLoaded', renderBasket);
-window.addEventListener('DOMContentLoaded', highlightActiveNavLink);
 window.addEventListener('cc-cart-updated', renderBasket);
-
-// Bolds whichever nav link matches the current page, same behaviour as account.html
-function highlightActiveNavLink() {
-    const currentPage = window.location.pathname.split('/').pop();
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        if (link.getAttribute('href') === currentPage) {
-            link.classList.add('active');
-        }
-    });
-}
 
 function renderBasket() {
     const items = ccCart.getCart();
@@ -245,8 +227,7 @@ async function goToCheckout() {
                 priceValue: item.priceValue,
                 quantity: item.quantity,
                 pdfDataUri: item.pdfDataUri,
-                delivery: item.delivery || { type: 'self' },
-                labelPdfDataUri: item.labelPdfDataUri
+                delivery: item.delivery || { type: 'self' }
             }))
         };
 
