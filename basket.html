@@ -226,7 +226,9 @@ async function goToCheckout() {
                 price: item.price,
                 priceValue: item.priceValue,
                 quantity: item.quantity,
-                pdfDataUri: item.pdfDataUri
+                pdfDataUri: item.pdfDataUri,
+                delivery: item.delivery || { type: 'self' },
+                labelPdfDataUri: item.labelPdfDataUri
             }))
         };
 
