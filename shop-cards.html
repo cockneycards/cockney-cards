@@ -146,6 +146,7 @@
             <label class="sort-label">
                 Sort by:
                 <select id="sort-select" onchange="sortProducts(this.value)">
+                    <option value="best-selling" selected>Best Selling</option>
                     <option value="featured">Featured</option>
                     <option value="price-asc">Price: Low to High</option>
                     <option value="price-desc">Price: High to Low</option>
@@ -200,7 +201,7 @@ const PRODUCTS = Object.entries(CARD_CATALOGUE)
 const $ = (id) => document.getElementById(id);
 
 let currentCategory = 'all';
-let currentSort = 'featured';
+let currentSort = 'best-selling';
 let viewMode = 'grid';       // 'grid' | 'gallery' | 'team'
 let currentLeague = null;    // e.g. "premiership" -- set when viewMode is 'gallery' or 'team'
 let currentTeam = null;      // e.g. "arsenal"      -- set when viewMode is 'team'
@@ -287,7 +288,7 @@ function restoreShopState() {
     let state;
     try { state = JSON.parse(raw); } catch (e) { filterProducts('all'); return; }
 
-    currentSort = state.currentSort || 'featured';
+    currentSort = state.currentSort || 'best-selling';
     const sortSelect = $('sort-select');
     if (sortSelect) sortSelect.value = currentSort;
 
@@ -499,6 +500,9 @@ function sortItems(items) {
         case 'price-desc': sorted.sort((a, b) => b.priceValue - a.priceValue); break;
         case 'name-asc': sorted.sort((a, b) => a.title.localeCompare(b.title)); break;
         case 'name-desc': sorted.sort((a, b) => b.title.localeCompare(a.title)); break;
+        // 'best-selling': no real sales data wired in yet -- falls back to
+        // catalogue order for now. Swap in real ranking once available
+        // (e.g. a `sales` count per product, or a `bestseller` flag).
         // 'featured' (default): keep original catalogue order
     }
     return sorted;
