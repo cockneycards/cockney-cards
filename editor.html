@@ -201,6 +201,24 @@
 
         <p id="account-nudge" style="font-size: 12px; color: #666; text-align: center; margin: 15px 0 10px 0;"></p>
 
+        <div id="delivery-section" style="margin: 15px 0; padding-top: 15px; border-top: 1px solid #eee;">
+            <p style="font-size: 12px; font-weight: bold; color: #333; margin: 0 0 8px; letter-spacing: 0.5px; text-transform: uppercase;">Delivery</p>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:8px; cursor:pointer;">
+                <input type="radio" name="delivery-choice" value="self" checked onchange="toggleRecipientFields()"> Send to me — I'll write in it myself
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:10px; cursor:pointer;">
+                <input type="radio" name="delivery-choice" value="recipient" onchange="toggleRecipientFields()"> Send directly to the recipient
+            </label>
+            <div id="recipient-fields" style="display:none; flex-direction:column; gap:8px;">
+                <input type="text" id="recipient-name" placeholder="Recipient's full name">
+                <input type="text" id="recipient-address1" placeholder="Address line 1">
+                <input type="text" id="recipient-address2" placeholder="Address line 2 (optional)">
+                <input type="text" id="recipient-city" placeholder="Town / City">
+                <input type="text" id="recipient-county" placeholder="County (optional)">
+                <input type="text" id="recipient-postcode" placeholder="Postcode">
+            </div>
+        </div>
+
         <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentCardToBasket()">Add to Basket</button>
         <button id="buy-now-btn" class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
 
@@ -1187,6 +1205,79 @@ async function testDownloadPrintPDFs() {
 // immediately restores whatever page was showing before, so this doesn't
 // visibly disrupt the customer's current view even though the "Add to
 // Basket" button only shows while viewing the inside page.
+// Shows/hides the recipient address fields based on which delivery
+// radio is selected.
+function toggleRecipientFields() {
+    const wantsRecipient = document.querySelector('input[name="delivery-choice"]:checked')?.value === 'recipient';
+    $('recipient-fields').style.display = wantsRecipient ? 'flex' : 'none';
+}
+
+// Reads the current delivery choice + (if applicable) recipient address
+// fields into a plain object, and clears them back to the default ("send
+// to me") ready for the next item — since this is a per-item choice, each
+// "Add to Basket"/"Buy Now" should start fresh rather than carrying the
+// previous item's recipient over.
+function collectAndResetDeliveryInfo() {
+    const wantsRecipient = document.querySelector('input[name="delivery-choice"]:checked')?.value === 'recipient';
+
+    const delivery = wantsRecipient ? {
+        type: 'recipient',
+        recipient: {
+            name: $('recipient-name').value.trim(),
+            address1: $('recipient-address1').value.trim(),
+            address2: $('recipient-address2').value.trim(),
+            city: $('recipient-city').value.trim(),
+            county: $('recipient-county').value.trim(),
+            postcode: $('recipient-postcode').value.trim(),
+            country: 'United Kingdom'
+        }
+    } : { type: 'self' };
+
+    // Reset for the next item.
+    document.querySelector('input[name="delivery-choice"][value="self"]').checked = true;
+    ['recipient-name', 'recipient-address1', 'recipient-address2', 'recipient-city', 'recipient-county', 'recipient-postcode']
+        .forEach((id) => { $(id).value = ''; });
+    toggleRecipientFields();
+
+    return delivery;
+}
+
+// Builds a small, generic A6 address label PDF for a recipient — sized to
+// work whether it gets printed on sticky label paper, printed and cut out,
+// or just used as a clear reference while hand-addressing an envelope.
+// Returns null if delivery.type isn't 'recipient' (nothing to build).
+function buildAddressLabelPDF(delivery) {
+    if (!delivery || delivery.type !== 'recipient') return null;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [105, 148] }); // A6
+    const r = delivery.recipient;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text('From: Cockney Cards', 10, 15);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    let y = 55;
+    const lineHeight = 8;
+    [r.name, r.address1, r.address2, [r.city, r.county].filter(Boolean).join(', '), r.postcode, r.country]
+        .filter(Boolean)
+        .forEach((line) => {
+            doc.text(line, 10, y);
+            y += lineHeight;
+        });
+
+    return doc;
+}
+
+// Builds a small, low-quality preview of the actual personalised front
+// page (photo, text, everything) for the basket list — NOT the print-ready
+// capture (that's high-res/high-quality and meant for printing, far too
+// large to store as basket metadata). Grabs the front page's JSON, then
+// immediately restores whatever page was showing before, so this doesn't
+// visibly disrupt the customer's current view even though the "Add to
+// Basket" button only shows while viewing the inside page.
 function captureFrontThumbnail() {
     const pageBeforeCapture = currentPage;
     switchPage('front', false);
@@ -1235,6 +1326,9 @@ async function addCurrentCardToBasket() {
         const doc = await captureAndBuildPrintPDF();
         const pdfDataUri = doc.output('datauristring');
         const thumbnail = await captureFrontThumbnail();
+        const delivery = collectAndResetDeliveryInfo();
+        const labelDoc = buildAddressLabelPDF(delivery);
+        const labelPdfDataUri = labelDoc ? labelDoc.output('datauristring') : null;
 
         const optionsParts = [];
         if (activeTemplate.name) optionsParts.push(`${activeTemplate.name.label || 'Name'}: ${$('name-input').value || '—'}`);
@@ -1243,6 +1337,7 @@ async function addCurrentCardToBasket() {
             const val = $(`extra-input-${i}`)?.value;
             if (val) optionsParts.push(`${f.label || f.key || 'Field'}: ${val}`);
         });
+        if (delivery.type === 'recipient') optionsParts.push(`Deliver to: ${delivery.recipient.name || 'recipient'}`);
 
         await ccCart.addToCart({
             kind: 'card',
@@ -1253,7 +1348,9 @@ async function addCurrentCardToBasket() {
             optionsSummary: optionsParts.join(' · '),
             price: activeTemplate.price || null,
             priceValue: activeTemplate.priceValue || 0,
-            pdfDataUri
+            pdfDataUri,
+            delivery,
+            labelPdfDataUri
         });
 
         addBtn.innerText = "Added to Basket ✓";
@@ -1279,11 +1376,14 @@ async function uploadAndGoToCheckout() {
         const doc = await captureAndBuildPrintPDF();
 
         // The print-ready PDF is handed to create-checkout, which stashes
-        // it in KV until Stripe confirms payment — stripe-webhook.js then
+        // it in R2 until Stripe confirms payment — stripe-webhook.js then
         // emails it to the business inbox. Nothing is emailed until payment
         // actually succeeds. Use "Test: Download Print PDFs" to check the
         // PDF locally without going through checkout.
         const pdfDataUri = doc.output('datauristring');
+        const delivery = collectAndResetDeliveryInfo();
+        const labelDoc = buildAddressLabelPDF(delivery);
+        const labelPdfDataUri = labelDoc ? labelDoc.output('datauristring') : null;
 
         buyBtn.innerText = "Connecting checkout...";
 
@@ -1295,7 +1395,9 @@ async function uploadAndGoToCheckout() {
                 return acc;
             }, {}),
             customerEmail: (typeof ccIsLoggedIn === 'function' && ccIsLoggedIn()) ? ccGetEmail() : null,
-            pdfDataUri
+            pdfDataUri,
+            delivery,
+            labelPdfDataUri
         };
 
         const response = await fetch('/create-checkout', {
