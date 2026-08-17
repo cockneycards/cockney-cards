@@ -220,12 +220,6 @@
         </div>
 
         <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentCardToBasket()">Add to Basket</button>
-        <button id="buy-now-btn" class="btn" onclick="uploadAndGoToCheckout()">Buy Now</button>
-
-        <!-- TESTING ONLY — downloads the print-ready PDFs straight to your
-             downloads folder so you can test-print and set up guillotine/cut
-             settings. Remove this button before going live. -->
-        <button id="test-download-btn" class="btn" style="background-color:#1A73E8;" onclick="testDownloadPrintPDFs()">Test: Download Print PDFs</button>
 
         <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
     </div>
@@ -916,8 +910,8 @@ function switchPage(page, updateBuyBtn = true) {
     $('front-controls').classList.toggle('active', isFront);
     $('inside-controls').classList.toggle('active', !isFront);
     if (updateBuyBtn) {
-        $('buy-now-btn').style.display = isFront ? 'none' : 'block';
         $('add-to-basket-btn').style.display = isFront ? 'none' : 'block';
+        $('delivery-section').style.display = isFront ? 'none' : 'block';
     }
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
@@ -1175,36 +1169,6 @@ async function captureAndBuildPrintPDF() {
     return buildPrintReadyPDF([outsideDataUrl, insideDataUrl]);
 }
 
-// TESTING ONLY — downloads the print-ready PDF (outside spread on page 1,
-// inside spread on page 2) straight to the browser's downloads folder so
-// you can test-print and dial in guillotine/cut settings without going
-// through a real checkout. Remove this button (and its entry in the
-// controls markup) once you're ready to go live.
-async function testDownloadPrintPDFs() {
-    const testBtn = $('test-download-btn');
-    const originalText = testBtn.innerText;
-    testBtn.innerText = "Generating...";
-    testBtn.disabled = true;
-
-    try {
-        const doc = await captureAndBuildPrintPDF();
-        doc.save('card-print-TEST.pdf');
-    } catch (err) {
-        console.error(err);
-        alert("Test download failed — check the console for details.");
-    } finally {
-        testBtn.innerText = originalText;
-        testBtn.disabled = false;
-    }
-}
-
-// Builds a small, low-quality preview of the actual personalised front
-// page (photo, text, everything) for the basket list — NOT the print-ready
-// capture (that's high-res/high-quality and meant for printing, far too
-// large to store as basket metadata). Grabs the front page's JSON, then
-// immediately restores whatever page was showing before, so this doesn't
-// visibly disrupt the customer's current view even though the "Add to
-// Basket" button only shows while viewing the inside page.
 // Shows/hides the recipient address fields based on which delivery
 // radio is selected.
 function toggleRecipientFields() {
@@ -1215,7 +1179,7 @@ function toggleRecipientFields() {
 // Reads the current delivery choice + (if applicable) recipient address
 // fields into a plain object, and clears them back to the default ("send
 // to me") ready for the next item — since this is a per-item choice, each
-// "Add to Basket"/"Buy Now" should start fresh rather than carrying the
+// "Add to Basket" should start fresh rather than carrying the
 // previous item's recipient over.
 function collectAndResetDeliveryInfo() {
     const wantsRecipient = document.querySelector('input[name="delivery-choice"]:checked')?.value === 'recipient';
@@ -1240,35 +1204,6 @@ function collectAndResetDeliveryInfo() {
     toggleRecipientFields();
 
     return delivery;
-}
-
-// Builds a small, generic A6 address label PDF for a recipient — sized to
-// work whether it gets printed on sticky label paper, printed and cut out,
-// or just used as a clear reference while hand-addressing an envelope.
-// Returns null if delivery.type isn't 'recipient' (nothing to build).
-function buildAddressLabelPDF(delivery) {
-    if (!delivery || delivery.type !== 'recipient') return null;
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [105, 148] }); // A6
-    const r = delivery.recipient;
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text('From: Cockney Cards', 10, 15);
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    let y = 55;
-    const lineHeight = 8;
-    [r.name, r.address1, r.address2, [r.city, r.county].filter(Boolean).join(', '), r.postcode, r.country]
-        .filter(Boolean)
-        .forEach((line) => {
-            doc.text(line, 10, y);
-            y += lineHeight;
-        });
-
-    return doc;
 }
 
 // Builds a small, low-quality preview of the actual personalised front
@@ -1311,7 +1246,7 @@ function captureFrontThumbnail() {
     });
 }
 
-// Builds the same print-ready PDF as "Buy Now"/the test-download button,
+// Builds the same print-ready PDF "Add to Basket" already used to send,
 // but instead of going straight to checkout it stashes the PDF + this
 // card's personalisation into the shared basket (see cart.js) so the
 // customer can keep personalising more cards before paying for all of
@@ -1327,8 +1262,6 @@ async function addCurrentCardToBasket() {
         const pdfDataUri = doc.output('datauristring');
         const thumbnail = await captureFrontThumbnail();
         const delivery = collectAndResetDeliveryInfo();
-        const labelDoc = buildAddressLabelPDF(delivery);
-        const labelPdfDataUri = labelDoc ? labelDoc.output('datauristring') : null;
 
         const optionsParts = [];
         if (activeTemplate.name) optionsParts.push(`${activeTemplate.name.label || 'Name'}: ${$('name-input').value || '—'}`);
@@ -1349,8 +1282,7 @@ async function addCurrentCardToBasket() {
             price: activeTemplate.price || null,
             priceValue: activeTemplate.priceValue || 0,
             pdfDataUri,
-            delivery,
-            labelPdfDataUri
+            delivery
         });
 
         addBtn.innerText = "Added to Basket ✓";
@@ -1363,62 +1295,6 @@ async function addCurrentCardToBasket() {
         alert("Couldn't add this card to your basket — check the console for details.");
         addBtn.innerText = originalText;
         addBtn.disabled = false;
-    }
-}
-
-async function uploadAndGoToCheckout() {
-    const buyBtn = $('buy-now-btn');
-    buyBtn.innerText = "Generating high-res pages...";
-    buyBtn.disabled = true;
-
-    try {
-        buyBtn.innerText = "Building print files...";
-        const doc = await captureAndBuildPrintPDF();
-
-        // The print-ready PDF is handed to create-checkout, which stashes
-        // it in R2 until Stripe confirms payment — stripe-webhook.js then
-        // emails it to the business inbox. Nothing is emailed until payment
-        // actually succeeds. Use "Test: Download Print PDFs" to check the
-        // PDF locally without going through checkout.
-        const pdfDataUri = doc.output('datauristring');
-        const delivery = collectAndResetDeliveryInfo();
-        const labelDoc = buildAddressLabelPDF(delivery);
-        const labelPdfDataUri = labelDoc ? labelDoc.output('datauristring') : null;
-
-        buyBtn.innerText = "Connecting checkout...";
-
-        const checkoutData = {
-            name: activeTemplate.name ? ($('name-input').value.toUpperCase() || "NAME") : "N/A",
-            age: ageText?.text ?? "N/A",
-            extraFields: (activeTemplate.extraFields || []).reduce((acc, f, i) => {
-                acc[f.key || f.label || `field${i}`] = $(`extra-input-${i}`)?.value || "";
-                return acc;
-            }, {}),
-            customerEmail: (typeof ccIsLoggedIn === 'function' && ccIsLoggedIn()) ? ccGetEmail() : null,
-            pdfDataUri,
-            delivery,
-            labelPdfDataUri
-        };
-
-        const response = await fetch('/create-checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(checkoutData)
-        });
-
-        const session = await response.json();
-        if (session.url) {
-            window.location.href = session.url;
-        } else {
-            alert("Checkout Error: " + (session.error || "Please verify environment settings."));
-            buyBtn.innerText = "Buy Now";
-            buyBtn.disabled = false;
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Checkout processing failed. Check the console for details.");
-        buyBtn.innerText = "Buy Now";
-        buyBtn.disabled = false;
     }
 }
 
