@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank You | Cockney Cards</title>
+<script src="auth.js"></script>
+<script src="cart.js"></script>
+
+<style>
+    :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --gold: #c8a04d; --font-family: 'Helvetica Neue', Arial, sans-serif; }
+    html { overflow-y: scroll; scrollbar-gutter: stable; }
+    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); display: flex; flex-direction: column; min-height: 100vh; }
+
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+    .logo-container { text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+
+    .thankyou-page { text-align: center; max-width: 620px; width: 100%; }
+
+    .image-wrap { width: 100%; max-width: 620px; margin: 0 auto; }
+    .image-wrap img { width: 100%; height: auto; display: block; }
+
+    h1 { font-size: 26px; font-weight: 300; margin: 24px 0 8px; letter-spacing: 0.5px; color: var(--dark); }
+
+    p.tagline { color: #666; font-size: 15px; margin: 0 0 8px; line-height: 1.6; }
+    p.order-ref { color: #999; font-size: 13px; margin: 0 0 30px; }
+
+    .divider { width: 60px; height: 2px; background: var(--gold); margin: 24px auto; opacity: 0.8; }
+
+    .actions { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+    .btn { background-color: #1a1a1a; color: white; border: none; padding: 14px 28px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; display: inline-block; box-sizing: border-box; }
+    .btn:hover { background-color: #444; }
+    .btn-secondary { background: none; border: 1px solid var(--border-color); color: #555; text-transform: none; letter-spacing: normal; font-weight: normal; }
+    .btn-secondary:hover { background: #f5f5f5; color: #111; }
+
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon"></div>
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="account.html">My Account</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <div class="thankyou-page">
+        <div class="image-wrap">
+            <img src="https://images.cockneycards.com/purchaselogo.png" alt="Cockney Cards — thank you for your purchase">
+        </div>
+
+        <h1>Thank You For Your Order!</h1>
+
+        <p class="tagline">Your order has been received and is being prepared. A confirmation email is on its way to your inbox.</p>
+        <p class="order-ref" id="order-ref"></p>
+
+        <div class="divider"></div>
+
+        <div class="actions">
+            <a href="shop-cards.html" class="btn">Keep Shopping</a>
+            <a href="account.html" class="btn btn-secondary">View My Orders</a>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="#" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
+
+<script>
+// If Stripe redirects back with a session id (e.g. thankyou.html?session_id=cs_...),
+// show it as a lightweight order reference. Purely cosmetic — no fetch back to Stripe.
+(function showOrderRef() {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    if (sessionId) {
+        document.getElementById('order-ref').textContent = 'Order reference: ' + sessionId;
+    }
+})();
+</script>
+</body>
+</html>
