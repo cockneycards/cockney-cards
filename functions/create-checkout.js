@@ -46,7 +46,7 @@ export async function onRequestPost(context) {
         const params = new URLSearchParams();
         params.append('payment_method_types[]', 'card');
         params.append('mode', 'payment');
-        params.append('success_url', `${origin}/?status=success`);
+        params.append('success_url', `${origin}/thankyou.html?session_id={CHECKOUT_SESSION_ID}`);
         params.append('cancel_url', `${origin}/?status=cancel`);
         // Pre-fills Stripe's checkout email field when the customer is
         // logged into their Cockney Cards account — makes it far more
