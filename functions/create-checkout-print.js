@@ -34,7 +34,6 @@ export async function onRequestPost(context) {
                     country: (data.delivery.recipient.country || 'United Kingdom').toString().slice(0, 100),
                 }
             } : { type: 'self' },
-            labelPdfDataUri: wantsRecipient ? (data.labelPdfDataUri || null) : null,
         }));
 
         const origin = new URL(request.url).origin;
