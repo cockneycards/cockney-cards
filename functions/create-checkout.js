@@ -16,17 +16,31 @@ export async function onRequestPost(context) {
     try {
         const data = await request.json();
 
-        // Stash the PDF in R2 so the webhook can pick it up after payment.
-        // ORDER_PDFS is an R2 bucket, not a KV namespace — no
-        // expirationTtl option here (R2 doesn't support per-object TTL
-        // the way KV does; passing it silently does nothing, it isn't a
-        // recognised R2PutOptions field). Use an R2 Lifecycle rule on the
-        // bucket itself if abandoned checkouts' PDFs need auto-cleanup —
-        // this call no longer even claims to provide that safety net.
+        // Stash the PDF (+ delivery choice + address label, if any) in R2
+        // so the webhook can pick it up after payment. ORDER_PDFS is an
+        // R2 bucket, not a KV namespace — no expirationTtl option here
+        // (R2 doesn't support per-object TTL the way KV does; passing it
+        // silently does nothing, it isn't a recognised R2PutOptions
+        // field). Use an R2 Lifecycle rule on the bucket itself if
+        // abandoned checkouts' files need auto-cleanup.
         const orderId = crypto.randomUUID();
-        if (data.pdfDataUri) {
-            await env.ORDER_PDFS.put(orderId, data.pdfDataUri);
-        }
+        const wantsRecipient = data.delivery?.type === 'recipient' && data.delivery?.recipient;
+        await env.ORDER_PDFS.put(orderId, JSON.stringify({
+            pdfDataUri: data.pdfDataUri || null,
+            delivery: wantsRecipient ? {
+                type: 'recipient',
+                recipient: {
+                    name: (data.delivery.recipient.name || '').toString().slice(0, 200),
+                    address1: (data.delivery.recipient.address1 || '').toString().slice(0, 200),
+                    address2: (data.delivery.recipient.address2 || '').toString().slice(0, 200),
+                    city: (data.delivery.recipient.city || '').toString().slice(0, 200),
+                    county: (data.delivery.recipient.county || '').toString().slice(0, 200),
+                    postcode: (data.delivery.recipient.postcode || '').toString().slice(0, 50),
+                    country: (data.delivery.recipient.country || 'United Kingdom').toString().slice(0, 100),
+                }
+            } : { type: 'self' },
+            labelPdfDataUri: wantsRecipient ? (data.labelPdfDataUri || null) : null,
+        }));
 
         const origin = new URL(request.url).origin;
 
