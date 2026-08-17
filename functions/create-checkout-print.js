@@ -15,13 +15,27 @@ export async function onRequestPost(context) {
         const data = await request.json();
 
         const orderId = crypto.randomUUID();
-        if (data.pdfDataUri) {
-            // ORDER_PDFS is an R2 bucket, not a KV namespace — no
-            // expirationTtl option here (R2 doesn't support per-object
-            // TTL like KV does). Use an R2 Lifecycle rule on the bucket
-            // itself if abandoned checkouts' PDFs need auto-cleanup.
-            await env.ORDER_PDFS.put(orderId, data.pdfDataUri);
-        }
+        // ORDER_PDFS is an R2 bucket, not a KV namespace — no
+        // expirationTtl option here (R2 doesn't support per-object TTL
+        // like KV does). Use an R2 Lifecycle rule on the bucket itself if
+        // abandoned checkouts' files need auto-cleanup.
+        const wantsRecipient = data.delivery?.type === 'recipient' && data.delivery?.recipient;
+        await env.ORDER_PDFS.put(orderId, JSON.stringify({
+            pdfDataUri: data.pdfDataUri || null,
+            delivery: wantsRecipient ? {
+                type: 'recipient',
+                recipient: {
+                    name: (data.delivery.recipient.name || '').toString().slice(0, 200),
+                    address1: (data.delivery.recipient.address1 || '').toString().slice(0, 200),
+                    address2: (data.delivery.recipient.address2 || '').toString().slice(0, 200),
+                    city: (data.delivery.recipient.city || '').toString().slice(0, 200),
+                    county: (data.delivery.recipient.county || '').toString().slice(0, 200),
+                    postcode: (data.delivery.recipient.postcode || '').toString().slice(0, 50),
+                    country: (data.delivery.recipient.country || 'United Kingdom').toString().slice(0, 100),
+                }
+            } : { type: 'self' },
+            labelPdfDataUri: wantsRecipient ? (data.labelPdfDataUri || null) : null,
+        }));
 
         const origin = new URL(request.url).origin;
 
