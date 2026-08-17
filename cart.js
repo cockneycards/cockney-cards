@@ -136,14 +136,19 @@
     }
 
     // item = { kind, templateId, variantId, title, thumbnail,
-    //          optionsSummary, price, priceValue, pdfDataUri }
+    //          optionsSummary, price, priceValue, pdfDataUri,
+    //          labelPdfDataUri (optional, for a "send to recipient"
+    //          delivery choice) }
     // Returns the new line item's id.
     async function addToCart(item) {
         const id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
-        const { pdfDataUri, ...metadata } = item;
+        const { pdfDataUri, labelPdfDataUri, ...metadata } = item;
 
         if (pdfDataUri) {
             await savePdf(id, pdfDataUri);
+        }
+        if (labelPdfDataUri) {
+            await savePdf(`${id}:label`, labelPdfDataUri);
         }
 
         const items = readCart();
@@ -155,6 +160,7 @@
     async function removeFromCart(id) {
         writeCart(readCart().filter((i) => i.id !== id));
         await deletePdf(id);
+        await deletePdf(`${id}:label`);
     }
 
     function updateCartQuantity(id, quantity) {
@@ -167,13 +173,14 @@
         await clearAllPdfs();
     }
 
-    // For checkout: metadata + its PDF, per item, in cart order.
+    // For checkout: metadata + its PDF(s), per item, in cart order.
     async function getCartWithPdfs() {
         const items = readCart();
         const withPdfs = [];
         for (const item of items) {
             const pdfDataUri = await loadPdf(item.id);
-            withPdfs.push(Object.assign({}, item, { pdfDataUri }));
+            const labelPdfDataUri = await loadPdf(`${item.id}:label`);
+            withPdfs.push(Object.assign({}, item, { pdfDataUri, labelPdfDataUri }));
         }
         return withPdfs;
     }
