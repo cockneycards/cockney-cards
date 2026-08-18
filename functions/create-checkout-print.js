@@ -60,12 +60,13 @@ export async function onRequestPost(context) {
         params.append('shipping_address_collection[allowed_countries][]', 'GB');
         params.append('success_url', `${origin}/thankyou.html?session_id={CHECKOUT_SESSION_ID}`);
         params.append('cancel_url', `${origin}/?status=cancel`);
-        // Pre-fills Stripe's checkout email field when the customer is
-        // logged into their Cockney Cards account — see create-checkout.js
-        // for why this matters (matches orders to accounts by email).
-        if (data.customerEmail) {
-            params.append('customer_email', data.customerEmail);
-        }
+        // Deliberately NOT passing customer_email here — Stripe locks
+        // (greys out, uneditable) the email field on its Checkout page
+        // whenever this is set, which was blocking customers from
+        // correcting a mistyped or different email at checkout. Order
+        // matching for "My Orders" still works fine without it — the
+        // webhook reads session.customer_details.email (whatever the
+        // customer actually confirms at checkout), not this prefill.
         params.append('line_items[0][price_data][currency]', 'gbp');
         params.append(
             'line_items[0][price_data][product_data][name]',
