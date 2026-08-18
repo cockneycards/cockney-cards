@@ -293,8 +293,10 @@
     </div>
 
 <script>
-    // Point this at your deployed Worker URL
-    const API_BASE = "https://old-bush-4d25cockney-cards-api.cockneycards.workers.dev";
+    // These endpoints now live on the same Worker/domain as this page
+    // itself (see functions/account-api.js + _worker.js) — no separate
+    // API host needed anymore, hence the empty base.
+    const API_BASE = "";
 
     const $ = (id) => document.getElementById(id);
     const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -405,6 +407,55 @@
         }
     }
 
+    async function loadOrders() {
+        const listEl = $("orders-list");
+        try {
+            const res = await fetch(`${API_BASE}/api/orders`, {
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            if (res.status === 401) { showLoggedOut(); return; }
+            const orders = await res.json();
+
+            if (!Array.isArray(orders) || !orders.length) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-title">No orders yet</div>
+                        Once you place an order, you'll be able to track it here.
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = orders.map(o => {
+                const date = new Date(o.created * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+                // Basket orders and single-item orders fill these fields a
+                // little differently (see stripe-webhook.js) — this just
+                // shows whichever of name/age/size are actually present,
+                // rather than assuming one fixed shape.
+                const details = [o.name, o.age, o.name2, o.age2, o.size]
+                    .filter(v => v && v !== "N/A")
+                    .join(" · ");
+                const productLabel = (o.product_type || "Order").replace(/^\w/, c => c.toUpperCase());
+                const amount = o.amount_total != null ? `£${(o.amount_total / 100).toFixed(2)}` : "";
+
+                return `
+                    <div class="order-row">
+                        <div>
+                            <div class="order-id">${productLabel}</div>
+                            <div class="order-date">${date}${details ? " · " + details : ""}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            ${amount ? `<span>${amount}</span>` : ""}
+                            <span class="order-status">Paid</span>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        } catch (err) {
+            listEl.innerHTML = '<p style="color:red; font-size:13px;">Could not load orders.</p>';
+        }
+    }
+
     async function loadReminders() {
         const listEl = $("reminders-list");
         try {
@@ -493,6 +544,7 @@
             $("user-email-display").textContent = email;
             $("settings-email").value = email;
         }
+        loadOrders();
         loadReminders();
     }
 
