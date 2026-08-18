@@ -383,9 +383,9 @@ const CARD_CATALOGUE = {
   "10kboy-photo": { title: "10K Achievement Boy", price: "£3.49", description: "Celebrate their 10K running achievement - add a photo, the event name, date and finish time.", categories: ["sports", "for-him", "running", "photo-upload"], preview: "10krace-boy-preview.png", full: "10krace-boy.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
-      { key: "event", label: "Event", left: 856, top: 625, fontSize: 22, color: "#001e3f", maxChars: 20 },
-      { key: "date", label: "Date", left: 851, top: 698, fontSize: 22, color: "#001e3f", maxChars: 20 },
-      { key: "finishTime", label: "Time", left: 895, top: 760, fontSize: 22, color: "#001e3f", maxChars: 12 }
+      { key: "event", label: "Event", left: 856, top: 632, fontSize: 25, color: "#001e3f", maxChars: 20 },
+      { key: "date", label: "Date", left: 851, top: 703, fontSize: 25, color: "#001e3f", maxChars: 20 },
+      { key: "finishTime", label: "Time", left: 895, top: 770, fontSize: 25, color: "#001e3f", maxChars: 12 }
     ] },
   "26mboy-photo": { title: "26M Achievement Boy", price: "£3.49", description: "Celebrate their 26.2 mile running achievement - add a photo, the event name, date and finish time.", categories: ["sports", "for-him", "running", "photo-upload"], preview: "26mboy-photo-preview_fml8xv.png", full: "26mboy-photo_qxv3ns.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
