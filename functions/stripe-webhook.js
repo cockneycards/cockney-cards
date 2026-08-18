@@ -63,6 +63,13 @@ export async function onRequestPost(context) {
         const orderId = meta.order_id;
         const customerEmail = session.customer_details?.email || null;
         const isBasket = meta.product_type === 'basket';
+        // Collected once per checkout (not per item) via
+        // shipping_address_collection on the session. Stripe moved this
+        // field from session.shipping_details to
+        // session.collected_information.shipping_details in its 2025-03-31
+        // API version ("basil") — check both so this keeps working
+        // whichever API version this account is pinned to.
+        const shippingDetails = session.collected_information?.shipping_details || session.shipping_details || null;
 
         // Both 'card'/'print' and 'basket' orders now store a JSON blob in
         // R2 (create-checkout.js / create-checkout-print.js /
@@ -158,6 +165,7 @@ export async function onRequestPost(context) {
                     customerEmail: customerEmail || 'N/A',
                     amountTotal: session.amount_total,
                     items: basketItems,
+                    shippingDetails,
                 });
             } else {
                 await sendOrderEmail(env, {
@@ -171,6 +179,7 @@ export async function onRequestPost(context) {
                     size: meta.size,
                     pdfDataUri,
                     delivery,
+                    shippingDetails,
                 });
             }
         } catch (err) {
@@ -262,6 +271,25 @@ async function sendViaZeptoMail(env, { subject, text, attachments }) {
     }
 }
 
+// Formats Stripe's shipping_details shape ({ name, address: { line1, line2,
+// city, state, postal_code, country } }) into the same plain-text block
+// style used for recipient addresses elsewhere in this file. Returns null
+// if nothing was actually collected (e.g. the customer closed the address
+// step, or this order predates shipping_address_collection being added).
+function formatCustomerShippingAddress(shippingDetails) {
+    if (!shippingDetails?.address) return null;
+    const a = shippingDetails.address;
+    const lines = [
+        shippingDetails.name,
+        a.line1,
+        a.line2,
+        [a.city, a.state].filter(Boolean).join(', '),
+        a.postal_code,
+        a.country,
+    ].filter(Boolean);
+    return lines.length ? lines : null;
+}
+
 async function sendOrderEmail(env, order) {
     const attachments = [];
     if (order.pdfDataUri) {
@@ -280,6 +308,7 @@ async function sendOrderEmail(env, order) {
             : `Card order (${order.name || 'N/A'})`;
 
     const r = wantsRecipient ? order.delivery.recipient : null;
+    const customerAddressLines = !wantsRecipient ? formatCustomerShippingAddress(order.shippingDetails) : null;
 
     const lines = [
         `Product: ${order.productType}`,
@@ -302,7 +331,10 @@ async function sendOrderEmail(env, order) {
                 r.postcode ? `  ${r.postcode}` : null,
                 r.country ? `  ${r.country}` : null,
             ].filter(Boolean).join('\n')
-            : 'DELIVERY: to the customer themselves (they\'ll write in it)',
+            : [
+                'DELIVERY: to the customer themselves (they\'ll write in it)',
+                customerAddressLines ? customerAddressLines.map((l) => `  ${l}`).join('\n') : '  ⚠️ No shipping address was collected for this order.',
+            ].join('\n'),
     ]
         .filter((line) => line !== null)
         .join('\n');
@@ -332,6 +364,8 @@ async function sendBasketOrderEmail(env, order) {
     });
 
     const missingPdfCount = order.items.filter((item) => !item.pdfDataUri).length;
+    const hasSelfDeliveryItem = order.items.some((item) => item.delivery?.type !== 'recipient');
+    const customerAddressLines = hasSelfDeliveryItem ? formatCustomerShippingAddress(order.shippingDetails) : null;
 
     const itemLines = order.items.map((item, i) => {
         const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
@@ -361,6 +395,13 @@ async function sendBasketOrderEmail(env, order) {
         `Customer email: ${order.customerEmail}`,
         order.amountTotal != null ? `Amount paid: £${(order.amountTotal / 100).toFixed(2)}` : null,
         '',
+        hasSelfDeliveryItem
+            ? [
+                'CUSTOMER\'S OWN ADDRESS (for any item(s) below going to the customer themselves):',
+                customerAddressLines ? customerAddressLines.map((l) => `  ${l}`).join('\n') : '  ⚠️ No shipping address was collected for this order.',
+                '',
+            ].join('\n')
+            : null,
         ...itemLines,
         missingPdfCount > 0 ? `\n⚠️ ${missingPdfCount} item(s) were missing their PDF — check R2/logs.` : null,
     ]
