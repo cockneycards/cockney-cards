@@ -129,7 +129,20 @@
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
     if (sessionId) {
-        document.getElementById('order-ref').textContent = 'Order reference: ' + sessionId;
+        // Stripe's session ids are long, opaque strings (cs_test_a1YCc...) —
+        // not something to shorten in storage/lookups, but showing the
+        // full thing to a customer is unnecessarily intimidating. The
+        // last 8 characters are still enough to quote back to support if
+        // they need to search for the exact order, paired with their email.
+        const shortRef = sessionId.slice(-8).toUpperCase();
+        document.getElementById('order-ref').textContent = 'Order reference: ' + shortRef;
+        // Every purchase now goes through the basket (there's no single-item
+        // "Buy Now" anymore) — landing here with a real session id means
+        // payment succeeded, so the basket that was just paid for should be
+        // emptied rather than sitting there for the customer's next visit.
+        if (typeof ccCart !== 'undefined') {
+            ccCart.clearCart();
+        }
     }
 })();
 
