@@ -6,6 +6,9 @@
     "observability": {
         "enabled": true
     },
+    "triggers": {
+        "crons": ["30 18 * * *"]
+    },
     "vars": {
         "ALLOWED_ORIGIN": "https://cockneycards.com",
         "FROM_EMAIL": "reminders@cockneycards.com",
