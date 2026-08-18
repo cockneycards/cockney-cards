@@ -52,6 +52,12 @@ export async function onRequestPost(context) {
         const params = new URLSearchParams();
         params.append('payment_method_types[]', 'card');
         params.append('mode', 'payment');
+        // Collect the customer's own address regardless of any per-item
+        // "send to recipient" choice — the order still needs to go
+        // *somewhere* when the customer picks "send to me" (a gap this
+        // didn't cover before), and it's harmless/useful to have even
+        // when every item is going straight to a recipient instead.
+        params.append('shipping_address_collection[allowed_countries][]', 'GB');
         params.append('success_url', `${origin}/thankyou.html?session_id={CHECKOUT_SESSION_ID}`);
         params.append('cancel_url', `${origin}/?status=cancel`);
         // Pre-fills Stripe's checkout email field when the customer is
