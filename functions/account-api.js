@@ -87,7 +87,7 @@ async function sendEmail(env, { to, toName, subject, html, attachments }) {
     return res.ok;
 }
 
-async function getUserFromAuth(request, env) {
+export async function getUserFromAuth(request, env) {
     const authHeader = request.headers.get('Authorization') || '';
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
     if (!token) return null;
@@ -100,10 +100,33 @@ async function getUserFromAuth(request, env) {
     if (!session || session.expires_at < now) return null;
 
     const user = await env.DB.prepare(
-        'SELECT id, email FROM users WHERE id = ?'
+        'SELECT id, email, plus_active, plus_current_period_end FROM users WHERE id = ?'
     ).bind(session.user_id).first();
 
     return user || null;
+}
+
+// Used by the checkout functions to decide whether to waive postage for
+// Cockney Cards Club members. Never trust a client-supplied "I'm a member"
+// flag for something that affects price — this always re-verifies against
+// the customer's actual session + D1 record. Returns false (not a member)
+// for guests, expired sessions, or lapsed/cancelled subscriptions — never
+// throws, so a broken/missing Authorization header just means standard
+// postage applies rather than the checkout failing outright.
+export async function checkPlusMembership(request, env) {
+    try {
+        const user = await getUserFromAuth(request, env);
+        if (!user || !user.plus_active) return false;
+        // Belt-and-braces expiry check in case a subscription.deleted/
+        // updated webhook was ever missed — plus_active should already be
+        // kept in sync by stripe-webhook.js, but this catches drift rather
+        // than silently honouring a stale "active" flag forever.
+        if (user.plus_current_period_end && user.plus_current_period_end < Date.now()) return false;
+        return true;
+    } catch (err) {
+        console.error('checkPlusMembership failed, defaulting to non-member:', err);
+        return false;
+    }
 }
 
 // ---------- Route handlers ----------
@@ -199,6 +222,17 @@ export async function handleAddReminder(request, env) {
     ).bind(id, user.id, occasion_name.trim(), (relationship || '').trim(), m, d, Date.now()).run();
 
     return json({ ok: true, id }, 200, env);
+}
+
+export async function handleGetAccount(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    return json({
+        email: user.email,
+        plusActive: !!user.plus_active,
+        plusCurrentPeriodEnd: user.plus_current_period_end || null,
+    }, 200, env);
 }
 
 export async function handleGetOrders(request, env) {
