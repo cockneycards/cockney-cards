@@ -10,6 +10,9 @@
 // Requires (set in Cloudflare Pages > Settings > Functions > R2 bindings):
 //   ORDER_PDFS           - an R2 bucket, variable name "ORDER_PDFS"
 
+import { POSTAGE_TIERS, appendShippingOption } from './postage.js';
+import { checkPlusMembership } from './account-api.js';
+
 export async function onRequestPost(context) {
     const { request, env } = context;
 
@@ -73,8 +76,14 @@ export async function onRequestPost(context) {
         params.append('line_items[0][price_data][unit_amount]', '349'); // £3.49
         params.append('line_items[0][quantity]', '1');
 
+        // A card is always the A5 tier (see postage.js) — Cockney Cards
+        // Club members get this waived entirely, matching how the basket
+        // checkout handles it.
+        const isPlusMember = await checkPlusMembership(request, env);
+        appendShippingOption(params, POSTAGE_TIERS.A5, { free: isPlusMember });
+
         // Metadata — kept under Stripe's 500-char-per-value limit. The PDF
-        // itself lives in KV, referenced by order_id, not in metadata.
+        // itself lives in R2, referenced by order_id, not in metadata.
         params.append('metadata[order_id]', orderId);
         params.append('metadata[product_type]', 'card');
         params.append('metadata[custom_name]', (data.name || 'N/A').slice(0, 480));
