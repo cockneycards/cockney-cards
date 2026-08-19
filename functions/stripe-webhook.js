@@ -60,6 +60,20 @@ export async function onRequestPost(context) {
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
         const meta = session.metadata || {};
+
+        // Membership signups (Cockney Cards Club) are a completely
+        // different shape of order — no PDF, no delivery address, no
+        // per-item anything — so they're handled entirely separately from
+        // the product-purchase flow below.
+        if (meta.product_type === 'membership') {
+            try {
+                await activatePlusMembership(env, session);
+            } catch (err) {
+                console.error('Failed to activate Club membership:', err);
+            }
+            return new Response('OK', { status: 200 });
+        }
+
         const orderId = meta.order_id;
         const customerEmail = session.customer_details?.email || null;
         const isBasket = meta.product_type === 'basket';
@@ -194,7 +208,52 @@ export async function onRequestPost(context) {
         }
     }
 
+    // Subscription lifecycle — keeps a Club member's status in sync with
+    // what Stripe actually has on file (renewed, past due, cancelled,
+    // etc.), independent of the initial checkout.session.completed above.
+    if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+        try {
+            await syncPlusMembershipStatus(env, event.data.object);
+        } catch (err) {
+            console.error('Failed to sync Club membership status:', err);
+        }
+    }
+
     return new Response('OK', { status: 200 });
+}
+
+// First-time activation, right after a membership Checkout Session
+// completes. Looks up the user by metadata.user_id (falling back to
+// client_reference_id) rather than trusting anything from the client.
+async function activatePlusMembership(env, session) {
+    const userId = session.metadata?.user_id || session.client_reference_id;
+    if (!userId) {
+        console.error('Membership checkout completed with no user_id to attach it to:', session.id);
+        return;
+    }
+
+    // Checkout in subscription mode always creates/attaches a real Stripe
+    // Customer and Subscription — both ids are on the session itself.
+    const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
+    const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
+
+    await env.DB.prepare(
+        `UPDATE users SET plus_active = 1, stripe_customer_id = ?, plus_subscription_id = ? WHERE id = ?`
+    ).bind(customerId || null, subscriptionId || null, userId).run();
+}
+
+// Called on customer.subscription.updated/deleted — keeps plus_active and
+// plus_current_period_end matching whatever Stripe actually has on file.
+// 'active' and 'trialing' are the only statuses that count as a live
+// membership; everything else (canceled, unpaid, past_due, incomplete_expired,
+// etc.) means postage should go back to being charged.
+async function syncPlusMembershipStatus(env, subscription) {
+    const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+    const periodEndMs = subscription.current_period_end ? subscription.current_period_end * 1000 : null;
+
+    await env.DB.prepare(
+        `UPDATE users SET plus_active = ?, plus_current_period_end = ? WHERE plus_subscription_id = ?`
+    ).bind(isActive ? 1 : 0, periodEndMs, subscription.id).run();
 }
 
 // Verifies the webhook actually came from Stripe by recomputing the HMAC
