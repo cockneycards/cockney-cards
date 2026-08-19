@@ -20,6 +20,9 @@
 // binding as create-checkout.js / create-checkout-print.js (all three
 // share it).
 
+import { highestTier, POSTAGE_TIERS, appendShippingOption } from './postage.js';
+import { checkPlusMembership } from './account-api.js';
+
 export async function onRequestPost(context) {
     const { request, env } = context;
 
@@ -63,6 +66,10 @@ export async function onRequestPost(context) {
                 priceValue: hasPrice ? item.priceValue : null,
                 quantity,
                 pdfDataUri: item.pdfDataUri || null,
+                // Explicit size (A5/A4/A3), for prints only — used for
+                // postage tier calculation below. Cards don't set this;
+                // they're always treated as A5 (see postage.js).
+                size: item.kind === 'print' && POSTAGE_TIERS[item.size] ? item.size : null,
                 // Per-item delivery choice — "self" (customer writes in it
                 // themselves) or "recipient" (goes straight to them; their
                 // address is included in the order email text).
@@ -129,6 +136,17 @@ export async function onRequestPost(context) {
             params.append(`line_items[${i}][price_data][unit_amount]`, String(unitAmount));
             params.append(`line_items[${i}][quantity]`, String(item.quantity));
         });
+
+        // Postage: a basket ships in one package sized for its biggest
+        // item, so this is the highest tier present, not summed per item.
+        // Cockney Cards Club members get free postage, but only when
+        // EVERY item in the basket is a card (not prints) — matching how
+        // Moonpig's equivalent membership works (free postage on standard
+        // cards specifically, not on gifts/prints).
+        const tier = highestTier(items);
+        const allCards = items.every((item) => item.kind === 'card');
+        const isPlusMember = await checkPlusMembership(request, env);
+        appendShippingOption(params, POSTAGE_TIERS[tier], { free: isPlusMember && allCards });
 
         params.append('metadata[order_id]', orderId);
         params.append('metadata[product_type]', 'basket');
