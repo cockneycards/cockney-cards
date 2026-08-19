@@ -220,9 +220,10 @@ async function goToCheckout() {
 
     try {
         const items = await ccCart.getCartWithPdfs();
+        const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
 
         const checkoutData = {
-            customerEmail: (typeof ccIsLoggedIn === 'function' && ccIsLoggedIn()) ? ccGetEmail() : null,
+            customerEmail: loggedIn ? ccGetEmail() : null,
             items: items.map((item) => ({
                 kind: item.kind,
                 templateId: item.templateId,
@@ -233,13 +234,22 @@ async function goToCheckout() {
                 priceValue: item.priceValue,
                 quantity: item.quantity,
                 pdfDataUri: item.pdfDataUri,
+                size: item.size || null,
                 delivery: item.delivery || { type: 'self' }
             }))
         };
 
         const response = await fetch('/create-checkout-basket', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                // Sent so the server can verify Cockney Cards Club
+                // membership before waiving postage — never trust a
+                // client-side "I'm a member" claim for anything that
+                // affects price. Omitted entirely for guests; the server
+                // just treats a missing/invalid token as "not a member".
+                ...(loggedIn ? { Authorization: `Bearer ${ccGetSession()}` } : {})
+            },
             body: JSON.stringify(checkoutData)
         });
 
