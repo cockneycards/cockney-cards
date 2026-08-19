@@ -1250,6 +1250,11 @@ async function addCurrentPrintToBasket() {
             thumbnail,
             optionsSummary: optionsParts.join(' · '),
             price: sizeInfo?.price || null,
+            // Explicit size (A5/A4/A3) — used for postage tier calculation
+            // at checkout (see functions/postage.js), separately from the
+            // human-readable "Size: A4" text already folded into
+            // optionsSummary above.
+            size: selectedSize,
             // sizeInfo.priceValue is in POUNDS, e.g. 6.99 for a £6.99 print
             // (confirmed from a real basket subtotal — a size priced at
             // "£6.99" needs its priceValue to already be 6.99 for the
