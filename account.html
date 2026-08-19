@@ -161,6 +161,7 @@
                 <div class="user-email" id="user-email-display"></div>
                 <ul class="sidebar-links">
                     <li><a href="#" class="tab-link active" data-tab="orders">Order History</a></li>
+                    <li><a href="#" class="tab-link" data-tab="plus">Cockney Cards Club</a></li>
                     <li><a href="#" class="tab-link" data-tab="addresses">Saved Addresses</a></li>
                     <li><a href="#" class="tab-link" data-tab="payment">Payment Methods</a></li>
                     <li><a href="#" class="tab-link" data-tab="reminders">Calendar Reminders</a></li>
@@ -180,6 +181,15 @@
                             <div class="empty-title">No orders yet</div>
                             Once you place an order, you'll be able to track it here.
                         </div>
+                    </div>
+                </div>
+
+                <!-- Cockney Cards Club -->
+                <div class="tab-panel" id="tab-plus">
+                    <h1>Cockney Cards Club</h1>
+                    <p class="lead">£9.99/year — free postage on every A5 card, no limit.</p>
+                    <div class="card" id="plus-status">
+                        <div class="empty-state">Loading...</div>
                     </div>
                 </div>
 
@@ -407,6 +417,65 @@
         }
     }
 
+    async function loadPlusStatus() {
+        const el = $("plus-status");
+        try {
+            const res = await fetch(`${API_BASE}/api/account`, {
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            if (res.status === 401) { showLoggedOut(); return; }
+            const account = await res.json();
+
+            if (account.plusActive) {
+                const renewsText = account.plusCurrentPeriodEnd
+                    ? new Date(account.plusCurrentPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+                    : null;
+                el.innerHTML = `
+                    <div style="padding: 10px 0;">
+                        <p style="font-size: 15px; font-weight: 600; color: #1a7a3c; margin: 0 0 8px;">✓ You're a Club member</p>
+                        <p style="font-size: 13px; color: #666; margin: 0;">Free postage is applied automatically on A5 cards at checkout.${renewsText ? ` Renews ${renewsText}.` : ""}</p>
+                    </div>
+                `;
+            } else {
+                el.innerHTML = `
+                    <div style="padding: 10px 0;">
+                        <p style="font-size: 13px; color: #666; margin: 0 0 15px;">Join for £9.99/year and never pay postage on an A5 card again.</p>
+                        <button class="btn" id="join-plus-btn" onclick="joinPlusMembership()">Join Cockney Cards Club — £9.99/year</button>
+                        <p id="plus-error" style="color:#c0392b; font-size:12px; margin-top:10px; display:none;"></p>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            el.innerHTML = '<p style="color:red; font-size:13px;">Could not load membership status.</p>';
+        }
+    }
+
+    async function joinPlusMembership() {
+        const btn = $("join-plus-btn");
+        const errorEl = $("plus-error");
+        btn.disabled = true;
+        btn.innerText = "Redirecting to checkout...";
+        errorEl.style.display = "none";
+
+        try {
+            const res = await fetch(`${API_BASE}/create-membership-checkout`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            const session = await res.json();
+            if (session.url) {
+                window.location.href = session.url;
+            } else {
+                throw new Error(session.error || "Please try again.");
+            }
+        } catch (err) {
+            errorEl.textContent = err.message;
+            errorEl.style.display = "block";
+            btn.disabled = false;
+            btn.innerText = "Join Cockney Cards Club — £9.99/year";
+        }
+    }
+
     async function loadOrders() {
         const listEl = $("orders-list");
         try {
@@ -545,6 +614,7 @@
             $("settings-email").value = email;
         }
         loadOrders();
+        loadPlusStatus();
         loadReminders();
     }
 
