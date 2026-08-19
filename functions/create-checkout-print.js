@@ -8,6 +8,8 @@
 // Requires the same STRIPE_SECRET_KEY env var and ORDER_PDFS R2 bucket
 // binding as create-checkout.js (they can share both).
 
+import { POSTAGE_TIERS } from './postage.js';
+
 export async function onRequestPost(context) {
     const { request, env } = context;
 
@@ -78,6 +80,14 @@ export async function onRequestPost(context) {
         );
         params.append('line_items[0][price_data][unit_amount]', String(unitAmount));
         params.append('line_items[0][quantity]', '1');
+
+        // Prints don't get the Cockney Cards Club free-postage waiver
+        // (that's specifically for A5 cards, see postage.js/checkPlusMembership
+        // usage in create-checkout-basket.js) — just the size-appropriate rate.
+        params.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
+        params.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', String(POSTAGE_TIERS[data.size] || POSTAGE_TIERS.A5));
+        params.append('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'gbp');
+        params.append('shipping_options[0][shipping_rate_data][display_name]', 'Postage');
 
         params.append('metadata[order_id]', orderId);
         params.append('metadata[product_type]', 'print');
