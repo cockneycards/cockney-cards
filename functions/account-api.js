@@ -1,304 +1,633 @@
-// functions/account-api.js
-//
-// Cockney Cards — Account API. Handles magic-link login, sessions, and
-// birthday reminder CRUD, plus a daily cron job that emails customers 2
-// weeks before a saved date.
-//
-// Ported directly from old-bush-4d25cockney-cards-api's standalone Worker
-// script (the only copy of this logic that ever existed — old-bush was
-// never git-connected, so this file itself IS the source of truth going
-// forward). old-bush's checkout/webhook handlers were NOT ported here —
-// those were older, buggier duplicates of what cockney-cards's own
-// create-checkout*.js / stripe-webhook.js already do properly (basket
-// support, correct pricing, delivery options, etc.) — see old-bush's own
-// comment: "moved here from the site's Pages Functions, which turned out
-// not to be executing", the exact same deploy problem this project's
-// _worker.js/wrangler.jsonc setup already fixed.
-//
-// Bindings required (all already set up on cockney-cards from earlier
-// work — nothing new to add):
-//  - DB              (D1 database, binding "DB")
-//  - ZEPTOMAIL_TOKEN  (secret — full value including "Zoho-enczapikey " prefix)
-//  - FROM_EMAIL       (e.g. "reminders@cockneycards.com")
-//  - SITE_URL         (e.g. "https://cockneycards.com")
-//  - ALLOWED_ORIGIN    (e.g. "https://cockneycards.com")
-//
-// D1 schema this expects (already exists — old-bush was writing to the
-// same cockney-cards-db this project now also uses):
-//  - users            (id, email, created_at)
-//  - sessions         (token, user_id, expires_at)
-//  - magic_tokens     (token, email, expires_at, used)
-//  - reminders        (id, user_id, occasion_name, relationship, month, day, created_at)
-//  - orders           (id, email, product_type, custom_name, custom_age,
-//                       custom_name2, custom_age2, size, amount_total, created_at)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | Cockney Cards</title>
+    <script src="cart.js"></script>
 
-const SESSION_DAYS = 30;
-const MAGIC_LINK_MINUTES = 15;
+    <style>
+        :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --font-family: 'Helvetica Neue', Arial, sans-serif; }
+        html { overflow-y: scroll; scrollbar-gutter: stable; }
+        body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #fcfcfc; color: var(--dark); }
 
-export function corsHeaders(env) {
-    return {
-        'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
-        'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    };
-}
+        header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+        .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+        .logo-container { text-align: center; }
+        .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .cart-icon { position: relative; cursor: pointer; }
+        nav { margin-top: 15px; text-align: center; }
+        .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+        .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+        .nav-links a:hover { color: #888; }
+        .nav-links a.active { font-weight: bold; }
 
-function json(data, status, env) {
-    return new Response(JSON.stringify(data), {
-        status,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(env) },
-    });
-}
+        /* ---- Logged-out (unchanged pattern) ---- */
+        .login-container { max-width: 420px; margin: 60px auto; padding: 0 20px; }
+        .login-container h1 { font-size: 26px; font-weight: 300; letter-spacing: 0.5px; margin-bottom: 10px; }
+        .login-container p.lead { font-size: 13px; color: #666; margin-bottom: 30px; }
 
-function uid() {
-    return crypto.randomUUID();
-}
+        .card { background: white; border: 1px solid var(--border-color); padding: 25px; border-radius: 6px; margin-bottom: 25px; }
 
-async function sendEmail(env, { to, toName, subject, html, attachments }) {
-    const body = {
-        from: { address: env.FROM_EMAIL, name: 'Cockney Cards' },
-        to: [{ email_address: { address: to, name: toName || to } }],
-        subject,
-        htmlbody: html,
-    };
-    if (attachments && attachments.length) {
-        body.attachments = attachments.map((a) => ({
-            content: a.content,
-            mime_type: a.mimeType || 'application/pdf',
-            name: a.filename,
-        }));
+        .login-form input { width: 100%; box-sizing: border-box; padding: 12px; font-size: 14px; border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 12px; }
+        .btn { background-color: #1a1a1a; color: white; border: none; padding: 12px 20px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 4px; }
+        .btn:hover { background-color: #444; }
+        .btn-secondary { background: none; border: 1px solid var(--border-color); color: #555; }
+        .btn-secondary:hover { background: #f5f5f5; color: #111; }
+        .btn-danger { background: none; border: 1px solid #e0b4b0; color: #c0392b; }
+        .btn-danger:hover { background: #fdf2f1; }
+        .status-msg { font-size: 13px; margin-top: 10px; }
+        .status-msg.error { color: #c0392b; }
+        .status-msg.success { color: #1a7a3c; }
+
+        /* ---- Logged-in account shell ---- */
+        .account-shell { max-width: 1100px; margin: 40px auto 80px; padding: 0 20px; display: grid; grid-template-columns: 230px 1fr; gap: 40px; }
+
+        .account-sidebar { border-right: 1px solid var(--border-color); padding-right: 20px; }
+        .account-sidebar .user-email { font-size: 12px; color: #888; margin-bottom: 18px; word-break: break-all; }
+        .sidebar-links { list-style: none; padding: 0; margin: 0; }
+        .sidebar-links li { margin-bottom: 4px; }
+        .sidebar-links a { display: block; padding: 10px 12px; font-size: 13px; color: #333; text-decoration: none; border-radius: 4px; letter-spacing: 0.3px; }
+        .sidebar-links a:hover { background: #f2f2f2; }
+        .sidebar-links a.active { background: #1a1a1a; color: white; font-weight: 600; }
+        .sidebar-links .logout-link { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+        .sidebar-links .logout-link a { color: #c0392b; }
+        .sidebar-links .logout-link a:hover { background: #fdf2f1; }
+
+        .account-main h1 { font-size: 24px; font-weight: 300; letter-spacing: 0.5px; margin: 0 0 6px; }
+        .account-main p.lead { font-size: 13px; color: #666; margin: 0 0 24px; }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .empty-state { text-align: center; padding: 50px 20px; color: #888; font-size: 13px; }
+        .empty-state .empty-title { font-size: 15px; color: #444; margin-bottom: 6px; }
+
+        /* ---- Reminders ---- */
+        .reminder-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .reminder-row:last-child { border-bottom: none; }
+        .reminder-info strong { display: block; }
+        .reminder-info span { font-size: 12px; color: #888; }
+        .delete-btn { background: none; border: none; color: #c0392b; cursor: pointer; font-size: 12px; text-decoration: underline; }
+
+        .add-form { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr auto; gap: 10px; align-items: end; margin-top: 20px; }
+        .add-form div { display: flex; flex-direction: column; }
+        .add-form label { font-size: 11px; color: #666; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .add-form input, .add-form select { padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; font-family: var(--font-family); }
+
+        /* ---- Order history ---- */
+        .order-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+        .order-row:last-child { border-bottom: none; }
+        .order-row .order-id { font-weight: 600; }
+        .order-row .order-date { color: #888; font-size: 12px; }
+        .order-status { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 20px; background: #eef6ee; color: #1a7a3c; }
+
+        /* ---- Addresses / Payment cards ---- */
+        .info-card { border: 1px solid var(--border-color); border-radius: 6px; padding: 16px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; }
+        .info-card .info-main strong { display: block; margin-bottom: 4px; }
+        .info-card .info-main span { color: #666; line-height: 1.5; }
+        .info-card .info-actions a { font-size: 12px; color: var(--primary); text-decoration: none; margin-left: 12px; }
+        .add-new-link { display: inline-block; margin-top: 6px; font-size: 13px; color: var(--primary); text-decoration: none; }
+
+        /* ---- Account settings ---- */
+        .settings-group { margin-bottom: 30px; }
+        .settings-group h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 12px; }
+        .settings-field { margin-bottom: 14px; }
+        .settings-field label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
+        .settings-field input { width: 100%; max-width: 360px; box-sizing: border-box; padding: 10px 12px; font-size: 14px; border: 1px solid var(--border-color); border-radius: 4px; }
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; max-width: 360px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+        .toggle-row:last-child { border-bottom: none; }
+
+        @media (max-width: 800px) {
+            .account-shell { grid-template-columns: 1fr; }
+            .account-sidebar { border-right: none; border-bottom: 1px solid var(--border-color); padding-right: 0; padding-bottom: 15px; margin-bottom: 15px; }
+            .sidebar-links { display: flex; flex-wrap: wrap; gap: 6px; }
+            .sidebar-links li { margin-bottom: 0; }
+            .sidebar-links .logout-link { margin-top: 0; padding-top: 0; border-top: none; width: 100%; }
+            .add-form { grid-template-columns: 1fr 1fr; }
+        }
+
+        #logged-out-view, #logged-in-view { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="account.html" class="active">My Account</a></li>
+        </ul>
+    </nav>
+</header>
+
+    <!-- LOGGED OUT: request magic link -->
+    <div id="logged-out-view">
+        <div class="login-container">
+            <h1>My Account</h1>
+            <p class="lead">Log in to view orders, manage your details, and set reminders.</p>
+            <div class="card login-form">
+                <input type="email" id="email-input" placeholder="you@example.com" autocomplete="email">
+                <button class="btn" onclick="requestLink()">Email Me a Login Link</button>
+                <div id="login-status" class="status-msg"></div>
+            </div>
+            <p style="text-align:center; margin-top:10px;">
+                <a href="#" onclick="previewAsTestUser(); return false;" style="font-size:12px; color:#aaa; text-decoration:underline;">⚠ Preview as test user (dev only — remove before launch)</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- LOGGED IN: account shell with sidebar tabs -->
+    <div id="logged-in-view">
+        <div class="account-shell">
+
+            <aside class="account-sidebar">
+                <div class="user-email" id="user-email-display"></div>
+                <ul class="sidebar-links">
+                    <li><a href="#" class="tab-link active" data-tab="orders">Order History</a></li>
+                    <li><a href="#" class="tab-link" data-tab="plus">Cockney Cards Club</a></li>
+                    <li><a href="#" class="tab-link" data-tab="addresses">Saved Addresses</a></li>
+                    <li><a href="#" class="tab-link" data-tab="payment">Payment Methods</a></li>
+                    <li><a href="#" class="tab-link" data-tab="reminders">Calendar Reminders</a></li>
+                    <li><a href="#" class="tab-link" data-tab="settings">Account Settings</a></li>
+                    <li class="logout-link"><a href="#" onclick="logout(); return false;">Log Out</a></li>
+                </ul>
+            </aside>
+
+            <main class="account-main">
+
+                <!-- Order History -->
+                <div class="tab-panel active" id="tab-orders">
+                    <h1>Order History</h1>
+                    <p class="lead">Track and review everything you've ordered from us.</p>
+                    <div class="card" id="orders-list">
+                        <div class="empty-state">
+                            <div class="empty-title">No orders yet</div>
+                            Once you place an order, you'll be able to track it here.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cockney Cards Club -->
+                <div class="tab-panel" id="tab-plus">
+                    <h1>Cockney Cards Club</h1>
+                    <p class="lead">£9.99/year — 30% off every card, 35% when 2+ go to the same address.</p>
+                    <div class="card" id="plus-status">
+                        <div class="empty-state">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Saved Addresses -->
+                <div class="tab-panel" id="tab-addresses">
+                    <h1>Saved Addresses</h1>
+                    <p class="lead">Save addresses so checkout is faster next time.</p>
+                    <div class="card" id="addresses-list">
+                        <div class="empty-state">
+                            <div class="empty-title">No saved addresses</div>
+                            Add an address to speed up your next checkout.
+                        </div>
+                        <a href="#" class="add-new-link">+ Add a new address</a>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="tab-panel" id="tab-payment">
+                    <h1>Payment Methods</h1>
+                    <p class="lead">Manage the cards saved to your account.</p>
+                    <div class="card" id="payment-list">
+                        <div class="empty-state">
+                            <div class="empty-title">No payment methods saved</div>
+                            Add a card to check out faster next time.
+                        </div>
+                        <a href="#" class="add-new-link">+ Add a payment method</a>
+                    </div>
+                </div>
+
+                <!-- Calendar Reminders (existing functionality) -->
+                <div class="tab-panel" id="tab-reminders">
+                    <h1>Calendar Reminders</h1>
+                    <p class="lead">Add birthdays and important dates for friends and family — we'll email you a reminder 2 weeks before, every year.</p>
+
+                    <div class="card">
+                        <div id="reminders-list"><p style="color:#888; font-size:13px;">Loading...</p></div>
+
+                        <div class="add-form">
+                            <div>
+                                <label>Who / What</label>
+                                <input type="text" id="new-name" placeholder="e.g. Mum's Birthday">
+                            </div>
+                            <div>
+                                <label>Relationship (optional)</label>
+                                <input type="text" id="new-relationship" placeholder="e.g. Mum">
+                            </div>
+                            <div>
+                                <label>Month</label>
+                                <select id="new-month"></select>
+                            </div>
+                            <div>
+                                <label>Day</label>
+                                <select id="new-day"></select>
+                            </div>
+                            <button class="btn" onclick="addReminder()">Add</button>
+                        </div>
+                        <div id="add-status" class="status-msg"></div>
+                    </div>
+                </div>
+
+                <!-- Account Settings -->
+                <div class="tab-panel" id="tab-settings">
+                    <h1>Account Settings</h1>
+                    <p class="lead">Manage your login details and how we contact you.</p>
+
+                    <div class="card">
+                        <div class="settings-group">
+                            <h3>Personal Details</h3>
+                            <div class="settings-field">
+                                <label>Full name</label>
+                                <input type="text" id="settings-name" placeholder="Your name">
+                            </div>
+                            <div class="settings-field">
+                                <label>Email address</label>
+                                <input type="email" id="settings-email" placeholder="you@example.com">
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Communication Preferences</h3>
+                            <div class="toggle-row">
+                                <span>Order updates &amp; shipping notifications</span>
+                                <input type="checkbox" checked disabled>
+                            </div>
+                            <div class="toggle-row">
+                                <span>Reminder emails (birthdays &amp; occasions)</span>
+                                <input type="checkbox" checked disabled>
+                            </div>
+                            <div class="toggle-row">
+                                <span>Offers, new ranges &amp; newsletter</span>
+                                <input type="checkbox" disabled>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <h3>Security</h3>
+                            <p style="font-size:13px; color:#666; margin-bottom:12px;">We use passwordless login — a fresh link is emailed to you each time, so there's no password to manage.</p>
+                            <button class="btn btn-secondary" disabled>Save Changes</button>
+                        </div>
+
+                        <div class="settings-group" style="margin-bottom: 0;">
+                            <h3>Danger Zone</h3>
+                            <p style="font-size:13px; color:#666; margin-bottom:12px;">Permanently delete your account and all saved data, including reminders, addresses and payment methods.</p>
+                            <button class="btn btn-danger">Delete Account</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+<script>
+    // These endpoints now live on the same Worker/domain as this page
+    // itself (see functions/account-api.js + _worker.js) — no separate
+    // API host needed anymore, hence the empty base.
+    const API_BASE = "";
+
+    const $ = (id) => document.getElementById(id);
+    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+    function getSessionToken() { return localStorage.getItem("cc_session"); }
+    function setSessionToken(t) { localStorage.setItem("cc_session", t); }
+    function clearSessionToken() { localStorage.removeItem("cc_session"); localStorage.removeItem("cc_email"); }
+
+    // DEV ONLY — lets you preview the logged-in account view without a real
+    // magic-link login. Reminders (and any future tab hitting the real API)
+    // won't have real data since the token isn't valid — everything else
+    // (Orders, Addresses, Payment, Settings) can be clicked through freely.
+    // Remove this function and its link in the logged-out view before launch.
+    function previewAsTestUser() {
+        setSessionToken("test-preview-token");
+        localStorage.setItem("cc_email", "preview@test.com");
+        showLoggedIn();
     }
 
-    // Same account/region as stripe-webhook.js's sendViaZeptoMail — ZEPTOMAIL_TOKEN
-    // is stored WITH the "Zoho-enczapikey " prefix already included, so it's
-    // used directly here, and this account is on ZeptoMail's EU cluster.
-    const res = await fetch('https://api.zeptomail.eu/v1.1/email', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: env.ZEPTOMAIL_TOKEN,
-        },
-        body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-        const errText = await res.text();
-        console.error('ZeptoMail send failed:', res.status, errText);
-    }
-    return res.ok;
-}
-
-export async function getUserFromAuth(request, env) {
-    const authHeader = request.headers.get('Authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-    if (!token) return null;
-
-    const now = Date.now();
-    const session = await env.DB.prepare(
-        'SELECT user_id, expires_at FROM sessions WHERE token = ?'
-    ).bind(token).first();
-
-    if (!session || session.expires_at < now) return null;
-
-    const user = await env.DB.prepare(
-        'SELECT id, email, plus_active, plus_current_period_end FROM users WHERE id = ?'
-    ).bind(session.user_id).first();
-
-    return user || null;
-}
-
-// Used by the checkout functions to decide whether to waive postage for
-// Cockney Cards Club members. Never trust a client-supplied "I'm a member"
-// flag for something that affects price — this always re-verifies against
-// the customer's actual session + D1 record. Returns false (not a member)
-// for guests, expired sessions, or lapsed/cancelled subscriptions — never
-// throws, so a broken/missing Authorization header just means standard
-// postage applies rather than the checkout failing outright.
-export async function checkPlusMembership(request, env) {
-    try {
-        const user = await getUserFromAuth(request, env);
-        if (!user || !user.plus_active) return false;
-        // Belt-and-braces expiry check in case a subscription.deleted/
-        // updated webhook was ever missed — plus_active should already be
-        // kept in sync by stripe-webhook.js, but this catches drift rather
-        // than silently honouring a stale "active" flag forever.
-        if (user.plus_current_period_end && user.plus_current_period_end < Date.now()) return false;
-        return true;
-    } catch (err) {
-        console.error('checkPlusMembership failed, defaulting to non-member:', err);
-        return false;
-    }
-}
-
-// ---------- Route handlers ----------
-
-export async function handleRequestLink(request, env) {
-    const { email } = await request.json();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return json({ error: 'Please enter a valid email address.' }, 400, env);
-    }
-    const normalizedEmail = email.trim().toLowerCase();
-
-    const token = uid();
-    const expiresAt = Date.now() + MAGIC_LINK_MINUTES * 60 * 1000;
-
-    await env.DB.prepare(
-        'INSERT INTO magic_tokens (token, email, expires_at, used) VALUES (?, ?, ?, 0)'
-    ).bind(token, normalizedEmail, expiresAt).run();
-
-    const loginUrl = `${env.SITE_URL}/account.html?token=${token}`;
-
-    await sendEmail(env, {
-        to: normalizedEmail,
-        subject: 'Your Cockney Cards login link',
-        html: `
-            <p>Hi there,</p>
-            <p>Click below to log in to your Cockney Cards account. This link expires in ${MAGIC_LINK_MINUTES} minutes.</p>
-            <p><a href="${loginUrl}" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 20px;text-decoration:none;">Log In</a></p>
-            <p>If you didn't request this, you can ignore this email.</p>
-        `,
-    });
-
-    return json({ ok: true, message: 'Check your email for a login link.' }, 200, env);
-}
-
-export async function handleVerify(request, env) {
-    const { token } = await request.json();
-    if (!token) return json({ error: 'Missing token.' }, 400, env);
-
-    const record = await env.DB.prepare(
-        'SELECT * FROM magic_tokens WHERE token = ?'
-    ).bind(token).first();
-
-    if (!record || record.used || record.expires_at < Date.now()) {
-        return json({ error: 'This login link is invalid or has expired.' }, 400, env);
-    }
-
-    await env.DB.prepare('UPDATE magic_tokens SET used = 1 WHERE token = ?').bind(token).run();
-
-    let user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(record.email).first();
-    if (!user) {
-        const newId = uid();
-        await env.DB.prepare(
-            'INSERT INTO users (id, email, created_at) VALUES (?, ?, ?)'
-        ).bind(newId, record.email, Date.now()).run();
-        user = { id: newId, email: record.email };
-    }
-
-    const sessionToken = uid();
-    const expiresAt = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
-    await env.DB.prepare(
-        'INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)'
-    ).bind(sessionToken, user.id, expiresAt).run();
-
-    return json({ ok: true, sessionToken, email: user.email }, 200, env);
-}
-
-export async function handleGetReminders(request, env) {
-    const user = await getUserFromAuth(request, env);
-    if (!user) return json({ error: 'Not logged in.' }, 401, env);
-
-    const { results } = await env.DB.prepare(
-        'SELECT id, occasion_name, relationship, month, day FROM reminders WHERE user_id = ? ORDER BY month, day'
-    ).bind(user.id).all();
-
-    return json({ reminders: results }, 200, env);
-}
-
-export async function handleAddReminder(request, env) {
-    const user = await getUserFromAuth(request, env);
-    if (!user) return json({ error: 'Not logged in.' }, 401, env);
-
-    const { occasion_name, relationship, month, day } = await request.json();
-    const m = parseInt(month, 10);
-    const d = parseInt(day, 10);
-
-    if (!occasion_name || !m || !d || m < 1 || m > 12 || d < 1 || d > 31) {
-        return json({ error: 'Please provide a name, month, and day.' }, 400, env);
-    }
-
-    const id = uid();
-    await env.DB.prepare(
-        'INSERT INTO reminders (id, user_id, occasion_name, relationship, month, day, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).bind(id, user.id, occasion_name.trim(), (relationship || '').trim(), m, d, Date.now()).run();
-
-    return json({ ok: true, id }, 200, env);
-}
-
-export async function handleGetAccount(request, env) {
-    const user = await getUserFromAuth(request, env);
-    if (!user) return json({ error: 'Not logged in.' }, 401, env);
-
-    return json({
-        email: user.email,
-        plusActive: !!user.plus_active,
-        plusCurrentPeriodEnd: user.plus_current_period_end || null,
-    }, 200, env);
-}
-
-export async function handleGetOrders(request, env) {
-    const user = await getUserFromAuth(request, env);
-    if (!user) return json({ error: 'Not logged in.' }, 401, env);
-
-    // Orders are written to D1 by stripe-webhook.js the moment a payment
-    // completes — matched to accounts by email, since Checkout Sessions
-    // don't create a persistent Stripe Customer object to key off.
-    const { results } = await env.DB.prepare(
-        `SELECT id, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, created_at
-         FROM orders WHERE email = ? ORDER BY created_at DESC`
-    ).bind(user.email.toLowerCase()).all();
-
-    const orders = results.map((o) => ({
-        id: o.id,
-        created: Math.floor(o.created_at / 1000), // seconds, to match front-end expectations
-        product_type: o.product_type,
-        name: o.custom_name,
-        age: o.custom_age,
-        name2: o.custom_name2,
-        age2: o.custom_age2,
-        size: o.size,
-        amount_total: o.amount_total,
-    }));
-
-    return json(orders, 200, env);
-}
-
-export async function handleDeleteReminder(request, env, reminderId) {
-    const user = await getUserFromAuth(request, env);
-    if (!user) return json({ error: 'Not logged in.' }, 401, env);
-
-    await env.DB.prepare(
-        'DELETE FROM reminders WHERE id = ? AND user_id = ?'
-    ).bind(reminderId, user.id).run();
-
-    return json({ ok: true }, 200, env);
-}
-
-// ---------- Daily cron: send reminders 14 days ahead ----------
-
-export async function runDailyReminderCheck(env) {
-    const target = new Date();
-    target.setUTCDate(target.getUTCDate() + 14);
-    const targetMonth = target.getUTCMonth() + 1;
-    const targetDay = target.getUTCDate();
-
-    const { results } = await env.DB.prepare(
-        `SELECT reminders.occasion_name, reminders.relationship, users.email
-         FROM reminders JOIN users ON reminders.user_id = users.id
-         WHERE reminders.month = ? AND reminders.day = ?`
-    ).bind(targetMonth, targetDay).all();
-
-    for (const row of results) {
-        const who = row.relationship || row.occasion_name;
-        await sendEmail(env, {
-            to: row.email,
-            subject: `${row.occasion_name} is coming up in 2 weeks!`,
-            html: `
-                <p>Just a friendly reminder — <strong>${row.occasion_name}</strong> is coming up in 2 weeks.</p>
-                <p>Plenty of time to pick out the perfect card for ${who}.</p>
-                <p><a href="${env.SITE_URL}/shop-cards.html" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 20px;text-decoration:none;">Shop Cards</a></p>
-            `,
+    function populateDateSelects() {
+        const monthSel = $("new-month");
+        MONTHS.forEach((m, i) => {
+            const opt = document.createElement("option");
+            opt.value = i + 1;
+            opt.textContent = m;
+            monthSel.appendChild(opt);
         });
+        const daySel = $("new-day");
+        for (let d = 1; d <= 31; d++) {
+            const opt = document.createElement("option");
+            opt.value = d;
+            opt.textContent = d;
+            daySel.appendChild(opt);
+        }
     }
 
-    console.log(`Reminder check complete: ${results.length} email(s) sent for ${targetMonth}/${targetDay}.`);
-}
+    // ---- Tab switching ----
+    function initTabs() {
+        document.querySelectorAll(".tab-link").forEach(link => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const tabId = link.getAttribute("data-tab");
+                document.querySelectorAll(".tab-link").forEach(l => l.classList.remove("active"));
+                document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+                link.classList.add("active");
+                $(`tab-${tabId}`).classList.add("active");
+                window.location.hash = tabId;
+            });
+        });
+
+        // Support deep-linking, e.g. account.html#reminders
+        const hash = window.location.hash.replace("#", "");
+        if (hash) {
+            const match = document.querySelector(`.tab-link[data-tab="${hash}"]`);
+            if (match) match.click();
+        }
+    }
+
+    async function requestLink() {
+        const email = $("email-input").value.trim();
+        const statusEl = $("login-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+
+        if (!email) {
+            statusEl.textContent = "Please enter your email.";
+            statusEl.classList.add("error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/request-link`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            statusEl.textContent = "Check your email for a login link!";
+            statusEl.classList.add("success");
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+        }
+    }
+
+    async function verifyTokenFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+        if (!token) return false;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            setSessionToken(data.sessionToken);
+            localStorage.setItem("cc_email", data.email);
+            window.history.replaceState({}, document.title, "account.html");
+            return true;
+        } catch (err) {
+            $("login-status").textContent = err.message;
+            $("login-status").classList.add("error");
+            return false;
+        }
+    }
+
+    async function loadPlusStatus() {
+        const el = $("plus-status");
+        try {
+            const res = await fetch(`${API_BASE}/api/account`, {
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            if (res.status === 401) { showLoggedOut(); return; }
+            const account = await res.json();
+
+            if (account.plusActive) {
+                const renewsText = account.plusCurrentPeriodEnd
+                    ? new Date(account.plusCurrentPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+                    : null;
+                el.innerHTML = `
+                    <div style="padding: 10px 0;">
+                        <p style="font-size: 15px; font-weight: 600; color: #1a7a3c; margin: 0 0 8px;">✓ You're a Club member</p>
+                        <p style="font-size: 13px; color: #666; margin: 0;">30% off every card is applied automatically at checkout — 35% when 2 or more go to the same address.${renewsText ? ` Renews ${renewsText}.` : ""}</p>
+                    </div>
+                `;
+            } else {
+                el.innerHTML = `
+                    <div style="padding: 10px 0;">
+                        <p style="font-size: 13px; color: #666; margin: 0 0 15px;">Join for £9.99/year and get 30% off every card, 35% when 2+ go to the same address.</p>
+                        <button class="btn" id="join-plus-btn" onclick="joinPlusMembership()">Join Cockney Cards Club — £9.99/year</button>
+                        <p id="plus-error" style="color:#c0392b; font-size:12px; margin-top:10px; display:none;"></p>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            el.innerHTML = '<p style="color:red; font-size:13px;">Could not load membership status.</p>';
+        }
+    }
+
+    async function joinPlusMembership() {
+        const btn = $("join-plus-btn");
+        const errorEl = $("plus-error");
+        btn.disabled = true;
+        btn.innerText = "Redirecting to checkout...";
+        errorEl.style.display = "none";
+
+        try {
+            const res = await fetch(`${API_BASE}/create-membership-checkout`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            const session = await res.json();
+            if (session.url) {
+                window.location.href = session.url;
+            } else {
+                throw new Error(session.error || "Please try again.");
+            }
+        } catch (err) {
+            errorEl.textContent = err.message;
+            errorEl.style.display = "block";
+            btn.disabled = false;
+            btn.innerText = "Join Cockney Cards Club — £9.99/year";
+        }
+    }
+
+    async function loadOrders() {
+        const listEl = $("orders-list");
+        try {
+            const res = await fetch(`${API_BASE}/api/orders`, {
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            if (res.status === 401) { showLoggedOut(); return; }
+            const orders = await res.json();
+
+            if (!Array.isArray(orders) || !orders.length) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-title">No orders yet</div>
+                        Once you place an order, you'll be able to track it here.
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = orders.map(o => {
+                const date = new Date(o.created * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+                // Basket orders and single-item orders fill these fields a
+                // little differently (see stripe-webhook.js) — this just
+                // shows whichever of name/age/size are actually present,
+                // rather than assuming one fixed shape.
+                const details = [o.name, o.age, o.name2, o.age2, o.size]
+                    .filter(v => v && v !== "N/A")
+                    .join(" · ");
+                const productLabel = (o.product_type || "Order").replace(/^\w/, c => c.toUpperCase());
+                const amount = o.amount_total != null ? `£${(o.amount_total / 100).toFixed(2)}` : "";
+
+                return `
+                    <div class="order-row">
+                        <div>
+                            <div class="order-id">${productLabel}</div>
+                            <div class="order-date">${date}${details ? " · " + details : ""}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            ${amount ? `<span>${amount}</span>` : ""}
+                            <span class="order-status">Paid</span>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        } catch (err) {
+            listEl.innerHTML = '<p style="color:red; font-size:13px;">Could not load orders.</p>';
+        }
+    }
+
+    async function loadReminders() {
+        const listEl = $("reminders-list");
+        try {
+            const res = await fetch(`${API_BASE}/api/reminders`, {
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            if (res.status === 401) { showLoggedOut(); return; }
+            const data = await res.json();
+
+            if (!data.reminders.length) {
+                listEl.innerHTML = '<p style="color:#888; font-size:13px;">No reminders saved yet — add one below.</p>';
+                return;
+            }
+
+            listEl.innerHTML = data.reminders.map(r => `
+                <div class="reminder-row">
+                    <div class="reminder-info">
+                        <strong>${r.occasion_name}</strong>
+                        <span>${MONTHS[r.month - 1]} ${r.day}${r.relationship ? " · " + r.relationship : ""}</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteReminder('${r.id}')">Remove</button>
+                </div>
+            `).join("");
+        } catch (err) {
+            listEl.innerHTML = '<p style="color:red; font-size:13px;">Could not load reminders.</p>';
+        }
+    }
+
+    async function addReminder() {
+        const statusEl = $("add-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+
+        const occasion_name = $("new-name").value.trim();
+        const relationship = $("new-relationship").value.trim();
+        const month = $("new-month").value;
+        const day = $("new-day").value;
+
+        if (!occasion_name) {
+            statusEl.textContent = "Please give it a name.";
+            statusEl.classList.add("error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/reminders`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${getSessionToken()}` },
+                body: JSON.stringify({ occasion_name, relationship, month, day })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+
+            $("new-name").value = "";
+            $("new-relationship").value = "";
+            loadReminders();
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+        }
+    }
+
+    async function deleteReminder(id) {
+        await fetch(`${API_BASE}/api/reminders/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${getSessionToken()}` }
+        });
+        loadReminders();
+    }
+
+    function logout() {
+        clearSessionToken();
+        showLoggedOut();
+    }
+
+    function showLoggedOut() {
+        $("logged-out-view").style.display = "block";
+        $("logged-in-view").style.display = "none";
+    }
+
+    function showLoggedIn() {
+        $("logged-out-view").style.display = "none";
+        $("logged-in-view").style.display = "block";
+        const email = localStorage.getItem("cc_email");
+        if (email) {
+            $("user-email-display").textContent = email;
+            $("settings-email").value = email;
+        }
+        loadOrders();
+        loadPlusStatus();
+        loadReminders();
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        populateDateSelects();
+        initTabs();
+        const justLoggedIn = await verifyTokenFromUrl();
+        if (justLoggedIn || getSessionToken()) {
+            showLoggedIn();
+        } else {
+            showLoggedOut();
+        }
+    });
+</script>
+</body>
+</html>
