@@ -170,14 +170,15 @@ export async function onRequestPost(context) {
             // Postage for this parcel — a group ships in one package
             // sized for its biggest item, so this is the highest tier
             // present within the group, not summed per item. Waived
-            // (free) when everything in the group is a card AND either
-            // the customer is a Club member or entered a valid promo
-            // code — never waived if a print is anywhere in the group,
-            // matching how Moonpig's equivalent membership only covers
-            // standard cards, not gifts/prints.
+            // (free) when everything in the group is a card AND a valid
+            // promo code was entered — Club membership does NOT waive
+            // postage (that's the card discount above instead); free
+            // postage is purely a promo-code perk now, independent of
+            // membership. Never waived if a print is anywhere in the
+            // group either way.
             const tier = highestTier(groupItems);
             const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
-            const postageWaived = allCardsInGroup && (isClubMember || isPromoValid);
+            const postageWaived = allCardsInGroup && isPromoValid;
             const postageAmount = postageWaived ? 0 : POSTAGE_TIERS[tier];
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
 
