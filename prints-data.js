@@ -75,7 +75,7 @@ const PRINT_CATALOGUE = {
     // shop grid or the editor.
   
     "wham-eatsleep": {
-        title: "West Ham Prints - Eat, Sleep, Lionesses, Repeat",
+        title: "West Ham Prints - Eat, Sleep, West Ham, Repeat",
         description: "West Ham duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
@@ -118,7 +118,7 @@ const PRINT_CATALOGUE = {
         ]
     }, 
     "spurs-eatsleep": {
-        title: "Tottenham Hotspur Prints - Eat, Sleep, Lionesses, Repeat",
+        title: "Tottenham Hotspur Prints - Eat, Sleep, Tottenham, Repeat",
         description: "Tottenham Hotspur duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
@@ -139,7 +139,7 @@ const PRINT_CATALOGUE = {
         ]
     }, 
     "charlton-eatsleep": {
-        title: "Charlton Athletic Prints - Eat, Sleep, Lionesses, Repeat",
+        title: "Charlton Athletic Prints - Eat, Sleep, Charlton, Repeat",
         description: "Charlton Athletic duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
@@ -160,7 +160,7 @@ const PRINT_CATALOGUE = {
         ]
     }, 
     "birmingham-eatsleep": {
-        title: "Birmingham City Prints - Eat, Sleep, Lionesses, Repeat",
+        title: "Birmingham City Prints - Eat, Sleep, City, Repeat",
         description: "Birmingham City duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
