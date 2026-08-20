@@ -3,8 +3,9 @@
 // Validates the optional promo code entered at basket checkout. Unlike
 // Club membership, this isn't tied to being logged in at all — any
 // customer can enter a code, and if it matches an active row in the
-// promo_codes table, cards in that order get free postage the same way
-// a Club member's would (see create-checkout-basket.js).
+// promo_codes table, cards in that order get free postage (Club
+// membership doesn't grant this — its benefit is the 30%/35% card
+// discount instead; see create-checkout-basket.js).
 
 export async function checkPromoCode(code, env) {
     if (!code) return false;
