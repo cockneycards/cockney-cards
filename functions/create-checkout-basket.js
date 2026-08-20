@@ -20,8 +20,9 @@
 // binding as create-checkout.js / create-checkout-print.js (all three
 // share it).
 
-import { highestTier, POSTAGE_TIERS, appendShippingOption } from './postage.js';
+import { highestTier, POSTAGE_TIERS, groupItemsByDestination } from './postage.js';
 import { checkPlusMembership } from './account-api.js';
+import { checkPromoCode } from './promo.js';
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -125,28 +126,67 @@ export async function onRequestPost(context) {
         // webhook reads session.customer_details.email (whatever the
         // customer actually confirms at checkout), not this prefill.
 
-        items.forEach((item, i) => {
-            const unitAmount = item.priceValue ? Math.round(item.priceValue * 100) : 999; // £9.99 fallback
-            const name = item.priceValue ? item.title : `${item.title} — PRICE CHECK NEEDED`;
-            const description = item.optionsSummary || (item.kind === 'print' ? 'Personalised photo print' : 'Personalised greeting card');
+        const isClubMember = await checkPlusMembership(request, env);
+        const isPromoValid = await checkPromoCode(data.promoCode, env);
 
-            params.append(`line_items[${i}][price_data][currency]`, 'gbp');
-            params.append(`line_items[${i}][price_data][product_data][name]`, name);
-            params.append(`line_items[${i}][price_data][product_data][description]`, description);
-            params.append(`line_items[${i}][price_data][unit_amount]`, String(unitAmount));
-            params.append(`line_items[${i}][quantity]`, String(item.quantity));
-        });
+        // Basket lines are grouped by destination — everything going to
+        // the customer themselves counts as one parcel, and each distinct
+        // recipient address counts as its own parcel, each getting its
+        // own postage charge (see postage.js's groupItemsByDestination).
+        // Club's discount (30%, or 35% once 2+ cards land at the same
+        // address) is calculated per group too, since "2 or more bought
+        // to the same address" is inherently a per-destination thing.
+        const groups = groupItemsByDestination(items);
+        let lineIndex = 0;
+        let parcelNumber = 0;
 
-        // Postage: a basket ships in one package sized for its biggest
-        // item, so this is the highest tier present, not summed per item.
-        // Cockney Cards Club members get free postage, but only when
-        // EVERY item in the basket is a card (not prints) — matching how
-        // Moonpig's equivalent membership works (free postage on standard
-        // cards specifically, not on gifts/prints).
-        const tier = highestTier(items);
-        const allCards = items.every((item) => item.kind === 'card');
-        const isPlusMember = await checkPlusMembership(request, env);
-        appendShippingOption(params, POSTAGE_TIERS[tier], { free: isPlusMember && allCards });
+        for (const groupItems of groups.values()) {
+            parcelNumber++;
+            const cardUnitsInGroup = groupItems
+                .filter((item) => item.kind === 'card')
+                .reduce((sum, item) => sum + item.quantity, 0);
+            const discountRate = isClubMember ? (cardUnitsInGroup >= 2 ? 0.35 : 0.30) : 0;
+
+            groupItems.forEach((item) => {
+                const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
+                let unitAmount = hasPrice ? Math.round(item.priceValue * 100) : 999; // £9.99 fallback
+                let name = hasPrice ? item.title : `${item.title} — PRICE CHECK NEEDED`;
+
+                if (item.kind === 'card' && discountRate > 0 && hasPrice) {
+                    unitAmount = Math.round(unitAmount * (1 - discountRate));
+                    name = `${item.title} (${Math.round(discountRate * 100)}% Club discount)`;
+                }
+
+                const description = item.optionsSummary || (item.kind === 'print' ? 'Personalised photo print' : 'Personalised greeting card');
+
+                params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
+                params.append(`line_items[${lineIndex}][price_data][product_data][name]`, name);
+                params.append(`line_items[${lineIndex}][price_data][product_data][description]`, description);
+                params.append(`line_items[${lineIndex}][price_data][unit_amount]`, String(unitAmount));
+                params.append(`line_items[${lineIndex}][quantity]`, String(item.quantity));
+                lineIndex++;
+            });
+
+            // Postage for this parcel — a group ships in one package
+            // sized for its biggest item, so this is the highest tier
+            // present within the group, not summed per item. Waived
+            // (free) when everything in the group is a card AND either
+            // the customer is a Club member or entered a valid promo
+            // code — never waived if a print is anywhere in the group,
+            // matching how Moonpig's equivalent membership only covers
+            // standard cards, not gifts/prints.
+            const tier = highestTier(groupItems);
+            const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
+            const postageWaived = allCardsInGroup && (isClubMember || isPromoValid);
+            const postageAmount = postageWaived ? 0 : POSTAGE_TIERS[tier];
+            const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
+
+            params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
+            params.append(`line_items[${lineIndex}][price_data][product_data][name]`, `${postageWaived ? 'Free Postage' : 'Postage'}${parcelLabel}`);
+            params.append(`line_items[${lineIndex}][price_data][unit_amount]`, String(postageAmount));
+            params.append(`line_items[${lineIndex}][quantity]`, '1');
+            lineIndex++;
+        }
 
         params.append('metadata[order_id]', orderId);
         params.append('metadata[product_type]', 'basket');
