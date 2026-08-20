@@ -64,23 +64,36 @@ export async function onRequestPost(context) {
         // matching for "My Orders" still works fine without it — the
         // webhook reads session.customer_details.email (whatever the
         // customer actually confirms at checkout), not this prefill.
+        // Cockney Cards Club benefit is a flat 30% off card price (same
+        // rule as create-checkout-basket.js) — membership no longer
+        // waives postage anywhere. Free delivery is now a quantity perk
+        // (3+ cards to the same address) rather than a membership one,
+        // and this endpoint only ever sells a single card at a time, so
+        // that threshold can never be met here — standard postage always
+        // applies below.
+        const isClubMember = await checkPlusMembership(request, env);
+        const CARD_PRICE_PENCE = 349; // £3.49
+        const unitAmount = isClubMember ? Math.round(CARD_PRICE_PENCE * 0.7) : CARD_PRICE_PENCE;
+        const cardName = isClubMember
+            ? `Customised Card (${data.name || 'Custom'}) (30% Club discount)`
+            : `Customised Card (${data.name || 'Custom'})`;
+
         params.append('line_items[0][price_data][currency]', 'gbp');
         params.append(
             'line_items[0][price_data][product_data][name]',
-            `Customised Card (${data.name || 'Custom'})`
+            cardName
         );
         params.append(
             'line_items[0][price_data][product_data][description]',
             'A4 Personalised Greeting Card folded to A5'
         );
-        params.append('line_items[0][price_data][unit_amount]', '349'); // £3.49
+        params.append('line_items[0][price_data][unit_amount]', String(unitAmount));
         params.append('line_items[0][quantity]', '1');
 
-        // A card is always the A5 tier (see postage.js) — Cockney Cards
-        // Club members get this waived entirely, matching how the basket
-        // checkout handles it.
-        const isPlusMember = await checkPlusMembership(request, env);
-        appendShippingOption(params, POSTAGE_TIERS.A5, { free: isPlusMember });
+        // A card is always the A5 tier (see postage.js) — always charged
+        // in full here (see comment above); free delivery for 3+ cards to
+        // the same address only applies via the basket checkout.
+        appendShippingOption(params, POSTAGE_TIERS.A5, { free: false });
 
         // Metadata — kept under Stripe's 500-char-per-value limit. The PDF
         // itself lives in R2, referenced by order_id, not in metadata.
