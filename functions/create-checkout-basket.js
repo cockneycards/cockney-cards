@@ -133,9 +133,10 @@ export async function onRequestPost(context) {
         // the customer themselves counts as one parcel, and each distinct
         // recipient address counts as its own parcel, each getting its
         // own postage charge (see postage.js's groupItemsByDestination).
-        // Club's discount (30%, or 35% once 2+ cards land at the same
-        // address) is calculated per group too, since "2 or more bought
-        // to the same address" is inherently a per-destination thing.
+        // Club's discount is a flat 30% off cards regardless of quantity —
+        // the old 35% tier for 2+ cards to the same address was dropped in
+        // favour of the free-delivery-on-3+-cards perk below, which now
+        // does that job (and applies to every customer, not just members).
         const groups = groupItemsByDestination(items);
         let lineIndex = 0;
         let parcelNumber = 0;
@@ -145,7 +146,7 @@ export async function onRequestPost(context) {
             const cardUnitsInGroup = groupItems
                 .filter((item) => item.kind === 'card')
                 .reduce((sum, item) => sum + item.quantity, 0);
-            const discountRate = isClubMember ? (cardUnitsInGroup >= 2 ? 0.35 : 0.30) : 0;
+            const discountRate = isClubMember ? 0.30 : 0;
 
             groupItems.forEach((item) => {
                 const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
@@ -170,20 +171,28 @@ export async function onRequestPost(context) {
             // Postage for this parcel — a group ships in one package
             // sized for its biggest item, so this is the highest tier
             // present within the group, not summed per item. Waived
-            // (free) when everything in the group is a card AND a valid
-            // promo code was entered — Club membership does NOT waive
-            // postage (that's the card discount above instead); free
-            // postage is purely a promo-code perk now, independent of
-            // membership. Never waived if a print is anywhere in the
-            // group either way.
+            // (free) in two independent cases, cards-only both times —
+            // never waived if a print is anywhere in the group:
+            //   1. 3+ cards are going to this same address. Applies to
+            //      every customer, not just Club members — that's the
+            //      whole point of it (it replaces the old 35% discount
+            //      tier as the "buy several, save on delivery" perk).
+            //   2. A valid promo code was entered. Unrelated to Club
+            //      membership, unrelated to quantity.
+            // Club membership itself does NOT waive postage — that's the
+            // 30% card discount above instead.
             const tier = highestTier(groupItems);
             const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
-            const postageWaived = allCardsInGroup && isPromoValid;
+            const qualifiesForFreeDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
+            const postageWaived = qualifiesForFreeDelivery || (allCardsInGroup && isPromoValid);
             const postageAmount = postageWaived ? 0 : POSTAGE_TIERS[tier];
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
+            const postageName = postageWaived
+                ? `${qualifiesForFreeDelivery ? 'Free Postage (3+ cards to this address)' : 'Free Postage (Promo Code)'}${parcelLabel}`
+                : `Postage${parcelLabel}`;
 
             params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
-            params.append(`line_items[${lineIndex}][price_data][product_data][name]`, `${postageWaived ? 'Free Postage' : 'Postage'}${parcelLabel}`);
+            params.append(`line_items[${lineIndex}][price_data][product_data][name]`, postageName);
             params.append(`line_items[${lineIndex}][price_data][unit_amount]`, String(postageAmount));
             params.append(`line_items[${lineIndex}][quantity]`, '1');
             lineIndex++;
