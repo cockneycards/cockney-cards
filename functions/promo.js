@@ -24,3 +24,24 @@ export async function checkPromoCode(code, env) {
         return false;
     }
 }
+
+// Lets basket.html's "Apply" button check a code up front and show
+// Invalid/Accepted feedback, rather than the customer only finding out
+// whether it worked once they're already on Stripe's checkout page.
+// checkout still re-validates independently at that point regardless —
+// this is purely for earlier feedback, not a security boundary.
+export async function handleValidatePromo(request, env) {
+    try {
+        const { code } = await request.json();
+        const valid = await checkPromoCode(code, env);
+        return new Response(JSON.stringify({ valid }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    } catch (err) {
+        return new Response(JSON.stringify({ valid: false }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+}
