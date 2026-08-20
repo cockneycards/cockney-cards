@@ -39,11 +39,43 @@ export function highestTier(items) {
     return best;
 }
 
+// Groups basket items by where they're actually going, for the basket
+// checkout specifically (single-item checkouts trivially have one
+// destination, so they don't need this). Every "self" item is treated as
+// the same one destination — the customer's own address, collected once
+// during Stripe Checkout itself (shipping_address_collection), which
+// happens *after* this grouping runs, so there's no address value to key
+// on yet — but that's fine, since a single order can only have one "my
+// own address" regardless of what it turns out to be. "recipient" items
+// are grouped by matching name+address1+postcode, so two cards genuinely
+// going to the same person count as one parcel, not two.
+export function groupItemsByDestination(items) {
+    const groups = new Map();
+    for (const item of items) {
+        const key = destinationKey(item);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(item);
+    }
+    return groups;
+}
+
+function destinationKey(item) {
+    const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+    if (!wantsRecipient) return 'self';
+    const r = item.delivery.recipient;
+    return ['recipient', normalise(r.name), normalise(r.address1), normalise(r.postcode)].join('|');
+}
+
+function normalise(value) {
+    return (value || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 // Builds the Stripe shipping_options[] params for a Checkout Session
 // (payment mode only — Stripe doesn't support shipping_options in
-// subscription mode). amountPence of 0 shows as "Free Postage" rather
-// than being omitted, so Club members can see the waiver applied rather
-// than wondering why there's no shipping line at all.
+// subscription mode). Used by the two single-item checkout functions only
+// — the basket checkout charges postage as per-destination line items
+// instead, since shipping_options only supports one selectable rate per
+// session, not several simultaneous ones for multiple parcels.
 export function appendShippingOption(params, amountPence, { free = false } = {}) {
     params.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
     params.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', String(free ? 0 : amountPence));
