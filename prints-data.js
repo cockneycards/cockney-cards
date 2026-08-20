@@ -97,7 +97,7 @@ const PRINT_CATALOGUE = {
     }, 
    
     "villa-eatsleep": {
-        title: "Aston Villa Prints - Eat, Sleep, Lionesses, Repeat",
+        title: "Aston Villa Prints - Eat, Sleep, Villa, Repeat",
         description: "Aston Villa duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
