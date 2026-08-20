@@ -187,7 +187,7 @@
                 <!-- Cockney Cards Club -->
                 <div class="tab-panel" id="tab-plus">
                     <h1>Cockney Cards Club</h1>
-                    <p class="lead">£9.99/year — free postage on every A5 card, no limit.</p>
+                    <p class="lead">£9.99/year — 30% off every card, 35% when 2+ go to the same address.</p>
                     <div class="card" id="plus-status">
                         <div class="empty-state">Loading...</div>
                     </div>
@@ -433,13 +433,13 @@
                 el.innerHTML = `
                     <div style="padding: 10px 0;">
                         <p style="font-size: 15px; font-weight: 600; color: #1a7a3c; margin: 0 0 8px;">✓ You're a Club member</p>
-                        <p style="font-size: 13px; color: #666; margin: 0;">Free postage is applied automatically on A5 cards at checkout.${renewsText ? ` Renews ${renewsText}.` : ""}</p>
+                        <p style="font-size: 13px; color: #666; margin: 0;">All discounts are applied automatically at checkout.${renewsText ? ` Renews ${renewsText}.` : ""}</p>
                     </div>
                 `;
             } else {
                 el.innerHTML = `
                     <div style="padding: 10px 0;">
-                        <p style="font-size: 13px; color: #666; margin: 0 0 15px;">Join for £9.99/year and never pay postage on an A5 card again.</p>
+                        <p style="font-size: 13px; color: #666; margin: 0 0 15px;">Join for £9.99/year and get 30% off every card, 35% when 2+ go to the same address.</p>
                         <button class="btn" id="join-plus-btn" onclick="joinPlusMembership()">Join Cockney Cards Club — £9.99/year</button>
                         <p id="plus-error" style="color:#c0392b; font-size:12px; margin-top:10px; display:none;"></p>
                     </div>
