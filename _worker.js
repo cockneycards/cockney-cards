@@ -32,6 +32,7 @@ import { onRequestPost as createCheckoutPrint } from './functions/create-checkou
 import { onRequestPost as createCheckoutBasket } from './functions/create-checkout-basket.js';
 import { onRequestPost as createMembershipCheckout } from './functions/create-membership-checkout.js';
 import { onRequestPost as stripeWebhook } from './functions/stripe-webhook.js';
+import { handleValidatePromo } from './functions/promo.js';
 import {
     corsHeaders,
     handleRequestLink,
@@ -99,6 +100,9 @@ export default {
         }
         if (pathname === '/api/account' && method === 'GET') {
             return handleGetAccount(request, env);
+        }
+        if (pathname === '/api/validate-promo' && method === 'POST') {
+            return handleValidatePromo(request, env);
         }
         if (pathname === '/api/reminders' && method === 'GET') {
             return handleGetReminders(request, env);
