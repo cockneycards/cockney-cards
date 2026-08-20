@@ -73,7 +73,134 @@ const PRINT_CATALOGUE = {
     // These two used to live in shop-prints.html's own PRODUCTS list —
     // moved here so this file is the one place you edit for either the
     // shop grid or the editor.
-
+  
+    "wham-eatsleep": {
+        title: "West Ham Prints - Eat, Sleep, Lionesses, Repeat",
+        description: "West Ham duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["whamboy", "whamgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-whamboy-preview-girl.png",
+        full: "eatsleep-wham.png",
+        variants: [
+          { id: "whamboy", full: "eatsleep-whamboy.png" },
+            { id: "whamgirl", full: "eatsleep-whamgirl.png" },
+        ]
+    }, 
+   
+    "villa-eatsleep": {
+        title: "Tottenham Hotspur Prints - Eat, Sleep, Lionesses, Repeat",
+        description: "Tottenham Hotspur duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["spursboy", "spursgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-spurs-preview-boy.png",
+        full: "eatsleep-spurs.png",
+        variants: [
+          { id: "spursboy", full: "eatsleep-spurs-boy.png" },
+            { id: "spursgirl", full: "eatsleep-spurs-girl.png" },
+        ]
+    }, 
+    "spurs-eatsleep": {
+        title: "Tottenham Hotspur Prints - Eat, Sleep, Lionesses, Repeat",
+        description: "Tottenham Hotspur duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["spursboy", "spursgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-spurs-preview-boy.png",
+        full: "eatsleep-spurs.png",
+        variants: [
+          { id: "spursboy", full: "eatsleep-spurs-boy.png" },
+            { id: "spursgirl", full: "eatsleep-spurs-girl.png" },
+        ]
+    }, 
+    "charlton-eatsleep": {
+        title: "Charlton Athletic Prints - Eat, Sleep, Lionesses, Repeat",
+        description: "Charlton Athletic duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["charltonboy", "charltongirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-charlton-girl-preview.png",
+        full: "eatsleep-charlton.png",
+        variants: [
+          { id: "charltonboy", full: "eatsleep-charlton-boy.png" },
+            { id: "charltongirl", full: "eatsleep-charlton-girl.png" },
+        ]
+    }, 
+    "birmingham-eatsleep": {
+        title: "Birmingham City Prints - Eat, Sleep, Lionesses, Repeat",
+        description: "Birmingham City duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["cityboy", "citygirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-birmingham-previewgirl.png",
+        full: "eatsleep-birmingham.png",
+        variants: [
+          { id: "cityboy", full: "eatsleep-birmingham-boy.png" },
+            { id: "citygirl", full: "eatsleep-birmingham-girl.png" },
+        ]
+    }, 
+    "lionesses-eatsleep": {
+        title: "London City Lionesses Prints - Eat, Sleep, Lionesses, Repeat",
+        description: "London City Lionesses duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["lionessboy", "lionessgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-lionesses-preview.png",
+        full: "eatsleep-lionesses.png",
+        variants: [
+          { id: "lionessoy", full: "eatsleep-lionesses-boy.png" },
+            { id: "lionessgirl", full: "eatsleep-lionesses-girl.png" },
+        ]
+    },
   "millwall-eatsleep": {
         title: "Millwall Prints - Eat, Sleep, Millwall, Repeat",
         description: "Millwall duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
