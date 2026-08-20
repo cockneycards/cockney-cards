@@ -97,8 +97,8 @@ const PRINT_CATALOGUE = {
     }, 
    
     "villa-eatsleep": {
-        title: "Tottenham Hotspur Prints - Eat, Sleep, Lionesses, Repeat",
-        description: "Tottenham Hotspur duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        title: "Aston Villa Prints - Eat, Sleep, Lionesses, Repeat",
+        description: "Aston Villa duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -107,14 +107,14 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "sports"],
         name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
-            onlyForVariants: ["spursboy", "spursgirl"], // no name field on the plain full/duo version — only these two personalised variants
+            onlyForVariants: ["villaboy", "villagirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
-        preview: "eatsleep-spurs-preview-boy.png",
-        full: "eatsleep-spurs.png",
+        preview: "eatsleep-villaboy-preview-girl.png",
+        full: "eatsleep-villa.png",
         variants: [
-          { id: "spursboy", full: "eatsleep-spurs-boy.png" },
-            { id: "spursgirl", full: "eatsleep-spurs-girl.png" },
+          { id: "villaboy", full: "eatsleep-villaboy.png" },
+            { id: "villagirl", full: "eatsleep-villagirl.png" },
         ]
     }, 
     "spurs-eatsleep": {
