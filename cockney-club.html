@@ -1,1 +1,229 @@
-jg
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cockney Club | Cockney Cards</title>
+<script src="auth.js"></script>
+<script src="cart.js"></script>
+
+<style>
+    :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --gold: #c8a04d; --font-family: 'Helvetica Neue', Arial, sans-serif; }
+    html { overflow-y: scroll; scrollbar-gutter: stable; }
+    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); }
+
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+    .logo-container { text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+    .nav-links a.active { font-weight: bold; }
+
+    .club-page { max-width: 800px; margin: 0 auto; padding: 50px 40px 90px; }
+
+    /* Pricing hero */
+    .club-hero { text-align: center; margin-bottom: 50px; }
+    .club-hero h1 { font-size: 30px; font-weight: 300; letter-spacing: 0.5px; margin: 0 0 10px; }
+    .club-hero p.lead { font-size: 15px; color: #666; max-width: 480px; margin: 0 auto 28px; line-height: 1.6; }
+    .price-card { display: inline-block; background: white; border: 1px solid var(--border-color); border-radius: 10px; padding: 28px 50px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+    .price-card .amount { font-size: 40px; font-weight: 700; color: var(--dark); }
+    .price-card .period { font-size: 14px; color: #888; margin-left: 4px; }
+    .price-card .join-btn { display: block; margin-top: 18px; background-color: #1a1a1a; color: white; border: none; padding: 14px 30px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; }
+    .price-card .join-btn:hover { background-color: #444; }
+    .price-card .fine-print { font-size: 11px; color: #999; margin-top: 12px; }
+
+    /* Benefits */
+    .section-title { font-size: 20px; font-weight: 600; margin: 0 0 20px; letter-spacing: 0.3px; }
+    .benefits-list { list-style: none; padding: 0; margin: 0 0 50px; display: grid; gap: 14px; }
+    .benefits-list li { display: flex; gap: 14px; align-items: flex-start; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px 18px; }
+    .benefits-list .tick { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+    .benefits-list strong { display: block; font-size: 14px; margin-bottom: 3px; }
+    .benefits-list span { font-size: 13px; color: #666; line-height: 1.5; }
+    .benefits-list li.coming-soon { border-style: dashed; background: #fafafa; }
+    .benefits-list li.coming-soon .tick { background: #ddd; color: #888; }
+
+    /* Terms */
+    .terms-box { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 30px 34px; font-size: 13px; line-height: 1.7; color: #444; }
+    .terms-box h2.section-title { font-size: 18px; margin-bottom: 6px; }
+    .terms-box p.updated { font-size: 12px; color: #999; margin: 0 0 24px; }
+    .terms-box h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--dark); margin: 26px 0 8px; }
+    .terms-box h3:first-of-type { margin-top: 0; }
+    .terms-box p { margin: 0 0 12px; }
+    .terms-box ul { margin: 0 0 12px; padding-left: 20px; }
+    .terms-box li { margin-bottom: 6px; }
+    .terms-box a { color: var(--primary); }
+
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+
+    @media (max-width: 600px) {
+        .club-page { padding: 40px 20px 70px; }
+        .price-card { padding: 24px 30px; width: 100%; box-sizing: border-box; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon" onclick="window.location.href='basket.html';">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="cockney-club.html" class="active">Cockney Club</a></li>
+            <li><a href="account.html">My Account</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="club-page">
+
+    <div class="club-hero">
+        <h1>Join The Cockney Club</h1>
+        <p class="lead">One membership, proper savings on every card you send. Cancel any time from your account.</p>
+
+        <div class="price-card">
+            <span class="amount">£9.99</span><span class="period">/ year</span>
+            <a href="account.html#plus" class="join-btn">Join The Club</a>
+            <p class="fine-print">Log in or create an account to join — takes about 30 seconds.</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">What You Get</h2>
+    <ul class="benefits-list">
+        <li>
+            <div class="tick">✓</div>
+            <div>
+                <strong>30% off every card</strong>
+                <span>Applied automatically at checkout on every personalised card you order, for as long as your membership is active.</span>
+            </div>
+        </li>
+        <li>
+            <div class="tick">✓</div>
+            <div>
+                <strong>Free delivery on 3+ cards to the same address</strong>
+                <span>This one's actually open to every customer, member or not — but it stacks nicely with your Club discount, so it's worth knowing about here too.</span>
+            </div>
+        </li>
+        <li>
+            <div class="tick">✓</div>
+            <div>
+                <strong>Free delivery on 2+ same-size prints to the same address</strong>
+                <span>Order two or more prints in the same size, going to one address, and postage is on us. Also open to every customer, not just members.</span>
+            </div>
+        </li>
+        <li>
+            <div class="tick">✓</div>
+            <div>
+                <strong>Refer a friend, get a free card!!</strong>
+                <span>Share your referral link from My Account. Your friend gets 25% off their first order, and when they place it, you'll get a reward code for a free personalised card too — you just cover postage.</span>
+            </div>
+        </li>
+        <li class="coming-soon">
+            <div class="tick">+</div>
+            <div>
+                <strong>More perks on the way</strong>
+                <span>We're planning further Club-only benefits — this section will grow as we grow so tell your friends about us and get them saving with Cockney Cards too.</span>
+            </div>
+        </li>
+    </ul>
+
+    <div class="terms-box">
+        <h2 class="section-title">Cockney Club Terms &amp; Conditions</h2>
+        <p class="updated">Last updated: August 2026</p>
+
+        <h3>1. What This Is</h3>
+        <p>The Cockney Club is an annual paid membership offered by Cockney Cards ("we", "us", "our") to customers in the United Kingdom. It gives members 30% off the price of personalised cards, applied automatically at checkout while the membership is active, in exchange for the annual fee shown at the time you join or renew (the "Membership Fee"). These terms sit alongside our general store policies (returns, refunds, and delivery) shown in the footer of this site, which continue to apply to any order you place, Club member or not.</p>
+
+        <h3>2. Joining</h3>
+        <p>To join the Cockney Club you need a registered Cockney Cards account in good standing, and you must be aged 18 or over. You'll need to be logged in to join, and to receive Club pricing at checkout — the discount is checked against your account each time you pay, not stored on your device, so it can never be applied by mistake to someone else's order.</p>
+
+        <h3>3. Using Your Membership</h3>
+        <p>Membership runs for 12 months from the date you join, and renews automatically unless you cancel (see Section 5). The 30% discount applies to personalised cards only — it doesn't apply to photo prints, postage, or any other product or fee on your order. Membership is for your own personal use. It isn't intended for business, trade, resale, or wholesale ordering, and we reserve the right to restrict or end a membership we reasonably believe is being used that way.</p>
+
+        <h3>4. Price Changes</h3>
+        <p>We may change the Membership Fee from time to time. If we do, the new price will only apply from your next renewal onwards — it never changes mid-way through a period you've already paid for. We'll email you at least 30 days before any renewal where the price is changing, so you have time to decide whether to continue.</p>
+
+        <h3>5. Auto-Renewal &amp; Cancelling</h3>
+        <p>Unless you cancel, your membership renews automatically each year using the payment method on file with our payment provider, Stripe. You can switch off auto-renewal at any time from the Cockney Club tab in My Account — doing so stops future renewals but doesn't refund or shorten the period you've already paid for, which continues to give you the 30% discount until it ends.</p>
+        <p>If you're a new member, UK consumer law gives you the right to cancel within 14 days of joining for a full refund. If you'd like your Club benefits to start straight away rather than waiting out the 14 days, you can ask us for this — but doing so means you're asking us to begin the service early, which affects how much of a refund you'd be entitled to if you cancel partway through those 14 days (broadly, a fair deduction for the discount you've already used). Outside of this cancellation window, membership fees aren't refundable for the remainder of a paid period, in the same way our standard returns policy doesn't cover services already provided.</p>
+
+        <h3>6. If We Need To End A Membership</h3>
+        <p>We may suspend or end a membership, and decline to offer a refund for the unused portion, if we reasonably believe it's being used for business/resale purposes against Section 3, obtained fraudulently, or used in a way that breaches our general site terms. Outside of those situations, if we ever need to end the Club scheme itself or a specific membership through no fault of yours, we'll refund you for the unused, full months remaining.</p>
+
+        <h3>7. Refer A Friend</h3>
+        <p>Registered Cockney Cards customers can share a personal referral link from the Refer a Friend tab in My Account. This benefit is separate from Club membership, and you don't need to be a Club member to take part or to earn a reward through it.</p>
+        <p>When someone you refer creates an account using your link and places their first paid order, we'll email you a single-use reward code for one free personalised card — you'll still need to cover postage. New customers who create an account via a referral link also receive a single-use reward code for 25% off the price of one personalised card, to use on their first order.</p>
+        <p>Reward codes are tied to the account they're issued to, can only be used once, and can't be exchanged for cash or transferred to another person or account. They apply to the price of one personalised card only — they don't reduce postage, and don't apply to photo prints or any other product.</p>
+        <p>The 25% new-customer reward doesn't combine with the 30% Club discount described in Section 3 — if you're a Club member, you'll receive the Club's 30% discount rather than both discounts together. Your new-customer reward code simply stays unused in that case, ready for a later order if your membership ever lapses. Referral rewards otherwise combine as normal with the free-delivery thresholds and promo codes described elsewhere on this page.</p>
+        <p>We reserve the right to withdraw, amend, or limit the referral scheme, or to decline a reward code we reasonably believe was obtained fraudulently or through abuse of the scheme — for example, referring yourself, or creating accounts purely to generate reward codes.</p>
+
+        <h3>8. Changes To These Terms</h3>
+        <p>We may update these terms occasionally — most often to reflect a change in the law, a change to how the Club works, or to make something clearer. If a change would leave you worse off, we'll let you know before it takes effect, and you'll be free to cancel ahead of your next renewal if you'd rather not continue under the new terms.</p>
+
+        <h3>9. Contact &amp; Governing Law</h3>
+        <p>Questions about your membership can go to <a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a>. These terms are governed by the laws of England and Wales, without affecting any statutory rights you have as a consumer.</p>
+    </div>
+
+</div>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="https://www.tiktok.com/@cockneycards" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
+
+<script>
+// Bolds whichever nav link matches the current page, same behaviour as account.html/thankyou.html
+function highlightActiveNavLink() {
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+            link.classList.add('active');
+        }
+    });
+}
+window.addEventListener('DOMContentLoaded', highlightActiveNavLink);
+</script>
+</body>
+</html>
