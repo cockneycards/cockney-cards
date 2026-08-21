@@ -73,10 +73,153 @@ const PRINT_CATALOGUE = {
     // These two used to live in shop-prints.html's own PRODUCTS list —
     // moved here so this file is the one place you edit for either the
     // shop grid or the editor.
-  
+
+    "album-mjbad": {
+        title: "Michael Jackson - Bad",
+        description: "Michael Jackson's Bad album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-mj-bad-preview.png",
+        full: "album-mj-bad.png"
+    },
+    "album-oasis-dm": {
+        title: "Oasis - Definitely Maybe - Album Artwork",
+        description: "Oasis's Definitely Maybe album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-oasis-dm-preview.png",
+        full: "album-oasis-dm.png"
+    },
+    "album--bobm": {
+        title: "Bob Marley - Legend - Album Artwork",
+        description: "Bob Marley's Legend album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-bobm-legend-preview.png",
+        full: "album-bobm-legend.png"
+    },
+    "album-dires": {
+        title: "Dire Strait's - Brother's In Arms - Album Artwork",
+        description: "Dire Strait's Brother's In Arms album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-dires-bia-preview.png",
+        full: "album-dires-bia.png"
+    },
+    "album-ledzep": {
+        title: "Led Zeplin - IV - Album Artwork",
+        description: "Led Zeplin's IV album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-ledzep-iv-preview.png",
+        full: "album-ledzep-iv.png"
+    },
+    "album-joydiv": {
+        title: "Joy Division - Unknown Pleasures - Album Artwork",
+        description: "Joy Division's Unknown Pleasures album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-joydiv-up-preview.png",
+        full: "album-joydiv-up.png"
+    },
+    "album-madness": {
+        title: "Madness - One Step Beyond - Album Artwork",
+        description: "Madness's One Step Beyond album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-madness-osb-preview.png",
+        full: "album-madness-osb.png"
+    },
+    "album-fleetmac": {
+        title: "Fleetwood Mac - Rumours - Album Artwork",
+        description: "Fleetwood Mac's Rumours album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-fleetm-rumours-preview.png",
+        full: "album-fleetm-rumours.png"
+    },
+    "album-doors": {
+        title: "The Doors - The Doors Album - Artwork",
+        description: "The Door's Album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-doors-doors-preview.png",
+        full: "album-doors-doors.png"
+    },
+    "album-prodigy": {
+        title: "The Prodigy - Music For The Jited Generation - Album Artwork",
+        description: "The Prodigy's Music For The Jited Generation album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-prodigy-mftjg-preview.png",
+        full: "album-prodigy-mftjg.png"
+    },
+    "album-pinkfloyd": {
+        title: "Pink Floyd's The Dark Side of The Moon - Album Artwork",
+        description: "Pink Floyd's The Dark Side of The Moon album print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-pinkfloyd-dsotm-preview.png",
+        full: "album-pinkfloyd-dsotm.png"
+    },
     "wham-eatsleep": {
         title: "West Ham Prints - Eat, Sleep, West Ham, Repeat",
-        description: "West Ham duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "West Ham duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -97,7 +240,7 @@ const PRINT_CATALOGUE = {
     }, 
     "spurs-eatsleep": {
         title: "Tottenham Hotspur Prints - Eat, Sleep, Tottenham, Repeat",
-        description: "Tottenham Hotspur duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Tottenham Hotspur duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -118,7 +261,7 @@ const PRINT_CATALOGUE = {
     }, 
     "charlton-eatsleep": {
         title: "Charlton Athletic Prints - Eat, Sleep, Charlton, Repeat",
-        description: "Charlton Athletic duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Charlton Athletic duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -139,7 +282,7 @@ const PRINT_CATALOGUE = {
     }, 
     "birmingham-eatsleep": {
         title: "Birmingham City Prints - Eat, Sleep, City, Repeat",
-        description: "Birmingham City duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Birmingham City duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -160,7 +303,7 @@ const PRINT_CATALOGUE = {
     }, 
     "lionesses-eatsleep": {
         title: "London City Lionesses Prints - Eat, Sleep, Lionesses, Repeat",
-        description: "London City Lionesses duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "London City Lionesses duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -181,7 +324,7 @@ const PRINT_CATALOGUE = {
     },
   "millwall-eatsleep": {
         title: "Millwall Prints - Eat, Sleep, Millwall, Repeat",
-        description: "Millwall duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Millwall duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -202,7 +345,7 @@ const PRINT_CATALOGUE = {
     },
     "arsenal-eatsleep": {
         title: "Arsenal Prints - Eat, Sleep, Arsenal, Repeat",
-        description: "Arsenal duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Arsenal duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -223,7 +366,7 @@ const PRINT_CATALOGUE = {
     },
     "villa-eatsleep": {
         title: "Aston Villa Prints - Eat, Sleep, Villa, Repeat",
-        description: "Aston Villa duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Aston Villa duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -244,7 +387,7 @@ const PRINT_CATALOGUE = {
     }, 
     "city-eatsleep": {
         title: "Manchester City Prints - Eat, Sleep, City, Repeat",
-        description: "Manchester City duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Manchester City duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -265,7 +408,7 @@ const PRINT_CATALOGUE = {
     },
     "chelsea-eatsleep": {
         title: "Chelsea Prints - Eat, Sleep, Chelsea, Repeat",
-        description: "Chelsea duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Chelsea duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -286,7 +429,7 @@ const PRINT_CATALOGUE = {
     },
     "united-eatsleep": {
         title: "Manchester United Prints - Eat, Sleep, United, Repeat",
-        description: "Manchester United duo prints that will look great in a bedroom or office. Choose from either a girl or boy version.",
+        description: "Manchester United duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
@@ -320,7 +463,7 @@ const PRINT_CATALOGUE = {
     },
    "dinosaurs": {
         title: "Dinosaur Duo",
-        description: "Dinosaur duo prints that will look great in a bedroom or office.",
+        description: "Dinosaur duo prints that will look great on any wall at home or even at work in the office.",
         price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£6.99", priceValue: 6.99 },
