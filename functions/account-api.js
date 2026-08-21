@@ -22,10 +22,22 @@
 //  - FROM_EMAIL       (e.g. "reminders@cockneycards.com")
 //  - SITE_URL         (e.g. "https://cockneycards.com")
 //  - ALLOWED_ORIGIN    (e.g. "https://cockneycards.com")
+//  - STRIPE_SECRET_KEY (same secret create-membership-checkout.js uses —
+//                        needed here too now, for handleCancelMembership /
+//                        handleResumeMembership to update a subscription
+//                        directly with Stripe)
 //
 // D1 schema this expects (already exists — old-bush was writing to the
 // same cockney-cards-db this project now also uses):
-//  - users            (id, email, created_at, referral_code)
+//  - users            (id, email, created_at, referral_code, plus_active,
+//                       plus_current_period_end, plus_subscription_id,
+//                       plus_cancel_at_period_end, stripe_customer_id) —
+//                       plus_cancel_at_period_end is a newer column (see
+//                       club-schema-update.sql) that mirrors Stripe's own
+//                       subscription.cancel_at_period_end flag, so the
+//                       account page can show "renews on X" vs "ends on X,
+//                       won't renew" without an extra Stripe API call on
+//                       every page load.
 //  - sessions         (token, user_id, expires_at)
 //  - magic_tokens     (token, email, expires_at, used, ref)
 //  - reminders        (id, user_id, occasion_name, relationship, month, day, created_at)
@@ -104,7 +116,7 @@ export async function getUserFromAuth(request, env) {
     if (!session || session.expires_at < now) return null;
 
     const user = await env.DB.prepare(
-        'SELECT id, email, plus_active, plus_current_period_end, referral_code FROM users WHERE id = ?'
+        'SELECT id, email, plus_active, plus_current_period_end, plus_subscription_id, plus_cancel_at_period_end, referral_code FROM users WHERE id = ?'
     ).bind(session.user_id).first();
 
     return user || null;
@@ -265,7 +277,91 @@ export async function handleGetAccount(request, env) {
         email: user.email,
         plusActive: !!user.plus_active,
         plusCurrentPeriodEnd: user.plus_current_period_end || null,
+        plusCancelAtPeriodEnd: !!user.plus_cancel_at_period_end,
     }, 200, env);
+}
+
+// ---------- Cockney Club subscription management ----------
+//
+// Both handlers below need routing added for them in _worker.js (not part
+// of this file) — POST /api/account/cancel-membership and POST
+// /api/account/resume-membership, same pattern as the other /api/account*
+// routes already wired there. Both also require STRIPE_SECRET_KEY, the
+// same secret create-membership-checkout.js already uses to start a
+// subscription in the first place.
+
+// Turns auto-renewal off for the caller's own Club subscription by
+// setting cancel_at_period_end on the underlying Stripe subscription.
+// This does NOT end their membership immediately — per the Club terms
+// (cockney-club.html, Section 5) they keep the 30% discount until the
+// period they've already paid for actually runs out, it just won't
+// renew after that. The authoritative status update still comes from
+// Stripe's own customer.subscription.updated webhook (see
+// stripe-webhook.js) — this also updates D1 directly so the account page
+// reflects the change immediately rather than waiting on that webhook.
+export async function handleCancelMembership(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+    if (!user.plus_active || !user.plus_subscription_id) {
+        return json({ error: 'No active membership to cancel.' }, 400, env);
+    }
+
+    try {
+        const res = await fetch(`https://api.stripe.com/v1/subscriptions/${user.plus_subscription_id}`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ cancel_at_period_end: 'true' }),
+        });
+        if (!res.ok) {
+            const errBody = await res.json().catch(() => ({}));
+            console.error('Stripe cancel_at_period_end failed:', res.status, errBody);
+            return json({ error: 'Could not cancel your membership — please try again or contact us.' }, 500, env);
+        }
+
+        await env.DB.prepare('UPDATE users SET plus_cancel_at_period_end = 1 WHERE id = ?').bind(user.id).run();
+        return json({ ok: true }, 200, env);
+    } catch (err) {
+        console.error('handleCancelMembership failed:', err);
+        return json({ error: 'Could not cancel your membership — please try again or contact us.' }, 500, env);
+    }
+}
+
+// The reverse of the above — lets someone who cancelled change their
+// mind and switch auto-renewal back on, as long as their current paid
+// period hasn't actually ended yet (plus_active is still true; Stripe
+// won't let cancel_at_period_end be un-set on a subscription that's
+// already been cancelled outright).
+export async function handleResumeMembership(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+    if (!user.plus_active || !user.plus_subscription_id) {
+        return json({ error: 'No membership to resume.' }, 400, env);
+    }
+
+    try {
+        const res = await fetch(`https://api.stripe.com/v1/subscriptions/${user.plus_subscription_id}`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ cancel_at_period_end: 'false' }),
+        });
+        if (!res.ok) {
+            const errBody = await res.json().catch(() => ({}));
+            console.error('Stripe resume (cancel_at_period_end=false) failed:', res.status, errBody);
+            return json({ error: 'Could not resume your membership — please try again or contact us.' }, 500, env);
+        }
+
+        await env.DB.prepare('UPDATE users SET plus_cancel_at_period_end = 0 WHERE id = ?').bind(user.id).run();
+        return json({ ok: true }, 200, env);
+    } catch (err) {
+        console.error('handleResumeMembership failed:', err);
+        return json({ error: 'Could not resume your membership — please try again or contact us.' }, 500, env);
+    }
 }
 
 // Powers the "Refer a Friend" account tab — the user's own referral
