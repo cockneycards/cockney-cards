@@ -37,6 +37,12 @@
 // pointing at https://cockneycards.com/stripe-webhook, subscribed to the
 // `checkout.session.completed` event, then copy its signing secret into
 // STRIPE_WEBHOOK_SECRET.
+//
+// Also requires SITE_URL (same value as account-api.js's) — used to build
+// the "Shop Cards" link and My Account link in customer-facing emails
+// below.
+
+import { checkAndQualifyReferral } from './referrals.js';
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -203,6 +209,41 @@ export async function onRequestPost(context) {
             console.error('Failed to send order email:', err);
         }
 
+        // Customer-facing confirmation — separate from the business
+        // notification above (which goes to orders@cockneycards.com and is
+        // built for fulfilment, not for the customer to read). Without
+        // this, a customer who's just paid gets no email at all until
+        // whatever confirmation Stripe Checkout itself shows on-screen,
+        // which is why orders were feeling "did that actually work?".
+        try {
+            await sendCustomerOrderConfirmationEmail(env, {
+                customerEmail,
+                isBasket: !!(isBasket && basketItems),
+                order: isBasket && basketItems
+                    ? { items: basketItems, amountTotal: session.amount_total }
+                    : {
+                        productType: meta.product_type || 'unknown',
+                        name: meta.custom_name,
+                        age: meta.custom_age,
+                        name2: meta.custom_name2,
+                        age2: meta.custom_age2,
+                        size: meta.size,
+                        amountTotal: session.amount_total,
+                    },
+            });
+        } catch (err) {
+            console.error('Failed to send customer confirmation email:', err);
+        }
+
+        // Referral qualification — was never actually wired up before, so
+        // referrers were never getting their free-card reward no matter
+        // how many referred friends completed an order. Checks whether
+        // this buyer's email matches someone's pending referral and, if
+        // so, issues + emails the referrer their reward. Safe to call for
+        // every order (including non-referred ones) — it's a no-op when
+        // there's no matching pending referral, and never throws.
+        await checkAndQualifyReferral(env, customerEmail, sendCustomerEmail);
+
         if (orderId) {
             await env.ORDER_PDFS.delete(orderId);
         }
@@ -328,6 +369,104 @@ async function sendViaZeptoMail(env, { subject, text, attachments }) {
         const errText = await res.text();
         throw new Error(`ZeptoMail API error (${res.status} ${res.statusText}): ${errText || '(empty response body)'}`);
     }
+}
+
+// Same ZeptoMail account as sendViaZeptoMail above, but for emails TO the
+// customer rather than the fixed orders@cockneycards.com fulfilment inbox
+// — an HTML body instead of a plain-text one, and no attachments (a
+// customer doesn't need the print-ready PDF). Used for the order
+// confirmation below, and passed into checkAndQualifyReferral so it can
+// email a qualifying referrer their reward without this file needing a
+// second copy of the referral email's branding.
+async function sendCustomerEmail(env, { to, subject, html }) {
+    if (!to || to === 'N/A') return false;
+    const res = await fetch('https://api.zeptomail.eu/v1.1/email', {
+        method: 'POST',
+        headers: {
+            Authorization: env.ZEPTOMAIL_TOKEN,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+        },
+        body: JSON.stringify({
+            from: { address: env.FROM_EMAIL, name: 'Cockney Cards' },
+            to: [{ email_address: { address: to, name: to } }],
+            subject,
+            htmlbody: html,
+        }),
+    });
+    if (!res.ok) {
+        const errText = await res.text();
+        console.error('ZeptoMail customer email failed:', res.status, errText);
+    }
+    return res.ok;
+}
+
+// Builds a per-item summary customers can actually read — basket orders
+// list every line with its options/quantity, single-item orders become a
+// one-item list of the same shape, so the email template below doesn't
+// need to know which kind of order it's rendering.
+function buildCustomerItemsSummary(isBasket, order) {
+    if (isBasket) {
+        return (order.items || []).map((item) => ({
+            title: item.title || 'Personalised item',
+            details: item.optionsSummary || '',
+            quantity: item.quantity || 1,
+        }));
+    }
+    const details = [order.name, order.age, order.name2, order.age2, order.size]
+        .filter((v) => v && v !== 'N/A')
+        .join(' · ');
+    return [{
+        title: order.productType === 'print' ? `Print${order.size ? ` (${order.size})` : ''}` : 'Personalised Card',
+        details,
+        quantity: 1,
+    }];
+}
+
+// The confirmation a customer never used to get at all — this is what
+// fixes the "did my order actually go through?" problem, sent right
+// after payment is confirmed, independent of the internal fulfilment
+// email above.
+async function sendCustomerOrderConfirmationEmail(env, { customerEmail, isBasket, order }) {
+    if (!customerEmail || customerEmail === 'N/A') return;
+
+    const items = buildCustomerItemsSummary(isBasket, order);
+    const itemsHtml = items.map((i) => `
+        <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                <strong style="font-size: 14px;">${i.title}</strong>
+                ${i.details ? `<br><span style="color: #888; font-size: 12px;">${i.details}</span>` : ''}
+                ${i.quantity > 1 ? `<br><span style="color: #888; font-size: 12px;">Qty: ${i.quantity}</span>` : ''}
+            </td>
+        </tr>
+    `).join('');
+
+    const amount = order.amountTotal != null ? `£${(order.amountTotal / 100).toFixed(2)}` : '';
+    const siteUrl = env.SITE_URL || '';
+
+    const html = `
+        <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 520px; margin: 0 auto; color: #1e1e24;">
+            <div style="text-align: center; padding: 28px 0 20px;">
+                <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards" style="max-width: 110px; height: auto;">
+            </div>
+            <div style="background: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 28px 26px;">
+                <h2 style="font-weight: 400; font-size: 20px; margin: 0 0 8px;">Thanks for your order! 🎉</h2>
+                <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 20px;">We've got it and we're already getting your card${items.length > 1 ? 's' : ''} ready.</p>
+                <table style="width: 100%; border-collapse: collapse;">${itemsHtml}</table>
+                ${amount ? `<p style="font-size: 14px; margin: 18px 0 0;"><strong>Total paid:</strong> ${amount}</p>` : ''}
+                <p style="color: #888; font-size: 12px; margin: 22px 0 0;">You can track this order any time in <a href="${siteUrl}/account.html" style="color: #1a73e8;">My Account</a>.</p>
+            </div>
+            <div style="text-align: center; padding: 20px 10px 0; font-size: 11px; color: #aaa;">
+                Cockney Cards · ${siteUrl.replace(/^https?:\/\//, '') || 'cockneycards.com'}
+            </div>
+        </div>
+    `;
+
+    await sendCustomerEmail(env, {
+        to: customerEmail,
+        subject: 'Your Cockney Cards order is confirmed!',
+        html,
+    });
 }
 
 // Formats Stripe's shipping_details shape ({ name, address: { line1, line2,
