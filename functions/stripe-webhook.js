@@ -278,13 +278,23 @@ async function activatePlusMembership(env, session) {
     const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
     const subscriptionId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
 
+    // plus_cancel_at_period_end reset to 0 here too — a brand-new
+    // subscription is never scheduled to cancel, and this covers someone
+    // re-joining after a previous membership lapsed (their old row could
+    // otherwise still have last time's cancellation flag left set).
     await env.DB.prepare(
-        `UPDATE users SET plus_active = 1, stripe_customer_id = ?, plus_subscription_id = ? WHERE id = ?`
+        `UPDATE users SET plus_active = 1, stripe_customer_id = ?, plus_subscription_id = ?, plus_cancel_at_period_end = 0 WHERE id = ?`
     ).bind(customerId || null, subscriptionId || null, userId).run();
 }
 
-// Called on customer.subscription.updated/deleted — keeps plus_active and
-// plus_current_period_end matching whatever Stripe actually has on file.
+// Called on customer.subscription.updated/deleted — keeps plus_active,
+// plus_current_period_end, and plus_cancel_at_period_end all matching
+// whatever Stripe actually has on file. This is the authoritative sync:
+// account-api.js's handleCancelMembership/handleResumeMembership also
+// write plus_cancel_at_period_end directly for an instant account-page
+// update, but this webhook is what corrects it if those two ever
+// disagree with Stripe (e.g. a subscription cancelled directly from the
+// Stripe Dashboard rather than through the site).
 // 'active' and 'trialing' are the only statuses that count as a live
 // membership; everything else (canceled, unpaid, past_due, incomplete_expired,
 // etc.) means postage should go back to being charged.
@@ -293,8 +303,8 @@ async function syncPlusMembershipStatus(env, subscription) {
     const periodEndMs = subscription.current_period_end ? subscription.current_period_end * 1000 : null;
 
     await env.DB.prepare(
-        `UPDATE users SET plus_active = ?, plus_current_period_end = ? WHERE plus_subscription_id = ?`
-    ).bind(isActive ? 1 : 0, periodEndMs, subscription.id).run();
+        `UPDATE users SET plus_active = ?, plus_current_period_end = ?, plus_cancel_at_period_end = ? WHERE plus_subscription_id = ?`
+    ).bind(isActive ? 1 : 0, periodEndMs, subscription.cancel_at_period_end ? 1 : 0, subscription.id).run();
 }
 
 // Verifies the webhook actually came from Stripe by recomputing the HMAC
