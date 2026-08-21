@@ -21,8 +21,9 @@
 // share it).
 
 import { highestTier, POSTAGE_TIERS, groupItemsByDestination } from './postage.js';
-import { checkPlusMembership } from './account-api.js';
+import { checkPlusMembership, getUserFromAuth } from './account-api.js';
 import { checkPromoCode } from './promo.js';
+import { validateRewardCode } from './referrals.js';
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -126,8 +127,19 @@ export async function onRequestPost(context) {
         // webhook reads session.customer_details.email (whatever the
         // customer actually confirms at checkout), not this prefill.
 
+        const authedUser = await getUserFromAuth(request, env);
         const isClubMember = await checkPlusMembership(request, env);
         const isPromoValid = await checkPromoCode(data.promoCode, env);
+        // Refer a Friend reward — a single-use "free card" code earned
+        // when someone the logged-in user referred completes their first
+        // order (see referrals.js). Requires being logged in as the user
+        // the code was issued to; validation only confirms it's valid and
+        // unredeemed here — it's actually marked redeemed by
+        // stripe-webhook.js once payment succeeds, since a Checkout
+        // Session can be abandoned without paying.
+        const rewardCode = (data.rewardCode || '').toString().trim();
+        const isRewardValid = rewardCode ? await validateRewardCode(rewardCode, authedUser, env) : false;
+        let rewardApplied = false;
 
         // Basket lines are grouped by destination — everything going to
         // the customer themselves counts as one parcel, and each distinct
@@ -162,6 +174,31 @@ export async function onRequestPost(context) {
                 }
 
                 const description = item.optionsSummary || (item.kind === 'print' ? 'Personalised photo print' : 'Personalised greeting card');
+
+                // Apply the reward to exactly ONE card unit, once per
+                // checkout — not the whole line's quantity. If this line
+                // has more than one card, it's split into a normally-
+                // priced portion plus a single free unit, so e.g. "3x
+                // Birthday Card" with a reward becomes "2x Birthday Card"
+                // + "1x Birthday Card (Free)" rather than all 3 going free.
+                if (!rewardApplied && isRewardValid && item.kind === 'card' && hasPrice) {
+                    rewardApplied = true;
+                    if (item.quantity > 1) {
+                        params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
+                        params.append(`line_items[${lineIndex}][price_data][product_data][name]`, name);
+                        params.append(`line_items[${lineIndex}][price_data][product_data][description]`, description);
+                        params.append(`line_items[${lineIndex}][price_data][unit_amount]`, String(unitAmount));
+                        params.append(`line_items[${lineIndex}][quantity]`, String(item.quantity - 1));
+                        lineIndex++;
+                    }
+                    params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
+                    params.append(`line_items[${lineIndex}][price_data][product_data][name]`, `${item.title} (Free — Refer a Friend reward)`);
+                    params.append(`line_items[${lineIndex}][price_data][product_data][description]`, description);
+                    params.append(`line_items[${lineIndex}][price_data][unit_amount]`, '0');
+                    params.append(`line_items[${lineIndex}][quantity]`, '1');
+                    lineIndex++;
+                    return;
+                }
 
                 params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
                 params.append(`line_items[${lineIndex}][price_data][product_data][name]`, name);
@@ -218,6 +255,9 @@ export async function onRequestPost(context) {
         params.append('metadata[order_id]', orderId);
         params.append('metadata[product_type]', 'basket');
         params.append('metadata[item_count]', String(items.length));
+        if (rewardApplied) {
+            params.append('metadata[reward_code]', rewardCode.toUpperCase());
+        }
 
         const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
             method: 'POST',
