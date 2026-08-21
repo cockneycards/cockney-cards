@@ -199,7 +199,7 @@
                 <!-- Refer a Friend -->
                 <div class="tab-panel" id="tab-referrals">
                     <h1>Refer a Friend</h1>
-                    <p class="lead">Share your link — when a friend you refer buys their first card, you get a free card too. You only pay delivery.</p>
+                    <p class="lead">Share your link — your friend gets 25% off their first order, and once they buy their first card, you get a free card too. You only pay delivery.</p>
                     <div class="card" id="referral-status">
                         <div class="empty-state">Loading...</div>
                     </div>
@@ -511,14 +511,19 @@
 
             const unredeemedRewards = data.rewards.filter(r => !r.redeemed);
             const rewardsHtml = unredeemedRewards.length
-                ? unredeemedRewards.map(r => `
+                ? unredeemedRewards.map(r => {
+                    const label = r.rewardType === "new_customer_25"
+                        ? `${r.discountPercent || 25}% off one card — enter this at checkout`
+                        : "Unused — enter this at checkout on your next card order";
+                    return `
                     <div class="reminder-row">
                         <div class="reminder-info">
                             <strong>${r.code}</strong>
-                            <span>Unused — enter this at checkout on your next card order</span>
+                            <span>${label}</span>
                         </div>
                     </div>
-                `).join("")
+                `;
+                }).join("")
                 : '';
 
             el.innerHTML = `
