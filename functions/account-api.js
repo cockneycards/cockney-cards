@@ -104,7 +104,7 @@ export async function getUserFromAuth(request, env) {
     if (!session || session.expires_at < now) return null;
 
     const user = await env.DB.prepare(
-        'SELECT id, email, plus_active, plus_current_period_end FROM users WHERE id = ?'
+        'SELECT id, email, plus_active, plus_current_period_end, referral_code FROM users WHERE id = ?'
     ).bind(session.user_id).first();
 
     return user || null;
@@ -258,25 +258,34 @@ export async function handleGetReferralInfo(request, env) {
     const user = await getUserFromAuth(request, env);
     if (!user) return json({ error: 'Not logged in.' }, 401, env);
 
-    const summary = await getReferralSummary(env, user);
-    const referralLink = `${env.SITE_URL}/?ref=${summary.referralCode}`;
+    try {
+        const summary = await getReferralSummary(env, user);
+        const referralLink = `${env.SITE_URL}/?ref=${summary.referralCode}`;
 
-    return json({
-        referralCode: summary.referralCode,
-        referralLink,
-        referrals: summary.referrals.map((r) => ({
-            email: r.referred_email,
-            status: r.status,
-            createdAt: r.created_at,
-            qualifiedAt: r.qualified_at,
-        })),
-        rewards: summary.rewards.map((r) => ({
-            code: r.code,
-            redeemed: !!r.redeemed,
-            createdAt: r.created_at,
-            redeemedAt: r.redeemed_at,
-        })),
-    }, 200, env);
+        return json({
+            referralCode: summary.referralCode,
+            referralLink,
+            referrals: summary.referrals.map((r) => ({
+                email: r.referred_email,
+                status: r.status,
+                createdAt: r.created_at,
+                qualifiedAt: r.qualified_at,
+            })),
+            rewards: summary.rewards.map((r) => ({
+                code: r.code,
+                redeemed: !!r.redeemed,
+                createdAt: r.created_at,
+                redeemedAt: r.redeemed_at,
+            })),
+        }, 200, env);
+    } catch (err) {
+        // Most likely cause: the referrals/reward_codes tables or the
+        // users.referral_code column don't exist yet in this D1 database
+        // (see referrals-schema.sql) — surface a real error instead of
+        // letting the request fail with an empty/unhandled response.
+        console.error('handleGetReferralInfo failed:', err);
+        return json({ error: 'Could not load referral info.' }, 500, env);
+    }
 }
 
 export async function handleGetOrders(request, env) {
