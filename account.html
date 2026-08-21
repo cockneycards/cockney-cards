@@ -199,7 +199,7 @@
                 <!-- Refer a Friend -->
                 <div class="tab-panel" id="tab-referrals">
                     <h1>Refer a Friend</h1>
-                    <p class="lead">Share your link — when a friend you refer buys their first card, you get a free card too. You only pay delivery.</p>
+                    <p class="lead">Invite a friend and we'll email them your link — they get 25% off their first order, and once they buy their first card, you get a free card too. You only pay delivery.</p>
                     <div class="card" id="referral-status">
                         <div class="empty-state">Loading...</div>
                     </div>
@@ -579,19 +579,35 @@
 
             const unredeemedRewards = data.rewards.filter(r => !r.redeemed);
             const rewardsHtml = unredeemedRewards.length
-                ? unredeemedRewards.map(r => `
+                ? unredeemedRewards.map(r => {
+                    const label = r.rewardType === "new_customer_25"
+                        ? `${r.discountPercent || 25}% off one card — enter this at checkout`
+                        : "Unused — enter this at checkout on your next card order";
+                    return `
                     <div class="reminder-row">
                         <div class="reminder-info">
                             <strong>${r.code}</strong>
-                            <span>Unused — enter this at checkout on your next card order</span>
+                            <span>${label}</span>
                         </div>
                     </div>
-                `).join("")
+                `;
+                }).join("")
                 : '';
 
             el.innerHTML = `
                 <div style="padding: 10px 0;">
-                    <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Your referral link:</p>
+                    <h3 style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin-bottom:10px;">Send An Invite</h3>
+                    <p style="font-size:13px; color:#666; margin:0 0 14px;">We'll send them a nice email with your link — no copy-pasting required.</p>
+                    <form id="invite-form" onsubmit="sendReferralInvite(event)" style="margin-bottom: 28px;">
+                        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                            <input type="text" id="invite-friend-name" placeholder="Friend's name (optional)" style="flex:1; min-width:140px; padding:10px; border:1px solid var(--border-color); border-radius:6px; box-sizing:border-box; font-size:13px;">
+                            <input type="email" id="invite-friend-email" placeholder="Friend's email" required style="flex:1; min-width:180px; padding:10px; border:1px solid var(--border-color); border-radius:6px; box-sizing:border-box; font-size:13px;">
+                            <button type="submit" class="btn" id="invite-send-btn" style="width:auto; flex:0 0 auto; margin-top:0; padding:10px 20px; white-space:nowrap;">Send Invite</button>
+                        </div>
+                        <p id="invite-status" class="status-msg" style="margin:0;"></p>
+                    </form>
+
+                    <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Or just share your link directly:</p>
                     <div style="display:flex; gap:8px; margin-bottom: 24px;">
                         <input type="text" readonly id="referral-link-input" value="${data.referralLink}" style="flex:1; min-width:0; padding:10px; border:1px solid var(--border-color); border-radius:6px; box-sizing:border-box; font-size:13px;">
                         <button type="button" class="btn btn-secondary" style="width:auto; flex:0 0 auto; margin-top:0; padding:10px 16px; white-space:nowrap;" onclick="copyReferralLink()">Copy</button>
@@ -606,6 +622,46 @@
             `;
         } catch (err) {
             el.innerHTML = `<p style="color:red; font-size:13px;">${err.message || "Could not load referral info."}</p>`;
+        }
+    }
+
+    async function sendReferralInvite(event) {
+        event.preventDefault();
+        const nameInput = $("invite-friend-name");
+        const emailInput = $("invite-friend-email");
+        const btn = $("invite-send-btn");
+        const statusEl = $("invite-status");
+
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+        btn.disabled = true;
+        btn.innerText = "Sending...";
+
+        try {
+            const res = await fetch(`${API_BASE}/api/referrals/send-invite`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getSessionToken()}`
+                },
+                body: JSON.stringify({
+                    friendName: nameInput.value.trim(),
+                    friendEmail: emailInput.value.trim(),
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+
+            statusEl.textContent = "Invite sent!";
+            statusEl.classList.add("success");
+            nameInput.value = "";
+            emailInput.value = "";
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Send Invite";
         }
     }
 
