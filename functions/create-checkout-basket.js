@@ -146,6 +146,9 @@ export async function onRequestPost(context) {
             const cardUnitsInGroup = groupItems
                 .filter((item) => item.kind === 'card')
                 .reduce((sum, item) => sum + item.quantity, 0);
+            const printItemsInGroup = groupItems.filter((item) => item.kind === 'print');
+            const printUnitsInGroup = printItemsInGroup.reduce((sum, item) => sum + item.quantity, 0);
+            const printSizesInGroup = new Set(printItemsInGroup.map((item) => item.size));
             const discountRate = isClubMember ? 0.30 : 0;
 
             groupItems.forEach((item) => {
@@ -171,25 +174,39 @@ export async function onRequestPost(context) {
             // Postage for this parcel — a group ships in one package
             // sized for its biggest item, so this is the highest tier
             // present within the group, not summed per item. Waived
-            // (free) in two independent cases, cards-only both times —
-            // never waived if a print is anywhere in the group:
+            // (free) in three independent cases — never waived if a
+            // group mixes cards and prints together, since each case
+            // below requires the group to be one kind or the other:
             //   1. 3+ cards are going to this same address. Applies to
             //      every customer, not just Club members — that's the
             //      whole point of it (it replaces the old 35% discount
             //      tier as the "buy several, save on delivery" perk).
-            //   2. A valid promo code was entered. Unrelated to Club
-            //      membership, unrelated to quantity.
+            //   2. 2+ prints of the SAME size are going to this same
+            //      address — e.g. two A4 prints qualifies, but one A4 +
+            //      one A3 doesn't (different parcel/postage tiers), and
+            //      neither does a single print of any size. Also applies
+            //      to every customer, mirroring the cards rule above.
+            //   3. A valid promo code was entered (cards-only, as before).
             // Club membership itself does NOT waive postage — that's the
             // 30% card discount above instead.
             const tier = highestTier(groupItems);
             const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
-            const qualifiesForFreeDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
-            const postageWaived = qualifiesForFreeDelivery || (allCardsInGroup && isPromoValid);
+            const allPrintsInGroup = groupItems.length > 0 && groupItems.every((item) => item.kind === 'print');
+            const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
+            const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
+            const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || (allCardsInGroup && isPromoValid);
             const postageAmount = postageWaived ? 0 : POSTAGE_TIERS[tier];
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
-            const postageName = postageWaived
-                ? `${qualifiesForFreeDelivery ? 'Free Postage (3+ cards to this address)' : 'Free Postage (Promo Code)'}${parcelLabel}`
-                : `Postage${parcelLabel}`;
+            let postageName;
+            if (qualifiesForFreeCardDelivery) {
+                postageName = `Free Postage (3+ cards to this address)${parcelLabel}`;
+            } else if (qualifiesForFreePrintDelivery) {
+                postageName = `Free Postage (2+ same-size prints to this address)${parcelLabel}`;
+            } else if (postageWaived) {
+                postageName = `Free Postage (Promo Code)${parcelLabel}`;
+            } else {
+                postageName = `Postage${parcelLabel}`;
+            }
 
             params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
             params.append(`line_items[${lineIndex}][price_data][product_data][name]`, postageName);
