@@ -165,7 +165,7 @@ function renderBasket() {
                     <label for="promo-code-input" style="font-size:12px; color:#666; display:block; margin-bottom:6px;">Promo code (optional)</label>
                     <div style="display:flex; gap:8px;">
                         <input type="text" id="promo-code-input" placeholder="e.g. WELCOME10" style="flex:1; min-width:0; padding:10px; border:1px solid var(--border-color); border-radius:6px; box-sizing:border-box; font-size:13px; text-transform:uppercase;">
-                        <button type="button" class="btn btn-secondary" style="width:auto; margin-top:0; padding:10px 16px; white-space:nowrap;" id="apply-promo-btn" onclick="applyPromoCode()">Enter Promo Code</button>
+                        <button type="button" class="btn btn-secondary" style="width:auto; flex:0 0 auto; margin-top:0; padding:10px 16px; white-space:nowrap;" id="apply-promo-btn" onclick="applyPromoCode()">Apply</button>
                     </div>
                     <p id="promo-feedback" style="font-size:12px; margin:8px 0 0; display:none;"></p>
                 </div>
@@ -263,7 +263,7 @@ async function applyPromoCode() {
         feedback.style.display = 'block';
     } finally {
         btn.disabled = false;
-        btn.innerText = 'Enter Promo Code';
+        btn.innerText = 'Apply';
     }
 }
 
