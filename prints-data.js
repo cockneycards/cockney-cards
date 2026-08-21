@@ -74,6 +74,34 @@ const PRINT_CATALOGUE = {
     // moved here so this file is the one place you edit for either the
     // shop grid or the editor.
 
+    "mfc-miiiii": {
+        title: "Millwall Chant - Miiiiiiii",
+        description: "Millwall's infamous Miiiiii... chant print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "sports"],
+        preview: "print-miiiiiiiii-preview.png",
+        full: "print-miiiiiiiii.png"
+        
+     },
+    "print-ofah-thistimenext": {
+        title: "Only Fools and Horses - This Time Next Year...",
+        description: "Only Fools and Horses - This Time Next Year... print will look great on any wall at home or even at work in the office.",
+        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£4.99", priceValue: 4.99 },
+            A4: { price: "£6.99", priceValue: 6.99 },
+            A3: { price: "£9.99", priceValue: 9.99 }
+        },
+        categories: ["all", "b&w"],
+        preview: "print-thistimenextyear-preview.png",
+        full: "print-thistimenextyear.png"
+        
+     },
     "album-mjbad": {
         title: "Michael Jackson - Bad",
         description: "Michael Jackson's Bad album print will look great on any wall at home or even at work in the office.",
