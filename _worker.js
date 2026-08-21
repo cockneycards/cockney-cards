@@ -38,6 +38,7 @@ import {
     handleRequestLink,
     handleVerify,
     handleGetAccount,
+    handleGetReferralInfo,
     handleGetReminders,
     handleAddReminder,
     handleDeleteReminder,
@@ -100,6 +101,9 @@ export default {
         }
         if (pathname === '/api/account' && method === 'GET') {
             return handleGetAccount(request, env);
+        }
+        if (pathname === '/api/referrals' && method === 'GET') {
+            return handleGetReferralInfo(request, env);
         }
         if (pathname === '/api/validate-promo' && method === 'POST') {
             return handleValidatePromo(request, env);
