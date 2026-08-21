@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account | Cockney Cards</title>
+    <script src="auth.js"></script>
     <script src="cart.js"></script>
 
     <style>
@@ -163,6 +164,7 @@
                 <ul class="sidebar-links">
                     <li><a href="#" class="tab-link active" data-tab="orders">Order History</a></li>
                     <li><a href="#" class="tab-link" data-tab="plus">Cockney Cards Club</a></li>
+                    <li><a href="#" class="tab-link" data-tab="referrals">Refer a Friend</a></li>
                     <li><a href="#" class="tab-link" data-tab="addresses">Saved Addresses</a></li>
                     <li><a href="#" class="tab-link" data-tab="payment">Payment Methods</a></li>
                     <li><a href="#" class="tab-link" data-tab="reminders">Calendar Reminders</a></li>
@@ -190,6 +192,15 @@
                     <h1>Cockney Cards Club</h1>
                     <p class="lead">£9.99/year — 30% off every card. Plus, free delivery on 3+ cards or 2+ same-size prints to the same address, for every customer. <a href="cockney-club.html" style="color: var(--primary);">See full benefits &amp; terms</a></p>
                     <div class="card" id="plus-status">
+                        <div class="empty-state">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Refer a Friend -->
+                <div class="tab-panel" id="tab-referrals">
+                    <h1>Refer a Friend</h1>
+                    <p class="lead">Share your link — when a friend you refer buys their first card, you get a free card too. You only pay delivery.</p>
+                    <div class="card" id="referral-status">
                         <div class="empty-state">Loading...</div>
                     </div>
                 </div>
@@ -382,7 +393,7 @@
             const res = await fetch(`${API_BASE}/api/auth/request-link`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email, ref: (typeof ccGetReferralCode === "function" ? ccGetReferralCode() : null) })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Something went wrong.");
@@ -475,6 +486,69 @@
             btn.disabled = false;
             btn.innerText = "Join Cockney Cards Club — £9.99/year";
         }
+    }
+
+    async function loadReferralInfo() {
+        const el = $("referral-status");
+        try {
+            const res = await fetch(`${API_BASE}/api/referrals`, {
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            if (res.status === 401) { showLoggedOut(); return; }
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Could not load referral info.");
+
+            const referralsHtml = data.referrals.length
+                ? data.referrals.map(r => `
+                    <div class="reminder-row">
+                        <div class="reminder-info">
+                            <strong>${r.email}</strong>
+                            <span>${r.status === "qualified" ? "✓ Ordered — reward earned" : "Waiting on their first order"}</span>
+                        </div>
+                    </div>
+                `).join("")
+                : '<p style="color:#888; font-size:13px;">No referrals yet — share your link below to get started.</p>';
+
+            const unredeemedRewards = data.rewards.filter(r => !r.redeemed);
+            const rewardsHtml = unredeemedRewards.length
+                ? unredeemedRewards.map(r => `
+                    <div class="reminder-row">
+                        <div class="reminder-info">
+                            <strong>${r.code}</strong>
+                            <span>Unused — enter this at checkout on your next card order</span>
+                        </div>
+                    </div>
+                `).join("")
+                : '';
+
+            el.innerHTML = `
+                <div style="padding: 10px 0;">
+                    <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Your referral link:</p>
+                    <div style="display:flex; gap:8px; margin-bottom: 24px;">
+                        <input type="text" readonly id="referral-link-input" value="${data.referralLink}" style="flex:1; min-width:0; padding:10px; border:1px solid var(--border-color); border-radius:6px; box-sizing:border-box; font-size:13px;">
+                        <button type="button" class="btn btn-secondary" style="width:auto; flex:0 0 auto; margin-top:0; padding:10px 16px; white-space:nowrap;" onclick="copyReferralLink()">Copy</button>
+                    </div>
+                    <p id="referral-copy-status" style="font-size:12px; color:#1a7a3c; display:none; margin: -16px 0 20px;">Copied!</p>
+
+                    ${unredeemedRewards.length ? `<h3 style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin-bottom:10px;">Rewards To Use</h3><div style="margin-bottom:24px;">${rewardsHtml}</div>` : ""}
+
+                    <h3 style="font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin-bottom:10px;">Your Referrals</h3>
+                    <div>${referralsHtml}</div>
+                </div>
+            `;
+        } catch (err) {
+            el.innerHTML = `<p style="color:red; font-size:13px;">${err.message || "Could not load referral info."}</p>`;
+        }
+    }
+
+    function copyReferralLink() {
+        const input = $("referral-link-input");
+        input.select();
+        navigator.clipboard.writeText(input.value).then(() => {
+            const status = $("referral-copy-status");
+            status.style.display = "block";
+            setTimeout(() => { status.style.display = "none"; }, 2000);
+        });
     }
 
     async function loadOrders() {
@@ -616,6 +690,7 @@
         }
         loadOrders();
         loadPlusStatus();
+        loadReferralInfo();
         loadReminders();
     }
 
