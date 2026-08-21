@@ -25,12 +25,16 @@
 //
 // D1 schema this expects (already exists — old-bush was writing to the
 // same cockney-cards-db this project now also uses):
-//  - users            (id, email, created_at)
+//  - users            (id, email, created_at, referral_code)
 //  - sessions         (token, user_id, expires_at)
-//  - magic_tokens     (token, email, expires_at, used)
+//  - magic_tokens     (token, email, expires_at, used, ref)
 //  - reminders        (id, user_id, occasion_name, relationship, month, day, created_at)
 //  - orders           (id, email, product_type, custom_name, custom_age,
 //                       custom_name2, custom_age2, size, amount_total, created_at)
+//  - referrals, reward_codes — see referrals.js and referrals-schema.sql
+//    for the "Refer a Friend" tables this file now also touches.
+
+import { generateUniqueReferralCode, recordReferralIfAny, getReferralSummary } from './referrals.js';
 
 const SESSION_DAYS = 30;
 const MAGIC_LINK_MINUTES = 15;
@@ -132,7 +136,7 @@ export async function checkPlusMembership(request, env) {
 // ---------- Route handlers ----------
 
 export async function handleRequestLink(request, env) {
-    const { email } = await request.json();
+    const { email, ref } = await request.json();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return json({ error: 'Please enter a valid email address.' }, 400, env);
     }
@@ -140,10 +144,15 @@ export async function handleRequestLink(request, env) {
 
     const token = uid();
     const expiresAt = Date.now() + MAGIC_LINK_MINUTES * 60 * 1000;
+    // `ref` is whatever referral code (if any) the visitor's browser had
+    // stashed from a ?ref= link — carried here so it survives the round
+    // trip through the login email and is still available at handleVerify
+    // time, when we actually know whether this is a brand-new signup.
+    const refCode = (ref || '').toString().trim().toUpperCase().slice(0, 20) || null;
 
     await env.DB.prepare(
-        'INSERT INTO magic_tokens (token, email, expires_at, used) VALUES (?, ?, ?, 0)'
-    ).bind(token, normalizedEmail, expiresAt).run();
+        'INSERT INTO magic_tokens (token, email, expires_at, used, ref) VALUES (?, ?, ?, 0, ?)'
+    ).bind(token, normalizedEmail, expiresAt, refCode).run();
 
     const loginUrl = `${env.SITE_URL}/account.html?token=${token}`;
 
@@ -178,10 +187,17 @@ export async function handleVerify(request, env) {
     let user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(record.email).first();
     if (!user) {
         const newId = uid();
+        const referralCode = await generateUniqueReferralCode(env);
         await env.DB.prepare(
-            'INSERT INTO users (id, email, created_at) VALUES (?, ?, ?)'
-        ).bind(newId, record.email, Date.now()).run();
-        user = { id: newId, email: record.email };
+            'INSERT INTO users (id, email, created_at, referral_code) VALUES (?, ?, ?, ?)'
+        ).bind(newId, record.email, Date.now(), referralCode).run();
+        user = { id: newId, email: record.email, referral_code: referralCode };
+
+        // Only ever recorded for brand-new accounts — an existing user
+        // clicking someone else's referral link to log back in shouldn't
+        // retroactively create a referral for an account that already
+        // existed before that link was clicked.
+        await recordReferralIfAny(env, record.ref, newId, record.email);
     }
 
     const sessionToken = uid();
@@ -232,6 +248,34 @@ export async function handleGetAccount(request, env) {
         email: user.email,
         plusActive: !!user.plus_active,
         plusCurrentPeriodEnd: user.plus_current_period_end || null,
+    }, 200, env);
+}
+
+// Powers the "Refer a Friend" account tab — the user's own referral
+// code/link, who they've referred so far and whether each has qualified,
+// and any free-card reward codes they've earned (redeemed or not).
+export async function handleGetReferralInfo(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    const summary = await getReferralSummary(env, user);
+    const referralLink = `${env.SITE_URL}/?ref=${summary.referralCode}`;
+
+    return json({
+        referralCode: summary.referralCode,
+        referralLink,
+        referrals: summary.referrals.map((r) => ({
+            email: r.referred_email,
+            status: r.status,
+            createdAt: r.created_at,
+            qualifiedAt: r.qualified_at,
+        })),
+        rewards: summary.rewards.map((r) => ({
+            code: r.code,
+            redeemed: !!r.redeemed,
+            createdAt: r.created_at,
+            redeemedAt: r.redeemed_at,
+        })),
     }, 200, env);
 }
 
