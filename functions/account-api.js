@@ -34,7 +34,7 @@
 //  - referrals, reward_codes — see referrals.js and referrals-schema.sql
 //    for the "Refer a Friend" tables this file now also touches.
 
-import { generateUniqueReferralCode, recordReferralIfAny, getReferralSummary } from './referrals.js';
+import { generateUniqueReferralCode, recordReferralIfAny, getReferralSummary, newCustomerWelcomeEmailHtml } from './referrals.js';
 
 const SESSION_DAYS = 30;
 const MAGIC_LINK_MINUTES = 15;
@@ -196,8 +196,25 @@ export async function handleVerify(request, env) {
         // Only ever recorded for brand-new accounts — an existing user
         // clicking someone else's referral link to log back in shouldn't
         // retroactively create a referral for an account that already
-        // existed before that link was clicked.
-        await recordReferralIfAny(env, record.ref, newId, record.email);
+        // existed before that link was clicked. When it does create one,
+        // it also issues this new user a 25%-off-one-card welcome reward
+        // and hands back its code so we can email them about it here —
+        // referrals.js only touches D1, it doesn't send mail itself.
+        const referralResult = await recordReferralIfAny(env, record.ref, newId, record.email);
+        if (referralResult?.rewardCode) {
+            try {
+                await sendEmail(env, {
+                    to: record.email,
+                    subject: "You've got 25% off your first Cockney Cards order!",
+                    html: newCustomerWelcomeEmailHtml(env, referralResult.rewardCode),
+                });
+            } catch (err) {
+                // A failed welcome email shouldn't block account creation —
+                // the reward code is already saved and still redeemable,
+                // they just won't have gotten the email announcing it.
+                console.error('Failed to send welcome discount email:', err);
+            }
+        }
     }
 
     const sessionToken = uid();
@@ -273,6 +290,8 @@ export async function handleGetReferralInfo(request, env) {
             })),
             rewards: summary.rewards.map((r) => ({
                 code: r.code,
+                rewardType: r.reward_type,
+                discountPercent: r.discount_percent || null,
                 redeemed: !!r.redeemed,
                 createdAt: r.created_at,
                 redeemedAt: r.redeemed_at,
