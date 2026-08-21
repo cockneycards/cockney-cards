@@ -46,7 +46,7 @@
 //  - referrals, reward_codes — see referrals.js and referrals-schema.sql
 //    for the "Refer a Friend" tables this file now also touches.
 
-import { generateUniqueReferralCode, recordReferralIfAny, getReferralSummary, newCustomerWelcomeEmailHtml } from './referrals.js';
+import { generateUniqueReferralCode, recordReferralIfAny, getReferralSummary, newCustomerWelcomeEmailHtml, referralInviteEmailHtml } from './referrals.js';
 
 const SESSION_DAYS = 30;
 const MAGIC_LINK_MINUTES = 15;
@@ -400,6 +400,43 @@ export async function handleGetReferralInfo(request, env) {
         // letting the request fail with an empty/unhandled response.
         console.error('handleGetReferralInfo failed:', err);
         return json({ error: 'Could not load referral info.' }, 500, env);
+    }
+}
+
+// Powers the "Send Invite" form on the Refer a Friend tab — the
+// alternative to the user having to copy-paste their link somewhere
+// themselves. Needs routing added in _worker.js: POST
+// /api/referrals/send-invite, same pattern as the other /api/referrals*
+// route(s) already wired there.
+export async function handleSendReferralInvite(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    const { friendName, friendEmail } = await request.json();
+    const email = (friendEmail || '').toString().trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return json({ error: "Please enter a valid email address for your friend." }, 400, env);
+    }
+    if (email === user.email.toLowerCase()) {
+        return json({ error: "You can't send a referral invite to your own email address." }, 400, env);
+    }
+
+    try {
+        const referralLink = `${env.SITE_URL}/?ref=${user.referral_code}`;
+        const sent = await sendEmail(env, {
+            to: email,
+            toName: (friendName || '').toString().trim() || undefined,
+            subject: "You've been invited to Cockney Cards — 25% off your first order!",
+            html: referralInviteEmailHtml(env, {
+                friendName: (friendName || '').toString().trim(),
+                referralLink,
+            }),
+        });
+        if (!sent) return json({ error: 'Could not send the invite — please try again.' }, 500, env);
+        return json({ ok: true }, 200, env);
+    } catch (err) {
+        console.error('handleSendReferralInvite failed:', err);
+        return json({ error: 'Could not send the invite — please try again.' }, 500, env);
     }
 }
 
