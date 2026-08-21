@@ -199,7 +199,7 @@
                 <!-- Refer a Friend -->
                 <div class="tab-panel" id="tab-referrals">
                     <h1>Refer a Friend</h1>
-                    <p class="lead">Share your link — your friend gets 25% off their first order, and once they buy their first card, you get a free card too. You only pay delivery.</p>
+                    <p class="lead">Share your link — when a friend you refer buys their first card, you get a free card too. You only pay delivery.</p>
                     <div class="card" id="referral-status">
                         <div class="empty-state">Loading...</div>
                     </div>
@@ -442,10 +442,32 @@
                 const renewsText = account.plusCurrentPeriodEnd
                     ? new Date(account.plusCurrentPeriodEnd).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
                     : null;
+                const daysLeft = account.plusCurrentPeriodEnd
+                    ? Math.max(0, Math.ceil((account.plusCurrentPeriodEnd - Date.now()) / (1000 * 60 * 60 * 24)))
+                    : null;
+
+                const statusLine = account.plusCancelAtPeriodEnd
+                    ? `<p style="font-size: 13px; color: #c0392b; margin: 0 0 4px;">Auto-renewal is off — your membership ends${renewsText ? ` on ${renewsText}` : ""}${daysLeft !== null ? ` (${daysLeft} day${daysLeft === 1 ? "" : "s"} left)` : ""}.</p>`
+                    : `<p style="font-size: 13px; color: #666; margin: 0 0 4px;">${daysLeft !== null ? `Renews in ${daysLeft} day${daysLeft === 1 ? "" : "s"}` : "Renews automatically"}${renewsText ? ` — ${renewsText}` : ""}.</p>`;
+
                 el.innerHTML = `
                     <div style="padding: 10px 0;">
                         <p style="font-size: 15px; font-weight: 600; color: #1a7a3c; margin: 0 0 8px;">✓ You're a Club member</p>
-                        <p style="font-size: 13px; color: #666; margin: 0;">All discounts are applied automatically at checkout.${renewsText ? ` Renews ${renewsText}.` : ""}</p>
+                        ${statusLine}
+
+                        <h3 style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin: 22px 0 10px;">Your Benefits</h3>
+                        <ul style="font-size: 13px; color: #444; line-height: 1.9; margin: 0 0 24px; padding-left: 18px;">
+                            <li>30% off every card, applied automatically at checkout</li>
+                            <li>Free delivery on 3+ cards to the same address (every customer gets this)</li>
+                            <li>Free delivery on 2+ same-size prints to the same address (every customer gets this)</li>
+                            <li>Refer a friend and get a free card once they place their first order</li>
+                        </ul>
+
+                        <div id="plus-cancel-status" class="status-msg" style="margin-bottom: 10px;"></div>
+                        ${account.plusCancelAtPeriodEnd
+                            ? `<button class="btn btn-secondary" id="resume-plus-btn" onclick="resumeMembership()">Turn Auto-Renewal Back On</button>`
+                            : `<button class="btn btn-danger" id="cancel-plus-btn" onclick="cancelMembership()">Cancel Membership</button>`
+                        }
                     </div>
                 `;
             } else {
@@ -488,6 +510,52 @@
         }
     }
 
+    async function cancelMembership() {
+        if (!confirm("Cancel your Cockney Cards Club membership? You'll keep your 30% discount until the end of your current paid period, but it won't renew after that.")) return;
+
+        const btn = $("cancel-plus-btn");
+        const statusEl = $("plus-cancel-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+        if (btn) { btn.disabled = true; btn.innerText = "Cancelling..."; }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/account/cancel-membership`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            loadPlusStatus();
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+            if (btn) { btn.disabled = false; btn.innerText = "Cancel Membership"; }
+        }
+    }
+
+    async function resumeMembership() {
+        const btn = $("resume-plus-btn");
+        const statusEl = $("plus-cancel-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+        if (btn) { btn.disabled = true; btn.innerText = "Turning back on..."; }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/account/resume-membership`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            loadPlusStatus();
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+            if (btn) { btn.disabled = false; btn.innerText = "Turn Auto-Renewal Back On"; }
+        }
+    }
+
     async function loadReferralInfo() {
         const el = $("referral-status");
         try {
@@ -511,19 +579,14 @@
 
             const unredeemedRewards = data.rewards.filter(r => !r.redeemed);
             const rewardsHtml = unredeemedRewards.length
-                ? unredeemedRewards.map(r => {
-                    const label = r.rewardType === "new_customer_25"
-                        ? `${r.discountPercent || 25}% off one card — enter this at checkout`
-                        : "Unused — enter this at checkout on your next card order";
-                    return `
+                ? unredeemedRewards.map(r => `
                     <div class="reminder-row">
                         <div class="reminder-info">
                             <strong>${r.code}</strong>
-                            <span>${label}</span>
+                            <span>Unused — enter this at checkout on your next card order</span>
                         </div>
                     </div>
-                `;
-                }).join("")
+                `).join("")
                 : '';
 
             el.innerHTML = `
