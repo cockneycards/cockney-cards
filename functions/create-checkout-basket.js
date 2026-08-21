@@ -23,7 +23,7 @@
 import { highestTier, POSTAGE_TIERS, groupItemsByDestination } from './postage.js';
 import { checkPlusMembership, getUserFromAuth } from './account-api.js';
 import { checkPromoCode } from './promo.js';
-import { validateRewardCode } from './referrals.js';
+import { getRewardCodeDetails } from './referrals.js';
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -130,15 +130,29 @@ export async function onRequestPost(context) {
         const authedUser = await getUserFromAuth(request, env);
         const isClubMember = await checkPlusMembership(request, env);
         const isPromoValid = await checkPromoCode(data.promoCode, env);
-        // Refer a Friend reward — a single-use "free card" code earned
-        // when someone the logged-in user referred completes their first
-        // order (see referrals.js). Requires being logged in as the user
-        // the code was issued to; validation only confirms it's valid and
-        // unredeemed here — it's actually marked redeemed by
+        // Refer a Friend / welcome reward — either a single-use "free
+        // card" code (earned when someone the logged-in user referred
+        // completes their first order) or a single-use "25% off one
+        // card" code (given to a brand-new customer who signed up via a
+        // referral link) — see referrals.js. Requires being logged in as
+        // the user the code was issued to; this only confirms it's valid
+        // and unredeemed — it's actually marked redeemed by
         // stripe-webhook.js once payment succeeds, since a Checkout
         // Session can be abandoned without paying.
         const rewardCode = (data.rewardCode || '').toString().trim();
-        const isRewardValid = rewardCode ? await validateRewardCode(rewardCode, authedUser, env) : false;
+        const rewardDetails = rewardCode ? await getRewardCodeDetails(rewardCode, authedUser, env) : null;
+        // A Club member's 30% is always better than the 25% welcome
+        // reward, and the two shouldn't stack (25% off an already-30%-off
+        // price) — so a new_customer_25 reward simply isn't applied for a
+        // Club member; they keep getting 30% off, same as any other
+        // member, and the reward code itself is left unredeemed (still
+        // usable on a future order once/if membership lapses). free_card
+        // isn't a percentage, so there's no stacking concern there — it
+        // zeroes that one unit's price regardless of any other discount.
+        const rewardIsUsable = !!(rewardDetails && (
+            rewardDetails.rewardType === 'free_card' ||
+            (rewardDetails.rewardType === 'new_customer_25' && rewardDetails.discountPercent && !isClubMember)
+        ));
         let rewardApplied = false;
 
         // Basket lines are grouped by destination — everything going to
@@ -178,10 +192,13 @@ export async function onRequestPost(context) {
                 // Apply the reward to exactly ONE card unit, once per
                 // checkout — not the whole line's quantity. If this line
                 // has more than one card, it's split into a normally-
-                // priced portion plus a single free unit, so e.g. "3x
-                // Birthday Card" with a reward becomes "2x Birthday Card"
-                // + "1x Birthday Card (Free)" rather than all 3 going free.
-                if (!rewardApplied && isRewardValid && item.kind === 'card' && hasPrice) {
+                // priced portion plus a single reward unit, so e.g. "3x
+                // Birthday Card" with a free-card reward becomes "2x
+                // Birthday Card" + "1x Birthday Card (Free)" rather than
+                // all 3 being affected. A 25%-off welcome reward works the
+                // same way, just discounting that one unit instead of
+                // zeroing it.
+                if (!rewardApplied && rewardIsUsable && item.kind === 'card' && hasPrice) {
                     rewardApplied = true;
                     if (item.quantity > 1) {
                         params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
@@ -191,10 +208,19 @@ export async function onRequestPost(context) {
                         params.append(`line_items[${lineIndex}][quantity]`, String(item.quantity - 1));
                         lineIndex++;
                     }
+
+                    const isFreeCardReward = rewardDetails.rewardType === 'free_card';
+                    const rewardUnitAmount = isFreeCardReward
+                        ? 0
+                        : Math.max(0, Math.round(unitAmount * (1 - rewardDetails.discountPercent / 100)));
+                    const rewardName = isFreeCardReward
+                        ? `${item.title} (Free — Refer a Friend reward)`
+                        : `${item.title} (${rewardDetails.discountPercent}% off — Welcome reward)`;
+
                     params.append(`line_items[${lineIndex}][price_data][currency]`, 'gbp');
-                    params.append(`line_items[${lineIndex}][price_data][product_data][name]`, `${item.title} (Free — Refer a Friend reward)`);
+                    params.append(`line_items[${lineIndex}][price_data][product_data][name]`, rewardName);
                     params.append(`line_items[${lineIndex}][price_data][product_data][description]`, description);
-                    params.append(`line_items[${lineIndex}][price_data][unit_amount]`, '0');
+                    params.append(`line_items[${lineIndex}][price_data][unit_amount]`, String(rewardUnitAmount));
                     params.append(`line_items[${lineIndex}][quantity]`, '1');
                     lineIndex++;
                     return;
