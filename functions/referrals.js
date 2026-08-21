@@ -296,3 +296,24 @@ export function newCustomerWelcomeEmailHtml(env, rewardCode) {
         ${clubBenefitsBlockHtml()}
     `);
 }
+
+// Called from account-api.js's new handleSendReferralInvite, when the
+// logged-in user enters a friend's name/email in the Refer a Friend tab
+// and hits Send — this is the "nice email" alternative to them having to
+// copy-paste their link somewhere themselves. There's no reward code yet
+// at this point (that's only issued once the friend actually signs up —
+// see recordReferralIfAny/newCustomerWelcomeEmailHtml above), so this
+// just sells the 25%-off headline and hands over the referral link.
+export function referralInviteEmailHtml(env, { friendName, referralLink }) {
+    const greeting = friendName ? `Hi ${friendName},` : 'Hi there,';
+    return brandedEmailShell(env, `
+        <h2 style="font-weight: 400; font-size: 20px; margin: 0 0 12px;">You've been invited to Cockney Cards! 🎉</h2>
+        <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 6px;">${greeting}</p>
+        <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 20px;">A friend thinks you'd love our personalised cards — follow the link below to create an account and you'll get <strong>25% off your first order</strong>, automatically.</p>
+        <div style="text-align: center; margin: 0 0 20px;">
+            <a href="${referralLink}" style="display: inline-block; background: #1a1a1a; color: #fff; padding: 14px 30px; text-decoration: none; border-radius: 4px; font-size: 13px; letter-spacing: 0.5px;">Get My 25% Off</a>
+        </div>
+        <p style="font-size: 12px; color: #999; margin: 0;">Or copy this link into your browser:<br>${referralLink}</p>
+        ${clubBenefitsBlockHtml()}
+    `);
+}
