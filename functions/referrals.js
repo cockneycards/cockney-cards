@@ -200,6 +200,28 @@ export async function getReferralSummary(env, user) {
     };
 }
 
+// Called from create-checkout-basket.js for every logged-in checkout —
+// finds an unredeemed 'new_customer_25' welcome reward for this user
+// without them needing to know or type a code. This is what makes the
+// 25%-off-first-order signup perk actually happen automatically; the
+// code (and manual entry via getRewardCodeDetails above) still exists
+// for reference/email purposes, but checkout no longer depends on it.
+export async function getActiveWelcomeReward(user, env) {
+    if (!user) return null;
+    try {
+        const row = await env.DB.prepare(
+            `SELECT code, discount_percent FROM reward_codes
+             WHERE user_id = ? AND reward_type = 'new_customer_25' AND redeemed = 0
+             ORDER BY created_at ASC LIMIT 1`
+        ).bind(user.id).first();
+        if (!row) return null;
+        return { code: row.code, discountPercent: row.discount_percent || 25 };
+    } catch (err) {
+        console.error('getActiveWelcomeReward failed:', err);
+        return null;
+    }
+}
+
 // Called from create-checkout-basket.js (or wherever a reward code is
 // actually applied to a price) once validateRewardCode above has already
 // confirmed the code is valid and unredeemed. Returns the reward's type
@@ -251,10 +273,12 @@ function brandedEmailShell(env, bodyHtml) {
 function clubBenefitsBlockHtml() {
     return `
         <div style="margin-top: 22px; padding-top: 18px; border-top: 1px solid #f0f0f0;">
-            <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 600; margin: 0 0 10px;">While you're here — Cockney Cards Club</p>
+            <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #888; font-weight: 600; margin: 0 0 10px;">While you're here — why not join The Cockney Club?</p>
             <ul style="font-size: 13px; color: #555; line-height: 1.7; margin: 0; padding-left: 18px;">
                 <li>30% off every card, all year round</li>
-                <li>Free delivery on 3+ cards (or 2+ same-size prints) to one address</li>
+                <li>Free delivery on 3 or more cards purchased to the same address</li>
+                <li>Free delivery on 2 or more prints purchased to the same address</li>
+                <li>Free card for every referral that joins</li>
                 <li>Just £9.99/year</li>
             </ul>
         </div>
@@ -307,7 +331,7 @@ export function newCustomerWelcomeEmailHtml(env, rewardCode) {
 export function referralInviteEmailHtml(env, { friendName, referralLink }) {
     const greeting = friendName ? `Hi ${friendName},` : 'Hi there,';
     return brandedEmailShell(env, `
-        <h2 style="font-weight: 400; font-size: 20px; margin: 0 0 12px;">You've been invited to Cockney Cards! 🎉</h2>
+        <h2 style="font-weight: 400; font-size: 20px; margin: 0 0 12px;">You've been invited to join Cockney Cards! 🎉</h2>
         <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 6px;">${greeting}</p>
         <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 20px;">A friend thinks you'd love our personalised cards — follow the link below to create an account and you'll get <strong>25% off your first order</strong>, automatically.</p>
         <div style="text-align: center; margin: 0 0 20px;">
