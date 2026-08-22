@@ -142,6 +142,9 @@
 <div class="editor-workspace">
     <div id="canvas-wrapper">
         <canvas id="canvas"></canvas>
+        <p id="editor-load-error" style="display:none; color:#c0392b; font-size:13px; text-align:center; margin: 12px 0 0;">
+            This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
+        </p>
     </div>
 
     <div class="side-column">
@@ -149,8 +152,8 @@
         <h2>Personalise Card</h2>
 
         <div class="page-toggle">
-            <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')">Outside Spread</button>
-            <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')">Inside Spread</button>
+            <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')" disabled>Outside Spread</button>
+            <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Inside Spread</button>
         </div>
 
         <div id="front-controls" class="control-group active">
@@ -227,7 +230,7 @@
             </div>
         </div>
 
-        <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentCardToBasket()">Add to Basket</button>
+        <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentCardToBasket()" disabled>Add to Basket</button>
 
         <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
     </div>
@@ -428,6 +431,18 @@ let insideBgRects = [];   // [top, middle, bottom]
 let insideTexts = [];     // [top, middle, bottom]
 let currentPage = "front", activeTemplate = null, activeVariantKey = null;
 
+// Flips true only once setupTextsAndOverlays() has actually created
+// leftPageBg/rightPageBg/insideBgRects/insideTexts (see below). The
+// front/inside toggle buttons use inline onclick="switchPage(...)" in the
+// HTML, which makes them clickable the instant the page renders — well
+// before DOMContentLoaded, font preloading, and the front-cover image
+// load have all finished. If switchPage() ran before that setup
+// completed, those objects were still undefined and it crashed (which
+// also broke Add to Basket, since it calls switchPage() internally while
+// building the print PDF). switchPage() now just no-ops until this is
+// true, and the buttons that can trigger it start out disabled.
+let editorReady = false;
+
 const $ = (id) => document.getElementById(id);
 
 // Scratch 2D context used to measure rendered text width for a given
@@ -567,6 +582,15 @@ function updateCardDescription(template) {
 }
 
 function loadFrontCover(imageUrl) {
+    // If the front cover image never loads at all (bad URL, network
+    // failure, etc.) the fromURL callback below simply never fires, so
+    // editorReady never flips true and the buttons stay disabled forever
+    // with no explanation. This gives the customer an actual message
+    // instead of a page that just silently never finishes loading.
+    setTimeout(() => {
+        if (!editorReady) $('editor-load-error').style.display = 'block';
+    }, 10000);
+
     fabric.Image.fromURL(imageUrl, (img) => {
         bgImg = img;
         bgImg.set({
@@ -579,6 +603,10 @@ function loadFrontCover(imageUrl) {
         canvas.sendToBack(bgImg);
 
         setupTextsAndOverlays();
+        editorReady = true;
+        $('toggle-front').disabled = false;
+        $('toggle-inside').disabled = false;
+        $('add-to-basket-btn').disabled = false;
         switchPage('front');
     }, { crossOrigin: 'anonymous' });
 }
@@ -910,6 +938,8 @@ function updateInsideColor(hexColor) {
 }
 
 function switchPage(page, updateBuyBtn = true) {
+    if (!editorReady) return; // see editorReady declaration above
+
     currentPage = page;
     const isFront = page === 'front';
 
@@ -923,7 +953,7 @@ function switchPage(page, updateBuyBtn = true) {
     }
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
-    [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o.set({ visible: !isFront }));
+    [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
     photoImg?.set({ visible: isFront, selectable: isFront, evented: isFront });
 
     canvas.discardActiveObject();
