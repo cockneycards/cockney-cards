@@ -39,6 +39,9 @@ import {
     handleVerify,
     handleGetAccount,
     handleGetReferralInfo,
+    handleSendReferralInvite,
+    handleCancelMembership,
+    handleResumeMembership,
     handleGetReminders,
     handleAddReminder,
     handleDeleteReminder,
@@ -104,6 +107,15 @@ export default {
         }
         if (pathname === '/api/referrals' && method === 'GET') {
             return handleGetReferralInfo(request, env);
+        }
+        if (pathname === '/api/referrals/send-invite' && method === 'POST') {
+            return handleSendReferralInvite(request, env);
+        }
+        if (pathname === '/api/account/cancel-membership' && method === 'POST') {
+            return handleCancelMembership(request, env);
+        }
+        if (pathname === '/api/account/resume-membership' && method === 'POST') {
+            return handleResumeMembership(request, env);
         }
         if (pathname === '/api/validate-promo' && method === 'POST') {
             return handleValidatePromo(request, env);
