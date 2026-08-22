@@ -23,7 +23,7 @@
 import { highestTier, POSTAGE_TIERS, groupItemsByDestination } from './postage.js';
 import { checkPlusMembership, getUserFromAuth } from './account-api.js';
 import { checkPromoCode } from './promo.js';
-import { getRewardCodeDetails } from './referrals.js';
+import { getRewardCodeDetails, getActiveWelcomeReward } from './referrals.js';
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -139,8 +139,23 @@ export async function onRequestPost(context) {
         // and unredeemed — it's actually marked redeemed by
         // stripe-webhook.js once payment succeeds, since a Checkout
         // Session can be abandoned without paying.
-        const rewardCode = (data.rewardCode || '').toString().trim();
-        const rewardDetails = rewardCode ? await getRewardCodeDetails(rewardCode, authedUser, env) : null;
+        const rewardCodeEntered = (data.rewardCode || '').toString().trim();
+        let rewardCode = rewardCodeEntered;
+        let rewardDetails = rewardCodeEntered ? await getRewardCodeDetails(rewardCodeEntered, authedUser, env) : null;
+
+        // Auto-apply the 25%-off welcome reward for anyone who signed up
+        // via a referral link — this is what actually makes it happen
+        // without the customer needing to find/enter a code themselves.
+        // A manually-entered code (e.g. a free_card reward) always takes
+        // priority if one was supplied; this only fills in when nothing
+        // was entered.
+        if (!rewardDetails && authedUser) {
+            const autoWelcome = await getActiveWelcomeReward(authedUser, env);
+            if (autoWelcome) {
+                rewardCode = autoWelcome.code;
+                rewardDetails = { rewardType: 'new_customer_25', discountPercent: autoWelcome.discountPercent };
+            }
+        }
         // A Club member's 30% is always better than the 25% welcome
         // reward, and the two shouldn't stack (25% off an already-30%-off
         // price) — so a new_customer_25 reward simply isn't applied for a
