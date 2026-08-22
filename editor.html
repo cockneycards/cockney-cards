@@ -80,8 +80,8 @@
     .page-toggle { display: flex; gap: 10px; margin-bottom: 25px; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
     .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
-    .control-group { display: none; flex-direction: column; gap: 15px; }
-    .control-group.active { display: flex; }
+    .control-group { display: flex; flex-direction: column; gap: 15px; }
+    .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
     .flex-row { display: flex; align-items: center; gap: 10px; }
@@ -156,7 +156,7 @@
             <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Inside Spread</button>
         </div>
 
-        <div id="front-controls" class="control-group active">
+        <div id="front-controls" class="control-group">
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
 
             <div id="front-photo-upload" style="display:none; margin-bottom: 18px;">
@@ -191,6 +191,7 @@
             </div>
         </div>
 
+        <label class="control-group-divider">Inside Message</label>
         <div id="inside-controls" class="control-group">
             <label>Font Size:</label>
             <div class="flex-row">
@@ -212,7 +213,7 @@
 
         <p id="account-nudge" style="font-size: 12px; color: #666; text-align: center; margin: 15px 0 10px 0;"></p>
 
-        <div id="delivery-section" style="margin: 15px 0; padding-top: 15px; border-top: 1px solid #eee;">
+        <div id="delivery-section" style="display:none; margin: 15px 0; padding-top: 15px; border-top: 1px solid #eee;">
             <p style="font-size: 12px; font-weight: bold; color: #333; margin: 0 0 8px; letter-spacing: 0.5px; text-transform: uppercase;">Delivery</p>
             <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:8px; cursor:pointer;">
                 <input type="radio" name="delivery-choice" value="self" checked onchange="toggleRecipientFields()"> Send to me — I'll write in it myself
@@ -230,7 +231,7 @@
             </div>
         </div>
 
-        <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentCardToBasket()" disabled>Add to Basket</button>
+        <button id="add-to-basket-btn" class="btn" style="display:none; background-color:#1a1a1a;" onclick="addCurrentCardToBasket()" disabled>Add to Basket</button>
 
         <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
     </div>
@@ -607,6 +608,8 @@ function loadFrontCover(imageUrl) {
         $('toggle-front').disabled = false;
         $('toggle-inside').disabled = false;
         $('add-to-basket-btn').disabled = false;
+        $('add-to-basket-btn').style.display = 'block';
+        $('delivery-section').style.display = 'block';
         switchPage('front');
     }, { crossOrigin: 'anonymous' });
 }
@@ -937,7 +940,7 @@ function updateInsideColor(hexColor) {
     }
 }
 
-function switchPage(page, updateBuyBtn = true) {
+function switchPage(page) {
     if (!editorReady) return; // see editorReady declaration above
 
     currentPage = page;
@@ -945,12 +948,6 @@ function switchPage(page, updateBuyBtn = true) {
 
     $('toggle-front').classList.toggle('active', isFront);
     $('toggle-inside').classList.toggle('active', !isFront);
-    $('front-controls').classList.toggle('active', isFront);
-    $('inside-controls').classList.toggle('active', !isFront);
-    if (updateBuyBtn) {
-        $('add-to-basket-btn').style.display = isFront ? 'none' : 'block';
-        $('delivery-section').style.display = isFront ? 'none' : 'block';
-    }
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
@@ -1187,12 +1184,12 @@ function showQrForCapture(show) {
 // test-download button so the capture logic — panel switching, hiding
 // editor-only borders/dashes, etc — only lives once.
 async function captureAndBuildPrintPDF() {
-    switchPage('front', false);
+    switchPage('front');
     showQrForCapture(true);
     const outsideDataUrl = await captureFullSpread();
     showQrForCapture(false);
 
-    switchPage('inside', false);
+    switchPage('inside');
     resetBordersToDashed();
     insideBgRects.forEach((r) => r.set({ visible: false }));
     insideTexts.forEach((t) => t.set({ borderDashArray: null, borderColor: "transparent" }));
@@ -1202,7 +1199,7 @@ async function captureAndBuildPrintPDF() {
     const insideDataUrl = await captureFullSpread();
 
     insideBgRects.forEach((r) => r.set({ visible: true }));
-    switchPage('inside', false);
+    switchPage('inside');
 
     return buildPrintReadyPDF([outsideDataUrl, insideDataUrl]);
 }
@@ -1253,9 +1250,9 @@ function collectAndResetDeliveryInfo() {
 // Basket" button only shows while viewing the inside page.
 function captureFrontThumbnail() {
     const pageBeforeCapture = currentPage;
-    switchPage('front', false);
+    switchPage('front');
     const frontJson = canvas.toJSON();
-    switchPage(pageBeforeCapture, false);
+    switchPage(pageBeforeCapture);
 
     return new Promise((resolve, reject) => {
         const exportEl = document.createElement('canvas');
