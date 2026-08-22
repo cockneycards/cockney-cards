@@ -426,7 +426,7 @@ export async function handleSendReferralInvite(request, env) {
         const sent = await sendEmail(env, {
             to: email,
             toName: (friendName || '').toString().trim() || undefined,
-            subject: "You've been invited to Cockney Cards — 25% off your first order!",
+            subject: "You've been invited to join Cockney Cards",
             html: referralInviteEmailHtml(env, {
                 friendName: (friendName || '').toString().trim(),
                 referralLink,
