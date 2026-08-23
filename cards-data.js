@@ -1,59 +1,10 @@
 const CLOUD_BASE = "https://images.cockneycards.com/";
 const DEFAULT_PRICE = "£3.99";
 
-const CATEGORIES = [
-  ["all", "All Cards"],
-  ["for-her", "Cards For Her"],
-  ["for-him", "Cards For Him"],
-  ["photo-upload", "Photo Upload Cards"],
-  ["birthdays", "Birthday Cards"],
-  ["newbaby", "New Baby"],
-  ["thank-you", "Thank You! Cards"],
-  ["weddings-engagements", "Wedding & Engagement Cards"],
-  ["home", "New Home Cards"],
-  ["school-cards", "School Cards"],
-  ["work-related", "Work Related Cards"],
-  ["achievements", "Personal Achievement Cards"],
-  ["children", "Childrens Cards"],
-  ["tv-movies", "TV / Movie Cards"],
-  ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
-  ["valentines", "Valentines"],
-  ["christmas", "Christmas"],
-  ["sports", "Sports Cards", [
-    ["football", "Football", [
-      ["premiership", "Premiership", [
-        ["arsenal", "Arsenal"],
-        ["chelsea", "Chelsea"],
-        ["liverpool", "Liverpool"],
-        ["tottenham", "Tottenham"],
-      ]],
-      ["championship", "Championship", [
-        ["millwall", "Millwall"],
-        ["west-ham", "West Ham"],
-      ]],
-      ["league-1", "League 1"],
-      ["league-2", "League 2"],
-      ["wsl", "WSL / WSL2", [
-        ["arsenal", "Arsenal"],
-        ["man-cityw", "Manchester City"],
-        ["man-utdw", "Manchester United"],
-        ["liverpool", "Liverpool"],
-        ["tottenham", "Tottenham"],
-        ["westhamw", "West Ham"],
-        ["brighton", "Brighton"],
-      ]],
-    ]],
-    ["golf", "Golf"],
-    ["cricket", "Cricket"],
-    ["formula1", "Formula 1"],
-    ["rugby", "Rugby"],
-    ["netball", "Netball"],
-    ["darts", "Darts"],
-    ["running", "Running"],
-    ["horseracing", "Horse Racing"],
-  ]],
-  
-];
+// CATEGORIES now lives in categories-data.js — shared with prints-data.js
+// / shop-prints.html so both catalogues use the same tree (and stay in
+// sync when a team or league gets added). Make sure categories-data.js
+// is loaded BEFORE this file wherever this file is included.
 
 const CARD_CATALOGUE = {
   "11plus-boy": { title: "11 Plus Boy Card", description: "A brilliant way to say congratulations on passing the 11 Plus! Add his name and school shirt colour to make it extra special.", categories: ["all", "for-him", "school-cards", "achievements","children"], preview: "11plus-boy-preview_sf4n9y.png", full: "11plus-boy_umzz8e.png" },
