@@ -6,6 +6,7 @@
     <title>Shop Prints | Cockney Cards</title>
     <script src="auth.js"></script>
     <script src="cart.js"></script>
+    <script src="categories-data.js"></script>
     <script src="prints-data.js"></script>
 
     <style>
@@ -176,7 +177,10 @@
             font-size: 13px;
             transition: color 0.2s;
             cursor: pointer;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
         }
 
         .category-list li a:hover,
@@ -185,10 +189,24 @@
             font-weight: bold;
         }
 
+        /* nested sub-category lists (Sports > Football > Premiership, etc.) */
+        .category-list .subcat-list { list-style: none; margin: 12px 0 0 4px; padding: 0 0 0 12px; display: none; flex-direction: column; gap: 10px; border-left: 1px solid var(--border-color); }
+        .category-list li.expanded > .subcat-list { display: flex; }
+        .category-list .subcat-list a { font-size: 12px; color: #777; }
+        .category-list .subcat-list .subcat-list a { font-size: 11.5px; color: #999; }
+        .category-list .arrow { font-size: 9px; color: #aaa; transition: transform 0.2s ease; flex-shrink: 0; }
+        .category-list li.expanded > a .arrow { transform: rotate(180deg); }
+
         /* PRODUCT GRID */
         .catalog-content {
             flex-grow: 1;
         }
+
+        .breadcrumb { font-size: 12px; color: #999; margin-bottom: 15px; min-height: 14px; }
+        .breadcrumb .crumb { color: #999; text-decoration: none; cursor: pointer; }
+        .breadcrumb a.crumb:hover { color: #111; text-decoration: underline; }
+        .breadcrumb .crumb.current { color: #111; font-weight: bold; cursor: default; }
+        .breadcrumb .crumb-sep { margin: 0 8px; color: #ccc; }
 
         .catalog-meta {
             display: flex;
@@ -228,6 +246,15 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
+
+        /* TEAM GALLERY (shown when a league like Premiership is clicked) */
+        .team-gallery { display: none; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .team-tile { border: 1px solid var(--border-color); background: #fff; padding: 15px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .team-tile:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .team-image-wrapper { aspect-ratio: 3 / 4; background-color: #fbfbfb; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 15px; }
+        .team-image-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+        .team-name { font-size: 14px; font-weight: bold; margin: 0 0 4px 0; color: #111; }
+        .team-count { font-size: 12px; color: #888; margin: 0; }
 
         /* PRODUCT CARD */
         .product-card {
@@ -354,7 +381,7 @@
 
         /* Responsive Breakpoints */
         @media (max-width: 950px) {
-            .product-grid { grid-template-columns: repeat(2, 1fr); }
+            .product-grid, .team-gallery { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 850px) {
             .shop-container { flex-direction: column; }
@@ -401,16 +428,11 @@
         
         <aside class="sidebar">
             <h2>Browse by</h2>
-            <ul class="category-list">
-                <li><a onclick="filterProducts('all')" class="active" id="cat-all">All Prints</a></li>
-                <li><a onclick="filterProducts('sports')" id="cat-sports">Sports</a></li>
-                <li><a onclick="filterProducts('music')" id="cat-music">Music</a></li>
-                <li><a onclick="filterProducts('b&w')" id="cat-b&w">Black & White</a></li>
-                <li><a onclick="filterProducts('childrens')" id="cat-childrens">Childrens</a></li>
-            </ul>
+            <ul class="category-list" id="category-list"></ul>
         </aside>
 
         <main class="catalog-content">
+            <div class="breadcrumb" id="breadcrumb"></div>
             <div class="catalog-meta">
                 <span id="product-count">0 products</span>
                 <label class="sort-label">
@@ -426,8 +448,8 @@
                 </label>
             </div>
 
-            <div class="product-grid" id="product-grid">
-                </div>
+            <div class="product-grid" id="product-grid"></div>
+            <div class="team-gallery" id="team-gallery"></div>
         </main>
 
     </div>
@@ -461,9 +483,9 @@
     </footer>
 
     <script>
-        // Built from PRINT_CATALOGUE (prints-data.js) — only entries with a
-        // `title` show up here; untitled entries (like the reference/sample
-        // ones in prints-data.js) are editor-only and stay hidden from the shop.
+        // CLOUD_BASE and PRINT_CATALOGUE come from prints-data.js;
+        // CATEGORIES comes from categories-data.js (shared with cards) —
+        // both loaded above.
         const PRODUCTS = Object.entries(PRINT_CATALOGUE)
             .filter(([id, c]) => c.title)
             .map(([id, c]) => ({
@@ -479,38 +501,207 @@
                 // ready to buy as-is ("Buy Now").
                 personalised: !!(c.name || c.age || c.name2 || c.age2 || c.extraFields)
             }));
+        const $ = (id) => document.getElementById(id);
 
         let currentCategory = 'all';
         let currentSort = 'best-selling';
+        let viewMode = 'grid';       // 'grid' | 'gallery' | 'team'
+        let currentLeague = null;    // e.g. "premiership" -- set when viewMode is 'gallery' or 'team'
+        let currentTeam = null;      // e.g. "arsenal"      -- set when viewMode is 'team'
 
         window.addEventListener('DOMContentLoaded', () => {
-            applyView();
+            renderCategories();
+            // The shared CATEGORIES tree's top entry is labelled "All Cards"
+            // for shop-cards.html's benefit -- relabel it here for prints.
+            const allLink = document.querySelector('.category-list a[data-cat="all"]');
+            if (allLink) allLink.firstChild.textContent = 'All Prints';
 
+            $('team-gallery').addEventListener('click', (e) => {
+                const tile = e.target.closest('.team-tile');
+                if (tile) openTeamPage(currentLeague, tile.dataset.team);
+            });
+            $('breadcrumb').addEventListener('click', (e) => {
+                e.preventDefault();
+                const galleryLink = e.target.closest('[data-gallery-league]');
+                if (galleryLink) { openTeamGallery(galleryLink.dataset.galleryLeague); return; }
+                const catLink = e.target.closest('[data-cat]');
+                if (catLink) filterProducts(catLink.dataset.cat);
+            });
+
+            filterProducts('all');
         });
 
-        function renderGrid(productsToRender) {
-            const grid = document.getElementById('product-grid');
-            const countLabel = document.getElementById('product-count');
-            grid.innerHTML = '';
-            
-            countLabel.innerText = `${productsToRender.length} products`;
+        // depth 0 = top-level (Sports), 1 = Football/Golf/etc, 2 = leagues.
+        // Leagues (depth 2) that have a team list open the team gallery on
+        // click instead of expanding inline -- so the sidebar never nests
+        // past 3 levels.
+        const DEFAULT_EXPANDED_CATEGORIES = ["sports"];
+        const LOCKED_EXPANDED_CATEGORIES = ["sports"];
 
-            productsToRender.forEach(prod => {
-                const buttonLabel = prod.personalised ? 'Personalise Print' : 'Buy Now';
-                const cardMarkup = `
+        function categoryHasProducts(node) {
+            const [key, , children] = node;
+            if (PRODUCTS.some((p) => p.categories.includes(key))) return true;
+            if (Array.isArray(children)) {
+                return children.some((c) => c[3] !== false && categoryHasProducts(c));
+            }
+            return false;
+        }
+
+        function findCategoryNode(key, nodes = CATEGORIES) {
+            for (const node of nodes) {
+                if (node[0] === key) return node;
+                if (Array.isArray(node[2])) {
+                    const found = findCategoryNode(key, node[2]);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function findPath(key, nodes = CATEGORIES, trail = []) {
+            for (const node of nodes) {
+                const newTrail = [...trail, node];
+                if (node[0] === key) return newTrail;
+                if (Array.isArray(node[2])) {
+                    const found = findPath(key, node[2], newTrail);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function renderCategoryLevel(categories, depth) {
+            return categories.map(([key, label, children, enabled = true]) => {
+                if (enabled === false) return '';
+                if (!categoryHasProducts([key, label, children])) return '';
+
+                const visibleKids = Array.isArray(children)
+                    ? children.filter((c) => c[3] !== false && categoryHasProducts(c))
+                    : [];
+                const hasKids = visibleKids.length > 0;
+                const inlineExpand = hasKids && depth <= 1;
+                const isGallery = hasKids && depth >= 2;
+
+                const showArrow = hasKids && !LOCKED_EXPANDED_CATEGORIES.includes(key);
+
+                return `
+                    <li class="${inlineExpand ? 'has-children' : ''}"${isGallery ? ' data-gallery="true"' : ''}>
+                        <a data-cat="${key}">${label}${showArrow ? '<span class="arrow">&#9662;</span>' : ''}</a>
+                        ${inlineExpand ? `<ul class="subcat-list">${renderCategoryLevel(visibleKids, depth + 1)}</ul>` : ''}
+                    </li>`;
+            }).join('');
+        }
+
+        function renderCategories() {
+            const list = $('category-list');
+            list.innerHTML = renderCategoryLevel(CATEGORIES, 0);
+
+            DEFAULT_EXPANDED_CATEGORIES.forEach((key) => {
+                const link = list.querySelector(`a[data-cat="${key}"]`);
+                const li = link && link.closest('li');
+                if (li && li.classList.contains('has-children')) li.classList.add('expanded');
+            });
+
+            list.addEventListener('click', (e) => {
+                const link = e.target.closest('a[data-cat]');
+                if (!link) return;
+                const li = link.closest('li');
+                const key = link.dataset.cat;
+
+                if (li.dataset.gallery === 'true') {
+                    openTeamGallery(key);
+                    return;
+                }
+                if (li.classList.contains('has-children') && !LOCKED_EXPANDED_CATEGORIES.includes(key)) {
+                    toggleExpandSubtree(li);
+                }
+                filterProducts(key);
+            });
+        }
+
+        function toggleExpandSubtree(li) {
+            const expanding = !li.classList.contains('expanded');
+            li.classList.toggle('expanded', expanding);
+            if (!expanding) {
+                li.querySelectorAll('li.has-children').forEach((child) => child.classList.remove('expanded'));
+            }
+        }
+
+        function setActiveCategory(key) {
+            document.querySelectorAll('.category-list a').forEach((a) => {
+                a.classList.toggle('active', a.dataset.cat === key);
+            });
+        }
+
+        function renderGrid(productsToRender) {
+            $('product-count').innerText = `${productsToRender.length} products`;
+            $('product-grid').innerHTML = productsToRender.map((p) => {
+                const buttonLabel = p.personalised ? 'Personalise Print' : 'Buy Now';
+                return `
                     <div class="product-card">
-                        <div class="image-wrapper" onclick="goToEditor('${prod.id}')">
-                            <img src="${prod.image}" alt="${prod.title}">
+                        <div class="image-wrapper" onclick="goToEditor('${p.id}')">
+                            <img src="${p.image}" alt="${p.title}" loading="lazy">
                         </div>
                         <div class="product-info">
-                            <h3 class="product-title" onclick="goToEditor('${prod.id}')">${prod.title}</h3>
-                            <p class="product-price">From ${prod.price}</p>
+                            <h3 class="product-title" onclick="goToEditor('${p.id}')">${p.title}</h3>
+                            <p class="product-price">From ${p.price}</p>
                         </div>
-                        <button class="btn-action" onclick="goToEditor('${prod.id}')">${buttonLabel}</button>
+                        <button class="btn-action" onclick="goToEditor('${p.id}')">${buttonLabel}</button>
                     </div>
                 `;
-                grid.innerHTML += cardMarkup;
-            });
+            }).join('');
+        }
+
+        function renderTeamGallery(leagueKey) {
+            const node = findCategoryNode(leagueKey);
+            const teams = (node && Array.isArray(node[2]) ? node[2] : [])
+                .filter((t) => t[3] !== false)
+                .map(([key, label]) => {
+                    const teamProducts = PRODUCTS.filter((p) => p.categories.includes(leagueKey) && p.categories.includes(key));
+                    return { key, label, count: teamProducts.length, image: teamProducts[0] ? teamProducts[0].image : '' };
+                })
+                .filter((t) => t.count > 0);
+
+            $('team-gallery').innerHTML = teams.map((t) => `
+                <div class="team-tile" data-team="${t.key}">
+                    <div class="team-image-wrapper"><img src="${t.image}" alt="${t.label}" loading="lazy"></div>
+                    <h3 class="team-name">${t.label}</h3>
+                    <p class="team-count">${t.count} print${t.count === 1 ? '' : 's'}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderBreadcrumb() {
+            if (viewMode === 'grid') {
+                if (currentCategory === 'all') return '';
+                const path = findPath(currentCategory) || [];
+                if (path.length <= 1) return '';
+                return path.map(([key, label], i) => {
+                    const isLast = i === path.length - 1;
+                    return isLast
+                        ? `<span class="crumb current">${label}</span>`
+                        : `<a href="#" class="crumb" data-cat="${key}">${label}</a>`;
+                }).join('<span class="crumb-sep">/</span>');
+            }
+
+            const leaguePath = findPath(currentLeague) || [];
+            const ancestorCrumbs = leaguePath.slice(0, -1).map(([key, label]) =>
+                `<a href="#" class="crumb" data-cat="${key}">${label}</a>`
+            );
+            const last = leaguePath[leaguePath.length - 1] || [currentLeague, currentLeague];
+            const leagueCrumb = viewMode === 'gallery'
+                ? `<span class="crumb current">${last[1]}</span>`
+                : `<a href="#" class="crumb" data-gallery-league="${last[0]}">${last[1]}</a>`;
+
+            const crumbs = [...ancestorCrumbs, leagueCrumb];
+
+            if (viewMode === 'team') {
+                const leagueNode = findCategoryNode(currentLeague);
+                const teamNode = (leagueNode && Array.isArray(leagueNode[2]) ? leagueNode[2] : []).find((t) => t[0] === currentTeam);
+                crumbs.push(`<span class="crumb current">${teamNode ? teamNode[1] : currentTeam}</span>`);
+            }
+
+            return crumbs.join('<span class="crumb-sep">/</span>');
         }
 
         function sortItems(items) {
@@ -521,28 +712,64 @@
                 case 'name-asc': sorted.sort((a, b) => a.title.localeCompare(b.title)); break;
                 case 'name-desc': sorted.sort((a, b) => b.title.localeCompare(a.title)); break;
                 // 'best-selling': no real sales data wired in yet -- falls back to
-                // catalogue order for now. Swap in real ranking once available
-                // (e.g. a `sales` count per product, or a `bestseller` flag).
+                // catalogue order for now.
                 // 'featured' (default): keep original catalogue order
             }
             return sorted;
         }
 
-        function applyView() {
-            const filtered = currentCategory === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.categories.includes(currentCategory));
+        function renderView() {
+            const grid = $('product-grid');
+            const gallery = $('team-gallery');
+            const meta = document.querySelector('.catalog-meta');
+
+            if (viewMode === 'gallery') {
+                meta.style.display = 'none';
+                grid.style.display = 'none';
+                gallery.style.display = 'grid';
+                renderTeamGallery(currentLeague);
+                $('breadcrumb').innerHTML = renderBreadcrumb();
+                return;
+            }
+
+            gallery.style.display = 'none';
+            meta.style.display = 'flex';
+            grid.style.display = 'grid';
+
+            const filtered = viewMode === 'team'
+                ? PRODUCTS.filter((p) => p.categories.includes(currentLeague) && p.categories.includes(currentTeam))
+                : PRODUCTS.filter((p) => p.categories.includes(currentCategory));
+
             renderGrid(sortItems(filtered));
+            $('breadcrumb').innerHTML = renderBreadcrumb();
         }
 
         function filterProducts(categoryKey) {
             currentCategory = categoryKey;
-            document.querySelectorAll('.category-list a').forEach(a => a.classList.remove('active'));
-            document.getElementById(`cat-${categoryKey}`).classList.add('active');
-            applyView();
+            viewMode = 'grid';
+            setActiveCategory(categoryKey);
+            renderView();
+        }
+
+        function openTeamGallery(leagueKey) {
+            currentLeague = leagueKey;
+            currentTeam = null;
+            viewMode = 'gallery';
+            setActiveCategory(leagueKey);
+            renderView();
+        }
+
+        function openTeamPage(leagueKey, teamKey) {
+            currentLeague = leagueKey;
+            currentTeam = teamKey;
+            viewMode = 'team';
+            setActiveCategory(leagueKey);
+            renderView();
         }
 
         function sortProducts(sortKey) {
             currentSort = sortKey;
-            applyView();
+            renderView();
         }
 
         function goToEditor(productId) {
