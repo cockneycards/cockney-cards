@@ -373,7 +373,7 @@ export async function handleGetReferralInfo(request, env) {
 
     try {
         const summary = await getReferralSummary(env, user);
-        const referralLink = `${env.SITE_URL}/?ref=${summary.referralCode}`;
+        const referralLink = `${env.SITE_URL}/account.html?ref=${summary.referralCode}`;
 
         return json({
             referralCode: summary.referralCode,
@@ -422,7 +422,7 @@ export async function handleSendReferralInvite(request, env) {
     }
 
     try {
-        const referralLink = `${env.SITE_URL}/?ref=${user.referral_code}`;
+        const referralLink = `${env.SITE_URL}/account.html?ref=${user.referral_code}`;
         const sent = await sendEmail(env, {
             to: email,
             toName: (friendName || '').toString().trim() || undefined,
