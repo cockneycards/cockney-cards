@@ -142,6 +142,9 @@
     <!-- LOGGED OUT: request magic link -->
     <div id="logged-out-view">
         <div class="login-container">
+            <div id="referral-banner" style="display:none; background:#fff8ec; border:1px solid #f0dfb0; border-radius:6px; padding:14px 16px; margin-bottom:22px; font-size:13px; color:#665c3d; line-height:1.5;">
+                🎉 You've been invited to Cockney Cards — sign up below and get <strong>25% off your first order</strong>, automatically.
+            </div>
             <h1>My Account</h1>
             <p class="lead">Log in to view orders, manage your details, and set reminders.</p>
             <div class="card login-form">
@@ -327,6 +330,21 @@
     function setSessionToken(t) { localStorage.setItem("cc_session", t); }
     function clearSessionToken() { localStorage.removeItem("cc_session"); localStorage.removeItem("cc_email"); }
 
+    // Referral code capture — this page is now the direct landing spot
+    // for referral links (account.html?ref=CODE), not just the homepage,
+    // so it can't rely solely on cart.js having already captured it
+    // elsewhere first. Reads ?ref= straight off the URL if present, saves
+    // it, and falls back to whatever's already stored (from a previous
+    // visit, or from cart.js capturing it on another page) otherwise —
+    // so a friend who lands here, gets distracted, and comes back later
+    // doesn't lose their 25% off.
+    function captureReferralCode() {
+        const params = new URLSearchParams(window.location.search);
+        const fromUrl = (params.get("ref") || "").trim().toUpperCase();
+        if (fromUrl) localStorage.setItem("cc_ref", fromUrl);
+        return localStorage.getItem("cc_ref") || (typeof ccGetReferralCode === "function" ? ccGetReferralCode() : null);
+    }
+
     // DEV ONLY — lets you preview the logged-in account view without a real
     // magic-link login. Reminders (and any future tab hitting the real API)
     // won't have real data since the token isn't valid — everything else
@@ -393,7 +411,7 @@
             const res = await fetch(`${API_BASE}/api/auth/request-link`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, ref: (typeof ccGetReferralCode === "function" ? ccGetReferralCode() : null) })
+                body: JSON.stringify({ email, ref: captureReferralCode() })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Something went wrong.");
@@ -696,10 +714,6 @@
 
             listEl.innerHTML = orders.map(o => {
                 const date = new Date(o.created * 1000).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-                // Basket orders and single-item orders fill these fields a
-                // little differently (see stripe-webhook.js) — this just
-                // shows whichever of name/age/size are actually present,
-                // rather than assuming one fixed shape.
                 const details = [o.name, o.age, o.name2, o.age2, o.size]
                     .filter(v => v && v !== "N/A")
                     .join(" · ");
@@ -802,6 +816,9 @@
     function showLoggedOut() {
         $("logged-out-view").style.display = "block";
         $("logged-in-view").style.display = "none";
+        if (captureReferralCode()) {
+            $("referral-banner").style.display = "block";
+        }
     }
 
     function showLoggedIn() {
@@ -819,6 +836,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
+        captureReferralCode();
         populateDateSelects();
         initTabs();
         const justLoggedIn = await verifyTokenFromUrl();
