@@ -10,7 +10,7 @@
 
 // Pence, matching Stripe's unit_amount convention.
 export const POSTAGE_TIERS = {
-    A5: 249, // cards (always this folded format) + A5 prints
+    A5: 199, // cards (always this folded format) + A5 prints
     A4: 299,
     A3: 499,
 };
