@@ -75,6 +75,7 @@
             .photo-grid a { width: 150px; }
         }
     </style>
+    <link rel="stylesheet" href="mobile.css">
 </head>
 <body>
 
