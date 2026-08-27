@@ -109,7 +109,68 @@
     .footer-col a { color: #111; text-decoration: underline; }
     .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
 
+    /* ============================================================
+       MOBILE / TABLET RESPONSIVE LAYOUT
+       Editor workspace stacks: canvas on top, personalisation
+       controls (page toggle + options) below — the DOM already puts
+       #canvas-wrapper before .side-column, so flex-direction:column
+       gives us this order for free. The canvas itself is scaled
+       down purely with CSS (max-width:100% / height:auto on the
+       Fabric-generated canvas elements) — Fabric.js converts pointer
+       coordinates using the ratio between the CSS-rendered size and
+       the canvas's internal resolution, so dragging/resizing photos
+       and text stays accurate even at a smaller on-screen size.
+       ============================================================ */
+    @media (max-width: 900px) {
+        header { padding: 12px 16px 8px; }
+        .nav-links { flex-wrap: wrap; justify-content: center; row-gap: 10px; column-gap: 18px; }
 
+        .editor-workspace {
+            flex-direction: column;
+            align-items: center;
+            min-width: 0;
+            overflow-x: visible;
+            width: 100%;
+            max-width: 500px;
+            margin: 24px auto;
+            padding: 0 16px;
+            gap: 24px;
+            box-sizing: border-box;
+        }
+
+        #canvas-wrapper {
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        /* Force Fabric.js's generated canvas elements to scale to the
+           wrapper's width instead of staying at their fixed internal
+           pixel size (EDIT_WIDTH x EDIT_HEIGHT = 595.5 x 840). */
+        #canvas-wrapper .canvas-container {
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 595.5 / 840;
+        }
+        #canvas-wrapper .canvas-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .side-column { width: 100%; max-width: 420px; }
+        .controls { padding: 22px; }
+        .controls h2 { font-size: 19px; margin-bottom: 18px; }
+
+        footer { padding: 40px 20px 20px; }
+        .footer-grid { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 30px; }
+        .footer-col { text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+        .toggle-btn { font-size: 12px; padding: 10px 6px; }
+        .variant-thumb { width: 48px; height: 48px; }
+        input[type="text"] { font-size: 16px; } /* avoids iOS auto-zoom on focus */
+    }
 </style>
 </head>
 <body>
