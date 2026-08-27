@@ -568,7 +568,14 @@ function initEditor(templateKey) {
     canvas = new fabric.Canvas(canvasElement, {
         width: EDIT_WIDTH, height: EDIT_HEIGHT,
         preserveObjectStacking: true, backgroundColor: '#ffffff',
-        allowTouchScrolling: true
+        allowTouchScrolling: true,
+        // This editor never needs multi-object selection — every field is
+        // edited individually via its own control. Turning it off entirely
+        // rules out Fabric's rubber-band "select everything the drag
+        // passes over" rectangle, which is what was appearing (and briefly
+        // treating the locked message boxes as a moveable group) when a
+        // hold-to-scroll touch landed on empty canvas.
+        selection: false
     });
 
     // Pan so logical x = PANEL_WIDTH..CANVAS_WIDTH (the right/front panel)
@@ -922,14 +929,25 @@ function attachPinchToResize(el) {
 }
 
 // ---- Hold-to-scroll ----
-// On phones/tablets the editor can fill the whole screen, so touching
-// anywhere on the canvas — even to just glance up at the header or down at
-// the footer — gets grabbed as a card edit instead of a page scroll.
-// Holding a finger still for a moment (rather than dragging straight away)
-// now hands that touch back to the page: it deselects whatever's active
-// and tells Fabric to stop looking for a target, so the rest of that touch
-// scrolls normally. A quick tap or an immediate drag is unaffected — the
-// hold only kicks in if the finger stays put for HOLD_TO_SCROLL_MS.
+// Empty canvas background already scrolls fine by itself (see
+// `allowTouchScrolling: true` above) — a touch that never hits an object
+// just falls through to the page. The one object worth a deliberate
+// hold/drag distinction is the uploaded photo, since a single-finger touch
+// on it is normally claimed straight away for repositioning. Holding still
+// on the PHOTO for a moment (rather than dragging it immediately) now hands
+// that touch back to the page instead, so the customer can scroll up to
+// the header or down to the footer without first having to look away from
+// the photo.
+//
+// This deliberately does NOT try to do the same thing for the message-box
+// text: a touch that lands on editable text is already being handled by
+// the phone's own text-editing/selection system by the time any hold timer
+// could fire, and stepping in after the fact left things in a broken
+// state — Fabric would fall back to its own rubber-band "select everything
+// nearby" drag, which is what was briefly making the (otherwise fully
+// locked) message boxes look like they'd become a moveable group. Message
+// boxes keep their normal, unmodified tap-to-edit behaviour; scroll using
+// the gaps around them or the header/nav instead.
 const HOLD_TO_SCROLL_MS = 350;
 const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
 let holdTimer = null;
@@ -952,12 +970,19 @@ function endHoldScroll() {
 function attachHoldToScroll(el) {
     el.addEventListener('touchstart', (e) => {
         if (!isMobileDevice() || e.touches.length !== 1) return;
+        // Only step in when the touch starts directly on the photo. Any
+        // other target (text, the artwork background, anything
+        // non-selectable) is left completely alone.
+        const target = canvas.findTarget(e, false);
+        if (!photoImg || target !== photoImg) return;
+
         const t = e.touches[0];
         holdStart = { x: t.clientX, y: t.clientY };
         cancelHoldTimer();
         holdTimer = setTimeout(() => {
             holdScrollActive = true;
             canvas.discardActiveObject();
+            canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
             canvas.skipTargetFind = true; // this touch now passes straight through to the page
             canvas.requestRenderAll();
         }, HOLD_TO_SCROLL_MS);
@@ -968,7 +993,7 @@ function attachHoldToScroll(el) {
         const t = e.touches[0];
         if (!t) return;
         const moved = Math.hypot(t.clientX - holdStart.x, t.clientY - holdStart.y);
-        if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag/tap, not a hold
+        if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag, not a hold
     }, { passive: true });
 
     el.addEventListener('touchend', endHoldScroll, { passive: true });
