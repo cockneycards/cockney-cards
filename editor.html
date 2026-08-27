@@ -256,13 +256,7 @@
 
         <label class="control-group-divider">Inside Spread </label>
         <div id="inside-controls" class="control-group">
-            <label>Font Colour:</label>
-            <div class="flex-row">
-                <input type="color" id="inside-color" class="color-picker" value="#000000" onchange="updateInsideColor(this.value)">
-                <span style="font-size: 12px; color: #666;">Choose Inside Colour</span>
-            </div>
-
-            <div class="flex-row" style="margin-top: 20px; align-items: center; gap: 10px;">
+            <div class="flex-row" style="align-items: center; gap: 10px;">
                 <input type="checkbox" id="blank-message-checkbox" onchange="toggleBlankMessage(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
                 <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Leave Message Blank — I'll write my own inside</label>
             </div>
@@ -503,6 +497,13 @@ let editorReady = false;
 
 const $ = (id) => document.getElementById(id);
 
+// Matches the editor's own mobile CSS breakpoint (see the @media
+// max-width:900px rule above) so "small device" means the same thing to
+// the layout and to the touch behaviour below.
+function isMobileDevice() {
+    return window.matchMedia('(max-width: 900px)').matches;
+}
+
 // Scratch 2D context used to measure rendered text width for a given
 // font — used to lay out curved-text characters using the same metrics
 // the browser will actually render with.
@@ -575,6 +576,9 @@ function initEditor(templateKey) {
     // coordinates; only the display is panned.
     canvas.setViewportTransform([1, 0, 0, 1, -PANEL_WIDTH, 0]);
     canvas.calcOffset();
+
+    attachPinchToResize(canvas.upperCanvasEl);
+    attachHoldToScroll(canvas.upperCanvasEl);
 
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
@@ -833,8 +837,13 @@ function handlePhotoUpload(inputEl) {
 // artwork — the artwork's own transparent cutout masks it, so the shape is
 // always a pixel-perfect match with soft anti-aliased edges (no synthetic
 // clipPath needed). Cover-fit sized into the configured frame box, then
-// the customer can drag to reposition or use the corner handle to resize —
-// shown with a normal visible blue selection box.
+// the customer can drag to reposition or use the corner handle to resize.
+//
+// On desktop this keeps the normal visible blue selection box + corner
+// handle. On phones/tablets (see isMobileDevice()) the box/handle are
+// hidden instead — a finger-drag still repositions the photo exactly the
+// same way, and a two-finger pinch (set up in attachPinchToResize) takes
+// over resizing since there's no handle left to grab.
 function loadPhotoIntoFrame(dataUrl) {
     const p = activeTemplate?.photo;
     if (!p) return;
@@ -845,12 +854,15 @@ function loadPhotoIntoFrame(dataUrl) {
         // Cover-fit: scale so the photo fully fills the frame, like CSS
         // object-fit: cover, then let the customer drag/resize from there.
         const coverScale = Math.max(p.width / img.width, p.height / img.height);
+        const mobile = isMobileDevice();
 
         img.set({
             left: p.left, top: p.top,
             originX: 'center', originY: 'center',
             scaleX: coverScale, scaleY: coverScale,
             lockRotation: true,
+            hasBorders: !mobile,
+            hasControls: !mobile,
             borderColor: '#1A73E8',
             cornerColor: '#1A73E8',
             cornerStrokeColor: '#1A73E8',
@@ -865,6 +877,102 @@ function loadPhotoIntoFrame(dataUrl) {
         canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
     }, { crossOrigin: 'anonymous' });
+}
+
+// ---- Mobile pinch-to-resize for the uploaded photo ----
+// With the blue box/corner handle hidden on small screens (see
+// loadPhotoIntoFrame) there's no handle left to drag for resizing, so this
+// listens for a standard two-finger pinch directly on the canvas and scales
+// the photo to match. Uniform scaling (scaleX === scaleY throughout, same
+// as the photo's initial cover-fit), so pinching in/out just makes it
+// bigger or smaller without distorting it. Single-finger dragging to
+// reposition isn't touched here — Fabric already supports that with no
+// visible controls needed, on both mobile and desktop.
+let pinchStartDist = null;
+let pinchStartScale = null;
+
+function touchDistance(t1, t2) {
+    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+}
+
+function attachPinchToResize(el) {
+    el.addEventListener('touchstart', (e) => {
+        if (!isMobileDevice() || currentPage !== 'front' || !photoImg || e.touches.length !== 2) return;
+        pinchStartDist = touchDistance(e.touches[0], e.touches[1]);
+        pinchStartScale = photoImg.scaleX;
+        canvas.setActiveObject(photoImg);
+    }, { passive: true });
+
+    el.addEventListener('touchmove', (e) => {
+        if (pinchStartDist === null || e.touches.length !== 2 || !photoImg) return;
+        e.preventDefault(); // don't let the page scroll while actively pinching
+        const ratio = touchDistance(e.touches[0], e.touches[1]) / pinchStartDist;
+        // Clamped loosely (0.1x–10x) just to stop the photo shrinking to
+        // nothing or ballooning to an unusable size — well outside any
+        // resize a customer would actually want.
+        const newScale = Math.min(Math.max(pinchStartScale * ratio, 0.1), 10);
+        photoImg.set({ scaleX: newScale, scaleY: newScale });
+        photoImg.setCoords();
+        canvas.requestRenderAll();
+    }, { passive: false });
+
+    const endPinch = (e) => { if (e.touches.length < 2) pinchStartDist = null; };
+    el.addEventListener('touchend', endPinch, { passive: true });
+    el.addEventListener('touchcancel', endPinch, { passive: true });
+}
+
+// ---- Hold-to-scroll ----
+// On phones/tablets the editor can fill the whole screen, so touching
+// anywhere on the canvas — even to just glance up at the header or down at
+// the footer — gets grabbed as a card edit instead of a page scroll.
+// Holding a finger still for a moment (rather than dragging straight away)
+// now hands that touch back to the page: it deselects whatever's active
+// and tells Fabric to stop looking for a target, so the rest of that touch
+// scrolls normally. A quick tap or an immediate drag is unaffected — the
+// hold only kicks in if the finger stays put for HOLD_TO_SCROLL_MS.
+const HOLD_TO_SCROLL_MS = 350;
+const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
+let holdTimer = null;
+let holdStart = null;
+let holdScrollActive = false;
+
+function cancelHoldTimer() {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+}
+
+function endHoldScroll() {
+    cancelHoldTimer();
+    if (holdScrollActive) {
+        holdScrollActive = false;
+        canvas.skipTargetFind = false;
+    }
+    holdStart = null;
+}
+
+function attachHoldToScroll(el) {
+    el.addEventListener('touchstart', (e) => {
+        if (!isMobileDevice() || e.touches.length !== 1) return;
+        const t = e.touches[0];
+        holdStart = { x: t.clientX, y: t.clientY };
+        cancelHoldTimer();
+        holdTimer = setTimeout(() => {
+            holdScrollActive = true;
+            canvas.discardActiveObject();
+            canvas.skipTargetFind = true; // this touch now passes straight through to the page
+            canvas.requestRenderAll();
+        }, HOLD_TO_SCROLL_MS);
+    }, { passive: true });
+
+    el.addEventListener('touchmove', (e) => {
+        if (!holdStart || holdScrollActive) return;
+        const t = e.touches[0];
+        if (!t) return;
+        const moved = Math.hypot(t.clientX - holdStart.x, t.clientY - holdStart.y);
+        if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag/tap, not a hold
+    }, { passive: true });
+
+    el.addEventListener('touchend', endHoldScroll, { passive: true });
+    el.addEventListener('touchcancel', endHoldScroll, { passive: true });
 }
 
 function updateNameText(inputEl) {
@@ -976,19 +1084,6 @@ function updateFrontSize(size) {
     canvas.requestRenderAll();
 }
 
-function activeInsideText() {
-    const active = canvas.getActiveObject();
-    return insideTexts.includes(active) ? active : null;
-}
-
-function updateInsideColor(hexColor) {
-    const active = activeInsideText();
-    if (active) {
-        active.set({ fill: hexColor });
-        canvas.requestRenderAll();
-    }
-}
-
 function switchPage(page) {
     if (!editorReady) return; // see editorReady declaration above
 
@@ -1014,7 +1109,6 @@ function setupTextEvents() {
         if (currentPage !== 'inside' || !insideTexts.includes(target)) return;
         resetBordersToDashed();
         target.set(STYLE_SOLID);
-        $('inside-color').value = target.fill;
         canvas.requestRenderAll();
     });
 
@@ -1029,6 +1123,17 @@ function setupTextEvents() {
             canvas.requestRenderAll();
         }
         target._lastValidText = target.text;
+
+        // Fabric edits text through a hidden off-screen <textarea> that
+        // grabs focus the moment you tap into a message box. Phones/tablets
+        // then do what they'd do for any focused field — auto-scroll it
+        // into view — except this one is invisible, so the whole page just
+        // jumps under the customer's finger with nothing to explain why.
+        // Snapping the scroll position back straight after undoes that jump
+        // without touching the actual editing behaviour.
+        const scrollX = window.scrollX, scrollY = window.scrollY;
+        requestAnimationFrame(() => window.scrollTo(scrollX, scrollY));
+        setTimeout(() => window.scrollTo(scrollX, scrollY), 60);
     });
 
     // Enforce each box's max line count (BOX_MAX_LINES) — blocks typing or
