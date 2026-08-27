@@ -58,7 +58,6 @@ const CATEGORIES = [
     ["rugby", "Rugby"],
     ["netball", "Netball"],
     ["darts", "Darts"],
-    ["running", "Running"],
     ["horseracing", "Horse Racing"],
   ]],
 
