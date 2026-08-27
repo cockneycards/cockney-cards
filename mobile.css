@@ -1,0 +1,83 @@
+/* ============================================================
+   Cockney Cards — shared mobile fixes
+   Linked from every page (index, shop-cards, shop-prints,
+   cockney-club, account, basket, thankyou) so header/nav/footer
+   behave consistently everywhere. Loaded after each page's own
+   <style> block, so these rules win on matching selectors.
+   ============================================================ */
+
+/* ---------- Header & nav (all pages) ---------- */
+@media (max-width: 640px) {
+    header { padding: 12px 16px 8px; }
+    .header-top { gap: 16px; }
+    .logo-container img { max-width: 92px; }
+    nav { margin-top: 10px; }
+    .nav-links { gap: 10px 16px; flex-wrap: wrap; row-gap: 8px; }
+    .nav-links a { font-size: 11.5px; letter-spacing: 0.5px; }
+}
+
+/* ---------- Footer (index, thankyou, basket, cockney-club —
+   shop-cards / shop-prints already stack their own footer-grid,
+   this rule just reinforces it for all pages at a shared breakpoint) ---------- */
+@media (max-width: 640px) {
+    footer { padding: 40px 20px 20px; }
+    .footer-grid {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        gap: 30px;
+        overflow-x: visible;
+    }
+    .footer-col { text-align: center; }
+}
+
+/* ---------- Homepage decorative gallery ----------
+   Previously locked to min-width:900px inside an 80%-width,
+   overflow-x:auto section — meaning mobile visitors landed on a
+   sideways-scrolling strip instead of a normal page. This lets it
+   stack into 2 columns, then 1, like a normal mobile layout. */
+@media (max-width: 640px) {
+    .gallery-section { max-width: 100%; padding: 0 16px; overflow-x: visible; margin: 20px auto; }
+    .gallery-grid { min-width: 0; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .gallery-title { font-size: 19px; margin-bottom: 20px; }
+}
+@media (max-width: 420px) {
+    .gallery-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Shop pages (shop-cards, shop-prints) ---------- */
+@media (max-width: 640px) {
+    .shop-header { padding: 0 16px; margin: 24px auto 16px; }
+    .shop-header h1 { font-size: 22px; }
+    .shop-container { padding: 0 16px 40px; gap: 30px; }
+    .catalog-meta { flex-wrap: wrap; gap: 10px; }
+}
+@media (max-width: 480px) {
+    .product-grid, .team-gallery { grid-template-columns: 1fr; }
+}
+
+/* ---------- Account page ---------- */
+@media (max-width: 640px) {
+    .account-shell { padding: 0 16px; margin: 24px auto 60px; }
+    .login-container { padding: 0 16px; margin: 40px auto; }
+}
+@media (max-width: 480px) {
+    .add-form { grid-template-columns: 1fr; }
+    .settings-field input { max-width: 100%; }
+    .toggle-row { max-width: 100%; }
+}
+
+/* ---------- Basket page ---------- */
+@media (max-width: 640px) {
+    .basket-page { padding: 0 16px; margin: 24px auto 60px; }
+}
+@media (max-width: 480px) {
+    .basket-item { flex-wrap: wrap; }
+    .item-actions { flex-direction: row; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px; }
+}
+
+/* ---------- Cockney Club page ---------- */
+@media (max-width: 480px) {
+    .terms-box { padding: 20px 18px; }
+    .benefits-list li { padding: 14px; }
+}
