@@ -544,7 +544,8 @@ function initEditor(templateKey) {
 
     canvas = new fabric.Canvas(canvasElement, {
         width: EDIT_WIDTH, height: EDIT_HEIGHT,
-        preserveObjectStacking: true, backgroundColor: '#ffffff'
+        preserveObjectStacking: true, backgroundColor: '#ffffff',
+        allowTouchScrolling: true
     });
 
     // Show/hide the personalisation inputs based on what this print (and,
