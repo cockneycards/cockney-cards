@@ -7,9 +7,9 @@ const DEFAULT_PRICE = "£3.49";
 // is loaded BEFORE this file wherever this file is included.
 
 const CARD_CATALOGUE = {
-  "11plus-boy": { title: "11 Plus Boy Card", description: "A brilliant way to say congratulations on passing the 11 Plus! Add his name and school shirt colour to make it extra special.", categories: ["all", "for-him", "school-cards", "achievements","children"], preview: "11plus-boy-preview_sf4n9y.png", full: "11plus-boy_umzz8e.png" },
-  "11plus-girl": { title: "11 Plus Girl Card", description: "A brilliant way to say congratulations on passing the 11 Plus.", categories: ["all", "for-her", "school-cards", "achievements", "children"], preview: "11plus-girl-preview_xdyo0z.png", full: "11plus-girl_rmkpbe.png" },
-  "11plus-kids": { title: "11 Plus Kids Card", description: "A brilliant way to say congratulations on passing the 11 Plus.", categories: ["all", "school-cards", "achievements", "children"], preview: "11plus-kids-preview_a1hxrs.png", full: "11plus-kids_wg25kp.png" },
+  "11plus-boy": { title: "11 Plus Boy Card", description: "A brilliant way to say congratulations on passing the 11 Plus! Add his name and school shirt colour to make it extra special.", categories: ["school-cards", "achievements","children"], preview: "11plus-boy-preview_sf4n9y.png", full: "11plus-boy_umzz8e.png" },
+  "11plus-girl": { title: "11 Plus Girl Card", description: "A brilliant way to say congratulations on passing the 11 Plus.", categories: ["school-cards", "achievements", "children"], preview: "11plus-girl-preview_xdyo0z.png", full: "11plus-girl_rmkpbe.png" },
+  "11plus-kids": { title: "11 Plus Kids Card", description: "A brilliant way to say congratulations on passing the 11 Plus.", categories: ["school-cards", "achievements", "children"], preview: "11plus-kids-preview_a1hxrs.png", full: "11plus-kids_wg25kp.png" },
 
   "birthday-80sbirthday": { title: "80s Retro Birthday Card", description: "A colourful birthday card.", categories: ["all", "birthdays", "tv-movies"], preview: "80s-birthday-preview_i8mnhc.png", full: "80s-birthday_jeq3bk.png" },
   "birthday-90sbirthday": { title: "90s Retro Birthday Card", description: "A colourful birthday card.", categories: ["all", "birthdays", "tv-movies"], preview: "90s-birthday-preview_vmzyiu.png", full: "90s-birthday_ldr2pi.png" },
