@@ -311,42 +311,42 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
   
-  "5kboy-photo": { title: "5K Achievement Boy", price: "£3.49", description: "Celebrate their 5K running achievement - add a photo, the event name, date and finish time.", categories: ["sports", "for-him", "running", "photo-upload"], preview: "5kboy-photo-preview_c2npct.png", full: "5kboy-photo_c116gx.png",
+  "5kboy-photo": { title: "5K Achievement Boy", price: "£3.49", description: "Celebrate their 5K running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "5kboy-photo-preview_c2npct.png", full: "5kboy-photo_c116gx.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 17, color: "#D9971D", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 17, color: "#D9971D", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 733, fontSize: 17, color: "#D9971D", maxChars: 12 }
     ] },
-  "10kboy-photo": { title: "10K Achievement Boy", price: "£3.49", description: "Celebrate their 10K running achievement - add a photo, the event name, date and finish time.", categories: ["sports", "for-him", "running", "photo-upload"], preview: "10krace-boy-preview.png", full: "10krace-boy.png",
+  "10kboy-photo": { title: "10K Achievement Boy", price: "£3.49", description: "Celebrate their 10K running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "10krace-boy-preview.png", full: "10krace-boy.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 852, top: 632, fontFamily: "Oswald-VariableFont_wght", fontSize: 25, color: "#001e3f", maxChars: 20 },
       { key: "date", label: "Date", left: 846, top: 703, fontFamily: "Oswald-VariableFont_wght", fontSize: 25, color: "#001e3f", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 895, top: 772, fontFamily: "Oswald-VariableFont_wght", fontSize: 25, color: "#001e3f", maxChars: 18 }
     ] },
-  "26mboy-photo": { title: "26M Achievement Boy", price: "£3.49", description: "Celebrate their 26.2 mile running achievement - add a photo, the event name, date and finish time.", categories: ["sports", "for-him", "running", "photo-upload"], preview: "26mboy-photo-preview_fml8xv.png", full: "26mboy-photo_qxv3ns.png",
+  "26mboy-photo": { title: "26M Achievement Boy", price: "£3.49", description: "Celebrate their 26.2 mile running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "26mboy-photo-preview_fml8xv.png", full: "26mboy-photo_qxv3ns.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 866, top: 627, fontSize: 18, color: "#F7CD4E", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 678, fontSize: 18, color: "#F7CD4E", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 900, top: 732, fontSize: 18, color: "#F7CD4E", maxChars: 12 }
     ] },
-  "5kgirl-photo": { title: "5K Achievement Girl", price: "£3.49", description: "Celebrate their 5K running achievement - add a photo, the event name, date and finish time.", categories: ["sports", "for-her", "running", "photo-upload"], preview: "5kgirl-photo-preview_loxgls.png", full: "5kgirl-photo_hd2sv5.png",
+  "5kgirl-photo": { title: "5K Achievement Girl", price: "£3.49", description: "Celebrate their 5K running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "5kgirl-photo-preview_loxgls.png", full: "5kgirl-photo_hd2sv5.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 870, top: 603, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 648, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 912, top: 694, fontSize: 18, color: "#8B1E5C", maxChars: 12 }
     ] },
-  "10kgirl-photo": { title: "10K Achievement Girl", price: "£3.49", description: "Celebrate their 10K running achievement - add a photo, the event name, date and finish time.", categories: ["sports", "for-her", "running", "photo-upload"], preview: "10kgirl-photo-preview_zyzc4l.png", full: "10kgirl-photo_qdsoyb.png",
+  "10kgirl-photo": { title: "10K Achievement Girl", price: "£3.49", description: "Celebrate their 10K running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "10kgirl-photo-preview_zyzc4l.png", full: "10kgirl-photo_qdsoyb.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 870, top: 603, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
       { key: "date", label: "Date", left: 861, top: 648, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
       { key: "finishTime", label: "Time", left: 912, top: 694, fontSize: 18, color: "#8B1E5C", maxChars: 12 }
     ] },
-  "26mgirl-photo": { title: "26M Achievement Girl", price: "£3.49", description: "Celebrate their 26.2 mile running achievement - add a photo, the event name, date and finish time.", categories: ["sports", "for-her", "running", "photo-upload"], preview: "26mgirl-photo-preview_n1juyo.png", full: "26mgirl-photo_apr3zk.png",
+  "26mgirl-photo": { title: "26M Achievement Girl", price: "£3.49", description: "Celebrate their 26.2 mile running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "26mgirl-photo-preview_n1juyo.png", full: "26mgirl-photo_apr3zk.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 },
     extraFields: [
       { key: "event", label: "Event", left: 870, top: 599, fontSize: 18, color: "#8B1E5C", maxChars: 20 },
