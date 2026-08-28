@@ -585,7 +585,7 @@ function initEditor(templateKey) {
     canvas.calcOffset();
 
     attachPinchToResize(canvas.upperCanvasEl);
-    attachHoldToScroll(canvas.upperCanvasEl);
+    attachMoveToScroll(canvas.upperCanvasEl);
 
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
@@ -933,78 +933,76 @@ function attachPinchToResize(el) {
     el.addEventListener('touchcancel', endPinch, { passive: true });
 }
 
-// ---- Hold-to-scroll ----
+// ---- Move-to-scroll ----
 // Empty canvas background already scrolls fine by itself (see
 // `allowTouchScrolling: true` above) — a touch that never hits an object
 // just falls through to the page. Any object (the photo, a message-box
 // text field, the printed name, etc) is normally claimed straight away by
 // Fabric instead, for repositioning/selecting/editing, which is what stops
-// a swipe over the card itself from scrolling the page. Holding still for
-// a moment (rather than dragging/tapping immediately) now hands that touch
-// back to the page, so the customer can scroll from wherever their finger
-// already is — including on top of the outside spread photo and the
-// inside spread message boxes — without first having to find an empty gap.
+// a swipe over the card itself from scrolling the page.
+//
+// This is movement-based, not time-based: the instant a touch that landed
+// on an object moves past a few pixels, we hand it straight back to the
+// page so it scrolls — no delay, so it feels the same on a slow drag or a
+// quick flick. A touch that never moves past that threshold is left alone
+// and still selects/edits normally. That means the whole editor — outside
+// spread photo and inside spread message boxes included — scrolls the
+// instant the customer's finger moves, from wherever it happens to land.
 //
 // While a message box is actively being edited (keyboard open, cursor
-// mid-placement) we leave it alone entirely — the hold timer is skipped
-// for that box's touches — so this never interrupts someone who's paused
-// mid-type or is placing their cursor in already-typed text. Once they tap
-// away and the box is no longer in edit mode, holding on it scrolls again
-// like everything else.
-const HOLD_TO_SCROLL_MS = 350;
-const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
-let holdTimer = null;
-let holdStart = null;
-let holdScrollActive = false;
+// mid-placement) we leave it alone entirely — this is skipped for that
+// box's touches — so it never interrupts someone who's paused mid-type or
+// is placing their cursor in already-typed text. Once they tap away and
+// the box is no longer in edit mode, moving on it scrolls again like
+// everything else.
+const MOVE_TO_SCROLL_PX = 10; // px of movement before the touch is handed to the page
+let moveStart = null;
+let moveScrollActive = false;
 
-function cancelHoldTimer() {
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-}
-
-function endHoldScroll() {
-    cancelHoldTimer();
-    if (holdScrollActive) {
-        holdScrollActive = false;
+function endMoveScroll() {
+    if (moveScrollActive) {
+        moveScrollActive = false;
         canvas.skipTargetFind = false;
     }
-    holdStart = null;
+    moveStart = null;
 }
 
-function attachHoldToScroll(el) {
+function attachMoveToScroll(el) {
     el.addEventListener('touchstart', (e) => {
-        if (!isMobileDevice() || e.touches.length !== 1) return;
+        if (!isMobileDevice() || e.touches.length !== 1) { moveStart = null; return; }
         // No target (empty canvas/background) already scrolls fine on its
         // own. A target that's actively being edited right now is left
         // completely alone so typing/cursor placement is never
         // interrupted. Anything else -- the photo, a message box not
         // currently being edited, the name text, etc -- gets the
-        // hold-to-scroll treatment below.
+        // move-to-scroll treatment below.
         const target = canvas.findTarget(e, false);
-        if (!target || target.isEditing) return;
+        if (!target || target.isEditing) { moveStart = null; return; }
 
         const t = e.touches[0];
-        holdStart = { x: t.clientX, y: t.clientY };
-        cancelHoldTimer();
-        holdTimer = setTimeout(() => {
-            holdScrollActive = true;
-            canvas.discardActiveObject();
-            resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
-            canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
-            canvas.skipTargetFind = true; // this touch now passes straight through to the page
-            canvas.requestRenderAll();
-        }, HOLD_TO_SCROLL_MS);
+        moveStart = { x: t.clientX, y: t.clientY };
+        moveScrollActive = false;
     }, { passive: true });
 
     el.addEventListener('touchmove', (e) => {
-        if (!holdStart || holdScrollActive) return;
+        if (!moveStart || moveScrollActive || e.touches.length !== 1) return;
         const t = e.touches[0];
         if (!t) return;
-        const moved = Math.hypot(t.clientX - holdStart.x, t.clientY - holdStart.y);
-        if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag, not a hold
+        const moved = Math.hypot(t.clientX - moveStart.x, t.clientY - moveStart.y);
+        if (moved <= MOVE_TO_SCROLL_PX) return; // still could be a stationary tap — leave it to Fabric
+
+        // The finger has moved — hand this touch straight to the page so
+        // it scrolls, instead of dragging/resizing whatever's underneath.
+        moveScrollActive = true;
+        canvas.discardActiveObject();
+        resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
+        canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
+        canvas.skipTargetFind = true; // this touch now passes straight through to the page
+        canvas.requestRenderAll();
     }, { passive: true });
 
-    el.addEventListener('touchend', endHoldScroll, { passive: true });
-    el.addEventListener('touchcancel', endHoldScroll, { passive: true });
+    el.addEventListener('touchend', endMoveScroll, { passive: true });
+    el.addEventListener('touchcancel', endMoveScroll, { passive: true });
 }
 
 function updateNameText(inputEl) {
