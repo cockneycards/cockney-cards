@@ -224,7 +224,7 @@
                 <label for="photo-input" style="display:block; margin-bottom: 6px;">Upload Photo:</label>
                 <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
                 <p style="font-size:12px; color:#666; margin-top:6px;">
-                    Drag the photo to reposition it, or use the corner handle to resize — it'll stay inside the frame.
+                    Your photo is centred to fill the frame. Pinch (or use the corner handle) to zoom in or out.
                 </p>
             </div>
 
@@ -585,7 +585,7 @@ function initEditor(templateKey) {
     canvas.calcOffset();
 
     attachPinchToResize(canvas.upperCanvasEl);
-    attachMoveToScroll(canvas.upperCanvasEl);
+    attachHoldToScroll(canvas.upperCanvasEl);
 
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
@@ -873,8 +873,13 @@ function loadPhotoIntoFrame(dataUrl) {
             originX: 'center', originY: 'center',
             scaleX: coverScale, scaleY: coverScale,
             lockRotation: true,
+            lockMovementX: true, lockMovementY: true, // snapped to the frame — never dragged, only scaled
             hasBorders: !mobile,
             hasControls: !mobile,
+            selectable: !mobile, // on mobile the photo is untouchable to Fabric's own
+            evented: !mobile,    // hit-testing, so a single-finger touch on it is treated
+                                  // exactly like touching empty canvas: allowTouchScrolling
+                                  // kicks in immediately, no hold-to-scroll delay needed
             borderColor: '#1A73E8',
             cornerColor: '#1A73E8',
             cornerStrokeColor: '#1A73E8',
@@ -886,20 +891,22 @@ function loadPhotoIntoFrame(dataUrl) {
         canvas.add(photoImg);
         canvas.sendToBack(photoImg); // behind everything, including the artwork —
                                       // its transparent cutout is what shows this
-        canvas.setActiveObject(photoImg);
+        if (!mobile) canvas.setActiveObject(photoImg); // desktop only — mobile has nothing to select
         canvas.requestRenderAll();
     }, { crossOrigin: 'anonymous' });
 }
 
 // ---- Mobile pinch-to-resize for the uploaded photo ----
-// With the blue box/corner handle hidden on small screens (see
-// loadPhotoIntoFrame) there's no handle left to drag for resizing, so this
-// listens for a standard two-finger pinch directly on the canvas and scales
-// the photo to match. Uniform scaling (scaleX === scaleY throughout, same
-// as the photo's initial cover-fit), so pinching in/out just makes it
-// bigger or smaller without distorting it. Single-finger dragging to
-// reposition isn't touched here — Fabric already supports that with no
-// visible controls needed, on both mobile and desktop.
+// The photo is snapped to the frame — centered, cover-fit, never dragged,
+// on desktop or mobile (see lockMovementX/Y in loadPhotoIntoFrame). Desktop
+// customers scale it with the visible corner handle; on mobile there's no
+// handle (and no drag) so this listens for a standard two-finger pinch
+// directly on the canvas and scales the photo to match. Uniform scaling
+// (scaleX === scaleY throughout, same as the photo's initial cover-fit), so
+// pinching in/out just makes it bigger or smaller without distorting it or
+// moving it off-center. Runs as a plain DOM touch listener rather than
+// through Fabric, so it works regardless of the photo's selectable/evented
+// state (see below).
 let pinchStartDist = null;
 let pinchStartScale = null;
 
@@ -933,76 +940,85 @@ function attachPinchToResize(el) {
     el.addEventListener('touchcancel', endPinch, { passive: true });
 }
 
-// ---- Move-to-scroll ----
+// ---- Hold-to-scroll ----
 // Empty canvas background already scrolls fine by itself (see
 // `allowTouchScrolling: true` above) — a touch that never hits an object
-// just falls through to the page. Any object (the photo, a message-box
-// text field, the printed name, etc) is normally claimed straight away by
-// Fabric instead, for repositioning/selecting/editing, which is what stops
-// a swipe over the card itself from scrolling the page.
+// just falls through to the page. The uploaded photo is also excluded from
+// Fabric's hit-testing on mobile (selectable/evented: false — see
+// loadPhotoIntoFrame), so a touch there falls through the same way and
+// scrolls instantly too, with no delay: it's locked to the frame and can
+// only be resized via pinch, so there's nothing left for a single-finger
+// touch on it to do except scroll.
 //
-// This is movement-based, not time-based: the instant a touch that landed
-// on an object moves past a few pixels, we hand it straight back to the
-// page so it scrolls — no delay, so it feels the same on a slow drag or a
-// quick flick. A touch that never moves past that threshold is left alone
-// and still selects/edits normally. That means the whole editor — outside
-// spread photo and inside spread message boxes included — scrolls the
-// instant the customer's finger moves, from wherever it happens to land.
+// Other objects (a message-box text field, the printed name, etc) are
+// still normally claimed straight away by Fabric for
+// repositioning/selecting/editing, which is what stops a swipe over them
+// from scrolling the page. Holding still for a moment (rather than
+// dragging/tapping immediately) now hands that touch back to the page, so
+// the customer can scroll from wherever their finger already is —
+// including on top of the inside spread's message boxes — without first
+// having to find an empty gap.
 //
 // While a message box is actively being edited (keyboard open, cursor
-// mid-placement) we leave it alone entirely — this is skipped for that
-// box's touches — so it never interrupts someone who's paused mid-type or
-// is placing their cursor in already-typed text. Once they tap away and
-// the box is no longer in edit mode, moving on it scrolls again like
-// everything else.
-const MOVE_TO_SCROLL_PX = 10; // px of movement before the touch is handed to the page
-let moveStart = null;
-let moveScrollActive = false;
+// mid-placement) we leave it alone entirely — the hold timer is skipped
+// for that box's touches — so this never interrupts someone who's paused
+// mid-type or is placing their cursor in already-typed text. Once they tap
+// away and the box is no longer in edit mode, holding on it scrolls again
+// like everything else.
+const HOLD_TO_SCROLL_MS = 350;
+const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
+let holdTimer = null;
+let holdStart = null;
+let holdScrollActive = false;
 
-function endMoveScroll() {
-    if (moveScrollActive) {
-        moveScrollActive = false;
-        canvas.skipTargetFind = false;
-    }
-    moveStart = null;
+function cancelHoldTimer() {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
 }
 
-function attachMoveToScroll(el) {
+function endHoldScroll() {
+    cancelHoldTimer();
+    if (holdScrollActive) {
+        holdScrollActive = false;
+        canvas.skipTargetFind = false;
+    }
+    holdStart = null;
+}
+
+function attachHoldToScroll(el) {
     el.addEventListener('touchstart', (e) => {
-        if (!isMobileDevice() || e.touches.length !== 1) { moveStart = null; return; }
+        if (!isMobileDevice() || e.touches.length !== 1) return;
         // No target (empty canvas/background) already scrolls fine on its
         // own. A target that's actively being edited right now is left
         // completely alone so typing/cursor placement is never
         // interrupted. Anything else -- the photo, a message box not
         // currently being edited, the name text, etc -- gets the
-        // move-to-scroll treatment below.
+        // hold-to-scroll treatment below.
         const target = canvas.findTarget(e, false);
-        if (!target || target.isEditing) { moveStart = null; return; }
+        if (!target || target.isEditing) return;
 
         const t = e.touches[0];
-        moveStart = { x: t.clientX, y: t.clientY };
-        moveScrollActive = false;
+        holdStart = { x: t.clientX, y: t.clientY };
+        cancelHoldTimer();
+        holdTimer = setTimeout(() => {
+            holdScrollActive = true;
+            canvas.discardActiveObject();
+            resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
+            canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
+            canvas.skipTargetFind = true; // this touch now passes straight through to the page
+            canvas.requestRenderAll();
+        }, HOLD_TO_SCROLL_MS);
     }, { passive: true });
 
     el.addEventListener('touchmove', (e) => {
-        if (!moveStart || moveScrollActive || e.touches.length !== 1) return;
+        if (!holdStart || holdScrollActive) return;
         const t = e.touches[0];
         if (!t) return;
-        const moved = Math.hypot(t.clientX - moveStart.x, t.clientY - moveStart.y);
-        if (moved <= MOVE_TO_SCROLL_PX) return; // still could be a stationary tap — leave it to Fabric
-
-        // The finger has moved — hand this touch straight to the page so
-        // it scrolls, instead of dragging/resizing whatever's underneath.
-        moveScrollActive = true;
-        canvas.discardActiveObject();
-        resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
-        canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
-        canvas.skipTargetFind = true; // this touch now passes straight through to the page
-        canvas.requestRenderAll();
+        const moved = Math.hypot(t.clientX - holdStart.x, t.clientY - holdStart.y);
+        if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag, not a hold
     }, { passive: true });
 
-    el.addEventListener('touchend', endMoveScroll, { passive: true });
-    el.addEventListener('touchcancel', endMoveScroll, { passive: true });
+    el.addEventListener('touchend', endHoldScroll, { passive: true });
+    el.addEventListener('touchcancel', endHoldScroll, { passive: true });
 }
 
 function updateNameText(inputEl) {
@@ -1125,7 +1141,13 @@ function switchPage(page) {
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
-    photoImg?.set({ visible: isFront, selectable: isFront, evented: isFront });
+    // On mobile the photo is always non-selectable/non-evented (snapped to
+    // the frame — see loadPhotoIntoFrame) so it never blocks instant-scroll,
+    // regardless of which page is showing. Only desktop toggles those flags
+    // with page visibility, since desktop still uses Fabric's own selection
+    // to drive the corner resize handle.
+    const photoInteractive = isFront && !isMobileDevice();
+    photoImg?.set({ visible: isFront, selectable: photoInteractive, evented: photoInteractive });
 
     canvas.discardActiveObject();
     resetBordersToDashed();
