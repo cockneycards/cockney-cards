@@ -624,12 +624,15 @@ function initEditor(templateKey) {
         // touch only hands off to page-scroll after being held still for a
         // moment — an immediate hand-off would make it impossible to drag
         // the photo at all.
-        attachHoldToScroll(canvas.upperCanvasEl);
+        // Attached to canvas.wrapperEl (the container div around Fabric's
+        // two stacked <canvas> elements), not canvas.upperCanvasEl itself —
+        // see the comment above attachHoldToScroll() for why that matters.
+        attachHoldToScroll(canvas.wrapperEl);
     } else {
         // Every other card: nothing on the canvas is draggable, so any
         // swipe should scroll the page immediately, same as touching
         // anywhere else on the page already does.
-        attachInstantScrollOnSwipe(canvas.upperCanvasEl);
+        attachInstantScrollOnSwipe(canvas.wrapperEl);
     }
 
     // Logo on the back cover panel
@@ -1001,6 +1004,24 @@ function attachPinchToResize(el) {
 // mid-type or is placing their cursor in already-typed text. Once they tap
 // away and the box is no longer in edit mode, holding on it scrolls again
 // like everything else.
+//
+// IMPORTANT — why these listeners attach to canvas.wrapperEl, not
+// canvas.upperCanvasEl: Fabric registers its own touch handling directly on
+// upperCanvasEl (and, once a touch starts, on document) when the canvas is
+// constructed — before this function ever runs. Listeners added later on
+// that same element still fire after Fabric's, so nulling out
+// `_currentTransform`/`skipTargetFind` here was arriving too late: Fabric
+// had already treated the in-progress touch as an object drag and kept
+// blocking the page's native scroll for the rest of that touch, which is
+// exactly the "only scrolls if you touch outside the canvas first" bug —
+// once a gesture started on the canvas, nothing could hand it back.
+// canvas.wrapperEl is the div Fabric wraps around both its stacked
+// <canvas> elements, so it's an ancestor of upperCanvasEl. A `capture:
+// true` listener there runs during the capture phase, which always
+// completes before the event reaches upperCanvasEl at all — so once we've
+// decided a touch is now a scroll, calling `e.stopPropagation()` here stops
+// the event before Fabric ever sees it, rather than hoping Fabric notices
+// state we changed after the fact.
 const HOLD_TO_SCROLL_MS = 350;
 const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
 let holdTimer = null;
@@ -1040,21 +1061,33 @@ function attachHoldToScroll(el) {
             canvas.discardActiveObject();
             resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
             canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
-            canvas.skipTargetFind = true; // this touch now passes straight through to the page
+            canvas.skipTargetFind = true; // belt-and-braces: also true for any stray event that isn't stopped below
             canvas.requestRenderAll();
         }, HOLD_TO_SCROLL_MS);
-    }, { passive: true });
+    }, { passive: true, capture: true });
 
     el.addEventListener('touchmove', (e) => {
-        if (!holdStart || holdScrollActive) return;
+        // Once the hold has fired, this touch belongs to the page now —
+        // stop it here, in the capture phase, so it never reaches Fabric
+        // at all and Fabric can't re-claim it or block the scroll it's
+        // now getting. This has to happen on every remaining touchmove of
+        // the gesture, not just once.
+        if (holdScrollActive) { e.stopPropagation(); return; }
+        if (!holdStart) return;
         const t = e.touches[0];
         if (!t) return;
         const moved = Math.hypot(t.clientX - holdStart.x, t.clientY - holdStart.y);
         if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag, not a hold
-    }, { passive: true });
+    }, { passive: true, capture: true });
 
-    el.addEventListener('touchend', endHoldScroll, { passive: true });
-    el.addEventListener('touchcancel', endHoldScroll, { passive: true });
+    const endHoldScrollCapture = (e) => {
+        // Swallow the release too, so a scroll ending back down over the
+        // canvas doesn't register with Fabric as a stray tap/click.
+        if (holdScrollActive) e.stopPropagation();
+        endHoldScroll();
+    };
+    el.addEventListener('touchend', endHoldScrollCapture, { passive: true, capture: true });
+    el.addEventListener('touchcancel', endHoldScrollCapture, { passive: true, capture: true });
 }
 
 // ---- Instant scroll-through on swipe (non-photo cards only) ----
@@ -1065,6 +1098,10 @@ function attachHoldToScroll(el) {
 // make the customer wait: the moment a touch moves enough to look like a
 // scroll rather than a tap, this hands it straight to the page, exactly
 // like touching anywhere else outside the canvas already does.
+//
+// Same reasoning as attachHoldToScroll above for attaching to
+// canvas.wrapperEl with capture:true and calling e.stopPropagation() once
+// handed off, rather than upperCanvasEl — see that comment for why.
 const SWIPE_SCROLL_MOVE_THRESHOLD = 10; // px of movement before it counts as a swipe, not a tap
 let swipeScrollStart = null;
 let swipeScrollHandedOff = false;
@@ -1081,10 +1118,11 @@ function attachInstantScrollOnSwipe(el) {
         const t = e.touches[0];
         swipeScrollStart = { x: t.clientX, y: t.clientY };
         swipeScrollHandedOff = false;
-    }, { passive: true });
+    }, { passive: true, capture: true });
 
     el.addEventListener('touchmove', (e) => {
-        if (!swipeScrollStart || swipeScrollHandedOff) return;
+        if (swipeScrollHandedOff) { e.stopPropagation(); return; }
+        if (!swipeScrollStart) return;
         const t = e.touches[0];
         if (!t) return;
         const moved = Math.hypot(t.clientX - swipeScrollStart.x, t.clientY - swipeScrollStart.y);
@@ -1094,19 +1132,21 @@ function attachInstantScrollOnSwipe(el) {
         canvas.discardActiveObject();
         resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
         canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
-        canvas.skipTargetFind = true; // this touch now passes straight through to the page
+        canvas.skipTargetFind = true; // belt-and-braces: also true for any stray event that isn't stopped below
         canvas.requestRenderAll();
-    }, { passive: true });
+        e.stopPropagation(); // hand off cleanly starting with this event — see attachHoldToScroll's comment
+    }, { passive: true, capture: true });
 
-    const endSwipeScroll = () => {
+    const endSwipeScrollCapture = (e) => {
+        if (swipeScrollHandedOff) e.stopPropagation();
         swipeScrollStart = null;
         if (swipeScrollHandedOff) {
             swipeScrollHandedOff = false;
             canvas.skipTargetFind = false;
         }
     };
-    el.addEventListener('touchend', endSwipeScroll, { passive: true });
-    el.addEventListener('touchcancel', endSwipeScroll, { passive: true });
+    el.addEventListener('touchend', endSwipeScrollCapture, { passive: true, capture: true });
+    el.addEventListener('touchcancel', endSwipeScrollCapture, { passive: true, capture: true });
 }
 
 function updateNameText(inputEl) {
