@@ -620,6 +620,13 @@ function initEditor(templateKey) {
     attachPinchToResize(canvas.upperCanvasEl);
     attachHoldToScroll(canvas.upperCanvasEl);
 
+    // Swipe up/down to flip between the outside and inside spreads —
+    // only wired up on cards with no photo frame, since a photo card
+    // already uses a single-finger drag on the canvas to reposition the
+    // photo (see loadPhotoIntoFrame/attachPinchToResize) and a swipe would
+    // clash with that.
+    if (!activeTemplate.photo) setupSwipeToChangePage();
+
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
         backCoverImg = logoImg;
@@ -1043,6 +1050,45 @@ function attachHoldToScroll(el) {
 
     el.addEventListener('touchend', endHoldScroll, { passive: true });
     el.addEventListener('touchcancel', endHoldScroll, { passive: true });
+}
+
+// ---- Swipe up/down to change page (non-photo cards only) ----
+// On a photo card, a drag on the canvas already means "move the photo" —
+// see attachPinchToResize/loadPhotoIntoFrame — so this is only wired up
+// (see initEditor above) for cards with no photo frame, where nothing on
+// the canvas is otherwise draggable. Works with mouse or touch, since
+// Fabric's mouse:down/move/up events already fire for both. A tap that
+// never moves far enough is left completely alone, so clicking into a
+// message box to edit it still works exactly as before — only once the
+// drag clears SWIPE_PAGE_THRESHOLD, and is mostly vertical rather than
+// sideways, does it count as a page-changing swipe.
+const SWIPE_PAGE_THRESHOLD = 50; // px of vertical travel before it counts as a swipe
+let swipeStart = null;
+let swipeHandled = false;
+
+function setupSwipeToChangePage() {
+    canvas.on('mouse:down', (opt) => {
+        if (opt.target?.isEditing) { swipeStart = null; return; } // never hijack an in-progress edit
+        swipeStart = { x: opt.pointer.x, y: opt.pointer.y };
+        swipeHandled = false;
+    });
+
+    canvas.on('mouse:move', (opt) => {
+        if (!swipeStart || swipeHandled) return;
+        const dx = opt.pointer.x - swipeStart.x;
+        const dy = opt.pointer.y - swipeStart.y;
+        if (Math.abs(dy) < SWIPE_PAGE_THRESHOLD || Math.abs(dy) < Math.abs(dx) * 1.5) return;
+
+        swipeHandled = true;
+        canvas.discardActiveObject();
+        resetBordersToDashed();
+        canvas.requestRenderAll();
+
+        if (dy < 0 && currentPage === 'front') switchPage('inside');
+        else if (dy > 0 && currentPage === 'inside') switchPage('front');
+    });
+
+    canvas.on('mouse:up', () => { swipeStart = null; swipeHandled = false; });
 }
 
 function updateNameText(inputEl) {
