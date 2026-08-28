@@ -794,12 +794,17 @@ function setupTextsAndOverlays() {
     const bgPanelDefaults = { width: BOX_WIDTH, left: BOX_LEFT, fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false };
     insideBgRects = BOX_CONFIGS.map((cfg) => new fabric.Rect({ ...bgPanelDefaults, top: cfg.top, height: cfg.height }));
 
+    // splitByGrapheme:false = wrap on whole words. When a word won't fit
+    // on the remaining space of a line it drops to the next line intact
+    // instead of being split mid-word — Fabric only ever breaks a single
+    // word by character as a last resort, if that word alone is too wide
+    // to fit on an empty line by itself.
     const textDefaults = {
         width: BOX_WIDTH, left: BOX_LEFT,
         fontFamily: "Arial", fill: "#000000", textAlign: "center",
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
-        hasBorders: true, splitByGrapheme: true, backgroundColor: "transparent",
+        hasBorders: true, splitByGrapheme: false, backgroundColor: "transparent",
         ...STYLE_DASHED
     };
     insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
@@ -931,23 +936,21 @@ function attachPinchToResize(el) {
 // ---- Hold-to-scroll ----
 // Empty canvas background already scrolls fine by itself (see
 // `allowTouchScrolling: true` above) — a touch that never hits an object
-// just falls through to the page. The one object worth a deliberate
-// hold/drag distinction is the uploaded photo, since a single-finger touch
-// on it is normally claimed straight away for repositioning. Holding still
-// on the PHOTO for a moment (rather than dragging it immediately) now hands
-// that touch back to the page instead, so the customer can scroll up to
-// the header or down to the footer without first having to look away from
-// the photo.
+// just falls through to the page. Any object (the photo, a message-box
+// text field, the printed name, etc) is normally claimed straight away by
+// Fabric instead, for repositioning/selecting/editing, which is what stops
+// a swipe over the card itself from scrolling the page. Holding still for
+// a moment (rather than dragging/tapping immediately) now hands that touch
+// back to the page, so the customer can scroll from wherever their finger
+// already is — including on top of the outside spread photo and the
+// inside spread message boxes — without first having to find an empty gap.
 //
-// This deliberately does NOT try to do the same thing for the message-box
-// text: a touch that lands on editable text is already being handled by
-// the phone's own text-editing/selection system by the time any hold timer
-// could fire, and stepping in after the fact left things in a broken
-// state — Fabric would fall back to its own rubber-band "select everything
-// nearby" drag, which is what was briefly making the (otherwise fully
-// locked) message boxes look like they'd become a moveable group. Message
-// boxes keep their normal, unmodified tap-to-edit behaviour; scroll using
-// the gaps around them or the header/nav instead.
+// While a message box is actively being edited (keyboard open, cursor
+// mid-placement) we leave it alone entirely — the hold timer is skipped
+// for that box's touches — so this never interrupts someone who's paused
+// mid-type or is placing their cursor in already-typed text. Once they tap
+// away and the box is no longer in edit mode, holding on it scrolls again
+// like everything else.
 const HOLD_TO_SCROLL_MS = 350;
 const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
 let holdTimer = null;
@@ -970,11 +973,14 @@ function endHoldScroll() {
 function attachHoldToScroll(el) {
     el.addEventListener('touchstart', (e) => {
         if (!isMobileDevice() || e.touches.length !== 1) return;
-        // Only step in when the touch starts directly on the photo. Any
-        // other target (text, the artwork background, anything
-        // non-selectable) is left completely alone.
+        // No target (empty canvas/background) already scrolls fine on its
+        // own. A target that's actively being edited right now is left
+        // completely alone so typing/cursor placement is never
+        // interrupted. Anything else -- the photo, a message box not
+        // currently being edited, the name text, etc -- gets the
+        // hold-to-scroll treatment below.
         const target = canvas.findTarget(e, false);
-        if (!photoImg || target !== photoImg) return;
+        if (!target || target.isEditing) return;
 
         const t = e.touches[0];
         holdStart = { x: t.clientX, y: t.clientY };
@@ -982,6 +988,7 @@ function attachHoldToScroll(el) {
         holdTimer = setTimeout(() => {
             holdScrollActive = true;
             canvas.discardActiveObject();
+            resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
             canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
             canvas.skipTargetFind = true; // this touch now passes straight through to the page
             canvas.requestRenderAll();
