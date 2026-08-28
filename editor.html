@@ -618,14 +618,19 @@ function initEditor(templateKey) {
     canvas.calcOffset();
 
     attachPinchToResize(canvas.upperCanvasEl);
-    attachHoldToScroll(canvas.upperCanvasEl);
 
-    // Swipe up/down to flip between the outside and inside spreads —
-    // only wired up on cards with no photo frame, since a photo card
-    // already uses a single-finger drag on the canvas to reposition the
-    // photo (see loadPhotoIntoFrame/attachPinchToResize) and a swipe would
-    // clash with that.
-    if (!activeTemplate.photo) setupSwipeToChangePage();
+    if (activeTemplate.photo) {
+        // Photo cards: a drag on the canvas means "move the photo", so a
+        // touch only hands off to page-scroll after being held still for a
+        // moment — an immediate hand-off would make it impossible to drag
+        // the photo at all.
+        attachHoldToScroll(canvas.upperCanvasEl);
+    } else {
+        // Every other card: nothing on the canvas is draggable, so any
+        // swipe should scroll the page immediately, same as touching
+        // anywhere else on the page already does.
+        attachInstantScrollOnSwipe(canvas.upperCanvasEl);
+    }
 
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
@@ -1052,43 +1057,56 @@ function attachHoldToScroll(el) {
     el.addEventListener('touchcancel', endHoldScroll, { passive: true });
 }
 
-// ---- Swipe up/down to change page (non-photo cards only) ----
-// On a photo card, a drag on the canvas already means "move the photo" —
-// see attachPinchToResize/loadPhotoIntoFrame — so this is only wired up
-// (see initEditor above) for cards with no photo frame, where nothing on
-// the canvas is otherwise draggable. Works with mouse or touch, since
-// Fabric's mouse:down/move/up events already fire for both. A tap that
-// never moves far enough is left completely alone, so clicking into a
-// message box to edit it still works exactly as before — only once the
-// drag clears SWIPE_PAGE_THRESHOLD, and is mostly vertical rather than
-// sideways, does it count as a page-changing swipe.
-const SWIPE_PAGE_THRESHOLD = 50; // px of vertical travel before it counts as a swipe
-let swipeStart = null;
-let swipeHandled = false;
+// ---- Instant scroll-through on swipe (non-photo cards only) ----
+// Photo cards need a brief hold before a touch hands off to page scroll
+// (see attachHoldToScroll) because a drag there normally means "move the
+// photo". Cards with no photo frame have nothing draggable on the canvas
+// at all — every text field is locked in place — so there's no reason to
+// make the customer wait: the moment a touch moves enough to look like a
+// scroll rather than a tap, this hands it straight to the page, exactly
+// like touching anywhere else outside the canvas already does.
+const SWIPE_SCROLL_MOVE_THRESHOLD = 10; // px of movement before it counts as a swipe, not a tap
+let swipeScrollStart = null;
+let swipeScrollHandedOff = false;
 
-function setupSwipeToChangePage() {
-    canvas.on('mouse:down', (opt) => {
-        if (opt.target?.isEditing) { swipeStart = null; return; } // never hijack an in-progress edit
-        swipeStart = { x: opt.pointer.x, y: opt.pointer.y };
-        swipeHandled = false;
-    });
+function attachInstantScrollOnSwipe(el) {
+    el.addEventListener('touchstart', (e) => {
+        if (!isMobileDevice() || e.touches.length !== 1) return;
+        // A target that's actively being edited right now is left
+        // completely alone, same as attachHoldToScroll, so typing/cursor
+        // placement is never interrupted.
+        const target = canvas.findTarget(e, false);
+        if (target?.isEditing) return;
 
-    canvas.on('mouse:move', (opt) => {
-        if (!swipeStart || swipeHandled) return;
-        const dx = opt.pointer.x - swipeStart.x;
-        const dy = opt.pointer.y - swipeStart.y;
-        if (Math.abs(dy) < SWIPE_PAGE_THRESHOLD || Math.abs(dy) < Math.abs(dx) * 1.5) return;
+        const t = e.touches[0];
+        swipeScrollStart = { x: t.clientX, y: t.clientY };
+        swipeScrollHandedOff = false;
+    }, { passive: true });
 
-        swipeHandled = true;
+    el.addEventListener('touchmove', (e) => {
+        if (!swipeScrollStart || swipeScrollHandedOff) return;
+        const t = e.touches[0];
+        if (!t) return;
+        const moved = Math.hypot(t.clientX - swipeScrollStart.x, t.clientY - swipeScrollStart.y);
+        if (moved < SWIPE_SCROLL_MOVE_THRESHOLD) return;
+
+        swipeScrollHandedOff = true;
         canvas.discardActiveObject();
-        resetBordersToDashed();
+        resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
+        canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
+        canvas.skipTargetFind = true; // this touch now passes straight through to the page
         canvas.requestRenderAll();
+    }, { passive: true });
 
-        if (dy < 0 && currentPage === 'front') switchPage('inside');
-        else if (dy > 0 && currentPage === 'inside') switchPage('front');
-    });
-
-    canvas.on('mouse:up', () => { swipeStart = null; swipeHandled = false; });
+    const endSwipeScroll = () => {
+        swipeScrollStart = null;
+        if (swipeScrollHandedOff) {
+            swipeScrollHandedOff = false;
+            canvas.skipTargetFind = false;
+        }
+    };
+    el.addEventListener('touchend', endSwipeScroll, { passive: true });
+    el.addEventListener('touchcancel', endSwipeScroll, { passive: true });
 }
 
 function updateNameText(inputEl) {
