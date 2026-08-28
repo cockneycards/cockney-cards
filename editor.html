@@ -77,9 +77,24 @@
     #card-description h3 { margin: 0 0 10px; font-size: 15px; font-weight: bold; }
     #card-description p { margin: 0; font-size: 13px; line-height: 1.6; color: #555; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
-    .page-toggle { display: flex; gap: 10px; margin-bottom: 25px; }
+    /* Superseded by the page-thumbnail-strip (under the canvas) — kept in
+       the DOM only because switchPage() still toggles its classes/disabled
+       state, but it's never shown to the customer any more. */
+    .page-toggle { display: none; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
     .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
+
+    /* PAGE THUMBNAIL STRIP — sits directly under the canvas so switching
+       between the outside/inside spread is a single tap that's always in
+       view, instead of scrolling down to the controls panel to find the
+       old text toggle (the "scrolling issue" on mobile in particular). */
+    .page-thumbnail-strip { display: flex; justify-content: center; gap: 14px; margin-top: 14px; }
+    .page-thumb { display: flex; flex-direction: column; align-items: center; gap: 6px; background: #f7f7f8; border: 2px solid var(--border-color); border-radius: 8px; padding: 6px; cursor: pointer; transition: border-color 0.15s ease; }
+    .page-thumb:hover { border-color: #bbb; }
+    .page-thumb.active { border-color: var(--primary); }
+    .page-thumb img { width: 110px; height: 78px; object-fit: cover; border-radius: 4px; background: #fff; display: block; }
+    .page-thumb span { font-size: 11px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; color: #555; }
+    .page-thumb.active span { color: var(--primary); }
     .control-group { display: flex; flex-direction: column; gap: 15px; }
     .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
@@ -140,7 +155,7 @@
 
         #canvas-wrapper {
             width: 100%;
-            max-width: 360px;
+            max-width: 420px;
             margin: 0 auto;
         }
 
@@ -170,6 +185,7 @@
         .toggle-btn { font-size: 12px; padding: 10px 6px; }
         .variant-thumb { width: 48px; height: 48px; }
         input[type="text"] { font-size: 16px; } /* avoids iOS auto-zoom on focus */
+        .page-thumb img { width: 84px; height: 60px; }
     }
 </style>
 </head>
@@ -203,6 +219,18 @@
 <div class="editor-workspace">
     <div id="canvas-wrapper">
         <canvas id="canvas"></canvas>
+
+        <div id="page-thumbnail-strip" class="page-thumbnail-strip" style="display:none;">
+            <button type="button" class="page-thumb active" id="thumb-front" onclick="switchPage('front')" aria-label="Edit the outside of the card">
+                <img id="thumb-front-img" alt="Outside of the card">
+                <span>Outside</span>
+            </button>
+            <button type="button" class="page-thumb" id="thumb-inside" onclick="switchPage('inside')" aria-label="Edit the inside of the card">
+                <img id="thumb-inside-img" alt="Inside of the card">
+                <span>Inside</span>
+            </button>
+        </div>
+
         <p id="editor-load-error" style="display:none; color:#c0392b; font-size:13px; text-align:center; margin: 12px 0 0;">
             This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
         </p>
@@ -680,6 +708,8 @@ function loadFrontCover(imageUrl) {
         $('add-to-basket-btn').style.display = 'block';
         $('delivery-section').style.display = 'block';
         switchPage('front');
+        $('page-thumbnail-strip').style.display = 'flex';
+        updatePageThumbnails();
     }, { crossOrigin: 'anonymous' });
 }
 
@@ -732,6 +762,7 @@ function selectVariant(key) {
             scaleY: CANVAS_HEIGHT / bgImg.height
         });
         canvas.requestRenderAll();
+        scheduleThumbnailUpdate();
     }, { crossOrigin: "anonymous" });
 
     document.querySelectorAll("#variant-selector .variant-thumb").forEach((btn) => {
@@ -888,6 +919,7 @@ function loadPhotoIntoFrame(dataUrl) {
                                       // its transparent cutout is what shows this
         canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
+        scheduleThumbnailUpdate();
     }, { crossOrigin: 'anonymous' });
 }
 
@@ -1026,6 +1058,7 @@ function updateNameText(inputEl) {
         nameText.set({ text: displayVal || "NAME" });
     }
     canvas.requestRenderAll();
+    scheduleThumbnailUpdate();
 }
 
 function updateAgeText(inputEl) {
@@ -1042,6 +1075,7 @@ function updateAgeText(inputEl) {
 
     ageText.set({ text: (val || a?.defaultText || "40").toUpperCase() });
     canvas.requestRenderAll();
+    scheduleThumbnailUpdate();
 }
 
 // Builds one label+input pair per entry in activeTemplate.extraFields
@@ -1086,6 +1120,7 @@ function updateExtraFieldText(index, value) {
 
     t.set({ text: val ? val.toUpperCase() : (f.label || f.key || '').toUpperCase() });
     canvas.requestRenderAll();
+    scheduleThumbnailUpdate();
 }
 
 function updateFrontColor(hexColor) {
@@ -1099,6 +1134,7 @@ function updateFrontColor(hexColor) {
     }
     ageText?.set({ fill: hexColor });
     canvas.requestRenderAll();
+    scheduleThumbnailUpdate();
 }
 
 function updateFrontSize(size) {
@@ -1114,6 +1150,7 @@ function updateFrontSize(size) {
         }
     }
     canvas.requestRenderAll();
+    scheduleThumbnailUpdate();
 }
 
 function switchPage(page) {
@@ -1124,6 +1161,8 @@ function switchPage(page) {
 
     $('toggle-front').classList.toggle('active', isFront);
     $('toggle-inside').classList.toggle('active', !isFront);
+    $('thumb-front').classList.toggle('active', isFront);
+    $('thumb-inside').classList.toggle('active', !isFront);
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
@@ -1137,6 +1176,11 @@ function switchPage(page) {
 }
 
 function setupTextEvents() {
+    // Covers the photo being dragged/resized (the only freely-movable
+    // object on the canvas) — refreshes the thumbnail once the customer
+    // lets go, rather than continuously while dragging.
+    canvas.on('object:modified', () => scheduleThumbnailUpdate());
+
     canvas.on("mouse:down", ({ target }) => {
         if (currentPage !== 'inside' || !insideTexts.includes(target)) return;
         resetBordersToDashed();
@@ -1189,6 +1233,7 @@ function setupTextEvents() {
                 textbox._lastValidText = textbox.text;
             }
             canvas.requestRenderAll();
+            scheduleThumbnailUpdate();
         });
     });
 }
@@ -1226,6 +1271,7 @@ function toggleBlankMessage(isChecked) {
 
     resetBordersToDashed();
     canvas.requestRenderAll();
+    scheduleThumbnailUpdate();
 }
 
 // Builds the name as a Fabric Group of individually-rotated characters
@@ -1316,6 +1362,63 @@ function captureFullSpread() {
             }
         });
     });
+}
+
+// Renders a small, low-quality preview of an already-captured full-spread
+// JSON snapshot (see updatePageThumbnails below) for the page-thumbnail
+// strip under the canvas. Deliberately tiny/low-quality — this is a UI
+// thumbnail, not a print asset — and takes a JSON snapshot rather than
+// reading the live canvas directly, so it never has to touch or re-render
+// what the customer is actually looking at.
+function captureThumbnailFromJson(json) {
+    return new Promise((resolve, reject) => {
+        const exportEl = document.createElement('canvas');
+        const exportCanvas = new fabric.StaticCanvas(exportEl, {
+            width: CANVAS_WIDTH, height: CANVAS_HEIGHT
+        });
+        exportCanvas.loadFromJSON(json, () => {
+            try {
+                exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+                exportCanvas.renderAll();
+                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.55, multiplier: 0.18 });
+                exportCanvas.dispose();
+                resolve(dataUrl);
+            } catch (err) {
+                exportCanvas.dispose();
+                reject(err);
+            }
+        });
+    });
+}
+
+// Regenerates both thumbnails in the page-thumbnail strip so they reflect
+// whatever the customer has just edited. Flips the live canvas through
+// 'front' then 'inside' to grab an accurate toJSON() snapshot of each, then
+// straight back to whichever page was actually showing — all synchronously,
+// with no awaits in between, so the browser never gets a chance to paint
+// the in-between states and the customer never sees a flicker. The actual
+// (slower) rendering of each snapshot into a small preview image happens
+// afterwards, off the live canvas entirely.
+let thumbnailUpdateTimer = null;
+function scheduleThumbnailUpdate(delay = 500) {
+    clearTimeout(thumbnailUpdateTimer);
+    thumbnailUpdateTimer = setTimeout(updatePageThumbnails, delay);
+}
+
+function updatePageThumbnails() {
+    if (!editorReady) return;
+    const pageBeforeUpdate = currentPage;
+
+    switchPage('front');
+    const frontJson = canvas.toJSON();
+
+    switchPage('inside');
+    const insideJson = canvas.toJSON();
+
+    switchPage(pageBeforeUpdate);
+
+    captureThumbnailFromJson(frontJson).then((url) => { $('thumb-front-img').src = url; }).catch(() => {});
+    captureThumbnailFromJson(insideJson).then((url) => { $('thumb-inside-img').src = url; }).catch(() => {});
 }
 
 // Draws one spread onto the current page of a jsPDF doc: the artwork at
