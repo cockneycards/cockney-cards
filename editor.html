@@ -87,14 +87,15 @@
     /* NAME/SHIRT + BLANK-MESSAGE FIELDS, MOVED BELOW THE CANVAS
        (sit between the canvas and the page-thumbnail strip, instead of
        buried in the side controls panel). */
-    .below-canvas-panel { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+    .side-personalisation-tools { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
+    .below-canvas-panel { display: flex; flex-direction: column; gap: 14px; margin-top: 0; }
     .below-canvas-fields label { display: block; margin-bottom: 6px; }
 
     /* PAGE THUMBNAIL STRIP — sits directly under the canvas so switching
        between the outside/inside spread is a single tap that's always in
        view, instead of scrolling down to the controls panel to find the
        old text toggle (the "scrolling issue" on mobile in particular). */
-    .page-thumbnail-strip { display: flex; justify-content: center; gap: 14px; margin-top: 14px; }
+    .page-thumbnail-strip { display: flex; justify-content: center; gap: 14px; margin-top: 0; flex-wrap: wrap; }
     .page-thumb { display: flex; flex-direction: column; align-items: center; gap: 6px; background: #f7f7f8; border: 2px solid var(--border-color); border-radius: 8px; padding: 6px; cursor: pointer; transition: border-color 0.15s ease; }
     .page-thumb:hover { border-color: #bbb; }
     .page-thumb.active { border-color: var(--primary); }
@@ -132,15 +133,10 @@
 
     /* ============================================================
        MOBILE / TABLET RESPONSIVE LAYOUT
-       Editor workspace stacks: canvas on top, personalisation
-       controls (page toggle + options) below — the DOM already puts
-       #canvas-wrapper before .side-column, so flex-direction:column
-       gives us this order for free. The canvas itself is scaled
-       down purely with CSS (max-width:100% / height:auto on the
-       Fabric-generated canvas elements) — Fabric.js converts pointer
-       coordinates using the ratio between the CSS-rendered size and
-       the canvas's internal resolution, so dragging/resizing photos
-       and text stays accurate even at a smaller on-screen size.
+       The canvas remains above the controls on smaller screens, while
+       all personalisation controls, the blank-message checkbox and the
+       two page preview thumbnails remain inside the side panel. They are
+       never moved underneath the canvas as separate elements.
        ============================================================ */
     @media (max-width: 900px) {
         header { padding: 12px 16px 8px; }
@@ -180,6 +176,8 @@
 
         .side-column { width: 100%; max-width: 420px; }
         .controls { padding: 22px; }
+        .side-personalisation-tools { width: 100%; margin-top: 18px; }
+        .side-personalisation-tools .page-thumbnail-strip { width: 100%; }
         .controls h2 { font-size: 19px; margin-bottom: 18px; }
 
         footer { padding: 40px 20px 20px; }
@@ -226,34 +224,6 @@
     <div id="canvas-wrapper">
         <canvas id="canvas"></canvas>
 
-        <div class="below-canvas-panel">
-            <div id="front-name-age-fields" class="below-canvas-fields">
-                <label id="label-name" for="name-input">Name:</label>
-                <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
-
-                <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
-                <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)">
-            </div>
-
-            <div id="inside-controls" class="below-canvas-fields">
-                <div class="flex-row" style="align-items: center; gap: 10px;">
-                    <input type="checkbox" id="blank-message-checkbox" onchange="toggleBlankMessage(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
-                    <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Leave Message Blank — I'll write my own inside</label>
-                </div>
-            </div>
-        </div>
-
-        <div id="page-thumbnail-strip" class="page-thumbnail-strip" style="display:none;">
-            <button type="button" class="page-thumb active" id="thumb-front" onclick="switchPage('front')" aria-label="Edit the outside of the card">
-                <img id="thumb-front-img" alt="Outside of the card">
-                <span>Outside</span>
-            </button>
-            <button type="button" class="page-thumb" id="thumb-inside" onclick="switchPage('inside')" aria-label="Edit the inside of the card">
-                <img id="thumb-inside-img" alt="Inside of the card">
-                <span>Inside</span>
-            </button>
-        </div>
-
         <p id="editor-load-error" style="display:none; color:#c0392b; font-size:13px; text-align:center; margin: 12px 0 0;">
             This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
         </p>
@@ -264,6 +234,36 @@
         <div class="page-toggle">
             <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')" disabled>Outside Spread</button>
             <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Inside Spread</button>
+        </div>
+
+        <div id="side-personalisation-tools" class="side-personalisation-tools">
+            <div class="below-canvas-panel">
+                <div id="front-name-age-fields" class="below-canvas-fields">
+                    <label id="label-name" for="name-input">Name:</label>
+                    <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
+
+                    <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
+                    <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)">
+                </div>
+
+                <div id="inside-controls" class="below-canvas-fields">
+                    <div class="flex-row" style="align-items: center; gap: 10px;">
+                        <input type="checkbox" id="blank-message-checkbox" onchange="toggleBlankMessage(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                        <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Leave Message Blank — I'll write my own inside</label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-thumbnail-strip" class="page-thumbnail-strip" style="display:none;">
+                <button type="button" class="page-thumb active" id="thumb-front" onclick="switchPage('front')" aria-label="Edit the outside of the card">
+                    <img id="thumb-front-img" alt="Outside of the card">
+                    <span>Outside</span>
+                </button>
+                <button type="button" class="page-thumb" id="thumb-inside" onclick="switchPage('inside')" aria-label="Edit the inside of the card">
+                    <img id="thumb-inside-img" alt="Inside of the card">
+                    <span>Inside</span>
+                </button>
+            </div>
         </div>
 
         <div id="front-controls" class="control-group">
