@@ -807,12 +807,14 @@ function setupTextsAndOverlays() {
     const bgPanelDefaults = { width: BOX_WIDTH, left: BOX_LEFT, fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false };
     insideBgRects = BOX_CONFIGS.map((cfg) => new fabric.Rect({ ...bgPanelDefaults, top: cfg.top, height: cfg.height }));
 
+    // splitByGrapheme: false makes Fabric wrap whole words down to the next
+    // line when they don't fit, instead of breaking mid-word.
     const textDefaults = {
         width: BOX_WIDTH, left: BOX_LEFT,
         fontFamily: "Arial", fill: "#000000", textAlign: "center",
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
-        hasBorders: true, splitByGrapheme: true, backgroundColor: "transparent",
+        hasBorders: true, splitByGrapheme: false, backgroundColor: "transparent",
         ...STYLE_DASHED
     };
     insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
@@ -1563,7 +1565,7 @@ async function addCurrentCardToBasket() {
         $('next-btn').disabled = false;
         setTimeout(() => {
             addBtn.innerText = originalText;
-            addBtn.disabled = false;
+            updateAddToBasketAvailability(); // re-checks photo/name/checkbox state rather than blindly re-enabling
         }, 1500);
     } catch (err) {
         console.error(err);
