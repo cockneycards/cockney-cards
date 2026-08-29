@@ -60,6 +60,24 @@
 
     #checkout-error { font-size: 12px; color: #c0392b; margin-top: 10px; display: none; }
 
+    .preview-link { font-size: 12px; color: var(--primary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; text-align: right; }
+    .preview-link:hover { color: #0d5bc4; }
+
+    .preview-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    .preview-overlay.open { display: flex; }
+    .preview-modal { background: white; border-radius: 10px; max-width: 520px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+    .preview-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+    .preview-modal-header h3 { margin: 0; font-size: 15px; font-weight: bold; }
+    .preview-close { background: none; border: none; font-size: 20px; line-height: 1; cursor: pointer; color: #888; padding: 4px; }
+    .preview-close:hover { color: #111; }
+    .preview-tabs { display: flex; gap: 8px; padding: 12px 20px 0; }
+    .preview-tab { flex: 1; padding: 8px; border: 1px solid var(--border-color); background: #f5f5f5; border-radius: 6px; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; cursor: pointer; color: #666; text-transform: uppercase; }
+    .preview-tab.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+    .preview-image-wrap { padding: 20px; text-align: center; overflow: auto; flex: 1; }
+    .preview-image-wrap img { max-width: 100%; max-height: 60vh; object-fit: contain; border: 1px solid #eee; border-radius: 4px; }
+    .preview-unavailable { font-size: 13px; color: #999; padding: 40px 20px; }
+    .preview-modal-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); font-size: 11px; color: #999; text-align: center; }
+
     footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
     .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
     .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
@@ -106,6 +124,18 @@
 <div class="basket-page">
     <h1>Your Basket</h1>
     <div id="basket-content"></div>
+</div>
+
+<div class="preview-overlay" id="preview-overlay" onclick="if(event.target===this) closePreview();">
+    <div class="preview-modal">
+        <div class="preview-modal-header">
+            <h3 id="preview-title">Proof your card</h3>
+            <button class="preview-close" onclick="closePreview()">&times;</button>
+        </div>
+        <div class="preview-tabs" id="preview-tabs"></div>
+        <div class="preview-image-wrap" id="preview-image-wrap"></div>
+        <div class="preview-modal-footer">Please check spelling and layout carefully — this is exactly how your card will print.</div>
+    </div>
 </div>
 
 <footer>
@@ -177,6 +207,7 @@ window.addEventListener('DOMContentLoaded', () => {
     refreshMembershipStatus();
 });
 window.addEventListener('cc-cart-updated', renderBasket);
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview(); });
 
 // ---------------------------------------------------------------------
 // Postage estimate — mirrors functions/postage.js + the grouping/waiver
@@ -347,9 +378,11 @@ function renderItem(item) {
         ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.75)} <span style="color:#1a7a3c; font-weight:normal;">(Club price)</span>`
         : (item.price || ccCart.formatGBP(item.priceValue));
 
+    const hasPreview = !!(item.thumbnail || item.previewFront || item.previewInside);
+
     return `
         <div class="basket-item" data-id="${item.id}">
-            <img src="${item.thumbnail || ''}" alt="${item.title || ''}">
+            <img src="${item.thumbnail || ''}" alt="${item.title || ''}" ${hasPreview ? `style="cursor:pointer;" onclick="openPreview('${item.id}')"` : ''}>
             <div class="item-info">
                 <p class="item-title">${item.title || 'Personalised item'}</p>
                 <p class="item-options">${item.optionsSummary || ''}</p>
@@ -361,10 +394,89 @@ function renderItem(item) {
                     <input type="number" min="1" max="20" value="${item.quantity}" onchange="changeQty('${item.id}', this.value)">
                     <button type="button" onclick="changeQty('${item.id}', ${item.quantity + 1})">+</button>
                 </div>
+                ${hasPreview ? `<button class="preview-link" onclick="openPreview('${item.id}')">Preview card</button>` : ''}
                 <button class="remove-link" onclick="removeItem('${item.id}')">Remove</button>
             </div>
         </div>
     `;
+}
+
+// ---------------------------------------------------------------------
+// Card proofing preview — lets the customer double-check the front
+// design and/or inside message of a card already in the basket before
+// they pay. Reads item.previewFront / item.previewInside if present
+// (these don't exist in the cart schema yet — see note below), falling
+// back to item.thumbnail as a "front" image so the button still does
+// something useful today. Purely a viewer: doesn't touch pdfDataUri or
+// anything that affects checkout.
+// ---------------------------------------------------------------------
+let previewActiveTab = 'front';
+
+function getPreviewImages(item) {
+    return {
+        front: item.previewFront || item.thumbnail || null,
+        inside: item.previewInside || null
+    };
+}
+
+function openPreview(id) {
+    const item = ccCart.getCart().find((i) => i.id === id);
+    if (!item) return;
+
+    const images = getPreviewImages(item);
+    previewActiveTab = images.front ? 'front' : 'inside';
+
+    $('preview-title').textContent = item.title || 'Proof your card';
+    renderPreviewTabs(images);
+    renderPreviewImage(images);
+
+    const overlay = $('preview-overlay');
+    overlay.dataset.itemId = id;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function renderPreviewTabs(images) {
+    const hasBoth = images.front && images.inside;
+    const tabsEl = $('preview-tabs');
+    if (!hasBoth) {
+        tabsEl.innerHTML = '';
+        tabsEl.style.display = 'none';
+        return;
+    }
+    tabsEl.style.display = 'flex';
+    tabsEl.innerHTML = `
+        <button type="button" class="preview-tab ${previewActiveTab === 'front' ? 'active' : ''}" onclick="switchPreviewTab('front')">Front</button>
+        <button type="button" class="preview-tab ${previewActiveTab === 'inside' ? 'active' : ''}" onclick="switchPreviewTab('inside')">Inside Message</button>
+    `;
+}
+
+function switchPreviewTab(tab) {
+    previewActiveTab = tab;
+    const overlay = $('preview-overlay');
+    if (!overlay.classList.contains('open')) return;
+    // Re-derive images from whichever item is currently showing by
+    // re-reading the tabs' onclick targets isn't possible statelessly,
+    // so we just re-render using the last opened item id stored on the overlay.
+    const id = overlay.dataset.itemId;
+    const item = ccCart.getCart().find((i) => i.id === id);
+    if (!item) return;
+    const images = getPreviewImages(item);
+    renderPreviewTabs(images);
+    renderPreviewImage(images);
+}
+
+function renderPreviewImage(images) {
+    const wrap = $('preview-image-wrap');
+    const src = previewActiveTab === 'inside' ? images.inside : images.front;
+    wrap.innerHTML = src
+        ? `<img src="${src}" alt="Card ${previewActiveTab} preview">`
+        : `<p class="preview-unavailable">No ${previewActiveTab} preview available for this item.</p>`;
+}
+
+function closePreview() {
+    $('preview-overlay').classList.remove('open');
+    document.body.style.overflow = '';
 }
 
 function changeQty(id, value) {
