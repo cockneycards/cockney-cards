@@ -144,7 +144,7 @@
     <div id="logged-out-view">
         <div class="login-container">
             <div id="referral-banner" style="display:none; background:#fff8ec; border:1px solid #f0dfb0; border-radius:6px; padding:14px 16px; margin-bottom:22px; font-size:13px; color:#665c3d; line-height:1.5;">
-                🎉 You've been invited to Cockney Cards — sign up below and get <strong>25% off your first order</strong>, automatically.
+                🎉 You've been invited to Cockney Cards — sign up below and get <strong>15% off your first order</strong>, automatically.
             </div>
             <h1>My Account</h1>
             <p class="lead">Log in to view orders, manage your details, and set reminders.</p>
@@ -191,7 +191,7 @@
                 <!-- Cockney Cards Club -->
                 <div class="tab-panel" id="tab-plus">
                     <h1>Cockney Cards Club</h1>
-                    <p class="lead">£9.99/year — 30% off every card. Plus, free delivery on 3+ cards to the same address or 2+ same-size prints to the same address, for every customer. <a href="cockney-club.html" style="color: var(--primary);">See full benefits &amp; terms</a></p>
+                    <p class="lead">£9.99/year — 25% off every card. Plus, free delivery on 3+ cards to the same address or 2+ same-size prints to the same address, for every customer. <a href="cockney-club.html" style="color: var(--primary);">See full benefits &amp; terms</a></p>
                     <div class="card" id="plus-status">
                         <div class="empty-state">Loading...</div>
                     </div>
@@ -200,7 +200,7 @@
                 <!-- Refer a Friend -->
                 <div class="tab-panel" id="tab-referrals">
                     <h1>Refer a Friend</h1>
-                    <p class="lead">Invite a friend and we'll email them your link — they get 25% off their first order, and once they buy their first card, you get a free card too. You only pay delivery.</p>
+                    <p class="lead">Invite a friend and we'll email them your link — they get 15% off their first order, and once they buy their first card, you get a free card too. You only pay delivery.</p>
                     <div class="card" id="referral-status">
                         <div class="empty-state">Loading...</div>
                     </div>
@@ -335,7 +335,7 @@
     // it, and falls back to whatever's already stored (from a previous
     // visit, or from cart.js capturing it on another page) otherwise —
     // so a friend who lands here, gets distracted, and comes back later
-    // doesn't lose their 25% off.
+    // doesn't lose their 15% off.
     function captureReferralCode() {
         const params = new URLSearchParams(window.location.search);
         const fromUrl = (params.get("ref") || "").trim().toUpperCase();
@@ -462,7 +462,7 @@
 
                         <h3 style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#888; margin: 22px 0 10px;">Your Benefits</h3>
                         <ul style="font-size: 13px; color: #444; line-height: 1.9; margin: 0 0 24px; padding-left: 18px;">
-                            <li>30% off every card, applied automatically at checkout</li>
+                            <li>25% off every card, applied automatically at checkout</li>
                             <li>Free delivery on 3+ cards to the same address (every customer gets this)</li>
                             <li>Free delivery on 2+ same-size prints to the same address (every customer gets this)</li>
                             <li>Refer a friend and get a free card once they place their first order</li>
@@ -478,7 +478,7 @@
             } else {
                 el.innerHTML = `
                     <div style="padding: 10px 0;">
-                        <p style="font-size: 13px; color: #666; margin: 0 0 15px;">Join for £9.99/year and get 30% off every card. (Everyone — member or not — also gets free delivery on 3+ cards, or 2+ same-size prints, to the same address.)</p>
+                        <p style="font-size: 13px; color: #666; margin: 0 0 15px;">Join for £9.99/year and get 25% off every card. (Everyone — member or not — also gets free delivery on 3+ cards, or 2+ same-size prints, to the same address.)</p>
                         <button class="btn" id="join-plus-btn" onclick="joinPlusMembership()">Join Cockney Cards Club — £9.99/year</button>
                         <p id="plus-error" style="color:#c0392b; font-size:12px; margin-top:10px; display:none;"></p>
                     </div>
@@ -516,7 +516,7 @@
     }
 
     async function cancelMembership() {
-        if (!confirm("Cancel your Cockney Cards Club membership? You'll keep your 30% discount until the end of your current paid period, but it won't renew after that.")) return;
+        if (!confirm("Cancel your Cockney Cards Club membership? You'll keep your 25% discount until the end of your current paid period, but it won't renew after that.")) return;
 
         const btn = $("cancel-plus-btn");
         const statusEl = $("plus-cancel-status");
@@ -586,7 +586,7 @@
             const rewardsHtml = unredeemedRewards.length
                 ? unredeemedRewards.map(r => {
                     const label = r.rewardType === "new_customer_25"
-                        ? `${r.discountPercent || 25}% off one card — enter this at checkout`
+                        ? `${r.discountPercent || 15}% off one card — enter this at checkout`
                         : "Unused — enter this at checkout on your next card order";
                     return `
                     <div class="reminder-row">
