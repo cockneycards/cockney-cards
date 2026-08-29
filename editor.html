@@ -147,13 +147,9 @@
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
 
             <div id="front-text-inputs">
-                <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Outside Spread Details</label>
-                
-                <label id="label-name" for="name-input">Name:</label>
                 <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
 
-                <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
-                <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)">
+                <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)" style="margin-top: 10px;">
 
                 <div id="extra-fields-container"></div>
 
@@ -171,7 +167,7 @@
                 </div>
             </div>
 
-            <div id="front-photo-upload" style="display:none; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+            <div id="front-photo-upload" style="display:none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
                 <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Upload Photo</label>
                 <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
                 <p style="font-size:12px; color:#666; margin-top:6px;">
@@ -508,16 +504,14 @@ function initEditor(templateKey) {
     $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
     buildExtraFieldInputs();
     if (hasPersonalisation) {
-        $('name-input').style.display = $('label-name').style.display = activeTemplate.name ? 'block' : 'none';
-        $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
+        $('name-input').style.display = activeTemplate.name ? 'block' : 'none';
+        $('age-input').style.display = activeTemplate.age ? 'block' : 'none';
         if (activeTemplate.name) {
             const nameLabel = activeTemplate.name.label || 'Name';
-            $('label-name').textContent = nameLabel + ':';
             $('name-input').placeholder = nameLabel + ':';
         }
         if (activeTemplate.age) {
             const ageLabel = activeTemplate.age.label || 'Age';
-            $('label-age').textContent = ageLabel + ':';
             $('age-input').placeholder = ageLabel + ':';
             $('age-input').setAttribute('inputmode', activeTemplate.age.lettersOnly ? 'text' : 'numeric');
         }
