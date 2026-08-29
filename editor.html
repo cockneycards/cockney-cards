@@ -76,7 +76,7 @@
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
     .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
     .controls { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
-    .controls h2 { margin: 0 0 10px; font-size: 22px; font-weight: 300; }
+    .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: bold; }
     .control-group { display: flex; flex-direction: column; gap: 15px; }
     .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
@@ -119,7 +119,7 @@
     @media (max-width: 500px) {
         .editor-workspace { padding: 0 16px; margin: 16px auto; }
         .controls { padding: 22px; }
-        .controls h2 { font-size: 19px; margin-bottom: 8px; }
+        .controls h2 { font-size: 19px; margin-bottom: 18px; }
     }
 
     @media (max-width: 480px) {
@@ -187,8 +187,12 @@
         <label class="control-group-divider">Inside Spread </label>
         <div id="inside-controls" class="control-group">
             <div class="flex-row" style="align-items: center; gap: 10px;">
+                <input type="checkbox" id="own-message-checkbox" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <label for="own-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Tick here if you have added your own personal message</label>
+            </div>
+            <div class="flex-row" style="align-items: center; gap: 10px;">
                 <input type="checkbox" id="blank-message-checkbox" onchange="toggleBlankMessage(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
-                <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Leave Message Blank — I'll write my own inside</label>
+                <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Tick here to leave the card message blank</label>
             </div>
         </div>
 
