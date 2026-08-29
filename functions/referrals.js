@@ -22,9 +22,9 @@
 //                       redeemed, created_at, redeemed_at) — reward_type is
 //                       'free_card' (the existing referrer reward — free
 //                       card, customer still pays postage, discount_percent
-//                       is NULL) or 'new_customer_25' (25% off one card,
+//                       is NULL) or 'new_customer_25' (15% off one card,
 //                       issued to a brand-new user who signed up via a
-//                       referral link, discount_percent = 25). See
+//                       referral link, discount_percent = 15). See
 //                       referrals-schema-update.sql for the migration that
 //                       adds discount_percent to an existing table.
 
@@ -64,7 +64,7 @@ export async function generateUniqueReferralCode(env) {
 // is being created and their magic_tokens row carried a `ref` code.
 // Never throws — a broken referral shouldn't be able to block someone
 // signing up. On success (a genuinely new referral, not a re-verify of
-// one that already existed), also issues the new user a single-use 25%-
+// one that already existed), also issues the new user a single-use 15%-
 // off-one-card welcome reward and returns its code so the caller
 // (account-api.js) can email them about it — this function only touches
 // D1, it doesn't send email itself, same division of labour as the rest
@@ -88,13 +88,13 @@ export async function recordReferralIfAny(env, refCode, newUserId, newUserEmail)
         // Only issue the welcome discount when a referral row was actually
         // newly created — result.meta.changes is 0 when INSERT OR IGNORE
         // hit the UNIQUE constraint above, which stops someone re-verifying
-        // against the same link from farming multiple 25%-off codes.
+        // against the same link from farming multiple 15%-off codes.
         if (!result?.meta?.changes) return null;
 
         const rewardCode = genShortCode('WELCOME');
         await env.DB.prepare(
             `INSERT INTO reward_codes (code, user_id, reward_type, discount_percent, redeemed, created_at)
-             VALUES (?, ?, 'new_customer_25', 25, 0, ?)`
+             VALUES (?, ?, 'new_customer_25', 15, 0, ?)`
         ).bind(rewardCode, newUserId, Date.now()).run();
 
         return { rewardCode };
@@ -203,7 +203,7 @@ export async function getReferralSummary(env, user) {
 // Called from create-checkout-basket.js for every logged-in checkout —
 // finds an unredeemed 'new_customer_25' welcome reward for this user
 // without them needing to know or type a code. This is what makes the
-// 25%-off-first-order signup perk actually happen automatically; the
+// 15%-off-first-order signup perk actually happen automatically; the
 // code (and manual entry via getRewardCodeDetails above) still exists
 // for reference/email purposes, but checkout no longer depends on it.
 export async function getActiveWelcomeReward(user, env) {
@@ -215,7 +215,7 @@ export async function getActiveWelcomeReward(user, env) {
              ORDER BY created_at ASC LIMIT 1`
         ).bind(user.id).first();
         if (!row) return null;
-        return { code: row.code, discountPercent: row.discount_percent || 25 };
+        return { code: row.code, discountPercent: row.discount_percent || 15 };
     } catch (err) {
         console.error('getActiveWelcomeReward failed:', err);
         return null;
@@ -227,7 +227,7 @@ export async function getActiveWelcomeReward(user, env) {
 // confirmed the code is valid and unredeemed. Returns the reward's type
 // and, for percentage-off rewards, how much — so the checkout code can
 // tell a 'free_card' reward (waives one card's price entirely, customer
-// still pays postage) apart from a 'new_customer_25' reward (25% off one
+// still pays postage) apart from a 'new_customer_25' reward (15% off one
 // card's price) rather than assuming every reward means the same thing.
 // Returns null for a missing/already-redeemed/mismatched-user code, same
 // as validateRewardCode returning false.
@@ -303,17 +303,17 @@ function referralRewardEmailHtml(env, rewardCode) {
 }
 
 // Exported so account-api.js's handleVerify can build the "you've been
-// welcomed with 25% off" email without duplicating the branding here.
+// welcomed with 15% off" email without duplicating the branding here.
 export function newCustomerWelcomeEmailHtml(env, rewardCode) {
     const shopUrl = `${env.SITE_URL || ''}/shop-cards.html`;
     return brandedEmailShell(env, `
-        <h2 style="font-weight: 400; font-size: 20px; margin: 0 0 12px;">Your friend has given you 25% off your 1st order! 🎉</h2>
+        <h2 style="font-weight: 400; font-size: 20px; margin: 0 0 12px;">Your friend has given you 15% off your 1st order! 🎉</h2>
         <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 20px;">Welcome to Cockney Cards — someone thought you'd love our cards, so here's a little something to say hello.</p>
         <div style="background: #f5f5f5; border-radius: 8px; padding: 16px; text-align: center; margin: 0 0 20px;">
             <p style="margin: 0; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Your code</p>
             <p style="margin: 6px 0 0; font-size: 22px; font-weight: 700; letter-spacing: 1px;">${rewardCode}</p>
         </div>
-        <p style="font-size: 13px; color: #555; margin: 0 0 20px;">Enter it at checkout — 25% off the price of one card, on us. One-time use.</p>
+        <p style="font-size: 13px; color: #555; margin: 0 0 20px;">Enter it at checkout — 15% off the price of one card, on us. One-time use.</p>
         <div style="text-align: center;">
             <a href="${shopUrl}" style="display: inline-block; background: #1a1a1a; color: #fff; padding: 12px 26px; text-decoration: none; border-radius: 4px; font-size: 13px; letter-spacing: 0.5px;">Shop Cards</a>
         </div>
@@ -327,15 +327,15 @@ export function newCustomerWelcomeEmailHtml(env, rewardCode) {
 // copy-paste their link somewhere themselves. There's no reward code yet
 // at this point (that's only issued once the friend actually signs up —
 // see recordReferralIfAny/newCustomerWelcomeEmailHtml above), so this
-// just sells the 25%-off headline and hands over the referral link.
+// just sells the 15%-off headline and hands over the referral link.
 export function referralInviteEmailHtml(env, { friendName, referralLink }) {
     const greeting = friendName ? `Hi ${friendName},` : 'Hi there,';
     return brandedEmailShell(env, `
         <h2 style="font-weight: 400; font-size: 20px; margin: 0 0 12px;">You've been invited to join Cockney Cards! 🎉</h2>
         <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 6px;">${greeting}</p>
-        <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 20px;">A friend thinks you'd love our personalised cards — follow the link below to create an account and you'll get <strong>25% off your first order</strong>, automatically.</p>
+        <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 20px;">A friend thinks you'd love our personalised cards — follow the link below to create an account and you'll get <strong>15% off your first order</strong>, automatically.</p>
         <div style="text-align: center; margin: 0 0 20px;">
-            <a href="${referralLink}" style="display: inline-block; background: #1a1a1a; color: #fff; padding: 14px 30px; text-decoration: none; border-radius: 4px; font-size: 13px; letter-spacing: 0.5px;">Get My 25% Off</a>
+            <a href="${referralLink}" style="display: inline-block; background: #1a1a1a; color: #fff; padding: 14px 30px; text-decoration: none; border-radius: 4px; font-size: 13px; letter-spacing: 0.5px;">Get My 15% Off</a>
         </div>
         <p style="font-size: 12px; color: #999; margin: 0;">Or copy this link into your browser:<br>${referralLink}</p>
         ${clubBenefitsBlockHtml()}
