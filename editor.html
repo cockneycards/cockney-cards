@@ -847,9 +847,16 @@ function handlePhotoUpload(inputEl) {
 
 // Adds the customer's photo as a BACKGROUND layer, sent behind the card
 // artwork — the artwork's own transparent cutout masks it, so the shape is
-// always a pixel-perfect match with soft anti-aliased edges (no synthetic
-// clipPath needed). Cover-fit sized into the configured frame box, then
-// the customer can drag to reposition or use the corner handle to resize.
+// always a pixel-perfect match with soft anti-aliased edges. On top of
+// that, the photo also gets a hard rectangular clipPath matching the frame
+// box itself (absolutePositioned, so it stays put in canvas coordinates
+// regardless of how the customer drags/resizes the photo) — belt and
+// braces: some card backs/panels are mostly transparent by design (e.g.
+// just a small logo), so relying on the artwork alone to mask an oversized
+// or repositioned photo isn't safe. The clipPath is what actually
+// guarantees the photo can never render outside its intended frame.
+// Cover-fit sized into the configured frame box, then the customer can
+// drag to reposition or use the corner handle to resize.
 //
 // On desktop this keeps the normal visible blue selection box + corner
 // handle. On phones/tablets (see isMobileDevice()) the box/handle are
@@ -878,7 +885,15 @@ function loadPhotoIntoFrame(dataUrl) {
             borderColor: '#1A73E8',
             cornerColor: '#1A73E8',
             cornerStrokeColor: '#1A73E8',
-            transparentCorners: false
+            transparentCorners: false,
+            // Hard-clips the photo to the frame's bounding box in canvas
+            // (not object-local) coordinates — see comment above.
+            clipPath: new fabric.Rect({
+                left: p.left, top: p.top,
+                originX: 'center', originY: 'center',
+                width: p.width, height: p.height,
+                absolutePositioned: true
+            })
         });
         img.setControlsVisibility({ mtr: false });
 
