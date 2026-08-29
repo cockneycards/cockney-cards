@@ -220,6 +220,11 @@
         <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Write Message</button>
     </div>
 
+    <div id="card-description" style="display:none; margin: 0 0 15px; padding: 12px 14px; background:#f7f7f7; border-radius:6px;">
+        <p id="card-description-title" style="font-size:12px; font-weight:bold; color:#333; margin:0 0 6px; letter-spacing:0.5px; text-transform:uppercase;"></p>
+        <p id="card-description-text" style="font-size:13px; color:#555; margin:0; line-height:1.4;"></p>
+    </div>
+
     <div class="controls">
         <div id="front-controls" class="control-group">
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
@@ -643,9 +648,6 @@ function initEditor(templateKey) {
 //   CARD_TEMPLATES['11plus-boy'] = { ..., title: '11+ Boy Card',
 //     description: 'A colourful card celebrating passing the 11+.' }
 function updateCardDescription(template) {
-    // The #card-description box was removed from the page (editor-only
-    // layout, no blurb section) — kept as a no-op so callers elsewhere
-    // don't need to change.
     const box = $('card-description');
     if (!box) return;
     if (!template || !template.description) {
