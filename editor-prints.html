@@ -124,6 +124,15 @@
     .btn-close { background-color: #f0f0f0; color: #333; margin-top: 10px; }
     .btn-close:hover { background-color: #e0e0e0; }
 
+    /* Small Back / Next nav buttons, side by side, below the main actions */
+    .nav-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-small { flex: 1; padding: 8px; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 0; }
+    .btn-back { background-color: #1a1a1a; color: white; border: none; }
+    .btn-back:hover { background-color: #444; }
+    .btn-next { background-color: #1a1a1a; color: white; border: none; }
+    .btn-next:hover { background-color: #444; }
+    .btn-small:disabled { background-color: #e8e8e8; color: #999; border-color: #e8e8e8; cursor: not-allowed; }
+
     /* FOOTER */
     footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
     .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
@@ -306,9 +315,12 @@
             </div>
         </div>
 
-        <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentPrintToBasket()">Add to Basket</button>
+        <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentPrintToBasket()" disabled>Add to Basket</button>
 
-        <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
+        <div class="nav-buttons">
+            <button class="btn-small btn-back" onclick="returnToShop()">Back</button>
+            <button id="next-btn" class="btn-small btn-next" onclick="goToBasket()" disabled>Next</button>
+        </div>
     </div>
 
     <div id="print-description" style="display:none;">
@@ -572,6 +584,7 @@ function initEditor(templateKey) {
     if (activeTemplate.name2?.maxChars) $('name2-input').maxLength = activeTemplate.name2.maxChars;
     if (activeTemplate.age2?.maxChars) $('age2-input').maxLength = activeTemplate.age2.maxChars;
     refreshNameVisibilityForVariant();
+    updateAddToBasketAvailability();
 
     renderSizeOptions();
     updatePrintDescription(activeTemplate);
@@ -688,6 +701,26 @@ function nameAllowedForVariant(key) {
     return !restrict || restrict.includes(key);
 }
 
+// Add to Basket only becomes available once:
+//  - if this print's name field is restricted to specific picture variants
+//    (e.g. mfcduoprints' "millwallboy"/"millwallgirl"), the customer has
+//    actually picked one of those variants rather than leaving the base
+//    version selected, and
+//  - if a name field is currently showing for the selected variant, it's
+//    actually been filled in.
+function updateAddToBasketAvailability() {
+    const btn = $('add-to-basket-btn');
+    if (!btn) return;
+
+    const restrictedVariants = activeTemplate?.name?.onlyForVariants;
+    const variantChosen = !restrictedVariants || restrictedVariants.includes(activeVariantKey);
+
+    const nameRequired = !!activeTemplate?.name && nameAllowedForVariant(activeVariantKey);
+    const nameFilled = !nameRequired || $('name-input').value.trim().length > 0;
+
+    btn.disabled = !(variantChosen && nameFilled);
+}
+
 // Re-applies name-field visibility — both the sidebar inputs and the
 // on-canvas text itself — for whichever picture variant is currently
 // selected. Called once from initEditor (before nameText exists, so it
@@ -717,6 +750,7 @@ function selectVariant(key) {
     if (!bgImg || key === activeVariantKey || !url) return;
     activeVariantKey = key;
     refreshNameVisibilityForVariant();
+    updateAddToBasketAvailability();
 
     bgImg.setSrc(url, () => {
         bgImg.set({
@@ -929,6 +963,7 @@ function updateNameText(inputEl) {
         nameText.set({ text: displayVal || "NAME" });
     }
     canvas.requestRenderAll();
+    updateAddToBasketAvailability();
 }
 
 function updateAgeText(inputEl) {
@@ -1334,6 +1369,7 @@ async function addCurrentPrintToBasket() {
         });
 
         addBtn.innerText = "Added to Basket ✓";
+        $('next-btn').disabled = false;
         setTimeout(() => {
             addBtn.innerText = originalText;
             addBtn.disabled = false;
@@ -1350,6 +1386,11 @@ async function addCurrentPrintToBasket() {
 // whatever category page the user left, instead of resetting.
 function returnToShop() {
     window.location.href = 'shop-prints.html?resume=1';
+}
+
+// Takes the customer straight to the basket page.
+function goToBasket() {
+    window.location.href = 'basket.html';
 }
 
 // DEV HELPER — not called automatically. Open this print in the editor,
