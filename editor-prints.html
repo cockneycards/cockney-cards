@@ -100,7 +100,7 @@
     #print-description { width: 100%; background: white; padding: 20px 25px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
     #print-description h3 { margin: 0 0 10px; font-size: 15px; font-weight: bold; }
     #print-description p { margin: 0; font-size: 13px; line-height: 1.6; color: #555; }
-    .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
+    .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: bold; }
     .control-group { display: flex; flex-direction: column; gap: 15px; }
     label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
@@ -113,6 +113,9 @@
     .variant-thumb { width: 56px; height: 56px; padding: 0; border: 2px solid #ccc; border-radius: 6px; overflow: hidden; cursor: pointer; background: none; }
     .variant-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .variant-thumb.active { border-color: #111; }
+    .variant-checkboxes { display: flex; gap: 20px; margin: -12px 0 20px; flex-wrap: wrap; }
+    .variant-checkboxes label { display: flex; align-items: center; gap: 6px; font-weight: normal; text-transform: none; letter-spacing: normal; font-size: 13px; color: #444; cursor: pointer; }
+    .variant-checkboxes input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 
     .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
     .size-option { flex: 1; padding: 10px 4px; border: 2px solid #ddd; border-radius: 6px; background: white; cursor: pointer; text-align: center; font-size: 13px; transition: border-color 0.15s; }
@@ -261,6 +264,7 @@
              print-ready PDF is built, see buildBackPageDataUrl() below. -->
         <div id="front-controls" class="control-group active">
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
+            <div id="variant-checkboxes" class="variant-checkboxes" style="display:none;"></div>
 
             <div id="front-text-inputs">
                 <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
@@ -552,7 +556,14 @@ function initEditor(templateKey) {
     canvas = new fabric.Canvas(canvasElement, {
         width: EDIT_WIDTH, height: EDIT_HEIGHT,
         preserveObjectStacking: true, backgroundColor: '#ffffff',
-        allowTouchScrolling: true
+        allowTouchScrolling: true,
+        // This editor never needs multi-object selection — name/age text
+        // is locked in place and edited via the sidebar controls, not by
+        // dragging on the canvas. Turning it off entirely rules out
+        // Fabric's rubber-band "select everything the drag passes over"
+        // rectangle, which is what was appearing when a touch-scroll
+        // gesture landed on empty canvas.
+        selection: false
     });
 
     // Show/hide the personalisation inputs based on what this print (and,
@@ -584,9 +595,9 @@ function initEditor(templateKey) {
     if (activeTemplate.name2?.maxChars) $('name2-input').maxLength = activeTemplate.name2.maxChars;
     if (activeTemplate.age2?.maxChars) $('age2-input').maxLength = activeTemplate.age2.maxChars;
     refreshNameVisibilityForVariant();
-    updateAddToBasketAvailability();
 
     renderSizeOptions();
+    updateAddToBasketAvailability();
     updatePrintDescription(activeTemplate);
     loadFrontArtwork(activeTemplate.url);
 }
@@ -647,6 +658,7 @@ function renderSizeOptions() {
 function selectSize(sizeKey) {
     selectedSize = sizeKey;
     renderSizeOptions(); // rebuilds the buttons with the new one marked 'selected'
+    updateAddToBasketAvailability();
 }
 
 function updateBuyButtonPrice() {
@@ -662,17 +674,36 @@ function artUrlFor(key) {
     return null;
 }
 
+// Turns a variant id into a friendly checkbox label — e.g. "millwallboy"
+// -> "Boy", "millwallgirl" -> "Girl". Falls back to the raw id
+// (capitalised) for anything that isn't a boy/girl-style variant.
+function variantDisplayLabel(key) {
+    const lower = key.toLowerCase();
+    if (lower.endsWith("boy")) return "Boy";
+    if (lower.endsWith("girl")) return "Girl";
+    return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
 // Builds the row of thumbnail buttons for a print's picture options (if it
 // has any). Clicking a thumbnail just swaps the artwork via
 // selectVariant() below — name/age text, position, colour etc. all stay
 // exactly as defined by this print's entry in prints-data.js the whole time.
+//
+// Prints whose name field is restricted to specific variants (see
+// nameAllowedForVariant — e.g. mfcduoprints' "millwallboy"/"millwallgirl")
+// also get an explicit checkbox under the thumbnails for each of those
+// variants, so the customer has an unambiguous, required confirmation of
+// which one they've picked (see updateAddToBasketAvailability).
 function setupVariantSelector(templateKey) {
     const variants = PRINT_VARIANTS[templateKey];
     const container = $("variant-selector");
+    const checkboxContainer = $("variant-checkboxes");
     container.innerHTML = "";
+    checkboxContainer.innerHTML = "";
 
     if (!variants || variants.length < 2) {
         container.style.display = "none";
+        checkboxContainer.style.display = "none";
         return;
     }
 
@@ -687,6 +718,33 @@ function setupVariantSelector(templateKey) {
         btn.onclick = () => selectVariant(key);
         container.appendChild(btn);
     });
+
+    const restrictedVariants = activeTemplate?.name?.onlyForVariants;
+    if (restrictedVariants && restrictedVariants.length) {
+        checkboxContainer.style.display = "flex";
+        restrictedVariants.forEach((key) => {
+            const wrapper = document.createElement("label");
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.dataset.key = key;
+            cb.checked = key === activeVariantKey;
+            cb.onchange = () => {
+                if (cb.checked) {
+                    selectVariant(key);
+                } else {
+                    // Behave like a radio button — the customer must pick
+                    // one, so an already-checked box can't be unchecked
+                    // without checking a different one instead.
+                    cb.checked = true;
+                }
+            };
+            wrapper.appendChild(cb);
+            wrapper.appendChild(document.createTextNode(variantDisplayLabel(key)));
+            checkboxContainer.appendChild(wrapper);
+        });
+    } else {
+        checkboxContainer.style.display = "none";
+    }
 }
 
 // Some prints only want their name field shown for certain picture
@@ -704,10 +762,11 @@ function nameAllowedForVariant(key) {
 // Add to Basket only becomes available once:
 //  - if this print's name field is restricted to specific picture variants
 //    (e.g. mfcduoprints' "millwallboy"/"millwallgirl"), the customer has
-//    actually picked one of those variants rather than leaving the base
-//    version selected, and
+//    actually checked/picked one of those variants rather than leaving the
+//    base version selected,
 //  - if a name field is currently showing for the selected variant, it's
-//    actually been filled in.
+//    actually been filled in, and
+//  - if this print has size pricing, a size is selected.
 function updateAddToBasketAvailability() {
     const btn = $('add-to-basket-btn');
     if (!btn) return;
@@ -718,7 +777,10 @@ function updateAddToBasketAvailability() {
     const nameRequired = !!activeTemplate?.name && nameAllowedForVariant(activeVariantKey);
     const nameFilled = !nameRequired || $('name-input').value.trim().length > 0;
 
-    btn.disabled = !(variantChosen && nameFilled);
+    const sizeRequired = !!activeTemplate?.sizes;
+    const sizeChosen = !sizeRequired || !!(selectedSize && activeTemplate.sizes[selectedSize]);
+
+    btn.disabled = !(variantChosen && nameFilled && sizeChosen);
 }
 
 // Re-applies name-field visibility — both the sidebar inputs and the
@@ -762,6 +824,9 @@ function selectVariant(key) {
 
     document.querySelectorAll("#variant-selector .variant-thumb").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.key === key);
+    });
+    document.querySelectorAll("#variant-checkboxes input[type=checkbox]").forEach((cb) => {
+        cb.checked = cb.dataset.key === key;
     });
 }
 
