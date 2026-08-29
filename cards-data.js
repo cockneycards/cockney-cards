@@ -80,7 +80,12 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "birthday-taxi": { title: "Birthday Taxi", price: "£3.49", description: "A fun birthday card - add a photo and their name for a personal touch.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-taxi-preview_rqnaae.png", full: "birthday-taxi_c3rhjq.png", name: { left: 891, top: 663, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    // Round gold-ringed photo window near the top of the card — measured
+    // from the artwork itself, NOT the generic default box. left/top is
+    // the center of the circle; width/height is a square slightly larger
+    // than the circle's diameter (the artwork's own round cutout does the
+    // actual round clipping, so the square only needs to fully cover it).
+    photo: { left: 742, top: 198, width: 290, height: 290 } },
   
   
   "drivingtest-boy1": { title: "Driving Test Pass Boy", description: "Celebrate passing their driving test with this fun congratulations card.", categories: ["all", "for-him", "achievements"], preview: "drivingtest-boy1-preview_mcgers.png", full: "drivingtest-boy1_icejra.png",
