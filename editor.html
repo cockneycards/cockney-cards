@@ -146,14 +146,6 @@
         <div id="front-controls" class="control-group">
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
 
-            <div id="front-photo-upload" style="display:none; margin-bottom: 18px;">
-                <label for="photo-input" style="display:block; margin-bottom: 6px;">Upload Photo:</label>
-                <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
-                <p style="font-size:12px; color:#666; margin-top:6px;">
-                    Drag the photo to reposition it, or use the corner handle to resize — it'll stay inside the frame.
-                </p>
-            </div>
-
             <div id="front-text-inputs">
                 <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Outside Spread Details</label>
                 
@@ -177,6 +169,14 @@
                         <span id="front-size-val">52px</span>
                     </div>
                 </div>
+            </div>
+
+            <div id="front-photo-upload" style="display:none; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Upload Photo</label>
+                <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
+                <p style="font-size:12px; color:#666; margin-top:6px;">
+                    Drag the photo to reposition it, or use the corner handle to resize — it'll stay inside the frame.
+                </p>
             </div>
         </div>
 
