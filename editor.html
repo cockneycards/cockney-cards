@@ -1129,6 +1129,7 @@ function onOwnMessageChange(isChecked) {
         $('blank-message-checkbox').checked = false;
         toggleBlankMessage(false); // restore any text that had been blanked
     }
+    if (isChecked) switchPage('inside');
     updateAddToBasketAvailability();
 }
 
