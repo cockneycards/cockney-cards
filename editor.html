@@ -76,7 +76,6 @@
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
     .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
     .controls { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
-    .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: bold; }
     .control-group { display: flex; flex-direction: column; gap: 15px; }
     .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
@@ -119,7 +118,6 @@
     @media (max-width: 500px) {
         .editor-workspace { padding: 0 16px; margin: 16px auto; }
         .controls { padding: 22px; }
-        .controls h2 { font-size: 19px; margin-bottom: 18px; }
     }
 
     @media (max-width: 480px) {
@@ -145,8 +143,6 @@
     </div>
 
     <div class="controls">
-        <h2>Personalise Card</h2>
-
         <div id="front-controls" class="control-group">
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
 
@@ -184,14 +180,13 @@
             </div>
         </div>
 
-        <label class="control-group-divider">Inside Spread </label>
-        <div id="inside-controls" class="control-group">
+        <div id="inside-controls" class="control-group" style="margin-top: 15px;">
             <div class="flex-row" style="align-items: center; gap: 10px;">
-                <input type="checkbox" id="own-message-checkbox" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <input type="checkbox" id="own-message-checkbox" onchange="onOwnMessageChange(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
                 <label for="own-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Tick here if you have added your own personal message</label>
             </div>
             <div class="flex-row" style="align-items: center; gap: 10px;">
-                <input type="checkbox" id="blank-message-checkbox" onchange="toggleBlankMessage(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <input type="checkbox" id="blank-message-checkbox" onchange="onBlankMessageChange(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
                 <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Tick here to leave the card message blank</label>
             </div>
         </div>
@@ -588,8 +583,7 @@ function loadFrontCover(imageUrl) {
         editorReady = true;
         $('toggle-front').disabled = false;
         $('toggle-inside').disabled = false;
-        $('add-to-basket-btn').disabled = false;
-        $('add-to-basket-btn').style.display = 'block';
+        updateAddToBasketAvailability();
         $('delivery-section').style.display = 'block';
         switchPage('front');
     }, { crossOrigin: 'anonymous' });
@@ -1131,6 +1125,42 @@ function toggleBlankMessage(isChecked) {
 
     resetBordersToDashed();
     canvas.requestRenderAll();
+}
+
+// "I've added my own message" and "Leave the message blank" are mutually
+// exclusive — ticking one always unticks the other. Add to Basket only
+// becomes available once the customer has told us which one applies.
+function onOwnMessageChange(isChecked) {
+    if (isChecked && $('blank-message-checkbox').checked) {
+        $('blank-message-checkbox').checked = false;
+        toggleBlankMessage(false); // restore any text that had been blanked
+    }
+    updateAddToBasketAvailability();
+}
+
+function onBlankMessageChange(isChecked) {
+    if (isChecked && $('own-message-checkbox').checked) {
+        $('own-message-checkbox').checked = false;
+    }
+    toggleBlankMessage(isChecked);
+    updateAddToBasketAvailability();
+}
+
+// Add to Basket only shows/enables once the editor has finished loading
+// AND exactly one of the two message checkboxes has been ticked.
+function updateAddToBasketAvailability() {
+    const ownChecked = $('own-message-checkbox').checked;
+    const blankChecked = $('blank-message-checkbox').checked;
+    const oneTicked = ownChecked !== blankChecked; // exactly one, since they're mutually exclusive
+    const btn = $('add-to-basket-btn');
+
+    if (editorReady && oneTicked) {
+        btn.disabled = false;
+        btn.style.display = 'block';
+    } else {
+        btn.disabled = true;
+        btn.style.display = 'none';
+    }
 }
 
 // Builds the name as a Fabric Group of individually-rotated characters
