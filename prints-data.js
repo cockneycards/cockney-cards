@@ -47,9 +47,9 @@
 //   sizes       — required. Per-size pricing, one entry per size the print
 //                 is sold at:
 //                   sizes: {
-//                       A5: { price: "£4.99", priceValue: 4.99 },
-//                       A4: { price: "£6.99", priceValue: 6.99 },
-//                       A3: { price: "£9.99", priceValue: 9.99 }
+//                       A5: { price: "£6.99", priceValue: 4.99 },
+//                       A4: { price: "£9.99", priceValue: 6.99 },
+//                       A3: { price: "£12.99", priceValue: 9.99 }
 //                   }
 //                 editor-prints.html reads this to build the size picker
 //                 and price display. All three A-sizes share the same
@@ -77,11 +77,11 @@ const PRINT_CATALOGUE = {
     "mfc-miiiii": {
         title: "Millwall Chant - Miiiiiiii",
         description: "Millwall's infamous Miiiiii... chant print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "print-miiiiiiiii-preview.png",
@@ -91,11 +91,11 @@ const PRINT_CATALOGUE = {
     "print-ofah-thistimenext": {
         title: "Only Fools and Horses - This Time Next Year...",
         description: "Only Fools and Horses - This Time Next Year... print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "b&w"],
         preview: "print-thistimenextyear-preview.png",
@@ -105,11 +105,11 @@ const PRINT_CATALOGUE = {
     "album-mjbad": {
         title: "Michael Jackson - Bad",
         description: "Michael Jackson's Bad album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-mj-bad-preview.png",
@@ -118,11 +118,11 @@ const PRINT_CATALOGUE = {
     "album-oasis-dm": {
         title: "Oasis - Definitely Maybe - Album Artwork",
         description: "Oasis's Definitely Maybe album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-oasis-dm-preview.png",
@@ -131,11 +131,11 @@ const PRINT_CATALOGUE = {
     "album--bobm": {
         title: "Bob Marley - Legend - Album Artwork",
         description: "Bob Marley's Legend album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-bobm-legend-preview.png",
@@ -144,11 +144,11 @@ const PRINT_CATALOGUE = {
     "album-dires": {
         title: "Dire Strait's - Brother's In Arms - Album Artwork",
         description: "Dire Strait's Brother's In Arms album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-dires-bia-preview.png",
@@ -157,11 +157,11 @@ const PRINT_CATALOGUE = {
     "album-ledzep": {
         title: "Led Zeplin - IV - Album Artwork",
         description: "Led Zeplin's IV album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-ledzep-iv-preview.png",
@@ -170,11 +170,11 @@ const PRINT_CATALOGUE = {
     "album-joydiv": {
         title: "Joy Division - Unknown Pleasures - Album Artwork",
         description: "Joy Division's Unknown Pleasures album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-joydiv-up-preview.png",
@@ -183,11 +183,11 @@ const PRINT_CATALOGUE = {
     "album-madness": {
         title: "Madness - One Step Beyond - Album Artwork",
         description: "Madness's One Step Beyond album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-madness-osb-preview.png",
@@ -196,11 +196,11 @@ const PRINT_CATALOGUE = {
     "album-fleetmac": {
         title: "Fleetwood Mac - Rumours - Album Artwork",
         description: "Fleetwood Mac's Rumours album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-fleetm-rumours-preview.png",
@@ -209,11 +209,11 @@ const PRINT_CATALOGUE = {
     "album-doors": {
         title: "The Doors - The Doors Album - Artwork",
         description: "The Door's Album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-doors-doors-preview.png",
@@ -222,11 +222,11 @@ const PRINT_CATALOGUE = {
     "album-prodigy": {
         title: "The Prodigy - Music For The Jited Generation - Album Artwork",
         description: "The Prodigy's Music For The Jited Generation album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-prodigy-mftjg-preview.png",
@@ -235,11 +235,11 @@ const PRINT_CATALOGUE = {
     "album-pinkfloyd": {
         title: "Pink Floyd's The Dark Side of The Moon - Album Artwork",
         description: "Pink Floyd's The Dark Side of The Moon album print will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
         preview: "album-pinkfloyd-dsotm-preview.png",
@@ -248,10 +248,10 @@ const PRINT_CATALOGUE = {
     "wham-eatsleep": {
         title: "West Ham Prints - Eat, Sleep, West Ham, Repeat",
         description: "West Ham duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -269,10 +269,10 @@ const PRINT_CATALOGUE = {
     "spurs-eatsleep": {
         title: "Tottenham Hotspur Prints - Eat, Sleep, Tottenham, Repeat",
         description: "Tottenham Hotspur duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -290,10 +290,10 @@ const PRINT_CATALOGUE = {
     "charlton-eatsleep": {
         title: "Charlton Athletic Prints - Eat, Sleep, Charlton, Repeat",
         description: "Charlton Athletic duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -311,10 +311,10 @@ const PRINT_CATALOGUE = {
     "birmingham-eatsleep": {
         title: "Birmingham City Prints - Eat, Sleep, City, Repeat",
         description: "Birmingham City duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -332,10 +332,10 @@ const PRINT_CATALOGUE = {
     "lionesses-eatsleep": {
         title: "London City Lionesses Prints - Eat, Sleep, Lionesses, Repeat",
         description: "London City Lionesses duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -353,10 +353,10 @@ const PRINT_CATALOGUE = {
   "millwall-eatsleep": {
         title: "Millwall Prints - Eat, Sleep, Millwall, Repeat",
         description: "Millwall duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -374,10 +374,10 @@ const PRINT_CATALOGUE = {
     "arsenal-eatsleep": {
         title: "Arsenal Prints - Eat, Sleep, Arsenal, Repeat",
         description: "Arsenal duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -395,10 +395,10 @@ const PRINT_CATALOGUE = {
     "villa-eatsleep": {
         title: "Aston Villa Prints - Eat, Sleep, Villa, Repeat",
         description: "Aston Villa duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -416,10 +416,10 @@ const PRINT_CATALOGUE = {
     "city-eatsleep": {
         title: "Manchester City Prints - Eat, Sleep, City, Repeat",
         description: "Manchester City duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -437,10 +437,10 @@ const PRINT_CATALOGUE = {
     "chelsea-eatsleep": {
         title: "Chelsea Prints - Eat, Sleep, Chelsea, Repeat",
         description: "Chelsea duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -458,10 +458,10 @@ const PRINT_CATALOGUE = {
     "united-eatsleep": {
         title: "Manchester United Prints - Eat, Sleep, United, Repeat",
         description: "Manchester United duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "sports"],
@@ -479,11 +479,11 @@ const PRINT_CATALOGUE = {
     "houserules": {
         title: "Dog's House Rules",
         description: "Based on a quote from the film Turner & Hooch. Great for all Dog lover's.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "b&w"],
         preview: "doghouserules-preview_iwabv0.png",
@@ -492,10 +492,10 @@ const PRINT_CATALOGUE = {
    "dinosaurs": {
         title: "Dinosaur Duo",
         description: "Dinosaur duo prints that will look great on any wall at home or even at work in the office.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
+            A5: { price: "£9.99", priceValue: 6.99 },
+            A4: { price: "£12.99", priceValue: 9.99 },
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "childrens"],
@@ -508,11 +508,11 @@ const PRINT_CATALOGUE = {
     "itsnotwhatwehave": {
         title: "It's Not What We Have In Life...",
         description: "A heartfelt black & white quote print about family, love, and togetherness.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "b&w"],
         preview: "itsnotwhatwehave-preview_xnh2nr.png",
@@ -521,11 +521,11 @@ const PRINT_CATALOGUE = {
     "underthesea": {
         title: "Under The Sea",
         description: "A colourful under-the-sea print for kids, personalised with their name.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "childrens"],
         name: { label: "First Name", left: 378, top: 120, startSize: 56, minSize: 25, maxSize: 35, fontFamily: "LuckiestGuy", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 8, forceUppercase: false },
@@ -539,11 +539,11 @@ const PRINT_CATALOGUE = {
     "oasis-dontlookback": {
         title: "Oasis - Dont Look Back...",
         description: "A classic Britpop-inspired print for Oasis fans.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "b&w", "music"],
         preview: "oasis-dontlookback-preview_yuwvyy.png",
@@ -552,11 +552,11 @@ const PRINT_CATALOGUE = {
     "wham-massive": {
         title: "West Ham Are Massive!",
         description: "A bold print for West Ham fans, celebrating the Irons.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "wham-massive-preview_vljrfh.png",
@@ -565,11 +565,11 @@ const PRINT_CATALOGUE = {
     "mfc-stone": {
         title: "MFC Stone Island",
         description: "A stylish sports-casual print for fans of the terrace look.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "mfc-stone-preview_bqjjdm.png",
@@ -578,11 +578,11 @@ const PRINT_CATALOGUE = {
     "mfc-boy1": {
         title: "MFC Boy 1",
         description: "A personalised football print for boys, add their name and shirt number.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "mfc-boy1-preview_atd6yj.png",
@@ -593,11 +593,11 @@ const PRINT_CATALOGUE = {
     "mfc-boy2": {
         title: "MFC Boy 2",
         description: "A personalised football print for boys, add their name and shirt number.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "mfc-boy2-preview_acy95s.png",
@@ -608,11 +608,11 @@ const PRINT_CATALOGUE = {
     "afc-boy1": {
         title: "AFC Boy 1",
         description: "A personalised football print for boys, add their name and shirt number.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "afc-boy1-preview_fk1pkz.png",
@@ -623,11 +623,11 @@ const PRINT_CATALOGUE = {
     "afc-boy2": {
         title: "AFC Boy 2",
         description: "A personalised football print for boys, add their name and shirt number.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "afc-boy2-preview_ex1356.png",
@@ -638,11 +638,11 @@ const PRINT_CATALOGUE = {
     "afc-boy3": {
         title: "AFC Boy 3",
         description: "A personalised football print for boys, add their name and shirt number.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "afc-boy3-preview_sbq2z8.png",
@@ -653,11 +653,11 @@ const PRINT_CATALOGUE = {
     "afc-girl1": {
         title: "AFC Girl 1",
         description: "A personalised football print for girls, add their name and shirt number.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "afc-girl1-preview_w99q5x.png",
@@ -668,11 +668,11 @@ const PRINT_CATALOGUE = {
     "afc-girl2": {
         title: "AFC Girl 2",
         description: "A personalised football print for girls, add their name and shirt number.",
-        price: "£4.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
         preview: "afc-girl2-preview_vbyq9q.png",
@@ -684,11 +684,11 @@ const PRINT_CATALOGUE = {
     // Example of a print WITH name personalisation, for reference:
     "sample-print": {
         full: "v1784098145/prints/sample-print-full.png",
-        price: "£4.99", priceValue: 4.99,
+        price: "£6.99", priceValue: 4.99,
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         name: { left: 297.75, top: 725, startSize: 52, color: "#FFFFFF" }
     },
@@ -700,11 +700,11 @@ const PRINT_CATALOGUE = {
     // left/top numbers once the artwork is loaded).
     "sample-two-person-print": {
         full: "v1784098145/prints/sample-two-person-full.png",
-        price: "£4.99", priceValue: 4.99,
+        price: "£6.99", priceValue: 4.99,
         sizes: {
-            A5: { price: "£4.99", priceValue: 4.99 },
-            A4: { price: "£6.99", priceValue: 6.99 },
-            A3: { price: "£9.99", priceValue: 9.99 }
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
         },
         name: { label: "First Name", left: 200, top: 725, startSize: 48, color: "#FFFFFF" },
         age: { label: "Age", left: 200, top: 600, startSize: 56, color: "#FFFFFF" },
