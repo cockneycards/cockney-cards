@@ -587,6 +587,7 @@ function initEditor(templateKey) {
 
     attachPinchToResize(canvas.upperCanvasEl);
     attachHoldToScroll(canvas.upperCanvasEl);
+    setupPhotoCoverageGuard();
 
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
@@ -895,7 +896,20 @@ function loadPhotoIntoFrame(dataUrl) {
                 absolutePositioned: true
             })
         });
-        img.setControlsVisibility({ mtr: false });
+        // Only the corner handles resize (uniform, diagonal drag). The
+        // side/middle handles (ml, mr, mt, mb) are hidden — leaving them
+        // on would let the customer squash/stretch the photo into a
+        // non-uniform shape, which the coverage guard below doesn't
+        // attempt to fix, so it's simplest to remove the option entirely.
+        img.setControlsVisibility({ mtr: false, ml: false, mr: false, mt: false, mb: false });
+
+        // frameBox + minScale travel with the image itself so the
+        // moving/scaling guard (keepPhotoCoveringFrame, below) and the
+        // pinch-resize handler both have what they need without reaching
+        // back into activeTemplate (which may have moved on by the time
+        // an in-flight gesture finishes).
+        img.frameBox = p;
+        img.minScale = coverScale;
 
         photoImg = img;
         canvas.add(photoImg);
@@ -904,6 +918,61 @@ function loadPhotoIntoFrame(dataUrl) {
         canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
     }, { crossOrigin: 'anonymous' });
+}
+
+// ---- Coverage guard: the frame can never show blank/white behind the
+// photo, no matter how it's dragged, pinched, or resized ----
+// The clipPath above stops the photo rendering OUTSIDE the frame; this is
+// the other half — stopping it from being dragged or shrunk so far that it
+// no longer fully covers the INSIDE of the frame. Called after every move,
+// scale (desktop corner-handle drag), and pinch, it:
+//   1) never lets the scale drop below the original cover-fit minimum
+//      (forcing scaleX === scaleY, so a stretch attempt just becomes a
+//      uniform resize instead — this can't happen via the UI any more
+//      since the side handles are hidden, but it's cheap insurance), then
+//   2) clamps left/top so the (now guaranteed large-enough) photo
+//      rectangle still fully overlaps the frame rectangle on every side.
+// Both objects use originX/Y: 'center', so left/top is each one's center —
+// that's what makes the half-width/half-height math below correct.
+function keepPhotoCoveringFrame(img) {
+    const p = img.frameBox;
+    if (!p) return;
+
+    const scale = Math.max(img.scaleX, img.scaleY, img.minScale);
+    if (img.scaleX !== scale || img.scaleY !== scale) {
+        img.set({ scaleX: scale, scaleY: scale });
+    }
+
+    const halfImgW = (img.width * scale) / 2;
+    const halfImgH = (img.height * scale) / 2;
+    const halfFrameW = p.width / 2;
+    const halfFrameH = p.height / 2;
+
+    const minLeft = p.left + halfFrameW - halfImgW;
+    const maxLeft = p.left - halfFrameW + halfImgW;
+    const minTop = p.top + halfFrameH - halfImgH;
+    const maxTop = p.top - halfFrameH + halfImgH;
+
+    img.set({
+        left: Math.min(Math.max(img.left, minLeft), maxLeft),
+        top: Math.min(Math.max(img.top, minTop), maxTop)
+    });
+    img.setCoords();
+}
+
+// Wires keepPhotoCoveringFrame into the two Fabric-native gestures that can
+// move or resize the photo: single-finger/mouse drag ('object:moving') and
+// the desktop corner-handle drag ('object:scaling'). Pinch-resize on mobile
+// isn't a Fabric gesture at all — it's handled separately in
+// attachPinchToResize, which calls keepPhotoCoveringFrame itself. Call once
+// at setup, not per-photo-upload — photoImg is checked fresh on every event.
+function setupPhotoCoverageGuard() {
+    canvas.on('object:moving', ({ target }) => {
+        if (target === photoImg) keepPhotoCoveringFrame(target);
+    });
+    canvas.on('object:scaling', ({ target }) => {
+        if (target === photoImg) keepPhotoCoveringFrame(target);
+    });
 }
 
 // ---- Mobile pinch-to-resize for the uploaded photo ----
@@ -934,12 +1003,12 @@ function attachPinchToResize(el) {
         if (pinchStartDist === null || e.touches.length !== 2 || !photoImg) return;
         e.preventDefault(); // don't let the page scroll while actively pinching
         const ratio = touchDistance(e.touches[0], e.touches[1]) / pinchStartDist;
-        // Clamped loosely (0.1x–10x) just to stop the photo shrinking to
-        // nothing or ballooning to an unusable size — well outside any
-        // resize a customer would actually want.
-        const newScale = Math.min(Math.max(pinchStartScale * ratio, 0.1), 10);
+        // Lower bound is the photo's own cover-fit minimum (never shrink
+        // enough to expose the frame); upper bound of 10x just stops it
+        // ballooning to an unusable size.
+        const newScale = Math.min(Math.max(pinchStartScale * ratio, photoImg.minScale), 10);
         photoImg.set({ scaleX: newScale, scaleY: newScale });
-        photoImg.setCoords();
+        keepPhotoCoveringFrame(photoImg); // re-clamp position for the new scale too
         canvas.requestRenderAll();
     }, { passive: false });
 
