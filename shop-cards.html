@@ -399,12 +399,14 @@ function renderCategories() {
 
         if (li.dataset.gallery === 'true') {
             openTeamGallery(key);
+            scrollToFirstItem();
             return;
         }
         if (li.classList.contains('has-children') && !LOCKED_EXPANDED_CATEGORIES.includes(key)) {
             toggleExpandSubtree(li);
         }
         filterProducts(key);
+        scrollToFirstItem();
     });
 }
 
@@ -542,6 +544,18 @@ function filterProducts(categoryKey) {
     viewMode = 'grid';
     setActiveCategory(categoryKey);
     renderView();
+}
+
+// Scrolls the first item of whichever view is currently showing (product
+// grid or team gallery) into view -- used after a sidebar category click
+// so the customer lands on the results instead of having to scroll down
+// themselves. Only called from actual click handlers, never on initial
+// page load/restore, since jumping the page on load would be jarring.
+function scrollToFirstItem() {
+    const firstItem = viewMode === 'gallery'
+        ? $('team-gallery').querySelector('.team-tile')
+        : $('product-grid').querySelector('.product-card');
+    if (firstItem) firstItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function openTeamGallery(leagueKey) {
