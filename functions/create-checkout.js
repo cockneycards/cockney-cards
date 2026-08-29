@@ -64,7 +64,7 @@ export async function onRequestPost(context) {
         // matching for "My Orders" still works fine without it — the
         // webhook reads session.customer_details.email (whatever the
         // customer actually confirms at checkout), not this prefill.
-        // Cockney Cards Club benefit is a flat 30% off card price (same
+        // Cockney Cards Club benefit is a flat 25% off card price (same
         // rule as create-checkout-basket.js) — membership no longer
         // waives postage anywhere. Free delivery is now a quantity perk
         // (3+ cards to the same address) rather than a membership one,
@@ -73,9 +73,9 @@ export async function onRequestPost(context) {
         // applies below.
         const isClubMember = await checkPlusMembership(request, env);
         const CARD_PRICE_PENCE = 349; // £3.49
-        const unitAmount = isClubMember ? Math.round(CARD_PRICE_PENCE * 0.7) : CARD_PRICE_PENCE;
+        const unitAmount = isClubMember ? Math.round(CARD_PRICE_PENCE * 0.75) : CARD_PRICE_PENCE;
         const cardName = isClubMember
-            ? `Customised Card (${data.name || 'Custom'}) (30% Club discount)`
+            ? `Customised Card (${data.name || 'Custom'}) (25% Club discount)`
             : `Customised Card (${data.name || 'Custom'})`;
 
         params.append('line_items[0][price_data][currency]', 'gbp');
