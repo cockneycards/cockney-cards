@@ -209,7 +209,7 @@ export async function handleVerify(request, env) {
         // clicking someone else's referral link to log back in shouldn't
         // retroactively create a referral for an account that already
         // existed before that link was clicked. When it does create one,
-        // it also issues this new user a 25%-off-one-card welcome reward
+        // it also issues this new user a 15%-off-one-card welcome reward
         // and hands back its code so we can email them about it here —
         // referrals.js only touches D1, it doesn't send mail itself.
         const referralResult = await recordReferralIfAny(env, record.ref, newId, record.email);
@@ -217,7 +217,7 @@ export async function handleVerify(request, env) {
             try {
                 await sendEmail(env, {
                     to: record.email,
-                    subject: "You've got 25% off your first Cockney Cards order!",
+                    subject: "You've got 15% off your first Cockney Cards order!",
                     html: newCustomerWelcomeEmailHtml(env, referralResult.rewardCode),
                 });
             } catch (err) {
@@ -293,7 +293,7 @@ export async function handleGetAccount(request, env) {
 // Turns auto-renewal off for the caller's own Club subscription by
 // setting cancel_at_period_end on the underlying Stripe subscription.
 // This does NOT end their membership immediately — per the Club terms
-// (cockney-club.html, Section 5) they keep the 30% discount until the
+// (cockney-club.html, Section 5) they keep the 25% discount until the
 // period they've already paid for actually runs out, it just won't
 // renew after that. The authoritative status update still comes from
 // Stripe's own customer.subscription.updated webhook (see
