@@ -378,7 +378,11 @@ function renderItem(item) {
         ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.75)} <span style="color:#1a7a3c; font-weight:normal;">(Club price)</span>`
         : (item.price || ccCart.formatGBP(item.priceValue));
 
-    const hasPreview = !!(item.thumbnail || item.previewFront || item.previewInside);
+    // previewFront/previewInside are fetched on demand from IndexedDB when
+    // the modal opens (see openPreview), so we can't check for them here
+    // synchronously — show the trigger whenever there's at least a
+    // thumbnail to fall back on, which is true for every real item.
+    const hasPreview = !!item.thumbnail;
 
     return `
         <div class="basket-item" data-id="${item.id}">
@@ -411,29 +415,43 @@ function renderItem(item) {
 // anything that affects checkout.
 // ---------------------------------------------------------------------
 let previewActiveTab = 'front';
+let previewImagesCache = { front: null, inside: null };
 
-function getPreviewImages(item) {
-    return {
-        front: item.previewFront || item.thumbnail || null,
-        inside: item.previewInside || null
-    };
-}
-
-function openPreview(id) {
+async function openPreview(id) {
     const item = ccCart.getCart().find((i) => i.id === id);
     if (!item) return;
-
-    const images = getPreviewImages(item);
-    previewActiveTab = images.front ? 'front' : 'inside';
-
-    $('preview-title').textContent = item.title || 'Proof your card';
-    renderPreviewTabs(images);
-    renderPreviewImage(images);
 
     const overlay = $('preview-overlay');
     overlay.dataset.itemId = id;
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+
+    $('preview-title').textContent = item.title || 'Proof your card';
+    $('preview-tabs').style.display = 'none';
+    $('preview-image-wrap').innerHTML = `<p class="preview-unavailable">Loading preview...</p>`;
+
+    // previewFront/previewInside live in IndexedDB (see cart.js), not on
+    // the item object itself, so they're fetched on demand rather than
+    // being loaded for every item up front.
+    let stored;
+    try {
+        stored = await ccCart.getItemPreviews(id);
+    } catch (err) {
+        stored = { front: null, inside: null };
+    }
+
+    // Bail out quietly if the modal was closed (or a different item was
+    // opened) while this was loading.
+    if (!overlay.classList.contains('open') || overlay.dataset.itemId !== id) return;
+
+    previewImagesCache = {
+        front: stored.front || item.thumbnail || null,
+        inside: stored.inside || null
+    };
+    previewActiveTab = previewImagesCache.front ? 'front' : 'inside';
+
+    renderPreviewTabs(previewImagesCache);
+    renderPreviewImage(previewImagesCache);
 }
 
 function renderPreviewTabs(images) {
@@ -453,17 +471,8 @@ function renderPreviewTabs(images) {
 
 function switchPreviewTab(tab) {
     previewActiveTab = tab;
-    const overlay = $('preview-overlay');
-    if (!overlay.classList.contains('open')) return;
-    // Re-derive images from whichever item is currently showing by
-    // re-reading the tabs' onclick targets isn't possible statelessly,
-    // so we just re-render using the last opened item id stored on the overlay.
-    const id = overlay.dataset.itemId;
-    const item = ccCart.getCart().find((i) => i.id === id);
-    if (!item) return;
-    const images = getPreviewImages(item);
-    renderPreviewTabs(images);
-    renderPreviewImage(images);
+    renderPreviewTabs(previewImagesCache);
+    renderPreviewImage(previewImagesCache);
 }
 
 function renderPreviewImage(images) {
