@@ -53,25 +53,28 @@
 
     body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); }
 
-    /* EDITOR WORKSPACE — single centered column at every screen size:
-       canvas on top, the front/write-message toggle directly under it,
-       then the personalise options below that. */
-    .editor-workspace { display: flex; flex-direction: column; align-items: center; max-width: 460px; margin: 40px auto; padding: 0 20px; gap: 20px; box-sizing: border-box; }
-    #canvas-wrapper { width: 100%; background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    /* HEADER & NAVIGATION */
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+    .logo-container { text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
+    .login-btn:hover { color: #111; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+
+    /* EDITOR WORKSPACE — PC/desktop default: canvas side by side with the
+       toggle + personalise options in a fixed-width column. Below the
+       900px breakpoint this collapses to the newer single centered
+       column (see MOBILE / TABLET RESPONSIVE LAYOUT below). */
+    .editor-workspace { display: flex; justify-content: center; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; overflow-x: auto; min-width: 900px; }
+    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
     #canvas { border: 1px solid #e2e2e2; }
-    /* Fabric.js's generated canvas elements are forced to scale to the
-       wrapper's width instead of staying at their fixed internal pixel
-       size (EDIT_WIDTH x EDIT_HEIGHT = 595.5 x 840), so the same markup
-       scales cleanly from phone widths up to the 460px column here. */
-    #canvas-wrapper .canvas-container {
-        width: 100% !important;
-        height: auto !important;
-        aspect-ratio: 595.5 / 840;
-    }
-    #canvas-wrapper .canvas-container canvas {
-        width: 100% !important;
-        height: 100% !important;
-    }
+    .side-column { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
     .page-toggle { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
     .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
@@ -97,24 +100,75 @@
     /* Small Back / Next nav buttons, side by side, below the main actions */
     .nav-buttons { display: flex; gap: 10px; margin-top: 10px; }
     .btn-small { flex: 1; padding: 8px; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 0; }
-    .btn-back { background-color: #f0f0f0; color: #333; border: 1px solid #ccc; }
-    .btn-back:hover { background-color: #e0e0e0; }
+    .btn-back { background-color: #1a1a1a; color: white; border: none; }
+    .btn-back:hover { background-color: #444; }
     .btn-next { background-color: #1a1a1a; color: white; border: none; }
     .btn-next:hover { background-color: #444; }
     .btn-small:disabled { background-color: #e8e8e8; color: #999; border-color: #e8e8e8; cursor: not-allowed; }
 
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+
     /* ============================================================
        MOBILE / TABLET RESPONSIVE LAYOUT
-       Editor workspace is a single centered column at every width —
-       canvas, then the front/write-message toggle, then the options —
-       and the canvas is scaled purely with CSS (width:100% / aspect-ratio
-       on the Fabric-generated canvas elements). Fabric.js converts
-       pointer coordinates using the ratio between the CSS-rendered size
-       and the canvas's internal resolution, so dragging/resizing photos
-       and text stays accurate at any on-screen size. Only small
-       screen-specific tweaks (tighter padding, no iOS zoom-on-focus)
-       are left to the breakpoints below.
+       Below 900px, the editor workspace collapses to a single centered
+       column — canvas, then the front/write-message toggle, then the
+       options — and the canvas is scaled purely with CSS (width:100% /
+       aspect-ratio on the Fabric-generated canvas elements). Fabric.js
+       converts pointer coordinates using the ratio between the
+       CSS-rendered size and the canvas's internal resolution, so
+       dragging/resizing photos and text stays accurate at any on-screen
+       size. This matches the 900px breakpoint isMobileDevice() uses
+       below to switch touch behaviour (pinch/hold-to-scroll) on.
        ============================================================ */
+    @media (max-width: 900px) {
+        header { padding: 12px 16px 8px; }
+        .nav-links { flex-wrap: wrap; justify-content: center; row-gap: 10px; column-gap: 18px; }
+
+        .editor-workspace {
+            flex-direction: column;
+            align-items: center;
+            min-width: 0;
+            overflow-x: visible;
+            width: 100%;
+            max-width: 460px;
+            margin: 40px auto;
+            padding: 0 20px;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        #canvas-wrapper {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Force Fabric.js's generated canvas elements to scale to the
+           wrapper's width instead of staying at their fixed internal
+           pixel size (EDIT_WIDTH x EDIT_HEIGHT = 595.5 x 840). */
+        #canvas-wrapper .canvas-container {
+            width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 595.5 / 840;
+        }
+        #canvas-wrapper .canvas-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .side-column { width: 100%; }
+
+        footer { padding: 40px 20px 20px; }
+        .footer-grid { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 30px; }
+        .footer-col { text-align: center; }
+    }
+
     @media (max-width: 500px) {
         .editor-workspace { padding: 0 16px; margin: 16px auto; }
         .controls { padding: 22px; }
@@ -129,6 +183,31 @@
 </head>
 <body>
 
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="cockney-club.html">Cockney Club</a></li>
+            <li><a href="account.html">My Account</a></li>
+        </ul>
+    </nav>
+</header>
+
 <div class="editor-workspace">
     <div id="canvas-wrapper">
         <canvas id="canvas"></canvas>
@@ -137,6 +216,7 @@
         </p>
     </div>
 
+    <div class="side-column">
     <div class="page-toggle">
         <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')" disabled>Front Cover</button>
         <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Write Message</button>
@@ -214,7 +294,31 @@
             <button id="next-btn" class="btn-small btn-next" onclick="goToBasket()" disabled>Next</button>
         </div>
     </div>
+    </div>
 </div>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="https://www.tiktok.com/@cockneycards" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
 
 <script>
 // CLOUD_BASE comes from cards-data.js (loaded above).
