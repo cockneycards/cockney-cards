@@ -578,6 +578,12 @@ function initEditor(templateKey) {
         // hold-to-scroll touch landed on empty canvas.
         selection: false
     });
+    // Alt normally toggles centered-vs-corner-anchored scaling for
+    // whatever's selected. The photo relies on centered scaling always
+    // being on (see centeredScaling on the photo image, and the comment
+    // on keepPhotoCoveringFrame) — nulling this out stops Alt from
+    // silently flipping it back to corner-anchored mid-drag.
+    canvas.centeredKey = null;
 
     // Pan so logical x = PANEL_WIDTH..CANVAS_WIDTH (the right/front panel)
     // fills the on-screen edit view. Objects keep their normal full-spread
@@ -881,6 +887,14 @@ function loadPhotoIntoFrame(dataUrl) {
             originX: 'center', originY: 'center',
             scaleX: coverScale, scaleY: coverScale,
             lockRotation: true,
+            // Anchors corner-drag resizing on the photo's own center
+            // instead of Fabric's default (opposite-corner anchor). This
+            // has to match the center-based assumption that
+            // keepPhotoCoveringFrame's math below relies on — without it,
+            // Fabric moves the anchor corner while our guard keeps
+            // snapping the center back, and the two fight each other so
+            // dragging a handle looks like it does nothing.
+            centeredScaling: true,
             hasBorders: !mobile,
             hasControls: !mobile,
             borderColor: '#1A73E8',
