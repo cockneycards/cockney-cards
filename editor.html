@@ -75,10 +75,6 @@
     #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
     #canvas { border: 1px solid #e2e2e2; }
     .side-column { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
-
-    #card-description { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
-    #card-description-title { font-size:14px; font-weight:bold; color:#333; margin:0 0 8px; letter-spacing:0.5px; text-transform:uppercase; }
-    #card-description-text { font-size:15px; color:#444; margin:0; line-height:1.5; }
     .page-toggle { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
     .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
@@ -174,7 +170,6 @@
     @media (max-width: 500px) {
         .editor-workspace { padding: 0 16px; margin: 16px auto; }
         .controls { padding: 22px; }
-        #card-description { padding: 22px; }
     }
 
     @media (max-width: 480px) {
@@ -296,11 +291,6 @@
             <button class="btn-small btn-back" onclick="returnToShop()">Back</button>
             <button id="next-btn" class="btn-small btn-next" onclick="goToBasket()" disabled>Next</button>
         </div>
-    </div>
-
-    <div id="card-description" style="display:none;">
-        <p id="card-description-title"></p>
-        <p id="card-description-text"></p>
     </div>
     </div>
 </div>
@@ -646,14 +636,16 @@ function initEditor(templateKey) {
     loadFrontCover(activeTemplate.url);
 }
 
-// Shows the card's blurb in its own box below the side panel's controls
-// (inside .side-column), if the template has one set. Expects an
-// optional `description` string
-// (and optional `title`, falls back to 'About This Card') on the
+// Shows the card's blurb underneath the side panel, if the template has
+// one set. Expects an optional `description` string (and optional
+// `title`, falls back to the template's own name/label) on the
 // CARD_TEMPLATES entry, e.g.:
 //   CARD_TEMPLATES['11plus-boy'] = { ..., title: '11+ Boy Card',
 //     description: 'A colourful card celebrating passing the 11+.' }
 function updateCardDescription(template) {
+    // The #card-description box was removed from the page (editor-only
+    // layout, no blurb section) — kept as a no-op so callers elsewhere
+    // don't need to change.
     const box = $('card-description');
     if (!box) return;
     if (!template || !template.description) {
@@ -807,14 +799,12 @@ function setupTextsAndOverlays() {
     const bgPanelDefaults = { width: BOX_WIDTH, left: BOX_LEFT, fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false };
     insideBgRects = BOX_CONFIGS.map((cfg) => new fabric.Rect({ ...bgPanelDefaults, top: cfg.top, height: cfg.height }));
 
-    // splitByGrapheme: false makes Fabric wrap whole words down to the next
-    // line when they don't fit, instead of breaking mid-word.
     const textDefaults = {
         width: BOX_WIDTH, left: BOX_LEFT,
         fontFamily: "Arial", fill: "#000000", textAlign: "center",
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
-        hasBorders: true, splitByGrapheme: false, backgroundColor: "transparent",
+        hasBorders: true, splitByGrapheme: true, backgroundColor: "transparent",
         ...STYLE_DASHED
     };
     insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
@@ -898,7 +888,6 @@ function loadPhotoIntoFrame(dataUrl) {
                                       // its transparent cutout is what shows this
         canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
-        updateAddToBasketAvailability();
     }, { crossOrigin: 'anonymous' });
 }
 
@@ -1035,7 +1024,6 @@ function updateNameText(inputEl) {
         nameText.set({ text: displayVal || "NAME" });
     }
     canvas.requestRenderAll();
-    updateAddToBasketAvailability();
 }
 
 function updateAgeText(inputEl) {
@@ -1259,24 +1247,14 @@ function onBlankMessageChange(isChecked) {
 }
 
 // Add to Basket only shows/enables once the editor has finished loading
-// AND all of the following that apply to this card are satisfied:
-//   1. a photo has been uploaded, for cards with a photo frame
-//   2. a name has been entered, for cards with a name field
-//   3. exactly one of the two message checkboxes has been ticked
-// Conditions 1 and 2 are skipped entirely for cards that don't have that
-// option (activeTemplate.photo / activeTemplate.name unset), so this
-// still works correctly for card types with no photo or no name field.
+// AND exactly one of the two message checkboxes has been ticked.
 function updateAddToBasketAvailability() {
     const ownChecked = $('own-message-checkbox').checked;
     const blankChecked = $('blank-message-checkbox').checked;
     const oneTicked = ownChecked !== blankChecked; // exactly one, since they're mutually exclusive
-
-    const photoOk = !activeTemplate?.photo || !!photoImg;
-    const nameOk = !activeTemplate?.name || $('name-input').value.trim().length > 0;
-
     const btn = $('add-to-basket-btn');
 
-    if (editorReady && oneTicked && photoOk && nameOk) {
+    if (editorReady && oneTicked) {
         btn.disabled = false;
         btn.style.display = 'block';
     } else {
@@ -1344,8 +1322,14 @@ function replaceNameText(newNameObj) {
 // it stays at its normal cropped size the whole time this runs. We just
 // snapshot the current objects (via toJSON, so it picks up whichever
 // front/inside visibility state is active right now) onto that hidden
-// canvas, grab a PNG, then discard it.
-function captureFullSpread() {
+// canvas, grab a JPEG, then discard it.
+//
+// options lets callers trade resolution/file size for quality:
+//   multiplier — export scale relative to the 1191x840 canvas (default 3,
+//                the print-ready setting: ~3573x2520px, ~335 DPI at real
+//                print size)
+//   quality    — JPEG quality 0-1 (default 0.92)
+function captureFullSpread({ multiplier = 3, quality = 0.92 } = {}) {
     return new Promise((resolve, reject) => {
         const exportEl = document.createElement('canvas');
         const exportCanvas = new fabric.StaticCanvas(exportEl, {
@@ -1355,16 +1339,17 @@ function captureFullSpread() {
             try {
                 exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
                 exportCanvas.renderAll();
-                // multiplier: 3 pushes the 1191x840 editor canvas up to
-                // ~3573x2520px, which lands at ~335 DPI once stretched to
-                // fill the real 270x188mm spread — without this, the export
-                // was going out at ~112 DPI and printing pixelated.
-                // JPEG at 0.92 quality rather than lossless PNG — visually
-                // identical at print size/distance, but a fraction of the
-                // file size (PNG was producing ~90MB+ files that blew past
-                // storage limits; JPEG at this quality typically lands
-                // under 10MB for the same artwork).
-                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.92, multiplier: 3 });
+                // multiplier: 3 (the default/print setting) pushes the
+                // 1191x840 editor canvas up to ~3573x2520px, which lands at
+                // ~335 DPI once stretched to fill the real 270x188mm spread
+                // — without this, the export was going out at ~112 DPI and
+                // printing pixelated.
+                // JPEG rather than lossless PNG — visually identical at
+                // print size/distance, but a fraction of the file size (PNG
+                // was producing ~90MB+ files that blew past storage
+                // limits; JPEG at quality 0.92 typically lands under 10MB
+                // for the same artwork).
+                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality, multiplier });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
@@ -1424,8 +1409,19 @@ function showQrForCapture(show) {
 // page 2 = inside). Shared by the real checkout flow and the local
 // test-download button so the capture logic — panel switching, hiding
 // editor-only borders/dashes, etc — only lives once.
+//
+// Also captures a smaller, lower-quality "proof" version of each spread
+// (previewFront/previewInside) in the same pass — same panel-switching/
+// border-hiding work already has to happen for the print capture, so
+// grabbing a second, cheaper export alongside it avoids doing that twice.
+// These are what the customer sees in the basket's "Preview card" modal;
+// they're never used for anything print-related.
 async function captureAndBuildPrintPDF() {
     switchPage('front');
+    // Proof capture first, before the QR overlay goes on — the QR is a
+    // print-only artifact (see showQrForCapture) and shouldn't appear in
+    // the customer-facing proof.
+    const previewFront = await captureFullSpread({ multiplier: 1, quality: 0.85 });
     showQrForCapture(true);
     const outsideDataUrl = await captureFullSpread();
     showQrForCapture(false);
@@ -1438,11 +1434,13 @@ async function captureAndBuildPrintPDF() {
     canvas.requestRenderAll();
 
     const insideDataUrl = await captureFullSpread();
+    const previewInside = await captureFullSpread({ multiplier: 1, quality: 0.85 });
 
     insideBgRects.forEach((r) => r.set({ visible: true }));
     switchPage('inside');
 
-    return buildPrintReadyPDF([outsideDataUrl, insideDataUrl]);
+    const doc = await buildPrintReadyPDF([outsideDataUrl, insideDataUrl]);
+    return { doc, previewFront, previewInside };
 }
 
 // Shows/hides the recipient address fields based on which delivery
@@ -1534,7 +1532,7 @@ async function addCurrentCardToBasket() {
     addBtn.disabled = true;
 
     try {
-        const doc = await captureAndBuildPrintPDF();
+        const { doc, previewFront, previewInside } = await captureAndBuildPrintPDF();
         const pdfDataUri = doc.output('datauristring');
         const thumbnail = await captureFrontThumbnail();
         const delivery = collectAndResetDeliveryInfo();
@@ -1558,6 +1556,8 @@ async function addCurrentCardToBasket() {
             price: activeTemplate.price || null,
             priceValue: activeTemplate.priceValue || 0,
             pdfDataUri,
+            previewFront,
+            previewInside,
             delivery
         });
 
@@ -1565,7 +1565,7 @@ async function addCurrentCardToBasket() {
         $('next-btn').disabled = false;
         setTimeout(() => {
             addBtn.innerText = originalText;
-            updateAddToBasketAvailability(); // re-checks photo/name/checkbox state rather than blindly re-enabling
+            addBtn.disabled = false;
         }, 1500);
     } catch (err) {
         console.error(err);
