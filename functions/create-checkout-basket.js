@@ -132,7 +132,7 @@ export async function onRequestPost(context) {
         const isPromoValid = await checkPromoCode(data.promoCode, env);
         // Refer a Friend / welcome reward — either a single-use "free
         // card" code (earned when someone the logged-in user referred
-        // completes their first order) or a single-use "25% off one
+        // completes their first order) or a single-use "15% off one
         // card" code (given to a brand-new customer who signed up via a
         // referral link) — see referrals.js. Requires being logged in as
         // the user the code was issued to; this only confirms it's valid
@@ -143,7 +143,7 @@ export async function onRequestPost(context) {
         let rewardCode = rewardCodeEntered;
         let rewardDetails = rewardCodeEntered ? await getRewardCodeDetails(rewardCodeEntered, authedUser, env) : null;
 
-        // Auto-apply the 25%-off welcome reward for anyone who signed up
+        // Auto-apply the 15%-off welcome reward for anyone who signed up
         // via a referral link — this is what actually makes it happen
         // without the customer needing to find/enter a code themselves.
         // A manually-entered code (e.g. a free_card reward) always takes
@@ -153,13 +153,18 @@ export async function onRequestPost(context) {
             const autoWelcome = await getActiveWelcomeReward(authedUser, env);
             if (autoWelcome) {
                 rewardCode = autoWelcome.code;
+                // NOTE: 'new_customer_25' is just this reward type's
+                // internal identifier (kept as-is so existing/stored
+                // reward codes still match) — the actual discount is
+                // whatever discountPercent holds (now 15%, see
+                // referrals.js), not literally 25% any more.
                 rewardDetails = { rewardType: 'new_customer_25', discountPercent: autoWelcome.discountPercent };
             }
         }
-        // A Club member's 30% is always better than the 25% welcome
-        // reward, and the two shouldn't stack (25% off an already-30%-off
+        // A Club member's 25% is always better than the 15% welcome
+        // reward, and the two shouldn't stack (15% off an already-25%-off
         // price) — so a new_customer_25 reward simply isn't applied for a
-        // Club member; they keep getting 30% off, same as any other
+        // Club member; they keep getting 25% off, same as any other
         // member, and the reward code itself is left unredeemed (still
         // usable on a future order once/if membership lapses). free_card
         // isn't a percentage, so there's no stacking concern there — it
@@ -174,7 +179,7 @@ export async function onRequestPost(context) {
         // the customer themselves counts as one parcel, and each distinct
         // recipient address counts as its own parcel, each getting its
         // own postage charge (see postage.js's groupItemsByDestination).
-        // Club's discount is a flat 30% off cards regardless of quantity —
+        // Club's discount is a flat 25% off cards regardless of quantity —
         // the old 35% tier for 2+ cards to the same address was dropped in
         // favour of the free-delivery-on-3+-cards perk below, which now
         // does that job (and applies to every customer, not just members).
@@ -190,7 +195,7 @@ export async function onRequestPost(context) {
             const printItemsInGroup = groupItems.filter((item) => item.kind === 'print');
             const printUnitsInGroup = printItemsInGroup.reduce((sum, item) => sum + item.quantity, 0);
             const printSizesInGroup = new Set(printItemsInGroup.map((item) => item.size));
-            const discountRate = isClubMember ? 0.30 : 0;
+            const discountRate = isClubMember ? 0.25 : 0;
 
             groupItems.forEach((item) => {
                 const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
@@ -210,7 +215,7 @@ export async function onRequestPost(context) {
                 // priced portion plus a single reward unit, so e.g. "3x
                 // Birthday Card" with a free-card reward becomes "2x
                 // Birthday Card" + "1x Birthday Card (Free)" rather than
-                // all 3 being affected. A 25%-off welcome reward works the
+                // all 3 being affected. A 15%-off welcome reward works the
                 // same way, just discounting that one unit instead of
                 // zeroing it.
                 if (!rewardApplied && rewardIsUsable && item.kind === 'card' && hasPrice) {
@@ -266,7 +271,7 @@ export async function onRequestPost(context) {
             //      to every customer, mirroring the cards rule above.
             //   3. A valid promo code was entered (cards-only, as before).
             // Club membership itself does NOT waive postage — that's the
-            // 30% card discount above instead.
+            // 25% card discount above instead.
             const tier = highestTier(groupItems);
             const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
             const allPrintsInGroup = groupItems.length > 0 && groupItems.every((item) => item.kind === 'print');
