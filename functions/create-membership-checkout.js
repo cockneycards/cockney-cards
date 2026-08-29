@@ -2,7 +2,7 @@
 //
 // Cloudflare Pages Function — creates a Stripe Checkout Session in
 // subscription mode for the Cockney Cards Club membership (£9.99/year,
-// 30% off every card, flat rate regardless of quantity). Requires the
+// 25% off every card, flat rate regardless of quantity). Requires the
 // customer to already be logged
 // in (Authorization: Bearer <session token>), since a membership has to
 // attach to an account, not a one-off guest checkout.
@@ -43,7 +43,7 @@ export async function onRequestPost(context) {
 
         params.append('line_items[0][price_data][currency]', 'gbp');
         params.append('line_items[0][price_data][product_data][name]', 'Cockney Cards Club (annual membership)');
-        params.append('line_items[0][price_data][product_data][description]', '30% off every card — renews yearly');
+        params.append('line_items[0][price_data][product_data][description]', '25% off every card — renews yearly');
         params.append('line_items[0][price_data][unit_amount]', String(PLUS_PRICE_PENCE));
         params.append('line_items[0][price_data][recurring][interval]', 'year');
         params.append('line_items[0][quantity]', '1');
