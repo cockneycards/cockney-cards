@@ -319,7 +319,7 @@
             </div>
         </div>
 
-        <button id="add-to-basket-btn" class="btn" style="background-color:#1a1a1a;" onclick="addCurrentPrintToBasket()" disabled>Add to Basket</button>
+        <button id="add-to-basket-btn" class="btn" onclick="addCurrentPrintToBasket()" disabled>Add to Basket</button>
 
         <div class="nav-buttons">
             <button class="btn-small btn-back" onclick="returnToShop()">Back</button>
@@ -486,7 +486,7 @@ const PRINT_SIZES = {
     A4: { label: "A4", mm: { width: 210, height: 297 }, multiplier: 4.2 },
     A3: { label: "A3", mm: { width: 297, height: 420 }, multiplier: 6 }
 };
-let selectedSize = "A3";
+let selectedSize = null; // no size pre-selected — customer must actively pick one
 
 // ---- Mutable editor state ----
 let canvas, bgImg, nameText, ageText, nameText2, ageText2;
@@ -621,8 +621,9 @@ function updatePrintDescription(template) {
 
 // Builds one button per PRINT_SIZES entry (A5/A4/A3), showing this print's
 // price at that size (from activeTemplate.sizes, set in prints-data.js).
-// Defaults to A3 selected; clicking a size updates `selectedSize` and the
-// Add to Basket button's price.
+// No size is pre-selected — the customer must actively tap one before
+// Add to Basket unlocks (see updateAddToBasketAvailability). Clicking a
+// size updates `selectedSize` and the Add to Basket button's price.
 function renderSizeOptions() {
     const container = $('print-size-options');
     container.innerHTML = '';
@@ -636,8 +637,10 @@ function renderSizeOptions() {
     }
     $('print-size-controls').style.display = 'block';
 
-    if (!activeTemplate.sizes[selectedSize]) {
-        selectedSize = Object.keys(activeTemplate.sizes)[0];
+    // Only keep the current selection if it's still valid for this
+    // template; otherwise leave it unset rather than defaulting to one.
+    if (selectedSize && !activeTemplate.sizes[selectedSize]) {
+        selectedSize = null;
     }
 
     Object.keys(PRINT_SIZES).forEach((sizeKey) => {
