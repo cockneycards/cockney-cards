@@ -24,6 +24,16 @@
 // run into several MB each once you've got a handful of items in the
 // basket, and localStorage's ~5MB-per-origin quota doesn't leave much
 // headroom for that, so only the lightweight metadata above lives there.
+//
+// Same goes for the two customer-facing proof images — previewFront and
+// previewInside (full-size renders of the front design and the inside
+// message, for the "Preview card" option in the basket) — pass them into
+// addToCart() alongside pdfDataUri and they'll be kept in IndexedDB under
+// `${id}:previewFront` / `${id}:previewInside`, not on the item object
+// itself. Fetch them with getItemPreviews(id) when you actually need to
+// show them (e.g. only when the basket preview modal is opened), rather
+// than loading every item's previews up front. previewInside is optional
+// — omit it for items that don't have a separate inside-message view.
 (function () {
     const CART_KEY = 'cc_cart_v1';
     const DB_NAME = 'cc_cart_db';
@@ -77,35 +87,45 @@
         });
     }
 
-    async function savePdf(id, dataUri) {
+    // Generic get/set/delete against the PDF_STORE — used for the
+    // print-ready PDF(s) and, keyed with a suffix, for the proof-preview
+    // images (previewFront / previewInside). Kept as one store since it's
+    // just large-ish data URIs keyed by string either way.
+    async function saveAsset(key, dataUri) {
         const db = await openDb();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(PDF_STORE, 'readwrite');
-            tx.objectStore(PDF_STORE).put(dataUri, id);
+            tx.objectStore(PDF_STORE).put(dataUri, key);
             tx.oncomplete = () => resolve();
             tx.onerror = () => reject(tx.error);
         });
     }
 
-    async function loadPdf(id) {
+    async function loadAsset(key) {
         const db = await openDb();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(PDF_STORE, 'readonly');
-            const req = tx.objectStore(PDF_STORE).get(id);
+            const req = tx.objectStore(PDF_STORE).get(key);
             req.onsuccess = () => resolve(req.result || null);
             req.onerror = () => reject(req.error);
         });
     }
 
-    async function deletePdf(id) {
+    async function deleteAsset(key) {
         const db = await openDb();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(PDF_STORE, 'readwrite');
-            tx.objectStore(PDF_STORE).delete(id);
+            tx.objectStore(PDF_STORE).delete(key);
             tx.oncomplete = () => resolve();
             tx.onerror = () => reject(tx.error);
         });
     }
+
+    // Back-compat aliases — kept because they read clearer at the PDF call
+    // sites below.
+    const savePdf = saveAsset;
+    const loadPdf = loadAsset;
+    const deletePdf = deleteAsset;
 
     async function clearAllPdfs() {
         const db = await openDb();
@@ -138,17 +158,25 @@
     // item = { kind, templateId, variantId, title, thumbnail,
     //          optionsSummary, price, priceValue, pdfDataUri,
     //          labelPdfDataUri (optional, for a "send to recipient"
-    //          delivery choice) }
+    //          delivery choice), previewFront (optional, full-size front
+    //          proof image), previewInside (optional, full-size inside-
+    //          message proof image) }
     // Returns the new line item's id.
     async function addToCart(item) {
         const id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
-        const { pdfDataUri, labelPdfDataUri, ...metadata } = item;
+        const { pdfDataUri, labelPdfDataUri, previewFront, previewInside, ...metadata } = item;
 
         if (pdfDataUri) {
             await savePdf(id, pdfDataUri);
         }
         if (labelPdfDataUri) {
             await savePdf(`${id}:label`, labelPdfDataUri);
+        }
+        if (previewFront) {
+            await saveAsset(`${id}:previewFront`, previewFront);
+        }
+        if (previewInside) {
+            await saveAsset(`${id}:previewInside`, previewInside);
         }
 
         const items = readCart();
@@ -161,6 +189,20 @@
         writeCart(readCart().filter((i) => i.id !== id));
         await deletePdf(id);
         await deletePdf(`${id}:label`);
+        await deleteAsset(`${id}:previewFront`);
+        await deleteAsset(`${id}:previewInside`);
+    }
+
+    // Fetches the proof-preview images for one line item. Returns
+    // { front, inside } — either can be null if that side wasn't
+    // captured (e.g. items added before this feature existed, or an item
+    // with no separate inside-message view).
+    async function getItemPreviews(id) {
+        const [front, inside] = await Promise.all([
+            loadAsset(`${id}:previewFront`),
+            loadAsset(`${id}:previewInside`)
+        ]);
+        return { front, inside };
     }
 
     function updateCartQuantity(id, quantity) {
@@ -248,6 +290,6 @@
     window.ccCart = {
         getCart, getCartWithPdfs, getCartCount, getCartTotal,
         addToCart, removeFromCart, updateCartQuantity, clearCart,
-        formatGBP, updateCartBadge
+        getItemPreviews, formatGBP, updateCartBadge
     };
 })();
