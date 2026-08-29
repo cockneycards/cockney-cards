@@ -76,8 +76,7 @@
     #canvas { border: 1px solid #e2e2e2; }
     .side-column { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
 
-    #card-description-wrap { max-width: 1280px; margin: 0 auto 40px; padding: 0 40px; box-sizing: border-box; }
-    #card-description { padding: 20px 24px; background:#fff8ec; border: 1px solid #f0d9a8; border-left: 5px solid #d4a72c; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    #card-description { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
     #card-description-title { font-size:14px; font-weight:bold; color:#333; margin:0 0 8px; letter-spacing:0.5px; text-transform:uppercase; }
     #card-description-text { font-size:15px; color:#444; margin:0; line-height:1.5; }
     .page-toggle { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
@@ -170,14 +169,12 @@
         }
 
         .side-column { width: 100%; }
-
-        #card-description-wrap { max-width: 460px; margin: 0 auto 40px; padding: 0 20px; }
     }
 
     @media (max-width: 500px) {
         .editor-workspace { padding: 0 16px; margin: 16px auto; }
         .controls { padding: 22px; }
-        #card-description-wrap { padding: 0 16px; margin: 0 auto 16px; }
+        #card-description { padding: 22px; }
     }
 
     @media (max-width: 480px) {
@@ -300,13 +297,11 @@
             <button id="next-btn" class="btn-small btn-next" onclick="goToBasket()" disabled>Next</button>
         </div>
     </div>
-    </div>
-</div>
 
-<div id="card-description-wrap" style="display:none;">
-    <div id="card-description">
+    <div id="card-description" style="display:none;">
         <p id="card-description-title"></p>
         <p id="card-description-text"></p>
+    </div>
     </div>
 </div>
 
@@ -651,22 +646,23 @@ function initEditor(templateKey) {
     loadFrontCover(activeTemplate.url);
 }
 
-// Shows the card's blurb in its own box below the editor workspace, if
-// the template has one set. Expects an optional `description` string
+// Shows the card's blurb in its own box below the side panel's controls
+// (inside .side-column), if the template has one set. Expects an
+// optional `description` string
 // (and optional `title`, falls back to 'About This Card') on the
 // CARD_TEMPLATES entry, e.g.:
 //   CARD_TEMPLATES['11plus-boy'] = { ..., title: '11+ Boy Card',
 //     description: 'A colourful card celebrating passing the 11+.' }
 function updateCardDescription(template) {
-    const wrap = $('card-description-wrap');
-    if (!wrap) return;
+    const box = $('card-description');
+    if (!box) return;
     if (!template || !template.description) {
-        wrap.style.display = 'none';
+        box.style.display = 'none';
         return;
     }
     $('card-description-title').textContent = template.title || 'About This Card';
     $('card-description-text').textContent = template.description;
-    wrap.style.display = 'block';
+    box.style.display = 'block';
 }
 
 function loadFrontCover(imageUrl) {
