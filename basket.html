@@ -147,7 +147,7 @@ let promoFeedbackColor = '#c0392b';
 
 // Cockney Cards Club membership — fetched from GET /api/account (needs
 // the logged-in session token; see auth.js) so the basket can show the
-// same 30%-off-cards price that create-checkout-basket.js actually
+// same 25%-off-cards price that create-checkout-basket.js actually
 // charges a member. Starts false (standard pricing) until this resolves,
 // so a guest or not-yet-checked visitor is never shown a discount that
 // might not apply — it only ever corrects upward into a lower price, not
@@ -265,7 +265,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
 }
 
 // Returns this line's per-unit price with the Club discount applied if
-// it qualifies — 30% off cards only, matching create-checkout-basket.js
+// it qualifies — 25% off cards only, matching create-checkout-basket.js
 // (`item.kind === 'card' && discountRate > 0`; prints and reward/promo
 // discounts aren't factored in here, those are checkout-only). Returns
 // null if this item has no usable price (matches the server's own
@@ -274,7 +274,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
 function displayUnitPrice(item) {
     const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
     if (!hasPrice) return null;
-    if (item.kind === 'card' && clubIsMember) return item.priceValue * 0.7;
+    if (item.kind === 'card' && clubIsMember) return item.priceValue * 0.75;
     return item.priceValue;
 }
 
@@ -309,7 +309,7 @@ function renderBasket() {
     `).join('');
 
     const clubSavingsRowHtml = clubSavings > 0.001
-        ? `<div class="summary-row" style="color:#1a7a3c;"><span>Cockney Cards Club discount (30% off cards)</span><span>−${ccCart.formatGBP(clubSavings)}</span></div>`
+        ? `<div class="summary-row" style="color:#1a7a3c;"><span>Cockney Cards Club discount (25% off cards)</span><span>−${ccCart.formatGBP(clubSavings)}</span></div>`
         : '';
 
     content.innerHTML = `
@@ -344,7 +344,7 @@ function renderItem(item) {
     const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
     const isDiscountedCard = item.kind === 'card' && clubIsMember && hasPrice;
     const priceHtml = isDiscountedCard
-        ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.7)} <span style="color:#1a7a3c; font-weight:normal;">(Club price)</span>`
+        ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.75)} <span style="color:#1a7a3c; font-weight:normal;">(Club price)</span>`
         : (item.price || ccCart.formatGBP(item.priceValue));
 
     return `
