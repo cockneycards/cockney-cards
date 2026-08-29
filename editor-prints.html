@@ -135,14 +135,16 @@
 
     /* ============================================================
        MOBILE / TABLET RESPONSIVE LAYOUT
-       Mirrors editor.html: canvas on top, personalisation controls
-       below — the DOM already puts #canvas-wrapper before
-       .side-column, so flex-direction:column gives us this order
-       for free. The canvas itself is scaled down purely with CSS
-       (max-width:100% / height:auto) — Fabric.js converts pointer
-       coordinates using the ratio between the CSS-rendered size and
-       the canvas's internal resolution, so dragging/resizing photos
-       and text stays accurate even at a smaller on-screen size.
+       Below 900px, the header and footer are hidden and the editor
+       workspace collapses to a single column — canvas on top,
+       personalisation controls below — the DOM already puts
+       #canvas-wrapper before .side-column, so flex-direction:column
+       gives us this order for free. The canvas itself is scaled down
+       purely with CSS (max-width:100% / height:auto) — Fabric.js
+       converts pointer coordinates using the ratio between the
+       CSS-rendered size and the canvas's internal resolution, so
+       dragging/resizing photos and text stays accurate even at a
+       smaller on-screen size.
 
        Unlike editor.html, the print editor wraps its canvas in a
        fixed-size #canvas-stage (so the watermark overlay div has a
@@ -153,8 +155,9 @@
        scales down right along with it.
        ============================================================ */
     @media (max-width: 900px) {
-        header { padding: 12px 16px 8px; }
-        .nav-links { flex-wrap: wrap; justify-content: center; row-gap: 10px; column-gap: 18px; }
+        /* Header and footer are PC/desktop-only — hidden on tablet and
+           phone so the mobile flow stays a focused single column. */
+        header, footer { display: none; }
 
         .editor-workspace {
             flex-direction: column;
@@ -195,10 +198,6 @@
         .side-column { width: 100%; max-width: 420px; }
         .controls { padding: 22px; }
         .controls h2 { font-size: 19px; margin-bottom: 18px; }
-
-        footer { padding: 40px 20px 20px; }
-        .footer-grid { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 30px; }
-        .footer-col { text-align: center; }
     }
 
     @media (max-width: 480px) {
@@ -255,17 +254,13 @@
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
 
             <div id="front-text-inputs">
-                <label id="label-name" for="name-input">Name:</label>
                 <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
 
-                <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Age:</label>
-                <input type="text" id="age-input" placeholder="Age:" inputmode="numeric" oninput="updateAgeText(this)">
+                <input type="text" id="age-input" placeholder="Age:" inputmode="numeric" oninput="updateAgeText(this)" style="margin-top: 10px;">
 
-                <label id="label-name2" for="name2-input" style="margin-top: 10px; display: block;">Second Name:</label>
-                <input type="text" id="name2-input" placeholder="Second Name:" oninput="updateNameText2(this)">
+                <input type="text" id="name2-input" placeholder="Second Name:" oninput="updateNameText2(this)" style="margin-top: 10px;">
 
-                <label id="label-age2" for="age2-input" style="margin-top: 10px; display: block;">Age:</label>
-                <input type="text" id="age2-input" placeholder="Age:" inputmode="numeric" oninput="updateAgeText2(this)">
+                <input type="text" id="age2-input" placeholder="Age:" inputmode="numeric" oninput="updateAgeText2(this)" style="margin-top: 10px;">
 
                 <div id="extra-fields-container"></div>
 
@@ -551,28 +546,24 @@ function initEditor(templateKey) {
     // Show/hide the personalisation inputs based on what this print (and,
     // for the name field, this variant — see refreshNameVisibilityForVariant) supports
     buildExtraFieldInputs();
-    $('age-input').style.display = $('label-age').style.display = activeTemplate.age ? 'block' : 'none';
+    $('age-input').style.display = activeTemplate.age ? 'block' : 'none';
     if (activeTemplate.name) {
         const nameLabel = activeTemplate.name.label || 'Name';
-        $('label-name').textContent = nameLabel + ':';
         $('name-input').placeholder = nameLabel + ':';
     }
     if (activeTemplate.age) {
         const ageLabel = activeTemplate.age.label || 'Age';
-        $('label-age').textContent = ageLabel + ':';
         $('age-input').placeholder = ageLabel + ':';
         $('age-input').setAttribute('inputmode', activeTemplate.age.lettersOnly ? 'text' : 'numeric');
     }
-    $('name2-input').style.display = $('label-name2').style.display = activeTemplate.name2 ? 'block' : 'none';
-    $('age2-input').style.display = $('label-age2').style.display = activeTemplate.age2 ? 'block' : 'none';
+    $('name2-input').style.display = activeTemplate.name2 ? 'block' : 'none';
+    $('age2-input').style.display = activeTemplate.age2 ? 'block' : 'none';
     if (activeTemplate.name2) {
         const name2Label = activeTemplate.name2.label || 'Second Name';
-        $('label-name2').textContent = name2Label + ':';
         $('name2-input').placeholder = name2Label + ':';
     }
     if (activeTemplate.age2) {
         const age2Label = activeTemplate.age2.label || 'Age';
-        $('label-age2').textContent = age2Label + ':';
         $('age2-input').placeholder = age2Label + ':';
         $('age2-input').setAttribute('inputmode', activeTemplate.age2.lettersOnly ? 'text' : 'numeric');
     }
@@ -705,7 +696,7 @@ function nameAllowedForVariant(key) {
 function refreshNameVisibilityForVariant() {
     const allowed = !!(activeTemplate.name && nameAllowedForVariant(activeVariantKey));
 
-    $('name-input').style.display = $('label-name').style.display = allowed ? 'block' : 'none';
+    $('name-input').style.display = allowed ? 'block' : 'none';
     $('front-size-controls').style.display = (allowed && activeTemplate.name?.canChangeSize) ? 'block' : 'none';
     $('front-color').parentElement.style.display = (allowed && activeTemplate.name?.canChangeColor) ? 'flex' : 'none';
 
