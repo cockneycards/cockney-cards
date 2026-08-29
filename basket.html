@@ -134,8 +134,153 @@
 <script>
 const $ = (id) => document.getElementById(id);
 
-window.addEventListener('DOMContentLoaded', renderBasket);
+// Promo-code state, kept here (rather than just left in the input) so it
+// survives the re-render triggered by applying a code — see
+// applyPromoCode(). Only affects the postage ESTIMATE below (free
+// postage for an all-card destination on a valid code, matching
+// functions/postage.js's rule) — checkout re-validates the code itself
+// regardless of what's shown here.
+let promoCodeValue = '';
+let promoIsValid = false;
+let promoFeedbackText = '';
+let promoFeedbackColor = '#c0392b';
+
+// Cockney Cards Club membership — fetched from GET /api/account (needs
+// the logged-in session token; see auth.js) so the basket can show the
+// same 30%-off-cards price that create-checkout-basket.js actually
+// charges a member. Starts false (standard pricing) until this resolves,
+// so a guest or not-yet-checked visitor is never shown a discount that
+// might not apply — it only ever corrects upward into a lower price, not
+// the other way round. Never trust this client-side for anything that
+// affects what's actually charged — checkout re-verifies membership
+// itself server-side regardless.
+let clubIsMember = false;
+
+async function refreshMembershipStatus() {
+    if (!ccIsLoggedIn()) return;
+    try {
+        const res = await fetch('/api/account', {
+            headers: { Authorization: `Bearer ${ccGetSession()}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            clubIsMember = !!data.plusActive;
+            renderBasket();
+        }
+    } catch (err) {
+        console.error('Could not check Cockney Cards Club status:', err);
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    renderBasket();
+    refreshMembershipStatus();
+});
 window.addEventListener('cc-cart-updated', renderBasket);
+
+// ---------------------------------------------------------------------
+// Postage estimate — mirrors functions/postage.js + the grouping/waiver
+// logic in functions/create-checkout-basket.js, so the basket shows the
+// same parcels/prices the Stripe session will actually charge. Keep in
+// sync if those files change. This is a display estimate only; the
+// Stripe Checkout Session created server-side is what actually charges
+// the customer.
+// ---------------------------------------------------------------------
+const POSTAGE_TIERS = { A5: 199, A4: 299, A3: 499 }; // pence
+const TIER_RANK = { A5: 0, A4: 1, A3: 2 };
+
+function tierForItem(item) {
+    if (item.kind === 'print' && item.size && POSTAGE_TIERS[item.size]) return item.size;
+    return 'A5';
+}
+
+function highestTier(items) {
+    let best = 'A5';
+    for (const item of items) {
+        const t = tierForItem(item);
+        if (TIER_RANK[t] > TIER_RANK[best]) best = t;
+    }
+    return best;
+}
+
+function normalise(value) {
+    return (value || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function destinationKey(item) {
+    const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+    if (!wantsRecipient) return 'self';
+    const r = item.delivery.recipient;
+    return ['recipient', normalise(r.name), normalise(r.address1), normalise(r.postcode)].join('|');
+}
+
+function groupItemsByDestination(items) {
+    const groups = new Map();
+    for (const item of items) {
+        const key = destinationKey(item);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(item);
+    }
+    return groups;
+}
+
+// Returns { parcels: [{ label, amountPence }], totalPence }.
+function estimatePostage(items, { isPromoValid = false } = {}) {
+    const groups = groupItemsByDestination(items);
+    const parcels = [];
+    let totalPence = 0;
+    let parcelNumber = 0;
+
+    for (const groupItems of groups.values()) {
+        parcelNumber++;
+
+        const allCardsInGroup = groupItems.every((i) => i.kind === 'card');
+        const allPrintsInGroup = groupItems.length > 0 && groupItems.every((i) => i.kind === 'print');
+        const cardUnitsInGroup = groupItems
+            .filter((i) => i.kind === 'card')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const printItemsInGroup = groupItems.filter((i) => i.kind === 'print');
+        const printUnitsInGroup = printItemsInGroup.reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const printSizesInGroup = new Set(printItemsInGroup.map((i) => i.size || null));
+
+        const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
+        const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
+        const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || (allCardsInGroup && isPromoValid);
+
+        const tier = highestTier(groupItems);
+        const amountPence = postageWaived ? 0 : POSTAGE_TIERS[tier];
+        totalPence += amountPence;
+
+        const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
+        let label;
+        if (qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address${parcelLabel}`;
+        else if (qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address${parcelLabel}`;
+        else if (postageWaived) label = `Free Postage — Promo Code${parcelLabel}`;
+        else label = `Postage${parcelLabel}`;
+
+        parcels.push({ label, amountPence });
+    }
+
+    return { parcels, totalPence };
+}
+
+// Returns this line's per-unit price with the Club discount applied if
+// it qualifies — 30% off cards only, matching create-checkout-basket.js
+// (`item.kind === 'card' && discountRate > 0`; prints and reward/promo
+// discounts aren't factored in here, those are checkout-only). Returns
+// null if this item has no usable price (matches the server's own
+// hasPrice check, so a missing price shows as missing here too rather
+// than silently becoming £0).
+function displayUnitPrice(item) {
+    const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
+    if (!hasPrice) return null;
+    if (item.kind === 'card' && clubIsMember) return item.priceValue * 0.7;
+    return item.priceValue;
+}
+
+function basketSubtotal(items) {
+    return items.reduce((sum, item) => sum + (displayUnitPrice(item) || 0) * (item.quantity || 1), 0);
+}
 
 function renderBasket() {
     const items = ccCart.getCart();
@@ -151,8 +296,21 @@ function renderBasket() {
         return;
     }
 
-    const total = ccCart.getCartTotal();
+    const rawSubtotal = ccCart.getCartTotal();
+    const subtotal = basketSubtotal(items);
+    const clubSavings = rawSubtotal - subtotal;
     const count = ccCart.getCartCount();
+    const postage = estimatePostage(items, { isPromoValid: promoIsValid });
+    const postagePounds = postage.totalPence / 100;
+    const grandTotal = subtotal + postagePounds;
+
+    const postageRowsHtml = postage.parcels.map((p) => `
+        <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
+    `).join('');
+
+    const clubSavingsRowHtml = clubSavings > 0.001
+        ? `<div class="summary-row" style="color:#1a7a3c;"><span>Cockney Cards Club discount (30% off cards)</span><span>−${ccCart.formatGBP(clubSavings)}</span></div>`
+        : '';
 
     content.innerHTML = `
         <div class="basket-layout">
@@ -161,14 +319,18 @@ function renderBasket() {
             </div>
             <div class="basket-summary">
                 <div class="summary-row"><span>Items</span><span>${count}</span></div>
-                <div class="summary-row total"><span>Subtotal</span><span>${ccCart.formatGBP(total)}</span></div>
+                <div class="summary-row"><span>Subtotal</span><span>${ccCart.formatGBP(rawSubtotal)}</span></div>
+                ${clubSavingsRowHtml}
+                ${postageRowsHtml}
+                <div class="summary-row total"><span>Total</span><span>${ccCart.formatGBP(grandTotal)}</span></div>
+                <p style="font-size:11px; color:#999; margin:8px 0 0;">Any promo code or referral reward is confirmed at checkout.</p>
                 <div style="margin: 15px 0;">
                     <label for="promo-code-input" style="font-size:12px; color:#666; display:block; margin-bottom:6px;">Promo code (optional)</label>
                     <div style="display:flex; gap:8px;">
-                        <input type="text" id="promo-code-input" placeholder="e.g. WELCOME10" style="flex:1; min-width:0; padding:10px; border:1px solid var(--border-color); border-radius:6px; box-sizing:border-box; font-size:13px; text-transform:uppercase;">
+                        <input type="text" id="promo-code-input" placeholder="e.g. WELCOME10" value="${promoCodeValue}" style="flex:1; min-width:0; padding:10px; border:1px solid var(--border-color); border-radius:6px; box-sizing:border-box; font-size:13px; text-transform:uppercase;">
                         <button type="button" class="btn btn-secondary" style="width:auto; flex:0 0 auto; margin-top:0; padding:10px 16px; white-space:nowrap;" id="apply-promo-btn" onclick="applyPromoCode()">Apply</button>
                     </div>
-                    <p id="promo-feedback" style="font-size:12px; margin:8px 0 0; display:none;"></p>
+                    <p id="promo-feedback" style="font-size:12px; margin:8px 0 0; color:${promoFeedbackColor}; ${promoFeedbackText ? '' : 'display:none;'}">${promoFeedbackText}</p>
                 </div>
                 <button class="btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
                 <button class="btn btn-secondary" onclick="window.location.href='shop-cards.html'">Keep Shopping</button>
@@ -179,13 +341,19 @@ function renderBasket() {
 }
 
 function renderItem(item) {
+    const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
+    const isDiscountedCard = item.kind === 'card' && clubIsMember && hasPrice;
+    const priceHtml = isDiscountedCard
+        ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.7)} <span style="color:#1a7a3c; font-weight:normal;">(Club price)</span>`
+        : (item.price || ccCart.formatGBP(item.priceValue));
+
     return `
         <div class="basket-item" data-id="${item.id}">
             <img src="${item.thumbnail || ''}" alt="${item.title || ''}">
             <div class="item-info">
                 <p class="item-title">${item.title || 'Personalised item'}</p>
                 <p class="item-options">${item.optionsSummary || ''}</p>
-                <p class="item-price">${item.price || ccCart.formatGBP(item.priceValue)} each</p>
+                <p class="item-price">${priceHtml} each</p>
             </div>
             <div class="item-actions">
                 <div class="qty-control">
@@ -228,19 +396,20 @@ async function removeItem(id) {
 async function applyPromoCode() {
     const input = $('promo-code-input');
     const btn = $('apply-promo-btn');
-    const feedback = $('promo-feedback');
     const code = input.value.trim();
 
+    promoCodeValue = code;
+
     if (!code) {
-        feedback.textContent = 'Enter a code first.';
-        feedback.style.color = '#c0392b';
-        feedback.style.display = 'block';
+        promoIsValid = false;
+        promoFeedbackText = 'Enter a code first.';
+        promoFeedbackColor = '#c0392b';
+        renderBasket();
         return;
     }
 
     btn.disabled = true;
     btn.innerText = 'Checking...';
-    feedback.style.display = 'none';
 
     try {
         const res = await fetch('/api/validate-promo', {
@@ -250,22 +419,21 @@ async function applyPromoCode() {
         });
         const result = await res.json();
 
-        if (result.valid) {
-            feedback.textContent = '✓ Code Accepted';
-            feedback.style.color = '#1a7a3c';
-        } else {
-            feedback.textContent = '✗ Invalid Code';
-            feedback.style.color = '#c0392b';
-        }
-        feedback.style.display = 'block';
+        // Drives the postage estimate above (a valid promo waives postage
+        // for an all-card destination) — re-render so that updates
+        // immediately, without waiting for checkout.
+        promoIsValid = !!result.valid;
+        promoFeedbackText = promoIsValid ? '✓ Code Accepted' : '✗ Invalid Code';
+        promoFeedbackColor = promoIsValid ? '#1a7a3c' : '#c0392b';
     } catch (err) {
-        feedback.textContent = 'Could not check code — try again.';
-        feedback.style.color = '#c0392b';
-        feedback.style.display = 'block';
-    } finally {
-        btn.disabled = false;
-        btn.innerText = 'Apply';
+        promoIsValid = false;
+        promoFeedbackText = 'Could not check code — try again.';
+        promoFeedbackColor = '#c0392b';
     }
+
+    renderBasket();
+    const applyBtn = $('apply-promo-btn');
+    if (applyBtn) { applyBtn.disabled = false; applyBtn.innerText = 'Apply'; }
 }
 
 async function goToCheckout() {
