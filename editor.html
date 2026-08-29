@@ -76,7 +76,7 @@
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
     .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
     .controls { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
-    .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
+    .controls h2 { margin: 0 0 10px; font-size: 22px; font-weight: 300; }
     .control-group { display: flex; flex-direction: column; gap: 15px; }
     .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
@@ -102,6 +102,7 @@
     .btn-back:hover { background-color: #e0e0e0; }
     .btn-next { background-color: #1a1a1a; color: white; border: none; }
     .btn-next:hover { background-color: #444; }
+    .btn-small:disabled { background-color: #e8e8e8; color: #999; border-color: #e8e8e8; cursor: not-allowed; }
 
     /* ============================================================
        MOBILE / TABLET RESPONSIVE LAYOUT
@@ -118,7 +119,7 @@
     @media (max-width: 500px) {
         .editor-workspace { padding: 0 16px; margin: 16px auto; }
         .controls { padding: 22px; }
-        .controls h2 { font-size: 19px; margin-bottom: 18px; }
+        .controls h2 { font-size: 19px; margin-bottom: 8px; }
     }
 
     @media (max-width: 480px) {
@@ -215,7 +216,7 @@
 
         <div class="nav-buttons">
             <button class="btn-small btn-back" onclick="returnToShop()">Back</button>
-            <button class="btn-small btn-next" onclick="goToBasket()">Next</button>
+            <button id="next-btn" class="btn-small btn-next" onclick="goToBasket()" disabled>Next</button>
         </div>
     </div>
 </div>
@@ -1405,6 +1406,7 @@ async function addCurrentCardToBasket() {
         });
 
         addBtn.innerText = "Added to Basket ✓";
+        $('next-btn').disabled = false;
         setTimeout(() => {
             addBtn.innerText = originalText;
             addBtn.disabled = false;
