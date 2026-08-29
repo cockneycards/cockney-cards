@@ -896,6 +896,7 @@ function loadPhotoIntoFrame(dataUrl) {
                                       // its transparent cutout is what shows this
         canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
+        updateAddToBasketAvailability();
     }, { crossOrigin: 'anonymous' });
 }
 
@@ -1032,6 +1033,7 @@ function updateNameText(inputEl) {
         nameText.set({ text: displayVal || "NAME" });
     }
     canvas.requestRenderAll();
+    updateAddToBasketAvailability();
 }
 
 function updateAgeText(inputEl) {
@@ -1255,14 +1257,24 @@ function onBlankMessageChange(isChecked) {
 }
 
 // Add to Basket only shows/enables once the editor has finished loading
-// AND exactly one of the two message checkboxes has been ticked.
+// AND all of the following that apply to this card are satisfied:
+//   1. a photo has been uploaded, for cards with a photo frame
+//   2. a name has been entered, for cards with a name field
+//   3. exactly one of the two message checkboxes has been ticked
+// Conditions 1 and 2 are skipped entirely for cards that don't have that
+// option (activeTemplate.photo / activeTemplate.name unset), so this
+// still works correctly for card types with no photo or no name field.
 function updateAddToBasketAvailability() {
     const ownChecked = $('own-message-checkbox').checked;
     const blankChecked = $('blank-message-checkbox').checked;
     const oneTicked = ownChecked !== blankChecked; // exactly one, since they're mutually exclusive
+
+    const photoOk = !activeTemplate?.photo || !!photoImg;
+    const nameOk = !activeTemplate?.name || $('name-input').value.trim().length > 0;
+
     const btn = $('add-to-basket-btn');
 
-    if (editorReady && oneTicked) {
+    if (editorReady && oneTicked && photoOk && nameOk) {
         btn.disabled = false;
         btn.style.display = 'block';
     } else {
