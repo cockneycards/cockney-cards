@@ -53,55 +53,16 @@
 
     body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); }
 
-    /* HEADER & NAVIGATION */
-    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
-    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
-    .logo-container { text-align: center; }
-    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
-    .header-right { display: flex; align-items: center; gap: 20px; }
-    .cart-icon { position: relative; cursor: pointer; }
-    .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
-    .login-btn:hover { color: #111; }
-    nav { margin-top: 15px; text-align: center; }
-    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
-    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
-    .nav-links a:hover { color: #888; }
-
     /* EDITOR WORKSPACE */
     .editor-workspace { display: flex; justify-content: center; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; overflow-x: auto; min-width: 900px; }
     #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
     #canvas { border: 1px solid #e2e2e2; }
     .side-column { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
     .controls { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
-    #card-description { width: 100%; background: white; padding: 20px 25px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
-    #card-description h3 { margin: 0 0 10px; font-size: 15px; font-weight: bold; }
-    #card-description p { margin: 0; font-size: 13px; line-height: 1.6; color: #555; }
     .controls h2 { margin: 0 0 25px; font-size: 22px; font-weight: 300; }
-    /* Superseded by the page-thumbnail-strip (under the canvas) — kept in
-       the DOM only because switchPage() still toggles its classes/disabled
-       state, but it's never shown to the customer any more. */
-    .page-toggle { display: none; }
+    .page-toggle { display: flex; gap: 10px; margin-bottom: 25px; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
     .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
-
-    /* NAME/SHIRT + BLANK-MESSAGE FIELDS, MOVED BELOW THE CANVAS
-       (sit between the canvas and the page-thumbnail strip, instead of
-       buried in the side controls panel). */
-    .side-personalisation-tools { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; }
-    .below-canvas-panel { display: flex; flex-direction: column; gap: 14px; margin-top: 0; }
-    .below-canvas-fields label { display: block; margin-bottom: 6px; }
-
-    /* PAGE THUMBNAIL STRIP — sits directly under the canvas so switching
-       between the outside/inside spread is a single tap that's always in
-       view, instead of scrolling down to the controls panel to find the
-       old text toggle (the "scrolling issue" on mobile in particular). */
-    .page-thumbnail-strip { display: flex; justify-content: center; gap: 14px; margin-top: 0; flex-wrap: wrap; }
-    .page-thumb { display: flex; flex-direction: column; align-items: center; gap: 6px; background: #f7f7f8; border: 2px solid var(--border-color); border-radius: 8px; padding: 6px; cursor: pointer; transition: border-color 0.15s ease; }
-    .page-thumb:hover { border-color: #bbb; }
-    .page-thumb.active { border-color: var(--primary); }
-    .page-thumb img { width: 110px; height: 78px; object-fit: cover; border-radius: 4px; background: #fff; display: block; }
-    .page-thumb span { font-size: 11px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; color: #555; }
-    .page-thumb.active span { color: var(--primary); }
     .control-group { display: flex; flex-direction: column; gap: 15px; }
     .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
     label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
@@ -122,26 +83,19 @@
     .btn-close { background-color: #f0f0f0; color: #333; margin-top: 10px; }
     .btn-close:hover { background-color: #e0e0e0; }
 
-    /* FOOTER */
-    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
-    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
-    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
-    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
-    .footer-col p { margin: 0 0 15px 0; }
-    .footer-col a { color: #111; text-decoration: underline; }
-    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
-
     /* ============================================================
        MOBILE / TABLET RESPONSIVE LAYOUT
-       The canvas remains above the controls on smaller screens, while
-       all personalisation controls, the blank-message checkbox and the
-       two page preview thumbnails remain inside the side panel. They are
-       never moved underneath the canvas as separate elements.
+       Editor workspace stacks: canvas on top, personalisation
+       controls (page toggle + options) below — the DOM already puts
+       #canvas-wrapper before .side-column, so flex-direction:column
+       gives us this order for free. The canvas itself is scaled
+       down purely with CSS (max-width:100% / height:auto on the
+       Fabric-generated canvas elements) — Fabric.js converts pointer
+       coordinates using the ratio between the CSS-rendered size and
+       the canvas's internal resolution, so dragging/resizing photos
+       and text stays accurate even at a smaller on-screen size.
        ============================================================ */
     @media (max-width: 900px) {
-        header { padding: 12px 16px 8px; }
-        .nav-links { flex-wrap: wrap; justify-content: center; row-gap: 10px; column-gap: 18px; }
-
         .editor-workspace {
             flex-direction: column;
             align-items: center;
@@ -149,7 +103,7 @@
             overflow-x: visible;
             width: 100%;
             max-width: 500px;
-            margin: 24px auto;
+            margin: 16px auto;
             padding: 0 16px;
             gap: 24px;
             box-sizing: border-box;
@@ -176,54 +130,21 @@
 
         .side-column { width: 100%; max-width: 420px; }
         .controls { padding: 22px; }
-        .side-personalisation-tools { width: 100%; margin-top: 18px; }
-        .side-personalisation-tools .page-thumbnail-strip { width: 100%; }
         .controls h2 { font-size: 19px; margin-bottom: 18px; }
-
-        footer { padding: 40px 20px 20px; }
-        .footer-grid { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 30px; }
-        .footer-col { text-align: center; }
     }
 
     @media (max-width: 480px) {
         .toggle-btn { font-size: 12px; padding: 10px 6px; }
         .variant-thumb { width: 48px; height: 48px; }
         input[type="text"] { font-size: 16px; } /* avoids iOS auto-zoom on focus */
-        .page-thumb img { width: 84px; height: 60px; }
     }
 </style>
 </head>
 <body>
 
-<header>
-    <div class="header-top">
-        <div class="logo-container" onclick="window.location.href='index.html';">
-            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
-        </div>
-        <div class="header-right">
-            <div class="cart-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-    <nav>
-        <ul class="nav-links">
-            <li><a href="shop-cards.html">Shop Cards</a></li>
-            <li><a href="shop-prints.html">Shop Prints</a></li>
-            <li><a href="cockney-club.html">Cockney Club</a></li>
-            <li><a href="account.html">My Account</a></li>
-        </ul>
-    </nav>
-</header>
-
 <div class="editor-workspace">
     <div id="canvas-wrapper">
         <canvas id="canvas"></canvas>
-
         <p id="editor-load-error" style="display:none; color:#c0392b; font-size:13px; text-align:center; margin: 12px 0 0;">
             This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
         </p>
@@ -231,39 +152,11 @@
 
     <div class="side-column">
     <div class="controls">
+        <h2>Personalise Card</h2>
+
         <div class="page-toggle">
             <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')" disabled>Outside Spread</button>
             <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Inside Spread</button>
-        </div>
-
-        <div id="side-personalisation-tools" class="side-personalisation-tools">
-            <div class="below-canvas-panel">
-                <div id="front-name-age-fields" class="below-canvas-fields">
-                    <label id="label-name" for="name-input">Name:</label>
-                    <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
-
-                    <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
-                    <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)">
-                </div>
-
-                <div id="inside-controls" class="below-canvas-fields">
-                    <div class="flex-row" style="align-items: center; gap: 10px;">
-                        <input type="checkbox" id="blank-message-checkbox" onchange="toggleBlankMessage(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
-                        <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Leave Message Blank — I'll write my own inside</label>
-                    </div>
-                </div>
-            </div>
-
-            <div id="page-thumbnail-strip" class="page-thumbnail-strip" style="display:none;">
-                <button type="button" class="page-thumb active" id="thumb-front" onclick="switchPage('front')" aria-label="Edit the outside of the card">
-                    <img id="thumb-front-img" alt="Outside of the card">
-                    <span>Outside</span>
-                </button>
-                <button type="button" class="page-thumb" id="thumb-inside" onclick="switchPage('inside')" aria-label="Edit the inside of the card">
-                    <img id="thumb-inside-img" alt="Inside of the card">
-                    <span>Inside</span>
-                </button>
-            </div>
         </div>
 
         <div id="front-controls" class="control-group">
@@ -278,6 +171,14 @@
             </div>
 
             <div id="front-text-inputs">
+                <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Outside Spread Details</label>
+                
+                <label id="label-name" for="name-input">Name:</label>
+                <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
+
+                <label id="label-age" for="age-input" style="margin-top: 10px; display: block;">Shirt:</label>
+                <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)">
+
                 <div id="extra-fields-container"></div>
 
                 <div class="flex-row">
@@ -292,6 +193,14 @@
                         <span id="front-size-val">52px</span>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <label class="control-group-divider">Inside Spread </label>
+        <div id="inside-controls" class="control-group">
+            <div class="flex-row" style="align-items: center; gap: 10px;">
+                <input type="checkbox" id="blank-message-checkbox" onchange="toggleBlankMessage(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Leave Message Blank — I'll write my own inside</label>
             </div>
         </div>
 
@@ -320,35 +229,8 @@
         <button class="btn btn-close" onclick="returnToShop()">Cancel & Return</button>
     </div>
 
-    <div id="card-description" style="display:none;">
-        <h3 id="card-description-title"></h3>
-        <p id="card-description-text"></p>
-    </div>
     </div>
 </div>
-
-<footer>
-    <div class="footer-grid">
-        <div class="footer-col">
-            <h4>Our Store Policies</h4>
-            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
-            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
-        </div>
-        <div class="footer-col">
-            <h4>Contact Us</h4>
-            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
-            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
-            <p><strong>TikTok:</strong><br><a href="https://www.tiktok.com/@cockneycards" target="_blank">@cockneycards</a></p>
-        </div>
-        <div class="footer-col">
-            <h4>Business Hours</h4>
-            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
-            <p><strong>Saturday:</strong><br>10am - 4pm</p>
-            <p><strong>Sunday:</strong><br>Closed</p>
-        </div>
-    </div>
-    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
-</footer>
 
 <script>
 // CLOUD_BASE comes from cards-data.js (loaded above).
@@ -618,22 +500,7 @@ function initEditor(templateKey) {
     canvas.calcOffset();
 
     attachPinchToResize(canvas.upperCanvasEl);
-
-    if (activeTemplate.photo) {
-        // Photo cards: a drag on the canvas means "move the photo", so a
-        // touch only hands off to page-scroll after being held still for a
-        // moment — an immediate hand-off would make it impossible to drag
-        // the photo at all.
-        // Attached to canvas.wrapperEl (the container div around Fabric's
-        // two stacked <canvas> elements), not canvas.upperCanvasEl itself —
-        // see the comment above attachHoldToScroll() for why that matters.
-        attachHoldToScroll(canvas.wrapperEl);
-    } else {
-        // Every other card: nothing on the canvas is draggable, so any
-        // swipe should scroll the page immediately, same as touching
-        // anywhere else on the page already does.
-        attachInstantScrollOnSwipe(canvas.wrapperEl);
-    }
+    attachHoldToScroll(canvas.upperCanvasEl);
 
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
@@ -651,7 +518,6 @@ function initEditor(templateKey) {
     // Show/hide the personalisation inputs based on what this card supports
     const hasPersonalisation = activeTemplate.name || activeTemplate.age || activeTemplate.extraFields;
     $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
-    $('front-name-age-fields').style.display = hasPersonalisation ? 'block' : 'none';
     buildExtraFieldInputs();
     if (hasPersonalisation) {
         $('name-input').style.display = $('label-name').style.display = activeTemplate.name ? 'block' : 'none';
@@ -690,7 +556,11 @@ function initEditor(templateKey) {
 //   CARD_TEMPLATES['11plus-boy'] = { ..., title: '11+ Boy Card',
 //     description: 'A colourful card celebrating passing the 11+.' }
 function updateCardDescription(template) {
+    // The #card-description box was removed from the page (editor-only
+    // layout, no blurb section) — kept as a no-op so callers elsewhere
+    // don't need to change.
     const box = $('card-description');
+    if (!box) return;
     if (!template || !template.description) {
         box.style.display = 'none';
         return;
@@ -729,8 +599,6 @@ function loadFrontCover(imageUrl) {
         $('add-to-basket-btn').style.display = 'block';
         $('delivery-section').style.display = 'block';
         switchPage('front');
-        $('page-thumbnail-strip').style.display = 'flex';
-        updatePageThumbnails();
     }, { crossOrigin: 'anonymous' });
 }
 
@@ -783,7 +651,6 @@ function selectVariant(key) {
             scaleY: CANVAS_HEIGHT / bgImg.height
         });
         canvas.requestRenderAll();
-        scheduleThumbnailUpdate();
     }, { crossOrigin: "anonymous" });
 
     document.querySelectorAll("#variant-selector .variant-thumb").forEach((btn) => {
@@ -846,17 +713,12 @@ function setupTextsAndOverlays() {
     const bgPanelDefaults = { width: BOX_WIDTH, left: BOX_LEFT, fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false };
     insideBgRects = BOX_CONFIGS.map((cfg) => new fabric.Rect({ ...bgPanelDefaults, top: cfg.top, height: cfg.height }));
 
-    // splitByGrapheme:false = wrap on whole words. When a word won't fit
-    // on the remaining space of a line it drops to the next line intact
-    // instead of being split mid-word — Fabric only ever breaks a single
-    // word by character as a last resort, if that word alone is too wide
-    // to fit on an empty line by itself.
     const textDefaults = {
         width: BOX_WIDTH, left: BOX_LEFT,
         fontFamily: "Arial", fill: "#000000", textAlign: "center",
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
-        hasBorders: true, splitByGrapheme: false, backgroundColor: "transparent",
+        hasBorders: true, splitByGrapheme: true, backgroundColor: "transparent",
         ...STYLE_DASHED
     };
     insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
@@ -940,7 +802,6 @@ function loadPhotoIntoFrame(dataUrl) {
                                       // its transparent cutout is what shows this
         canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
-        scheduleThumbnailUpdate();
     }, { crossOrigin: 'anonymous' });
 }
 
@@ -989,39 +850,23 @@ function attachPinchToResize(el) {
 // ---- Hold-to-scroll ----
 // Empty canvas background already scrolls fine by itself (see
 // `allowTouchScrolling: true` above) — a touch that never hits an object
-// just falls through to the page. Any object (the photo, a message-box
-// text field, the printed name, etc) is normally claimed straight away by
-// Fabric instead, for repositioning/selecting/editing, which is what stops
-// a swipe over the card itself from scrolling the page. Holding still for
-// a moment (rather than dragging/tapping immediately) now hands that touch
-// back to the page, so the customer can scroll from wherever their finger
-// already is — including on top of the outside spread photo and the
-// inside spread message boxes — without first having to find an empty gap.
+// just falls through to the page. The one object worth a deliberate
+// hold/drag distinction is the uploaded photo, since a single-finger touch
+// on it is normally claimed straight away for repositioning. Holding still
+// on the PHOTO for a moment (rather than dragging it immediately) now hands
+// that touch back to the page instead, so the customer can scroll up to
+// the header or down to the footer without first having to look away from
+// the photo.
 //
-// While a message box is actively being edited (keyboard open, cursor
-// mid-placement) we leave it alone entirely — the hold timer is skipped
-// for that box's touches — so this never interrupts someone who's paused
-// mid-type or is placing their cursor in already-typed text. Once they tap
-// away and the box is no longer in edit mode, holding on it scrolls again
-// like everything else.
-//
-// IMPORTANT — why these listeners attach to canvas.wrapperEl, not
-// canvas.upperCanvasEl: Fabric registers its own touch handling directly on
-// upperCanvasEl (and, once a touch starts, on document) when the canvas is
-// constructed — before this function ever runs. Listeners added later on
-// that same element still fire after Fabric's, so nulling out
-// `_currentTransform`/`skipTargetFind` here was arriving too late: Fabric
-// had already treated the in-progress touch as an object drag and kept
-// blocking the page's native scroll for the rest of that touch, which is
-// exactly the "only scrolls if you touch outside the canvas first" bug —
-// once a gesture started on the canvas, nothing could hand it back.
-// canvas.wrapperEl is the div Fabric wraps around both its stacked
-// <canvas> elements, so it's an ancestor of upperCanvasEl. A `capture:
-// true` listener there runs during the capture phase, which always
-// completes before the event reaches upperCanvasEl at all — so once we've
-// decided a touch is now a scroll, calling `e.stopPropagation()` here stops
-// the event before Fabric ever sees it, rather than hoping Fabric notices
-// state we changed after the fact.
+// This deliberately does NOT try to do the same thing for the message-box
+// text: a touch that lands on editable text is already being handled by
+// the phone's own text-editing/selection system by the time any hold timer
+// could fire, and stepping in after the fact left things in a broken
+// state — Fabric would fall back to its own rubber-band "select everything
+// nearby" drag, which is what was briefly making the (otherwise fully
+// locked) message boxes look like they'd become a moveable group. Message
+// boxes keep their normal, unmodified tap-to-edit behaviour; scroll using
+// the gaps around them or the header/nav instead.
 const HOLD_TO_SCROLL_MS = 350;
 const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
 let holdTimer = null;
@@ -1044,14 +889,11 @@ function endHoldScroll() {
 function attachHoldToScroll(el) {
     el.addEventListener('touchstart', (e) => {
         if (!isMobileDevice() || e.touches.length !== 1) return;
-        // No target (empty canvas/background) already scrolls fine on its
-        // own. A target that's actively being edited right now is left
-        // completely alone so typing/cursor placement is never
-        // interrupted. Anything else -- the photo, a message box not
-        // currently being edited, the name text, etc -- gets the
-        // hold-to-scroll treatment below.
+        // Only step in when the touch starts directly on the photo. Any
+        // other target (text, the artwork background, anything
+        // non-selectable) is left completely alone.
         const target = canvas.findTarget(e, false);
-        if (!target || target.isEditing) return;
+        if (!photoImg || target !== photoImg) return;
 
         const t = e.touches[0];
         holdStart = { x: t.clientX, y: t.clientY };
@@ -1059,94 +901,22 @@ function attachHoldToScroll(el) {
         holdTimer = setTimeout(() => {
             holdScrollActive = true;
             canvas.discardActiveObject();
-            resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
             canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
-            canvas.skipTargetFind = true; // belt-and-braces: also true for any stray event that isn't stopped below
+            canvas.skipTargetFind = true; // this touch now passes straight through to the page
             canvas.requestRenderAll();
         }, HOLD_TO_SCROLL_MS);
-    }, { passive: true, capture: true });
+    }, { passive: true });
 
     el.addEventListener('touchmove', (e) => {
-        // Once the hold has fired, this touch belongs to the page now —
-        // stop it here, in the capture phase, so it never reaches Fabric
-        // at all and Fabric can't re-claim it or block the scroll it's
-        // now getting. This has to happen on every remaining touchmove of
-        // the gesture, not just once.
-        if (holdScrollActive) { e.stopPropagation(); return; }
-        if (!holdStart) return;
+        if (!holdStart || holdScrollActive) return;
         const t = e.touches[0];
         if (!t) return;
         const moved = Math.hypot(t.clientX - holdStart.x, t.clientY - holdStart.y);
         if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag, not a hold
-    }, { passive: true, capture: true });
+    }, { passive: true });
 
-    const endHoldScrollCapture = (e) => {
-        // Swallow the release too, so a scroll ending back down over the
-        // canvas doesn't register with Fabric as a stray tap/click.
-        if (holdScrollActive) e.stopPropagation();
-        endHoldScroll();
-    };
-    el.addEventListener('touchend', endHoldScrollCapture, { passive: true, capture: true });
-    el.addEventListener('touchcancel', endHoldScrollCapture, { passive: true, capture: true });
-}
-
-// ---- Instant scroll-through on swipe (non-photo cards only) ----
-// Photo cards need a brief hold before a touch hands off to page scroll
-// (see attachHoldToScroll) because a drag there normally means "move the
-// photo". Cards with no photo frame have nothing draggable on the canvas
-// at all — every text field is locked in place — so there's no reason to
-// make the customer wait: the moment a touch moves enough to look like a
-// scroll rather than a tap, this hands it straight to the page, exactly
-// like touching anywhere else outside the canvas already does.
-//
-// Same reasoning as attachHoldToScroll above for attaching to
-// canvas.wrapperEl with capture:true and calling e.stopPropagation() once
-// handed off, rather than upperCanvasEl — see that comment for why.
-const SWIPE_SCROLL_MOVE_THRESHOLD = 10; // px of movement before it counts as a swipe, not a tap
-let swipeScrollStart = null;
-let swipeScrollHandedOff = false;
-
-function attachInstantScrollOnSwipe(el) {
-    el.addEventListener('touchstart', (e) => {
-        if (!isMobileDevice() || e.touches.length !== 1) return;
-        // A target that's actively being edited right now is left
-        // completely alone, same as attachHoldToScroll, so typing/cursor
-        // placement is never interrupted.
-        const target = canvas.findTarget(e, false);
-        if (target?.isEditing) return;
-
-        const t = e.touches[0];
-        swipeScrollStart = { x: t.clientX, y: t.clientY };
-        swipeScrollHandedOff = false;
-    }, { passive: true, capture: true });
-
-    el.addEventListener('touchmove', (e) => {
-        if (swipeScrollHandedOff) { e.stopPropagation(); return; }
-        if (!swipeScrollStart) return;
-        const t = e.touches[0];
-        if (!t) return;
-        const moved = Math.hypot(t.clientX - swipeScrollStart.x, t.clientY - swipeScrollStart.y);
-        if (moved < SWIPE_SCROLL_MOVE_THRESHOLD) return;
-
-        swipeScrollHandedOff = true;
-        canvas.discardActiveObject();
-        resetBordersToDashed(); // undo the solid "selected" border a message box may have picked up before we deselected it
-        canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
-        canvas.skipTargetFind = true; // belt-and-braces: also true for any stray event that isn't stopped below
-        canvas.requestRenderAll();
-        e.stopPropagation(); // hand off cleanly starting with this event — see attachHoldToScroll's comment
-    }, { passive: true, capture: true });
-
-    const endSwipeScrollCapture = (e) => {
-        if (swipeScrollHandedOff) e.stopPropagation();
-        swipeScrollStart = null;
-        if (swipeScrollHandedOff) {
-            swipeScrollHandedOff = false;
-            canvas.skipTargetFind = false;
-        }
-    };
-    el.addEventListener('touchend', endSwipeScrollCapture, { passive: true, capture: true });
-    el.addEventListener('touchcancel', endSwipeScrollCapture, { passive: true, capture: true });
+    el.addEventListener('touchend', endHoldScroll, { passive: true });
+    el.addEventListener('touchcancel', endHoldScroll, { passive: true });
 }
 
 function updateNameText(inputEl) {
@@ -1168,7 +938,6 @@ function updateNameText(inputEl) {
         nameText.set({ text: displayVal || "NAME" });
     }
     canvas.requestRenderAll();
-    scheduleThumbnailUpdate();
 }
 
 function updateAgeText(inputEl) {
@@ -1185,7 +954,6 @@ function updateAgeText(inputEl) {
 
     ageText.set({ text: (val || a?.defaultText || "40").toUpperCase() });
     canvas.requestRenderAll();
-    scheduleThumbnailUpdate();
 }
 
 // Builds one label+input pair per entry in activeTemplate.extraFields
@@ -1230,7 +998,6 @@ function updateExtraFieldText(index, value) {
 
     t.set({ text: val ? val.toUpperCase() : (f.label || f.key || '').toUpperCase() });
     canvas.requestRenderAll();
-    scheduleThumbnailUpdate();
 }
 
 function updateFrontColor(hexColor) {
@@ -1244,7 +1011,6 @@ function updateFrontColor(hexColor) {
     }
     ageText?.set({ fill: hexColor });
     canvas.requestRenderAll();
-    scheduleThumbnailUpdate();
 }
 
 function updateFrontSize(size) {
@@ -1260,7 +1026,6 @@ function updateFrontSize(size) {
         }
     }
     canvas.requestRenderAll();
-    scheduleThumbnailUpdate();
 }
 
 function switchPage(page) {
@@ -1271,8 +1036,6 @@ function switchPage(page) {
 
     $('toggle-front').classList.toggle('active', isFront);
     $('toggle-inside').classList.toggle('active', !isFront);
-    $('thumb-front').classList.toggle('active', isFront);
-    $('thumb-inside').classList.toggle('active', !isFront);
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
@@ -1286,11 +1049,6 @@ function switchPage(page) {
 }
 
 function setupTextEvents() {
-    // Covers the photo being dragged/resized (the only freely-movable
-    // object on the canvas) — refreshes the thumbnail once the customer
-    // lets go, rather than continuously while dragging.
-    canvas.on('object:modified', () => scheduleThumbnailUpdate());
-
     canvas.on("mouse:down", ({ target }) => {
         if (currentPage !== 'inside' || !insideTexts.includes(target)) return;
         resetBordersToDashed();
@@ -1343,7 +1101,6 @@ function setupTextEvents() {
                 textbox._lastValidText = textbox.text;
             }
             canvas.requestRenderAll();
-            scheduleThumbnailUpdate();
         });
     });
 }
@@ -1381,7 +1138,6 @@ function toggleBlankMessage(isChecked) {
 
     resetBordersToDashed();
     canvas.requestRenderAll();
-    scheduleThumbnailUpdate();
 }
 
 // Builds the name as a Fabric Group of individually-rotated characters
@@ -1472,63 +1228,6 @@ function captureFullSpread() {
             }
         });
     });
-}
-
-// Renders a small, low-quality preview of an already-captured full-spread
-// JSON snapshot (see updatePageThumbnails below) for the page-thumbnail
-// strip under the canvas. Deliberately tiny/low-quality — this is a UI
-// thumbnail, not a print asset — and takes a JSON snapshot rather than
-// reading the live canvas directly, so it never has to touch or re-render
-// what the customer is actually looking at.
-function captureThumbnailFromJson(json) {
-    return new Promise((resolve, reject) => {
-        const exportEl = document.createElement('canvas');
-        const exportCanvas = new fabric.StaticCanvas(exportEl, {
-            width: CANVAS_WIDTH, height: CANVAS_HEIGHT
-        });
-        exportCanvas.loadFromJSON(json, () => {
-            try {
-                exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
-                exportCanvas.renderAll();
-                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.55, multiplier: 0.18 });
-                exportCanvas.dispose();
-                resolve(dataUrl);
-            } catch (err) {
-                exportCanvas.dispose();
-                reject(err);
-            }
-        });
-    });
-}
-
-// Regenerates both thumbnails in the page-thumbnail strip so they reflect
-// whatever the customer has just edited. Flips the live canvas through
-// 'front' then 'inside' to grab an accurate toJSON() snapshot of each, then
-// straight back to whichever page was actually showing — all synchronously,
-// with no awaits in between, so the browser never gets a chance to paint
-// the in-between states and the customer never sees a flicker. The actual
-// (slower) rendering of each snapshot into a small preview image happens
-// afterwards, off the live canvas entirely.
-let thumbnailUpdateTimer = null;
-function scheduleThumbnailUpdate(delay = 500) {
-    clearTimeout(thumbnailUpdateTimer);
-    thumbnailUpdateTimer = setTimeout(updatePageThumbnails, delay);
-}
-
-function updatePageThumbnails() {
-    if (!editorReady) return;
-    const pageBeforeUpdate = currentPage;
-
-    switchPage('front');
-    const frontJson = canvas.toJSON();
-
-    switchPage('inside');
-    const insideJson = canvas.toJSON();
-
-    switchPage(pageBeforeUpdate);
-
-    captureThumbnailFromJson(frontJson).then((url) => { $('thumb-front-img').src = url; }).catch(() => {});
-    captureThumbnailFromJson(insideJson).then((url) => { $('thumb-inside-img').src = url; }).catch(() => {});
 }
 
 // Draws one spread onto the current page of a jsPDF doc: the artwork at
