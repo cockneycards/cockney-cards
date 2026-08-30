@@ -95,8 +95,6 @@
     #canvas-wrapper .canvas-container { width: 100% !important; height: auto !important; aspect-ratio: 595.5 / 840; }
     #canvas-wrapper .canvas-container canvas { width: 100% !important; height: 100% !important; }
 
-    .editor-tip { grid-column: 1 / -1; text-align: center; margin: -18px auto 0; color: #777; font-size: 12px; line-height: 1.5; max-width: 720px; order: 3; }
-
     /* PHOTO ADJUST WIDGET — floats above the photo once it's tapped/
        clicked on desktop (see openPhotoToolbar/openAdjustPanel/
        closePhotoToolbar in the script). Never shown below the 999px
@@ -178,7 +176,6 @@
         #canvas-wrapper { border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,.10); }
         .side-column { width: 100%; max-width: 595.5px; margin: 0; position: static; }
         .page-toggle { position: sticky; top: 4px; z-index: 5; }
-        .editor-tip { order: initial; margin: 0 auto; }
         .controls { padding: 18px; border-radius: 12px; }
         .toggle-btn { font-size: 12px; padding: 11px 6px; }
         input[type="text"] { font-size: 16px; } /* avoids iOS auto-zoom on focus */
@@ -252,7 +249,8 @@
         </div>
 
         <!-- Shown when "Adjust" is tapped (desktop only — see above). The
-             Zoom slider is the only way to resize on desktop; on mobile
+             Zoom slider is a second way to resize on desktop, alongside
+             dragging the photo's corner handles directly; on mobile
              pinch-to-zoom (attachMobileCardGestures) does the same job. -->
         <div id="photo-adjust-panel" class="photo-float-widget">
             <span class="zoom-label">Zoom <span id="zoom-value">1.0x</span></span>
@@ -261,9 +259,6 @@
         </div>
     </div>
     </div>
-
-    <p class="editor-tip">Scroll the page normally — on a touchscreen, press and hold the photo for a moment to reposition it, and pinch with two fingers to zoom.</p>
-
 
     <div class="side-column">
     <div class="page-toggle">
@@ -904,13 +899,15 @@ function handlePhotoUpload(inputEl) {
     reader.readAsDataURL(file);
 }
 
-// Adds the customer's photo as a free-positioned layer ON TOP of the card
-// artwork (not masked by any frame cutout) — it can be dragged and zoomed
-// anywhere on the front panel. It starts out sitting inside the
-// configured frame box, cover-fit like CSS object-fit: cover, just as a
-// sensible default position/size — but that frame box isn't a boundary
-// once it's placed. The only real boundary is the panel guard below,
-// which keeps it from crossing onto the left-hand (inside) page.
+// Adds the customer's photo as a free-positioned layer BEHIND the card
+// artwork, showing through the artwork's transparent cutout (see
+// DEFAULT_PHOTO_SETTINGS) — it can still be dragged and zoomed anywhere on
+// the front panel, the artwork just stays layered on top of it. It starts
+// out sitting inside the configured frame box, cover-fit like CSS
+// object-fit: cover, just as a sensible default position/size — but that
+// frame box isn't a boundary once it's placed. The only real boundary is
+// the panel guard below, which keeps it from crossing onto the left-hand
+// (inside) page.
 //
 // The photo is NOT interactive by default (evented/selectable: false) —
 // it's just a static layer until interacted with. On desktop, clicking it
@@ -935,13 +932,24 @@ function loadPhotoIntoFrame(dataUrl) {
             left: p.left, top: p.top,
             originX: 'center', originY: 'center',
             scaleX: coverScale, scaleY: coverScale,
-            lockRotation: true,
-            hasBorders: false, hasControls: false, // no Fabric selection UI, ever — see photo-toolbar instead
-            // Idle by default (see comment above); openPhotoToolbar flips
-            // these on for the duration of a tap/adjust session.
+            lockRotation: true, lockUniScaling: true, // corner drag always scales evenly, never distorts
+            // hasBorders/hasControls are OFF by default (idle) — see
+            // comment below. openPhotoToolbar flips these on, showing the
+            // corner-drag resize box, for the duration of a tap/adjust
+            // session; DESKTOP ONLY, see isMobileDevice() guards there —
+            // mobile keeps using pinch-to-zoom instead.
+            hasBorders: false, hasControls: false,
             selectable: false, evented: false
             // No clipPath — once uploaded, the photo is a free-positioned
             // layer and can be moved anywhere on the visible front panel.
+        });
+        // Only the four corner handles resize it (no side handles, no
+        // rotation handle) — that's the "drag the corners to size the
+        // photo" box. Has no visible effect until hasControls is switched
+        // on in openPhotoToolbar.
+        img.setControlsVisibility({
+            mt: false, mb: false, ml: false, mr: false, mtr: false,
+            tl: true, tr: true, bl: true, br: true
         });
 
         // frameBox is kept around only as the original starting point;
@@ -956,12 +964,13 @@ function loadPhotoIntoFrame(dataUrl) {
 
         photoImg = img;
         canvas.add(photoImg);
-        // On top of the artwork, not behind it — a freely-placed photo
-        // needs to actually be visible wherever the customer puts it, not
-        // just inside whatever transparent cutout the artwork happens to
-        // have. Text stays above the photo so it's never covered.
-        canvas.bringToFront(photoImg);
-        [nameText, ageText, ...extraTexts].forEach((o) => o && canvas.bringToFront(o));
+        // Behind the artwork, not on top of it — the photo shows through
+        // the artwork's transparent cutout (see DEFAULT_PHOTO_SETTINGS),
+        // with the card's frame/graphics layered on top of it, same as
+        // the printed card. Text/QR were already added above the artwork
+        // in setupTextsAndOverlays, so sending the photo to the very back
+        // is enough to put it behind everything else too.
+        canvas.sendToBack(photoImg);
 
         // If a photo was already being adjusted (this is a Replace, not a
         // first upload), carry that open state over to the new image
@@ -1020,7 +1029,7 @@ function keepPhotoCoveringFrame(img) {
 
 // ---- Photo adjust widget (DESKTOP ONLY — see isMobileDevice() guards
 // below; mobile uses attachMobileCardGestures instead, further down) ----
-// Replaces the old desktop corner-handle resize with a tap → widget flow:
+// A tap → widget flow, layered on top of Fabric's own corner-handle resize:
 //
 //   idle    — the photo sits there unselectable/un-evented (see
 //             loadPhotoIntoFrame). A click anywhere on the card,
@@ -1029,10 +1038,14 @@ function keepPhotoCoveringFrame(img) {
 //   toolbar — a click ON the photo (detected manually below, since the
 //             photo isn't evented in idle mode for Fabric to detect it
 //             itself) switches evented/selectable on and shows the
-//             Replace / Adjust / Done widget. The photo can now be
-//             dragged directly to reposition it.
-//   adjust  — "Adjust" swaps the widget for the Zoom slider — the only
-//             way to resize on desktop (mobile has pinch instead).
+//             Replace / Adjust / Done widget, plus Fabric's corner-drag
+//             resize box (see setControlsVisibility in loadPhotoIntoFrame
+//             — corners only, no rotation handle). The photo can now be
+//             dragged directly to reposition it, or resized from a
+//             corner.
+//   adjust  — "Adjust" additionally shows the Zoom slider, a second way to
+//             resize on desktop (mobile has pinch instead); the
+//             corner-drag box stays available too.
 //
 // "Done", or clicking anywhere else on the card, returns to idle.
 let photoToolbarMode = 'idle'; // 'idle' | 'toolbar' | 'adjust'
@@ -1070,12 +1083,21 @@ function setupPhotoAdjustWidget() {
         keepPhotoCoveringFrame(target);
         if (photoToolbarMode !== 'idle') positionPhotoWidget();
     });
+
+    // Same guard + widget-repositioning, but for the corner-drag resize
+    // handles (see setControlsVisibility in loadPhotoIntoFrame) instead of
+    // a plain drag-move.
+    canvas.on('object:scaling', ({ target }) => {
+        if (isMobileDevice() || target !== photoImg) return;
+        keepPhotoCoveringFrame(target);
+        if (photoToolbarMode !== 'idle') positionPhotoWidget();
+    });
 }
 
 function openPhotoToolbar() {
     if (isMobileDevice() || !photoImg || photoToolbarMode !== 'idle') return;
     photoToolbarMode = 'toolbar';
-    photoImg.set({ evented: true, selectable: true });
+    photoImg.set({ evented: true, selectable: true, hasControls: true, hasBorders: true });
     canvas.setActiveObject(photoImg);
     $('photo-adjust-panel').style.display = 'none';
     $('photo-toolbar').style.display = 'flex';
@@ -1097,7 +1119,7 @@ function openAdjustPanel() {
 function closePhotoToolbar() {
     photoToolbarMode = 'idle';
     if (photoImg) {
-        photoImg.set({ evented: false, selectable: false });
+        photoImg.set({ evented: false, selectable: false, hasControls: false, hasBorders: false });
         canvas.discardActiveObject();
     }
     $('photo-toolbar').style.display = 'none';
