@@ -1103,6 +1103,18 @@ function setupPhotoAdjustWidget() {
         if (moved < TAP_MOVE_THRESHOLD && quick) openPhotoToolbar();
     });
 
+    // After the customer presses Done the blue box/tools are hidden.
+    // A deliberate double-click on the photo brings them back so the
+    // customer can amend its position or size at any time.  We do this
+    // manually because the photo is non-evented while idle.
+    canvas.on('mouse:dblclick', (opt) => {
+        if (isMobileDevice() || !photoImg || currentPage !== 'front' || photoToolbarMode !== 'idle') return;
+        const pointer = canvas.getPointer(opt.e);
+        if (photoImg.containsPoint(pointer)) {
+            openPhotoToolbar();
+        }
+    });
+
     // Keep the floating widget glued to the photo as it's dragged, and
     // keep the coverage guard enforced on every move.
     canvas.on('object:moving', ({ target }) => {
@@ -1682,6 +1694,42 @@ function replaceNameText(newNameObj) {
 //                the print-ready setting: ~3573x2520px, ~335 DPI at real
 //                print size)
 //   quality    — JPEG quality 0-1 (default 0.92)
+// Re-applies the live editor's personalisation transforms to the export
+// clone.  The editor is displayed through a viewport that pans to the front
+// panel, while the PDF is rendered from the full spread.  Copying the exact
+// live transform (rather than relying only on JSON deserialisation) makes the
+// customer's on-screen name position the single source of truth for print.
+function syncPersonalisationForExport(exportCanvas) {
+    const liveObjects = canvas.getObjects();
+    const exportObjects = exportCanvas.getObjects();
+    const targets = [nameText, ageText, ...(extraTexts || [])].filter(Boolean);
+
+    targets.forEach((liveObj) => {
+        const liveIndex = liveObjects.indexOf(liveObj);
+        const exportObj = liveIndex >= 0 ? exportObjects[liveIndex] : null;
+        if (!exportObj) return;
+
+        exportObj.set({
+            left: liveObj.left,
+            top: liveObj.top,
+            scaleX: liveObj.scaleX,
+            scaleY: liveObj.scaleY,
+            angle: liveObj.angle,
+            skewX: liveObj.skewX,
+            skewY: liveObj.skewY,
+            flipX: liveObj.flipX,
+            flipY: liveObj.flipY,
+            originX: liveObj.originX,
+            originY: liveObj.originY
+        });
+
+        // Curved names are Fabric groups, so their internal character layout
+        // is already carried by the clone; only the group's exact transform
+        // needs to be synchronised.
+        exportObj.setCoords();
+    });
+}
+
 function captureFullSpread({ multiplier = 3, quality = 0.92 } = {}) {
     return new Promise((resolve, reject) => {
         const exportEl = document.createElement('canvas');
@@ -1690,6 +1738,7 @@ function captureFullSpread({ multiplier = 3, quality = 0.92 } = {}) {
         });
         exportCanvas.loadFromJSON(canvas.toJSON(), () => {
             try {
+                syncPersonalisationForExport(exportCanvas);
                 exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
                 exportCanvas.renderAll();
                 // multiplier: 3 (the default/print setting) pushes the
