@@ -90,7 +90,19 @@
 
     .card-stage { width: 100%; display: flex; justify-content: center; position: relative; min-width: 0; }
 
-    #canvas-wrapper { position: relative; width: 100%; max-width: 595.5px; background: white; padding: 0; border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 8px 30px rgba(0,0,0,.10); overflow: hidden; box-sizing: border-box; }
+    #canvas-wrapper {
+        position: relative; width: 100%; max-width: 595.5px; background: white; padding: 0; border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 8px 30px rgba(0,0,0,.10); overflow: hidden; box-sizing: border-box;
+        /* Mobile card gestures (attachMobileCardGestures) reimplement
+           scrolling, panning, and pinch-zoom by hand in JS so the photo
+           can tell a page-scroll swipe apart from a deliberate
+           press-and-hold drag. touch-action: none (plus disabling the
+           iOS long-press callout/selection below) stops the browser's
+           own default touch handling from racing that JS for the same
+           touch — without it, the browser can already start its own
+           scroll or show a "save image" callout before our hold-timer or
+           drag math ever runs, which is what breaks the drag gesture. */
+        touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+    }
     #canvas { display: block; width: 100%; height: auto; border: 0; }
     #canvas-wrapper .canvas-container { width: 100% !important; height: auto !important; aspect-ratio: 595.5 / 840; }
     #canvas-wrapper .canvas-container canvas { width: 100% !important; height: 100% !important; }
@@ -1056,13 +1068,19 @@ const TAP_MAX_MS = 400;
 function setupPhotoAdjustWidget() {
     canvas.on('mouse:down', (opt) => {
         if (isMobileDevice() || !photoImg || currentPage !== 'front') return;
-        const pointer = canvas.getPointer(opt.e);
-        const onPhoto = photoImg.containsPoint(pointer);
 
         if (photoToolbarMode === 'idle') {
+            const pointer = canvas.getPointer(opt.e);
+            const onPhoto = photoImg.containsPoint(pointer);
             tapCandidate = onPhoto ? { x: pointer.x, y: pointer.y, time: Date.now() } : null;
-        } else if (!onPhoto) {
-            // Clicked away from the photo while the widget was open.
+        } else if (opt.target !== photoImg) {
+            // Clicked away from the photo while the widget was open. Uses
+            // Fabric's own hit-test (opt.target) here rather than a plain
+            // point-in-shape check, because Fabric's hit-test also covers
+            // the corner resize handles (which sit partly outside the
+            // photo's own bounds) — a plain containsPoint() check would
+            // wrongly treat "grabbed a corner handle" as "clicked away"
+            // and close the toolbar before the resize could start.
             closePhotoToolbar();
         }
     });
