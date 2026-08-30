@@ -266,7 +266,7 @@
              pinch-to-zoom (attachMobileCardGestures) does the same job. -->
         <div id="photo-adjust-panel" class="photo-float-widget">
             <span class="zoom-label">Zoom <span id="zoom-value">1.0x</span></span>
-            <input type="range" id="zoom-slider" min="1" max="3" step="0.02" value="1" oninput="onZoomSliderInput(this.value)">
+            <input type="range" id="zoom-slider" min="0.3" max="6" step="0.02" value="1" oninput="onZoomSliderInput(this.value)">
             <button type="button" class="adjust-done-btn" onclick="closePhotoToolbar()">Done</button>
         </div>
     </div>
@@ -640,9 +640,9 @@ function initEditor(templateKey) {
     });
     // Alt normally toggles centered-vs-corner-anchored scaling for
     // whatever's selected. The photo relies on centered scaling always
-    // being on (see centeredScaling on the photo image, and the comment
-    // on keepPhotoCoveringFrame) — nulling this out stops Alt from
-    // silently flipping it back to corner-anchored mid-drag.
+    // being on (see centeredScaling on the photo image, and
+    // clampPhotoScale) — nulling this out stops Alt from silently
+    // flipping it back to corner-anchored mid-drag.
     canvas.centeredKey = null;
 
     // Pan so logical x = PANEL_WIDTH..CANVAS_WIDTH (the right/front panel)
@@ -913,13 +913,10 @@ function handlePhotoUpload(inputEl) {
 
 // Adds the customer's photo as a free-positioned layer BEHIND the card
 // artwork, showing through the artwork's transparent cutout (see
-// DEFAULT_PHOTO_SETTINGS) — it can still be dragged and zoomed anywhere on
-// the front panel, the artwork just stays layered on top of it. It starts
-// out sitting inside the configured frame box, cover-fit like CSS
-// object-fit: cover, just as a sensible default position/size — but that
-// frame box isn't a boundary once it's placed. The only real boundary is
-// the panel guard below, which keeps it from crossing onto the left-hand
-// (inside) page.
+// DEFAULT_PHOTO_SETTINGS) — it can be dragged and zoomed freely, including
+// past the edge of the front panel altogether; a clipPath (below) keeps
+// anything past the printable page invisible, so there's no need to pen
+// it in with a position clamp. The artwork stays layered on top of it.
 //
 // The photo is NOT interactive by default (evented/selectable: false) —
 // it's just a static layer until interacted with. On desktop, clicking it
@@ -945,6 +942,7 @@ function loadPhotoIntoFrame(dataUrl) {
             originX: 'center', originY: 'center',
             scaleX: coverScale, scaleY: coverScale,
             lockRotation: true, lockUniScaling: true, // corner drag always scales evenly, never distorts
+            centeredScaling: true, // corner drag resizes around the photo's own center, not the opposite corner
             // hasBorders/hasControls are OFF by default (idle) — see
             // comment below. openPhotoToolbar flips these on, showing the
             // corner-drag resize box, for the duration of a tap/adjust
@@ -952,8 +950,16 @@ function loadPhotoIntoFrame(dataUrl) {
             // mobile keeps using pinch-to-zoom instead.
             hasBorders: false, hasControls: false,
             selectable: false, evented: false
-            // No clipPath — once uploaded, the photo is a free-positioned
-            // layer and can be moved anywhere on the visible front panel.
+        });
+        // Clip to the printable front panel, in fixed canvas coordinates
+        // (absolutePositioned) rather than relative to the photo itself —
+        // so wherever the photo gets dragged or zoomed to, including
+        // beyond the panel's edges, only the part actually over the front
+        // panel ever renders. This is what lets movement/resizing below
+        // be left free instead of clamped to stay fully on-page.
+        img.clipPath = new fabric.Rect({
+            left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT,
+            absolutePositioned: true
         });
         // Only the four corner handles resize it (no side handles, no
         // rotation handle) — that's the "drag the corners to size the
@@ -965,12 +971,14 @@ function loadPhotoIntoFrame(dataUrl) {
         });
 
         // frameBox is kept around only as the original starting point;
-        // minScale (the floor the photo can be zoomed OUT to) is fixed at
-        // upload time from that same frame box, so it never gets so small
-        // it's pointless, even though it's no longer required to fully
-        // cover any particular shape. Both travel with the image itself
-        // so keepPhotoCoveringFrame and the Zoom slider have what they
-        // need without reaching back into activeTemplate.
+        // minScale is fixed at upload time from that same frame box and
+        // used purely as the reference point (1x) that the Zoom slider and
+        // pinch-to-zoom scale relative to — see PHOTO_MIN_ZOOM/
+        // PHOTO_MAX_ZOOM below for the actual allowed range, which now
+        // goes both smaller and larger than this cover-fit size. Both
+        // travel with the image itself so clampPhotoScale and the Zoom
+        // slider have what they need without reaching back into
+        // activeTemplate.
         img.frameBox = p;
         img.minScale = coverScale;
 
@@ -981,7 +989,12 @@ function loadPhotoIntoFrame(dataUrl) {
         // with the card's frame/graphics layered on top of it, same as
         // the printed card. Text/QR were already added above the artwork
         // in setupTextsAndOverlays, so sending the photo to the very back
-        // is enough to put it behind everything else too.
+        // is enough to put it behind everything else too. While it's
+        // actively being adjusted, openPhotoToolbar/closePhotoToolbar
+        // temporarily float it back on top instead (see
+        // canvas.preserveObjectStacking there) so the resize box is
+        // actually visible — this sendToBack only governs how it sits the
+        // rest of the time.
         canvas.sendToBack(photoImg);
 
         // If a photo was already being adjusted (this is a Replace, not a
@@ -999,43 +1012,25 @@ function loadPhotoIntoFrame(dataUrl) {
     }, { crossOrigin: 'anonymous' });
 }
 
-// ---- Panel guard: the photo can go anywhere on the front panel, but
-// never onto the left-hand (inside) page, and never below the size it
-// started at ----
-// Called after every move, scale change (desktop Zoom slider, mobile
-// pinch), and drag, it:
-//   1) never lets the scale drop below the cover-fit size it was uploaded
-//      at (see loadPhotoIntoFrame), then
-//   2) clamps left/top so the (now guaranteed large-enough) photo
-//      rectangle stays entirely within the front panel — from
-//      PANEL_WIDTH to CANVAS_WIDTH horizontally, 0 to CANVAS_HEIGHT
-//      vertically — so it can never cross onto the left-hand page.
-// Uses originX/Y: 'center', so left/top is the photo's center — that's
-// what makes the half-width/half-height math below correct.
-function keepPhotoCoveringFrame(img) {
+// ---- Scale guard: keeps the photo's zoom within a sane range ----
+// PHOTO_MIN_ZOOM/PHOTO_MAX_ZOOM are multiples of the cover-fit size the
+// photo started at (img.minScale, set in loadPhotoIntoFrame) — e.g. 0.3
+// lets it zoom out to 30% of that starting size, 6 lets it zoom in to 6x.
+// Position is NOT constrained here — the photo can be dragged freely,
+// including off the edge of the card altogether; its clipPath (also set
+// in loadPhotoIntoFrame) is what keeps anything past the printable page
+// invisible, so there's no need to pen it in by clamping left/top.
+const PHOTO_MIN_ZOOM = 0.3;
+const PHOTO_MAX_ZOOM = 6;
+
+function clampPhotoScale(img) {
     if (!img) return;
 
-    const scale = Math.max(img.scaleX, img.scaleY, img.minScale);
+    const requested = Math.max(img.scaleX, img.scaleY);
+    const scale = Math.min(Math.max(requested, img.minScale * PHOTO_MIN_ZOOM), img.minScale * PHOTO_MAX_ZOOM);
     if (img.scaleX !== scale || img.scaleY !== scale) {
         img.set({ scaleX: scale, scaleY: scale });
     }
-
-    const halfImgW = (img.width * scale) / 2;
-    const halfImgH = (img.height * scale) / 2;
-
-    const minLeft = PANEL_WIDTH + halfImgW;
-    const maxLeft = CANVAS_WIDTH - halfImgW;
-    const minTop = halfImgH;
-    const maxTop = CANVAS_HEIGHT - halfImgH;
-
-    // Math.max(minLeft, maxLeft) as the upper bound (same for top) is a
-    // safety net for the rare case the photo's been zoomed so large it's
-    // wider/taller than the whole panel — it pins to the left/top edge
-    // instead of the range inverting and throwing left/top out of order.
-    img.set({
-        left: Math.min(Math.max(img.left, minLeft), Math.max(minLeft, maxLeft)),
-        top: Math.min(Math.max(img.top, minTop), Math.max(minTop, maxTop))
-    });
     img.setCoords();
 }
 
@@ -1098,7 +1093,7 @@ function setupPhotoAdjustWidget() {
     // keep the coverage guard enforced on every move.
     canvas.on('object:moving', ({ target }) => {
         if (isMobileDevice() || target !== photoImg) return;
-        keepPhotoCoveringFrame(target);
+        clampPhotoScale(target);
         if (photoToolbarMode !== 'idle') positionPhotoWidget();
     });
 
@@ -1107,7 +1102,7 @@ function setupPhotoAdjustWidget() {
     // a plain drag-move.
     canvas.on('object:scaling', ({ target }) => {
         if (isMobileDevice() || target !== photoImg) return;
-        keepPhotoCoveringFrame(target);
+        clampPhotoScale(target);
         if (photoToolbarMode !== 'idle') positionPhotoWidget();
     });
 }
@@ -1117,6 +1112,16 @@ function openPhotoToolbar() {
     photoToolbarMode = 'toolbar';
     photoImg.set({ evented: true, selectable: true, hasControls: true, hasBorders: true });
     canvas.setActiveObject(photoImg);
+    // The photo normally sits behind the artwork (see loadPhotoIntoFrame),
+    // which is correct for the finished card — but with
+    // preserveObjectStacking left on (see canvas init), Fabric draws the
+    // active object's own border/corner handles in that same behind-the-
+    // artwork position too, so they'd be invisible, painted over by the
+    // artwork drawn afterwards. Turning preserveObjectStacking off just
+    // for the duration of this edit makes Fabric render the active photo
+    // (and its resize box) on top instead, without actually changing its
+    // real position in the stack — closePhotoToolbar switches it back.
+    canvas.preserveObjectStacking = false;
     $('photo-adjust-panel').style.display = 'none';
     $('photo-toolbar').style.display = 'flex';
     positionPhotoWidget();
@@ -1140,6 +1145,7 @@ function closePhotoToolbar() {
         photoImg.set({ evented: false, selectable: false, hasControls: false, hasBorders: false });
         canvas.discardActiveObject();
     }
+    canvas.preserveObjectStacking = true; // back behind the artwork now editing's done — see openPhotoToolbar
     $('photo-toolbar').style.display = 'none';
     $('photo-adjust-panel').style.display = 'none';
     canvas.requestRenderAll();
@@ -1154,7 +1160,7 @@ function onZoomSliderInput(value) {
     const multiplier = Number(value);
     const scale = photoImg.minScale * multiplier;
     photoImg.set({ scaleX: scale, scaleY: scale });
-    keepPhotoCoveringFrame(photoImg);
+    clampPhotoScale(photoImg);
     $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
     canvas.requestRenderAll();
 }
@@ -1194,10 +1200,12 @@ function positionPhotoWidget() {
 //   * a plain swipe anywhere on the card, including over the photo,
 //     scrolls the page — it does NOT drag the photo
 //   * press and hold on the photo for ~0.4s enters photo positioning mode
-//   * once held, dragging moves the photo — still clamped by
-//     keepPhotoCoveringFrame, so it can never be dragged off the frame
-//   * a two-finger touch that starts on the photo pinches to zoom — also
-//     clamped, so it can never shrink below the frame's cover-fit minimum
+//   * once held, dragging moves the photo freely — not clamped to stay
+//     on-page; its clipPath (see loadPhotoIntoFrame) just keeps whatever
+//     goes past the printable page invisible
+//   * a two-finger touch that starts on the photo pinches to zoom, from
+//     PHOTO_MIN_ZOOM to PHOTO_MAX_ZOOM times its starting size (see
+//     clampPhotoScale)
 //   * lifting all fingers and swiping again goes straight back to
 //     scrolling the page
 // This talks to the canvas element directly with raw touch listeners
@@ -1206,8 +1214,8 @@ function positionPhotoWidget() {
 // false the whole time on mobile (see loadPhotoIntoFrame and the
 // isMobileDevice() guards on the photo adjust widget above), so there's
 // nothing for Fabric itself to grab; every position/scale change here is
-// applied directly to photoImg and re-clamped through
-// keepPhotoCoveringFrame, same guard function the desktop widget uses.
+// applied directly to photoImg and re-clamped through clampPhotoScale,
+// same guard function the desktop widget uses.
 let mobileGesture = null;
 let mobileHoldTimer = null;
 const MOBILE_HOLD_MS = 380;       // press-and-hold duration before positioning mode kicks in
@@ -1293,9 +1301,8 @@ function attachMobileCardGestures(el) {
             e.preventDefault();
             const dist = touchDistance(e.touches[0], e.touches[1]);
             const ratio = mobileGesture.startDistance ? dist / mobileGesture.startDistance : 1;
-            const newScale = Math.min(Math.max(mobileGesture.startScale * ratio, photoImg.minScale), 10);
-            photoImg.set({ scaleX: newScale, scaleY: newScale });
-            keepPhotoCoveringFrame(photoImg);
+            photoImg.set({ scaleX: mobileGesture.startScale * ratio, scaleY: mobileGesture.startScale * ratio });
+            clampPhotoScale(photoImg);
             canvas.requestRenderAll();
             return;
         }
@@ -1330,7 +1337,7 @@ function attachMobileCardGestures(el) {
             left: mobileGesture.photoStartX + dx * sx,
             top: mobileGesture.photoStartY + dy * sy
         });
-        keepPhotoCoveringFrame(photoImg);
+        clampPhotoScale(photoImg);
         canvas.requestRenderAll();
     }, { passive: false, capture: true });
 
