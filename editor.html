@@ -72,25 +72,8 @@
        900px breakpoint this collapses to the newer single centered
        column (see MOBILE / TABLET RESPONSIVE LAYOUT below). */
     .editor-workspace { display: flex; justify-content: center; max-width: 1280px; margin: 40px auto; padding: 0 40px; gap: 40px; align-items: flex-start; box-sizing: border-box; overflow-x: auto; min-width: 900px; }
-    #canvas-wrapper { position: relative; background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
+    #canvas-wrapper { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; flex-shrink: 0; }
     #canvas { border: 1px solid #e2e2e2; }
-
-    /* PHOTO ADJUST WIDGET — floats above the photo once it's tapped/
-       clicked (see openPhotoToolbar/openAdjustPanel/closePhotoToolbar in
-       the script). Positioned in JS (positionPhotoToolbar) since it has
-       to track the photo's on-screen box, which moves with drags, page
-       toggles, and the mobile CSS-scaled canvas. */
-    .photo-float-widget { position: absolute; z-index: 20; top: 0; left: 0; background: var(--dark); color: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); font-size: 12px; user-select: none; }
-    #photo-toolbar { display: none; padding: 4px; gap: 2px; align-items: center; }
-    #photo-toolbar button { background: none; border: none; color: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-family: inherit; letter-spacing: 0.3px; }
-    #photo-toolbar button:hover { background: rgba(255,255,255,0.14); }
-    #photo-toolbar button svg { width: 17px; height: 17px; }
-    #photo-adjust-panel { display: none; flex-direction: column; align-items: stretch; padding: 14px 16px; gap: 8px; width: 220px; }
-    #photo-adjust-panel .zoom-label { color: white; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; }
-    #photo-adjust-panel input[type="range"] { width: 100%; }
-    #photo-adjust-panel .adjust-done-btn { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 9px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 2px; letter-spacing: 0.5px; }
-    #photo-adjust-panel .adjust-done-btn:hover { background: #1558b0; }
-
     .side-column { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 20px; }
     .page-toggle { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
     .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
@@ -140,9 +123,10 @@
        canvas scaled purely with CSS (width:100% / aspect-ratio on the
        Fabric-generated canvas elements). Fabric.js converts pointer
        coordinates using the ratio between the CSS-rendered size and
-       the canvas's internal resolution, so dragging photos and text, and
-       the floating Adjust widget (see positionPhotoWidget), all stay
-       accurate at any on-screen size.
+       the canvas's internal resolution, so dragging/resizing photos
+       and text stays accurate at any on-screen size. This matches the
+       900px breakpoint isMobileDevice() uses below to switch touch
+       behaviour (pinch/hold-to-scroll) on.
        ============================================================ */
     @media (max-width: 900px) {
         /* Header and footer are PC/desktop-only — hidden on tablet and
@@ -228,36 +212,6 @@
         <p id="editor-load-error" style="display:none; color:#c0392b; font-size:13px; text-align:center; margin: 12px 0 0;">
             This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
         </p>
-
-        <!-- Shown when the photo is tapped/clicked (see openPhotoToolbar).
-             Replaces Fabric's own corner-handle resize UI entirely — this
-             is now the only way to Replace or Adjust the photo, on every
-             device. -->
-        <div id="photo-toolbar" class="photo-float-widget">
-            <button type="button" onclick="onReplacePhotoClick()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.5-7.1"/><path d="M21 3v6h-6"/></svg>
-                <span>Replace</span>
-            </button>
-            <button type="button" onclick="openAdjustPanel()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/></svg>
-                <span>Adjust</span>
-            </button>
-            <button type="button" onclick="closePhotoToolbar()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                <span>Done</span>
-            </button>
-        </div>
-
-        <!-- Shown when "Adjust" is tapped. The Zoom slider is the ONLY
-             way to resize the photo now, on desktop and mobile alike —
-             see onZoomSliderInput. Dragging the photo itself (to
-             reposition) still works directly on the canvas while this
-             panel is open. -->
-        <div id="photo-adjust-panel" class="photo-float-widget">
-            <span class="zoom-label">Zoom <span id="zoom-value">1.0x</span></span>
-            <input type="range" id="zoom-slider" min="1" max="3" step="0.02" value="1" oninput="onZoomSliderInput(this.value)">
-            <button type="button" class="adjust-done-btn" onclick="closePhotoToolbar()">Done</button>
-        </div>
     </div>
 
     <div class="side-column">
@@ -295,7 +249,7 @@
                 <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Upload Photo</label>
                 <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
                 <p style="font-size:12px; color:#666; margin-top:6px;">
-                    Tap the photo to Replace it or Adjust it — drag to reposition, use the Zoom slider to resize. It'll always stay filling the frame.
+                    Drag the photo to reposition it, or use the corner handle to resize — it'll stay inside the frame.
                 </p>
             </div>
         </div>
@@ -545,9 +499,8 @@ let editorReady = false;
 const $ = (id) => document.getElementById(id);
 
 // Matches the editor's own mobile CSS breakpoint (see the @media
-// max-width:900px rule above). Not currently called anywhere — the photo
-// Adjust widget behaves identically on every screen size now — but left
-// in place since other mobile-specific behaviour may want it later.
+// max-width:900px rule above) so "small device" means the same thing to
+// the layout and to the touch behaviour below.
 function isMobileDevice() {
     return window.matchMedia('(max-width: 900px)').matches;
 }
@@ -638,7 +591,9 @@ function initEditor(templateKey) {
     canvas.setViewportTransform([1, 0, 0, 1, -PANEL_WIDTH, 0]);
     canvas.calcOffset();
 
-    setupPhotoAdjustWidget();
+    attachPinchToResize(canvas.upperCanvasEl);
+    attachHoldToScroll(canvas.upperCanvasEl);
+    setupPhotoCoverageGuard();
 
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
@@ -907,15 +862,14 @@ function handlePhotoUpload(inputEl) {
 // just a small logo), so relying on the artwork alone to mask an oversized
 // or repositioned photo isn't safe. The clipPath is what actually
 // guarantees the photo can never render outside its intended frame.
-// Cover-fit sized into the configured frame box to start.
+// Cover-fit sized into the configured frame box, then the customer can
+// drag to reposition or use the corner handle to resize.
 //
-// The photo is NOT interactive by default (evented/selectable: false) —
-// it's just a static layer until the customer taps/clicks it, at which
-// point openPhotoToolbar() switches it on. This is what lets a touch
-// anywhere on the card, including right over the photo, scroll the page
-// normally: with evented false there's no Fabric object there to claim
-// the gesture. See the "Photo adjust widget" section below for the rest
-// of that flow (toolbar → Adjust panel → drag-to-move / Zoom slider).
+// On desktop this keeps the normal visible blue selection box + corner
+// handle. On phones/tablets (see isMobileDevice()) the box/handle are
+// hidden instead — a finger-drag still repositions the photo exactly the
+// same way, and a two-finger pinch (set up in attachPinchToResize) takes
+// over resizing since there's no handle left to grab.
 function loadPhotoIntoFrame(dataUrl) {
     const p = activeTemplate?.photo;
     if (!p) return;
@@ -926,16 +880,27 @@ function loadPhotoIntoFrame(dataUrl) {
         // Cover-fit: scale so the photo fully fills the frame, like CSS
         // object-fit: cover, then let the customer drag/resize from there.
         const coverScale = Math.max(p.width / img.width, p.height / img.height);
+        const mobile = isMobileDevice();
 
         img.set({
             left: p.left, top: p.top,
             originX: 'center', originY: 'center',
             scaleX: coverScale, scaleY: coverScale,
             lockRotation: true,
-            hasBorders: false, hasControls: false, // no Fabric selection UI, ever — see photo-toolbar instead
-            // Idle by default (see comment above); openPhotoToolbar flips
-            // these on for the duration of a tap/adjust session.
-            selectable: false, evented: false,
+            // Anchors corner-drag resizing on the photo's own center
+            // instead of Fabric's default (opposite-corner anchor). This
+            // has to match the center-based assumption that
+            // keepPhotoCoveringFrame's math below relies on — without it,
+            // Fabric moves the anchor corner while our guard keeps
+            // snapping the center back, and the two fight each other so
+            // dragging a handle looks like it does nothing.
+            centeredScaling: true,
+            hasBorders: !mobile,
+            hasControls: !mobile,
+            borderColor: '#1A73E8',
+            cornerColor: '#1A73E8',
+            cornerStrokeColor: '#1A73E8',
+            transparentCorners: false,
             // Hard-clips the photo to the frame's bounding box in canvas
             // (not object-local) coordinates — see comment above.
             clipPath: new fabric.Rect({
@@ -945,11 +910,18 @@ function loadPhotoIntoFrame(dataUrl) {
                 absolutePositioned: true
             })
         });
+        // Only the corner handles resize (uniform, diagonal drag). The
+        // side/middle handles (ml, mr, mt, mb) are hidden — leaving them
+        // on would let the customer squash/stretch the photo into a
+        // non-uniform shape, which the coverage guard below doesn't
+        // attempt to fix, so it's simplest to remove the option entirely.
+        img.setControlsVisibility({ mtr: false, ml: false, mr: false, mt: false, mb: false });
 
-        // frameBox + minScale travel with the image itself so
-        // keepPhotoCoveringFrame and the Zoom slider both have what they
-        // need without reaching back into activeTemplate (which may have
-        // moved on by the time an in-flight gesture finishes).
+        // frameBox + minScale travel with the image itself so the
+        // moving/scaling guard (keepPhotoCoveringFrame, below) and the
+        // pinch-resize handler both have what they need without reaching
+        // back into activeTemplate (which may have moved on by the time
+        // an in-flight gesture finishes).
         img.frameBox = p;
         img.minScale = coverScale;
 
@@ -957,30 +929,21 @@ function loadPhotoIntoFrame(dataUrl) {
         canvas.add(photoImg);
         canvas.sendToBack(photoImg); // behind everything, including the artwork —
                                       // its transparent cutout is what shows this
-
-        // If a photo was already being adjusted (this is a Replace, not a
-        // first upload), carry that open state over to the new image
-        // instead of dropping back to idle — otherwise Replace would
-        // require a second tap to keep adjusting.
-        if (photoToolbarMode !== 'idle') {
-            const modeToRestore = photoToolbarMode;
-            photoToolbarMode = 'idle'; // openPhotoToolbar/openAdjustPanel both assume they're transitioning FROM idle
-            openPhotoToolbar();
-            if (modeToRestore === 'adjust') openAdjustPanel();
-        } else {
-            canvas.requestRenderAll();
-        }
+        canvas.setActiveObject(photoImg);
+        canvas.requestRenderAll();
     }, { crossOrigin: 'anonymous' });
 }
 
 // ---- Coverage guard: the frame can never show blank/white behind the
-// photo, no matter how it's dragged or resized ----
+// photo, no matter how it's dragged, pinched, or resized ----
 // The clipPath above stops the photo rendering OUTSIDE the frame; this is
 // the other half — stopping it from being dragged or shrunk so far that it
-// no longer fully covers the INSIDE of the frame. Called after every move
-// and every Zoom-slider change, it:
-//   1) never lets the scale drop below the original cover-fit minimum,
-//      then
+// no longer fully covers the INSIDE of the frame. Called after every move,
+// scale (desktop corner-handle drag), and pinch, it:
+//   1) never lets the scale drop below the original cover-fit minimum
+//      (forcing scaleX === scaleY, so a stretch attempt just becomes a
+//      uniform resize instead — this can't happen via the UI any more
+//      since the side handles are hidden, but it's cheap insurance), then
 //   2) clamps left/top so the (now guaranteed large-enough) photo
 //      rectangle still fully overlaps the frame rectangle on every side.
 // Both objects use originX/Y: 'center', so left/top is each one's center —
@@ -1011,136 +974,133 @@ function keepPhotoCoveringFrame(img) {
     img.setCoords();
 }
 
-// ---- Photo adjust widget ----
-// Replaces both the old desktop corner-handle resize AND mobile
-// pinch-to-resize with one consistent flow on every device:
-//
-//   idle    — the photo sits there unselectable/un-evented (see
-//             loadPhotoIntoFrame). A touch/click anywhere on the card,
-//             including directly over the photo, is completely ignored by
-//             Fabric and falls straight through to normal page scroll.
-//   toolbar — a tap/click ON the photo (detected manually below, since
-//             the photo isn't evented in idle mode for Fabric to detect
-//             it itself) switches evented/selectable on and shows the
-//             Replace / Adjust / Done widget. The photo can now be
-//             dragged directly to reposition it — while that drag is
-//             happening Fabric owns the touch, so the page correctly
-//             does NOT scroll (this is the "unless the toolbar is open"
-//             behaviour).
-//   adjust  — "Adjust" swaps the widget for the Zoom slider. This is now
-//             the ONLY way to resize the photo, replacing both the old
-//             corner-drag handle and pinch-to-zoom.
-//
-// "Done", or tapping/clicking anywhere else on the card, returns to idle.
-let photoToolbarMode = 'idle'; // 'idle' | 'toolbar' | 'adjust'
-let tapCandidate = null;
-const TAP_MOVE_THRESHOLD = 8;  // canvas-space px — more than this and it's a drag/scroll, not a tap
-const TAP_MAX_MS = 400;
-
-function setupPhotoAdjustWidget() {
-    canvas.on('mouse:down', (opt) => {
-        if (!photoImg || currentPage !== 'front') return;
-        const pointer = canvas.getPointer(opt.e);
-        const onPhoto = photoImg.containsPoint(pointer);
-
-        if (photoToolbarMode === 'idle') {
-            tapCandidate = onPhoto ? { x: pointer.x, y: pointer.y, time: Date.now() } : null;
-        } else if (!onPhoto) {
-            // Tapped/clicked away from the photo while the widget was open.
-            closePhotoToolbar();
-        }
-    });
-
-    canvas.on('mouse:up', (opt) => {
-        if (!tapCandidate) return;
-        const pointer = canvas.getPointer(opt.e);
-        const moved = Math.hypot(pointer.x - tapCandidate.x, pointer.y - tapCandidate.y);
-        const quick = Date.now() - tapCandidate.time < TAP_MAX_MS;
-        tapCandidate = null;
-        if (moved < TAP_MOVE_THRESHOLD && quick) openPhotoToolbar();
-    });
-
-    // Keep the floating widget glued to the photo as it's dragged, and
-    // keep the coverage guard enforced on every move.
+// Wires keepPhotoCoveringFrame into the two Fabric-native gestures that can
+// move or resize the photo: single-finger/mouse drag ('object:moving') and
+// the desktop corner-handle drag ('object:scaling'). Pinch-resize on mobile
+// isn't a Fabric gesture at all — it's handled separately in
+// attachPinchToResize, which calls keepPhotoCoveringFrame itself. Call once
+// at setup, not per-photo-upload — photoImg is checked fresh on every event.
+function setupPhotoCoverageGuard() {
     canvas.on('object:moving', ({ target }) => {
-        if (target !== photoImg) return;
-        keepPhotoCoveringFrame(target);
-        if (photoToolbarMode !== 'idle') positionPhotoWidget();
+        if (target === photoImg) keepPhotoCoveringFrame(target);
+    });
+    canvas.on('object:scaling', ({ target }) => {
+        if (target === photoImg) keepPhotoCoveringFrame(target);
     });
 }
 
-function openPhotoToolbar() {
-    if (!photoImg || photoToolbarMode !== 'idle') return;
-    photoToolbarMode = 'toolbar';
-    photoImg.set({ evented: true, selectable: true });
-    canvas.setActiveObject(photoImg);
-    $('photo-adjust-panel').style.display = 'none';
-    $('photo-toolbar').style.display = 'flex';
-    positionPhotoWidget();
-    canvas.requestRenderAll();
+// ---- Mobile pinch-to-resize for the uploaded photo ----
+// With the blue box/corner handle hidden on small screens (see
+// loadPhotoIntoFrame) there's no handle left to drag for resizing, so this
+// listens for a standard two-finger pinch directly on the canvas and scales
+// the photo to match. Uniform scaling (scaleX === scaleY throughout, same
+// as the photo's initial cover-fit), so pinching in/out just makes it
+// bigger or smaller without distorting it. Single-finger dragging to
+// reposition isn't touched here — Fabric already supports that with no
+// visible controls needed, on both mobile and desktop.
+let pinchStartDist = null;
+let pinchStartScale = null;
+
+function touchDistance(t1, t2) {
+    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
 }
 
-function openAdjustPanel() {
-    if (!photoImg) return;
-    photoToolbarMode = 'adjust';
-    const multiplier = photoImg.scaleX / photoImg.minScale;
-    $('zoom-slider').value = multiplier;
-    $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
-    $('photo-toolbar').style.display = 'none';
-    $('photo-adjust-panel').style.display = 'flex';
-    positionPhotoWidget();
+function attachPinchToResize(el) {
+    el.addEventListener('touchstart', (e) => {
+        if (!isMobileDevice() || currentPage !== 'front' || !photoImg || e.touches.length !== 2) return;
+        pinchStartDist = touchDistance(e.touches[0], e.touches[1]);
+        pinchStartScale = photoImg.scaleX;
+        canvas.setActiveObject(photoImg);
+    }, { passive: true });
+
+    el.addEventListener('touchmove', (e) => {
+        if (pinchStartDist === null || e.touches.length !== 2 || !photoImg) return;
+        e.preventDefault(); // don't let the page scroll while actively pinching
+        const ratio = touchDistance(e.touches[0], e.touches[1]) / pinchStartDist;
+        // Lower bound is the photo's own cover-fit minimum (never shrink
+        // enough to expose the frame); upper bound of 10x just stops it
+        // ballooning to an unusable size.
+        const newScale = Math.min(Math.max(pinchStartScale * ratio, photoImg.minScale), 10);
+        photoImg.set({ scaleX: newScale, scaleY: newScale });
+        keepPhotoCoveringFrame(photoImg); // re-clamp position for the new scale too
+        canvas.requestRenderAll();
+    }, { passive: false });
+
+    const endPinch = (e) => { if (e.touches.length < 2) pinchStartDist = null; };
+    el.addEventListener('touchend', endPinch, { passive: true });
+    el.addEventListener('touchcancel', endPinch, { passive: true });
 }
 
-function closePhotoToolbar() {
-    photoToolbarMode = 'idle';
-    if (photoImg) {
-        photoImg.set({ evented: false, selectable: false });
-        canvas.discardActiveObject();
+// ---- Hold-to-scroll ----
+// Empty canvas background already scrolls fine by itself (see
+// `allowTouchScrolling: true` above) — a touch that never hits an object
+// just falls through to the page. The one object worth a deliberate
+// hold/drag distinction is the uploaded photo, since a single-finger touch
+// on it is normally claimed straight away for repositioning. Holding still
+// on the PHOTO for a moment (rather than dragging it immediately) now hands
+// that touch back to the page instead, so the customer can scroll up to
+// the header or down to the footer without first having to look away from
+// the photo.
+//
+// This deliberately does NOT try to do the same thing for the message-box
+// text: a touch that lands on editable text is already being handled by
+// the phone's own text-editing/selection system by the time any hold timer
+// could fire, and stepping in after the fact left things in a broken
+// state — Fabric would fall back to its own rubber-band "select everything
+// nearby" drag, which is what was briefly making the (otherwise fully
+// locked) message boxes look like they'd become a moveable group. Message
+// boxes keep their normal, unmodified tap-to-edit behaviour; scroll using
+// the gaps around them or the header/nav instead.
+const HOLD_TO_SCROLL_MS = 350;
+const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
+let holdTimer = null;
+let holdStart = null;
+let holdScrollActive = false;
+
+function cancelHoldTimer() {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+}
+
+function endHoldScroll() {
+    cancelHoldTimer();
+    if (holdScrollActive) {
+        holdScrollActive = false;
+        canvas.skipTargetFind = false;
     }
-    $('photo-toolbar').style.display = 'none';
-    $('photo-adjust-panel').style.display = 'none';
-    canvas.requestRenderAll();
+    holdStart = null;
 }
 
-function onReplacePhotoClick() {
-    $('photo-input').click();
-}
+function attachHoldToScroll(el) {
+    el.addEventListener('touchstart', (e) => {
+        if (!isMobileDevice() || e.touches.length !== 1) return;
+        // Only step in when the touch starts directly on the photo. Any
+        // other target (text, the artwork background, anything
+        // non-selectable) is left completely alone.
+        const target = canvas.findTarget(e, false);
+        if (!photoImg || target !== photoImg) return;
 
-function onZoomSliderInput(value) {
-    if (!photoImg) return;
-    const multiplier = Number(value);
-    const scale = photoImg.minScale * multiplier;
-    photoImg.set({ scaleX: scale, scaleY: scale });
-    keepPhotoCoveringFrame(photoImg);
-    $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
-    canvas.requestRenderAll();
-}
+        const t = e.touches[0];
+        holdStart = { x: t.clientX, y: t.clientY };
+        cancelHoldTimer();
+        holdTimer = setTimeout(() => {
+            holdScrollActive = true;
+            canvas.discardActiveObject();
+            canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
+            canvas.skipTargetFind = true; // this touch now passes straight through to the page
+            canvas.requestRenderAll();
+        }, HOLD_TO_SCROLL_MS);
+    }, { passive: true });
 
-// Positions the floating toolbar/panel directly above the photo's current
-// on-screen box. Has to convert from the photo's logical canvas
-// coordinates through two layers: the workspace's fixed pan (see
-// setViewportTransform/PANEL_WIDTH above) and, on mobile, the CSS scaling
-// that stretches the fixed-resolution canvas element to the phone's width
-// (see the 900px breakpoint rules).
-function positionPhotoWidget() {
-    if (!photoImg) return;
-    const rect = photoImg.getBoundingRect(true, true);
-    const canvasEl = canvas.upperCanvasEl;
-    const canvasRect = canvasEl.getBoundingClientRect();
-    const wrapperRect = $('canvas-wrapper').getBoundingClientRect();
-    const scaleX = canvasRect.width / canvas.width;
-    const scaleY = canvasRect.height / canvas.height;
+    el.addEventListener('touchmove', (e) => {
+        if (!holdStart || holdScrollActive) return;
+        const t = e.touches[0];
+        if (!t) return;
+        const moved = Math.hypot(t.clientX - holdStart.x, t.clientY - holdStart.y);
+        if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag, not a hold
+    }, { passive: true });
 
-    const screenLeft = (rect.left - PANEL_WIDTH) * scaleX + (canvasRect.left - wrapperRect.left);
-    const screenTop = rect.top * scaleY + (canvasRect.top - wrapperRect.top);
-    const screenCenterX = screenLeft + (rect.width * scaleX) / 2;
-    const widgetTop = Math.max(8, screenTop - 56); // just above the photo; clamped so it doesn't run off the top of the card
-
-    [$('photo-toolbar'), $('photo-adjust-panel')].forEach((el) => {
-        el.style.left = screenCenterX + 'px';
-        el.style.top = widgetTop + 'px';
-        el.style.transform = 'translateX(-50%)';
-    });
+    el.addEventListener('touchend', endHoldScroll, { passive: true });
+    el.addEventListener('touchcancel', endHoldScroll, { passive: true });
 }
 
 function updateNameText(inputEl) {
@@ -1263,11 +1223,7 @@ function switchPage(page) {
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
-    // Photo stays idle (not selectable/evented) regardless of which page
-    // we're on — see loadPhotoIntoFrame/closePhotoToolbar. Only the Adjust
-    // widget's open state needs resetting when we leave the front page.
-    photoImg?.set({ visible: isFront });
-    if (!isFront) closePhotoToolbar();
+    photoImg?.set({ visible: isFront, selectable: isFront, evented: isFront });
 
     canvas.discardActiveObject();
     resetBordersToDashed();
