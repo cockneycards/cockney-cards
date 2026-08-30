@@ -77,10 +77,15 @@
        ============================================================ */
     .editor-workspace {
         width: 100%;
-        max-width: 760px;
+        max-width: 980px;
         margin: 28px auto 60px;
         padding: 0 20px;
         box-sizing: border-box;
+        display: grid;
+        grid-template-columns: minmax(0, 595.5px) minmax(280px, 320px);
+        align-items: start;
+        justify-content: center;
+        gap: 32px;
     }
 
     .card-stage {
@@ -88,11 +93,13 @@
         display: flex;
         justify-content: center;
         position: relative;
+        min-width: 0;
     }
 
     #canvas-wrapper {
         position: relative;
-        width: min(100%, 595.5px);
+        width: 100%;
+        max-width: 595.5px;
         background: white;
         padding: 0;
         border-radius: 14px;
@@ -121,20 +128,25 @@
     }
 
     .editor-tip {
+        grid-column: 1 / -1;
         text-align: center;
-        margin: 14px auto 0;
+        margin: -18px auto 0;
         color: #777;
         font-size: 12px;
         line-height: 1.5;
+        max-width: 720px;
+        order: 3;
     }
 
     .side-column {
         width: 100%;
-        max-width: 595.5px;
-        margin: 24px auto 0;
+        max-width: 320px;
+        margin: 0;
         display: flex;
         flex-direction: column;
         gap: 14px;
+        position: sticky;
+        top: 20px;
     }
 
     .page-toggle {
@@ -142,61 +154,9 @@
         gap: 8px;
         width: 100%;
         box-sizing: border-box;
-        position: sticky;
-        top: 8px;
-        z-index: 5;
-        background: rgba(246,246,248,.92);
+        background: rgba(246,246,248,.94);
         backdrop-filter: blur(8px);
         padding: 6px;
-        border-radius: 12px;
-    }
-
-    .toggle-btn {
-        flex: 1;
-        padding: 12px;
-        border: 1px solid #ddd;
-        background: white;
-        cursor: pointer;
-        border-radius: 9px;
-        font-size: 13px;
-        font-weight: bold;
-        transition: all .2s;
-    }
-
-    .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
-
-    .controls {
-        width: 100%;
-        background: white;
-        padding: 24px;
-        border-radius: 14px;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 5px 20px rgba(0,0,0,.06);
-        box-sizing: border-box;
-    }
-
-    .control-group { display: flex; flex-direction: column; gap: 15px; }
-    .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: .5px; color: #444; }
-    label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: .5px; color: #444; }
-    input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-    .flex-row { display: flex; align-items: center; gap: 10px; }
-    .color-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; padding: 0; }
-    .size-slider { flex: 1; }
-
-    .variant-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-    .variant-thumb { width: 56px; height: 56px; padding: 0; border: 2px solid #ccc; border-radius: 8px; overflow: hidden; cursor: pointer; background: none; }
-    .variant-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .variant-thumb.active { border-color: #111; }
-
-    .photo-action {
-        width: 100%;
-        border: 1px solid #111;
-        background: #111;
-        color: white;
-        padding: 13px 16px;
-        border-radius: 9px;
-        font-size: 13px;
-        font-weight: 700;
         cursor: pointer;
     }
 
@@ -212,22 +172,41 @@
     .btn-back:hover, .btn-next:hover { background-color: #444; }
     .btn-small:disabled { background-color: #e8e8e8; color: #999; border-color: #e8e8e8; cursor: not-allowed; }
 
-    @media (max-width: 700px) {
+    /* Phones/tablets: the card becomes the full-width main column and the
+       controls return underneath it. The desktop side frame is deliberately
+       preserved above this breakpoint. */
+    @media (max-width: 999px) {
         header, footer { display: none; }
-        .editor-workspace { max-width: 595.5px; margin: 12px auto 40px; padding: 0 10px; }
+        .editor-workspace {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 595.5px;
+            margin: 12px auto 40px;
+            padding: 0 10px;
+            gap: 18px;
+        }
         #canvas-wrapper { border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,.10); }
-        .side-column { margin-top: 18px; }
+        .side-column { width: 100%; max-width: 595.5px; margin: 0; position: static; }
+        .page-toggle { position: sticky; top: 4px; z-index: 5; }
+        .editor-tip { order: initial; margin: 0 auto; }
         .controls { padding: 18px; border-radius: 12px; }
-        .page-toggle { top: 4px; }
         .toggle-btn { font-size: 12px; padding: 11px 6px; }
         input[type="text"] { font-size: 16px; }
-        .editor-tip { font-size: 11px; padding: 0 10px; }
     }
 
-    @media (min-width: 701px) {
-        .editor-workspace { padding-top: 10px; }
+    @media (max-width: 500px) {
+        .editor-workspace { padding: 0 8px; margin: 8px auto 30px; }
+        .controls { padding: 18px; }
+        .editor-tip { font-size: 11px; padding: 0 8px; }
     }
 
+    @media (max-width: 480px) {
+        .toggle-btn { font-size: 12px; padding: 10px 6px; }
+        .variant-thumb { width: 48px; height: 48px; }
+        input[type="text"] { font-size: 16px; }
+    }
     /* FOOTER */
     footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
     .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
@@ -698,8 +677,8 @@ function initEditor(templateKey) {
         selection: false
     });
 
-    // Let a normal one-finger swipe on the artwork bubble up to the page.
-    // The uploaded photo remains the only object that captures a gesture.
+    // Mobile uses a gesture layer that treats vertical swipes as page scrolling
+    // and reserves a long-press on the photo for repositioning.
     canvas.upperCanvasEl.style.touchAction = 'pan-y';
     canvas.upperCanvasEl.style.webkitUserSelect = 'none';
     // Alt normally toggles centered-vs-corner-anchored scaling for
@@ -715,8 +694,7 @@ function initEditor(templateKey) {
     canvas.setViewportTransform([1, 0, 0, 1, -PANEL_WIDTH, 0]);
     canvas.calcOffset();
 
-    attachPinchToResize(canvas.upperCanvasEl);
-    attachHoldToScroll(canvas.upperCanvasEl);
+    attachMobileCardGestures(canvas.upperCanvasEl);
     setupPhotoCoverageGuard();
     setupPhotoFrameTapUpload();
 
@@ -1022,18 +1000,14 @@ function loadPhotoIntoFrame(dataUrl) {
             centeredScaling: true,
             hasBorders: !mobile,
             hasControls: !mobile,
+            evented: !mobile,
+            selectable: !mobile,
             borderColor: '#1A73E8',
             cornerColor: '#1A73E8',
             cornerStrokeColor: '#1A73E8',
             transparentCorners: false,
-            // Hard-clips the photo to the frame's bounding box in canvas
-            // (not object-local) coordinates — see comment above.
-            clipPath: new fabric.Rect({
-                left: p.left, top: p.top,
-                originX: 'center', originY: 'center',
-                width: p.width, height: p.height,
-                absolutePositioned: true
-            })
+            // No clipPath: once uploaded, the photo is a free-positioned
+            // layer and can be moved anywhere on the visible card panel.
         });
         // Only the corner handles resize (uniform, diagonal drag). The
         // side/middle handles (ml, mr, mt, mb) are hidden — leaving them
@@ -1052,9 +1026,12 @@ function loadPhotoIntoFrame(dataUrl) {
 
         photoImg = img;
         canvas.add(photoImg);
-        canvas.sendToBack(photoImg); // behind everything, including the artwork —
-                                      // its transparent cutout is what shows this
-        canvas.setActiveObject(photoImg);
+        // Put the uploaded photo above the card artwork so white/opaque areas
+        // in individual card PNGs cannot mask the customer's picture. Keep
+        // editable text above it where present.
+        canvas.bringToFront(photoImg);
+        [nameText, ageText, ...extraTexts].forEach((o) => o && canvas.bringToFront(o));
+        if (!mobile) canvas.setActiveObject(photoImg);
         canvas.requestRenderAll();
     }, { crossOrigin: 'anonymous' });
 }
@@ -1074,27 +1051,26 @@ function loadPhotoIntoFrame(dataUrl) {
 // Both objects use originX/Y: 'center', so left/top is each one's center —
 // that's what makes the half-width/half-height math below correct.
 function keepPhotoCoveringFrame(img) {
-    const p = img.frameBox;
-    if (!p) return;
+    if (!img) return;
 
-    const scale = Math.max(img.scaleX, img.scaleY, img.minScale);
+    const scale = Math.max(img.scaleX, img.scaleY, img.minScale || 0.01);
     if (img.scaleX !== scale || img.scaleY !== scale) {
         img.set({ scaleX: scale, scaleY: scale });
     }
 
+    // The photo is no longer restricted to its original frame. Keep it within
+    // the visible front panel so it can be positioned anywhere on the card
+    // without disappearing completely off the artwork.
     const halfImgW = (img.width * scale) / 2;
     const halfImgH = (img.height * scale) / 2;
-    const halfFrameW = p.width / 2;
-    const halfFrameH = p.height / 2;
-
-    const minLeft = p.left + halfFrameW - halfImgW;
-    const maxLeft = p.left - halfFrameW + halfImgW;
-    const minTop = p.top + halfFrameH - halfImgH;
-    const maxTop = p.top - halfFrameH + halfImgH;
+    const minLeft = PANEL_WIDTH + halfImgW;
+    const maxLeft = CANVAS_WIDTH - halfImgW;
+    const minTop = halfImgH;
+    const maxTop = CANVAS_HEIGHT - halfImgH;
 
     img.set({
-        left: Math.min(Math.max(img.left, minLeft), maxLeft),
-        top: Math.min(Math.max(img.top, minTop), maxTop)
+        left: Math.min(Math.max(img.left, minLeft), Math.max(minLeft, maxLeft)),
+        top: Math.min(Math.max(img.top, minTop), Math.max(minTop, maxTop))
     });
     img.setCoords();
 }
@@ -1127,118 +1103,183 @@ function setupPhotoCoverageGuard() {
     });
 }
 
-// ---- Mobile pinch-to-resize for the uploaded photo ----
-// With the blue box/corner handle hidden on small screens (see
-// loadPhotoIntoFrame) there's no handle left to drag for resizing, so this
-// listens for a standard two-finger pinch directly on the canvas and scales
-// the photo to match. Uniform scaling (scaleX === scaleY throughout, same
-// as the photo's initial cover-fit), so pinching in/out just makes it
-// bigger or smaller without distorting it. Single-finger dragging to
-// reposition isn't touched here — Fabric already supports that with no
-// visible controls needed, on both mobile and desktop.
-let pinchStartDist = null;
-let pinchStartScale = null;
+// ---- Mobile card gestures ----
+// The card itself behaves like a normal web page on a phone:
+//   * vertical swipe anywhere on the card -> scroll the page
+//   * press/hold on the uploaded photo -> photo-edit mode
+//   * after the hold, drag -> reposition the photo
+//   * two fingers on the photo -> pinch to zoom
+// This avoids the common Fabric.js problem where an object on the canvas
+// captures the first finger and makes the entire card feel non-scrollable.
+let mobileGesture = null;
+let mobileHoldTimer = null;
+const MOBILE_HOLD_MS = 380;
+const MOBILE_MOVE_THRESHOLD = 8;
 
-function touchDistance(t1, t2) {
+function mobileCanvasPoint(touch) {
+    const rect = canvas.upperCanvasEl.getBoundingClientRect();
+    const sx = canvas.getWidth() / rect.width;
+    const sy = canvas.getHeight() / rect.height;
+    return {
+        x: (touch.clientX - rect.left) * sx - canvas.viewportTransform[4],
+        y: (touch.clientY - rect.top) * sy - canvas.viewportTransform[5]
+    };
+}
+
+function photoContainsPoint(point) {
+    if (!photoImg || !photoImg.visible || currentPage !== 'front') return false;
+    const w = photoImg.width * photoImg.scaleX;
+    const h = photoImg.height * photoImg.scaleY;
+    return point.x >= photoImg.left - w / 2 && point.x <= photoImg.left + w / 2 &&
+           point.y >= photoImg.top - h / 2 && point.y <= photoImg.top + h / 2;
+}
+
+function distanceBetweenTouches(t1, t2) {
     return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
 }
 
-function attachPinchToResize(el) {
-    el.addEventListener('touchstart', (e) => {
-        if (!isMobileDevice() || currentPage !== 'front' || !photoImg || e.touches.length !== 2) return;
-        pinchStartDist = touchDistance(e.touches[0], e.touches[1]);
-        pinchStartScale = photoImg.scaleX;
-        canvas.setActiveObject(photoImg);
-    }, { passive: true });
-
-    el.addEventListener('touchmove', (e) => {
-        if (pinchStartDist === null || e.touches.length !== 2 || !photoImg) return;
-        e.preventDefault(); // don't let the page scroll while actively pinching
-        const ratio = touchDistance(e.touches[0], e.touches[1]) / pinchStartDist;
-        // Lower bound is the photo's own cover-fit minimum (never shrink
-        // enough to expose the frame); upper bound of 10x just stops it
-        // ballooning to an unusable size.
-        const newScale = Math.min(Math.max(pinchStartScale * ratio, photoImg.minScale), 10);
-        photoImg.set({ scaleX: newScale, scaleY: newScale });
-        keepPhotoCoveringFrame(photoImg); // re-clamp position for the new scale too
-        canvas.requestRenderAll();
-    }, { passive: false });
-
-    const endPinch = (e) => { if (e.touches.length < 2) pinchStartDist = null; };
-    el.addEventListener('touchend', endPinch, { passive: true });
-    el.addEventListener('touchcancel', endPinch, { passive: true });
-}
-
-// ---- Hold-to-scroll ----
-// Empty canvas background already scrolls fine by itself (see
-// `allowTouchScrolling: true` above) — a touch that never hits an object
-// just falls through to the page. The one object worth a deliberate
-// hold/drag distinction is the uploaded photo, since a single-finger touch
-// on it is normally claimed straight away for repositioning. Holding still
-// on the PHOTO for a moment (rather than dragging it immediately) now hands
-// that touch back to the page instead, so the customer can scroll up to
-// the header or down to the footer without first having to look away from
-// the photo.
-//
-// This deliberately does NOT try to do the same thing for the message-box
-// text: a touch that lands on editable text is already being handled by
-// the phone's own text-editing/selection system by the time any hold timer
-// could fire, and stepping in after the fact left things in a broken
-// state — Fabric would fall back to its own rubber-band "select everything
-// nearby" drag, which is what was briefly making the (otherwise fully
-// locked) message boxes look like they'd become a moveable group. Message
-// boxes keep their normal, unmodified tap-to-edit behaviour; scroll using
-// the gaps around them or the header/nav instead.
-const HOLD_TO_SCROLL_MS = 350;
-const HOLD_MOVE_THRESHOLD = 10; // px of movement before the timer fires that cancels the hold
-let holdTimer = null;
-let holdStart = null;
-let holdScrollActive = false;
-
-function cancelHoldTimer() {
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-}
-
-function endHoldScroll() {
-    cancelHoldTimer();
-    if (holdScrollActive) {
-        holdScrollActive = false;
-        canvas.skipTargetFind = false;
+function cancelMobileHold() {
+    if (mobileHoldTimer) {
+        clearTimeout(mobileHoldTimer);
+        mobileHoldTimer = null;
     }
-    holdStart = null;
 }
 
-function attachHoldToScroll(el) {
-    el.addEventListener('touchstart', (e) => {
-        if (!isMobileDevice() || e.touches.length !== 1) return;
-        // Only step in when the touch starts directly on the photo. Any
-        // other target (text, the artwork background, anything
-        // non-selectable) is left completely alone.
-        const target = canvas.findTarget(e, false);
-        if (!photoImg || target !== photoImg) return;
+function stopFabricTouchState() {
+    canvas._currentTransform = null;
+    canvas.discardActiveObject();
+    canvas.skipTargetFind = true;
+}
 
+function finishMobileGesture() {
+    cancelMobileHold();
+    if (mobileGesture?.photoMode) {
+        keepPhotoCoveringFrame(photoImg);
+        canvas.requestRenderAll();
+    }
+    canvas.skipTargetFind = false;
+    mobileGesture = null;
+}
+
+function attachMobileCardGestures(el) {
+    // Capture phase is intentional: it gets first chance to decide whether a
+    // moving finger should scroll the page before Fabric can turn the touch
+    // into an object drag.
+    el.addEventListener('touchstart', (e) => {
+        if (!isMobileDevice()) return;
+
+        if (e.touches.length === 2) {
+            cancelMobileHold();
+            if (mobileGesture?.onPhoto) {
+                mobileGesture.photoMode = true;
+                mobileGesture.pinch = true;
+                mobileGesture.startDistance = distanceBetweenTouches(e.touches[0], e.touches[1]);
+                mobileGesture.startScale = photoImg.scaleX;
+                stopFabricTouchState();
+                e.preventDefault();
+            }
+            return;
+        }
+
+        if (e.touches.length !== 1) return;
         const t = e.touches[0];
-        holdStart = { x: t.clientX, y: t.clientY };
-        cancelHoldTimer();
-        holdTimer = setTimeout(() => {
-            holdScrollActive = true;
-            canvas.discardActiveObject();
-            canvas._currentTransform = null; // cancel whatever drag Fabric had already queued up for this touch
-            canvas.skipTargetFind = true; // this touch now passes straight through to the page
-            canvas.requestRenderAll();
-        }, HOLD_TO_SCROLL_MS);
-    }, { passive: true });
+        const point = mobileCanvasPoint(t);
+        const onPhoto = photoContainsPoint(point);
+        const onPhotoFrame = activeTemplate?.photo &&
+            Math.abs(point.x - activeTemplate.photo.left) <= activeTemplate.photo.width / 2 &&
+            Math.abs(point.y - activeTemplate.photo.top) <= activeTemplate.photo.height / 2;
+
+        mobileGesture = {
+            startX: t.clientX,
+            startY: t.clientY,
+            lastX: t.clientX,
+            lastY: t.clientY,
+            onPhoto,
+            onPhotoFrame,
+            photoMode: false,
+            pinch: false,
+            moved: false
+        };
+
+        // Once a photo exists, only a deliberate hold turns this touch into
+        // photo positioning. A normal swipe remains a page scroll.
+        if (onPhoto) {
+            mobileHoldTimer = setTimeout(() => {
+                if (!mobileGesture || mobileGesture.moved || mobileGesture.pinch) return;
+                mobileGesture.photoMode = true;
+                stopFabricTouchState();
+                mobileGesture.photoStartX = photoImg.left;
+                mobileGesture.photoStartY = photoImg.top;
+                canvas.requestRenderAll();
+            }, MOBILE_HOLD_MS);
+        }
+    }, { passive: false, capture: true });
 
     el.addEventListener('touchmove', (e) => {
-        if (!holdStart || holdScrollActive) return;
-        const t = e.touches[0];
-        if (!t) return;
-        const moved = Math.hypot(t.clientX - holdStart.x, t.clientY - holdStart.y);
-        if (moved > HOLD_MOVE_THRESHOLD) cancelHoldTimer(); // a real drag, not a hold
-    }, { passive: true });
+        if (!isMobileDevice() || !mobileGesture) return;
 
-    el.addEventListener('touchend', endHoldScroll, { passive: true });
-    el.addEventListener('touchcancel', endHoldScroll, { passive: true });
+        // Pinch: only the two-finger gesture on the photo is an editor gesture.
+        if (mobileGesture.pinch && e.touches.length >= 2 && photoImg) {
+            e.preventDefault();
+            const dist = distanceBetweenTouches(e.touches[0], e.touches[1]);
+            const ratio = mobileGesture.startDistance ? dist / mobileGesture.startDistance : 1;
+            const newScale = Math.min(Math.max(mobileGesture.startScale * ratio, photoImg.minScale || 0.01), 10);
+            photoImg.set({ scaleX: newScale, scaleY: newScale });
+            keepPhotoCoveringFrame(photoImg);
+            canvas.requestRenderAll();
+            return;
+        }
+
+        if (e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const dx = t.clientX - mobileGesture.startX;
+        const dy = t.clientY - mobileGesture.startY;
+        mobileGesture.lastX = t.clientX;
+        mobileGesture.lastY = t.clientY;
+
+        if (!mobileGesture.photoMode) {
+            if (Math.hypot(dx, dy) > MOBILE_MOVE_THRESHOLD) {
+                mobileGesture.moved = true;
+                cancelMobileHold();
+
+                // Manually scroll the real page. This works even if Fabric has
+                // attached its own touch listener to a text/object underneath.
+                e.preventDefault();
+                window.scrollBy(0, -dy);
+                mobileGesture.startX = t.clientX;
+                mobileGesture.startY = t.clientY;
+                stopFabricTouchState();
+            }
+            return;
+        }
+
+        // Long-press has promoted the touch to photo positioning.
+        e.preventDefault();
+        const rect = el.getBoundingClientRect();
+        const sx = canvas.getWidth() / rect.width;
+        const sy = canvas.getHeight() / rect.height;
+        photoImg.set({
+            left: mobileGesture.photoStartX + dx * sx,
+            top: mobileGesture.photoStartY + dy * sy
+        });
+        keepPhotoCoveringFrame(photoImg);
+        canvas.requestRenderAll();
+    }, { passive: false, capture: true });
+
+    el.addEventListener('touchend', (e) => {
+        if (!mobileGesture) return;
+        if (e.touches.length > 0) return;
+
+        const wasTap = !mobileGesture.moved && !mobileGesture.photoMode && !mobileGesture.pinch;
+        const wasEmptyFrameTap = wasTap && mobileGesture.onPhotoFrame && !photoImg;
+        if (wasEmptyFrameTap) {
+            const input = $('photo-input');
+            if (input) input.click();
+        }
+        finishMobileGesture();
+    }, { passive: true, capture: true });
+
+    el.addEventListener('touchcancel', finishMobileGesture, { passive: true, capture: true });
 }
 
 function updateNameText(inputEl) {
@@ -1361,7 +1402,7 @@ function switchPage(page) {
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
-    photoImg?.set({ visible: isFront, selectable: isFront, evented: isFront });
+    photoImg?.set({ visible: isFront, selectable: isFront && !isMobileDevice(), evented: isFront && !isMobileDevice() });
 
     canvas.discardActiveObject();
     resetBordersToDashed();
