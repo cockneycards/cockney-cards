@@ -822,6 +822,10 @@ function setupTextsAndOverlays() {
                 fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
                 hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
             });
+        // Stable tag used by syncPersonalisationForExport to find this
+        // object again on the export clone — see that function for why
+        // this can't just be an array index lookup.
+        nameText.ccRole = "name";
 
         if (n.canChangeSize) {
             const slider = $("front-size");
@@ -840,6 +844,7 @@ function setupTextsAndOverlays() {
             fontSize: a.startSize, fontFamily: a.fontFamily || "Arial", fontWeight: "bold",
             fill: a.color, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
         });
+        ageText.ccRole = "age"; // see nameText.ccRole above
         canvas.add(ageText);
     }
 
@@ -854,6 +859,7 @@ function setupTextsAndOverlays() {
                 fontWeight: f.fontWeight || "bold", fill: f.color, textAlign: "left",
                 hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
             });
+            t.ccRole = `extra-${extraTexts.length}`; // see nameText.ccRole above
             extraTexts.push(t);
             canvas.add(t);
         });
@@ -1676,12 +1682,14 @@ function buildCurvedNameGroup(rawValue, fontSize, color) {
         });
     });
 
-    return new fabric.Group(letters, {
+    const group = new fabric.Group(letters, {
         left: n.left, top: n.top, originX: "center", originY: "center",
         angle: n.tiltAngle || 0,
         hasControls: false, hasBorders: false,
         lockMovementX: true, lockMovementY: true
     });
+    group.ccRole = "name"; // see nameText.ccRole in setupTextsAndOverlays
+    return group;
 }
 
 // Swaps the on-canvas name object for a freshly-built one (used whenever
@@ -1710,14 +1718,22 @@ function replaceNameText(newNameObj) {
 // panel, while the PDF is rendered from the full spread.  Copying the exact
 // live transform (rather than relying only on JSON deserialisation) makes the
 // customer's on-screen name position the single source of truth for print.
+//
+// Matches live objects to their export-clone counterpart by the stable
+// `ccRole` tag (set at creation time — see nameText.ccRole etc. in
+// setupTextsAndOverlays/buildCurvedNameGroup) rather than by array index.
+// Index-matching broke specifically on photo-upload cards: photoImg is a
+// large, async-decoding image that canvas.sendToBack()'s into the object
+// list, and re-enlivening that same image from JSON on the export canvas
+// doesn't reliably finish/settle into the exact same array position as the
+// live canvas, which silently shifted every later index (name/age/extra
+// text) out of alignment. Tag-matching sidesteps that entirely.
 function syncPersonalisationForExport(exportCanvas) {
-    const liveObjects = canvas.getObjects();
     const exportObjects = exportCanvas.getObjects();
     const targets = [nameText, ageText, ...(extraTexts || [])].filter(Boolean);
 
     targets.forEach((liveObj) => {
-        const liveIndex = liveObjects.indexOf(liveObj);
-        const exportObj = liveIndex >= 0 ? exportObjects[liveIndex] : null;
+        const exportObj = exportObjects.find((o) => o.ccRole && o.ccRole === liveObj.ccRole) || null;
         if (!exportObj) return;
 
         exportObj.set({
@@ -1747,7 +1763,11 @@ function captureFullSpread({ multiplier = 3, quality = 0.92 } = {}) {
         const exportCanvas = new fabric.StaticCanvas(exportEl, {
             width: CANVAS_WIDTH, height: CANVAS_HEIGHT
         });
-        exportCanvas.loadFromJSON(canvas.toJSON(), () => {
+        // 'ccRole' must be explicitly listed here — Fabric only serialises
+        // custom (non-default) properties that are asked for, and
+        // syncPersonalisationForExport needs this tag to survive the
+        // round-trip so it can match objects up on the export clone.
+        exportCanvas.loadFromJSON(canvas.toJSON(['ccRole']), () => {
             try {
                 syncPersonalisationForExport(exportCanvas);
                 exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
@@ -1919,7 +1939,9 @@ function collectAndResetDeliveryInfo() {
 function captureFrontThumbnail() {
     const pageBeforeCapture = currentPage;
     switchPage('front');
-    const frontJson = canvas.toJSON();
+    // 'ccRole' included so syncPersonalisationForExport can match objects
+    // by tag rather than array position — see that function's comment.
+    const frontJson = canvas.toJSON(['ccRole']);
     switchPage(pageBeforeCapture);
 
     return new Promise((resolve, reject) => {
