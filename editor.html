@@ -300,7 +300,7 @@
                 <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Upload Photo</label>
                 <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
                 <p style="font-size:12px; color:#666; margin-top:6px;">
-                    On desktop: tap the photo to Replace or Adjust it. On a touchscreen: press and hold the photo for a moment, then drag to reposition it — pinch with two fingers to zoom. It'll always stay filling the frame.
+                    On desktop: tap the photo to Replace or Adjust it. On a touchscreen: press and hold the photo for a moment, then drag to reposition it — pinch with two fingers to zoom. Place it anywhere on the front of the card.
                 </p>
             </div>
         </div>
@@ -904,17 +904,13 @@ function handlePhotoUpload(inputEl) {
     reader.readAsDataURL(file);
 }
 
-// Adds the customer's photo as a BACKGROUND layer, sent behind the card
-// artwork — the artwork's own transparent cutout masks it, so the shape is
-// always a pixel-perfect match with soft anti-aliased edges. On top of
-// that, the photo also gets a hard rectangular clipPath matching the frame
-// box itself (absolutePositioned, so it stays put in canvas coordinates
-// regardless of how the customer drags/resizes the photo) — belt and
-// braces: some card backs/panels are mostly transparent by design (e.g.
-// just a small logo), so relying on the artwork alone to mask an oversized
-// or repositioned photo isn't safe. The clipPath is what actually
-// guarantees the photo can never render outside its intended frame.
-// Cover-fit sized into the configured frame box to start.
+// Adds the customer's photo as a free-positioned layer ON TOP of the card
+// artwork (not masked by any frame cutout) — it can be dragged and zoomed
+// anywhere on the front panel. It starts out sitting inside the
+// configured frame box, cover-fit like CSS object-fit: cover, just as a
+// sensible default position/size — but that frame box isn't a boundary
+// once it's placed. The only real boundary is the panel guard below,
+// which keeps it from crossing onto the left-hand (inside) page.
 //
 // The photo is NOT interactive by default (evented/selectable: false) —
 // it's just a static layer until interacted with. On desktop, clicking it
@@ -931,8 +927,8 @@ function loadPhotoIntoFrame(dataUrl) {
     fabric.Image.fromURL(dataUrl, (img) => {
         if (photoImg) canvas.remove(photoImg);
 
-        // Cover-fit: scale so the photo fully fills the frame, like CSS
-        // object-fit: cover, then let the customer drag/resize from there.
+        // Cover-fit to the frame box as a starting size — not a hard
+        // limit, just where it lands before the customer drags/zooms it.
         const coverScale = Math.max(p.width / img.width, p.height / img.height);
 
         img.set({
@@ -943,28 +939,29 @@ function loadPhotoIntoFrame(dataUrl) {
             hasBorders: false, hasControls: false, // no Fabric selection UI, ever — see photo-toolbar instead
             // Idle by default (see comment above); openPhotoToolbar flips
             // these on for the duration of a tap/adjust session.
-            selectable: false, evented: false,
-            // Hard-clips the photo to the frame's bounding box in canvas
-            // (not object-local) coordinates — see comment above.
-            clipPath: new fabric.Rect({
-                left: p.left, top: p.top,
-                originX: 'center', originY: 'center',
-                width: p.width, height: p.height,
-                absolutePositioned: true
-            })
+            selectable: false, evented: false
+            // No clipPath — once uploaded, the photo is a free-positioned
+            // layer and can be moved anywhere on the visible front panel.
         });
 
-        // frameBox + minScale travel with the image itself so
-        // keepPhotoCoveringFrame and the Zoom slider both have what they
-        // need without reaching back into activeTemplate (which may have
-        // moved on by the time an in-flight gesture finishes).
+        // frameBox is kept around only as the original starting point;
+        // minScale (the floor the photo can be zoomed OUT to) is fixed at
+        // upload time from that same frame box, so it never gets so small
+        // it's pointless, even though it's no longer required to fully
+        // cover any particular shape. Both travel with the image itself
+        // so keepPhotoCoveringFrame and the Zoom slider have what they
+        // need without reaching back into activeTemplate.
         img.frameBox = p;
         img.minScale = coverScale;
 
         photoImg = img;
         canvas.add(photoImg);
-        canvas.sendToBack(photoImg); // behind everything, including the artwork —
-                                      // its transparent cutout is what shows this
+        // On top of the artwork, not behind it — a freely-placed photo
+        // needs to actually be visible wherever the customer puts it, not
+        // just inside whatever transparent cutout the artwork happens to
+        // have. Text stays above the photo so it's never covered.
+        canvas.bringToFront(photoImg);
+        [nameText, ageText, ...extraTexts].forEach((o) => o && canvas.bringToFront(o));
 
         // If a photo was already being adjusted (this is a Replace, not a
         // first upload), carry that open state over to the new image
@@ -981,21 +978,21 @@ function loadPhotoIntoFrame(dataUrl) {
     }, { crossOrigin: 'anonymous' });
 }
 
-// ---- Coverage guard: the frame can never show blank/white behind the
-// photo, no matter how it's dragged or resized ----
-// The clipPath above stops the photo rendering OUTSIDE the frame; this is
-// the other half — stopping it from being dragged or shrunk so far that it
-// no longer fully covers the INSIDE of the frame. Called after every move
-// and every Zoom-slider change, it:
-//   1) never lets the scale drop below the original cover-fit minimum,
-//      then
+// ---- Panel guard: the photo can go anywhere on the front panel, but
+// never onto the left-hand (inside) page, and never below the size it
+// started at ----
+// Called after every move, scale change (desktop Zoom slider, mobile
+// pinch), and drag, it:
+//   1) never lets the scale drop below the cover-fit size it was uploaded
+//      at (see loadPhotoIntoFrame), then
 //   2) clamps left/top so the (now guaranteed large-enough) photo
-//      rectangle still fully overlaps the frame rectangle on every side.
-// Both objects use originX/Y: 'center', so left/top is each one's center —
-// that's what makes the half-width/half-height math below correct.
+//      rectangle stays entirely within the front panel — from
+//      PANEL_WIDTH to CANVAS_WIDTH horizontally, 0 to CANVAS_HEIGHT
+//      vertically — so it can never cross onto the left-hand page.
+// Uses originX/Y: 'center', so left/top is the photo's center — that's
+// what makes the half-width/half-height math below correct.
 function keepPhotoCoveringFrame(img) {
-    const p = img.frameBox;
-    if (!p) return;
+    if (!img) return;
 
     const scale = Math.max(img.scaleX, img.scaleY, img.minScale);
     if (img.scaleX !== scale || img.scaleY !== scale) {
@@ -1004,17 +1001,19 @@ function keepPhotoCoveringFrame(img) {
 
     const halfImgW = (img.width * scale) / 2;
     const halfImgH = (img.height * scale) / 2;
-    const halfFrameW = p.width / 2;
-    const halfFrameH = p.height / 2;
 
-    const minLeft = p.left + halfFrameW - halfImgW;
-    const maxLeft = p.left - halfFrameW + halfImgW;
-    const minTop = p.top + halfFrameH - halfImgH;
-    const maxTop = p.top - halfFrameH + halfImgH;
+    const minLeft = PANEL_WIDTH + halfImgW;
+    const maxLeft = CANVAS_WIDTH - halfImgW;
+    const minTop = halfImgH;
+    const maxTop = CANVAS_HEIGHT - halfImgH;
 
+    // Math.max(minLeft, maxLeft) as the upper bound (same for top) is a
+    // safety net for the rare case the photo's been zoomed so large it's
+    // wider/taller than the whole panel — it pins to the left/top edge
+    // instead of the range inverting and throwing left/top out of order.
     img.set({
-        left: Math.min(Math.max(img.left, minLeft), maxLeft),
-        top: Math.min(Math.max(img.top, minTop), maxTop)
+        left: Math.min(Math.max(img.left, minLeft), Math.max(minLeft, maxLeft)),
+        top: Math.min(Math.max(img.top, minTop), Math.max(minTop, maxTop))
     });
     img.setCoords();
 }
