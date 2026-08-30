@@ -1077,6 +1077,17 @@ const TAP_MOVE_THRESHOLD = 8;  // canvas-space px — more than this and it's a 
 const TAP_MAX_MS = 400;
 
 function setupPhotoAdjustWidget() {
+    // Desktop: a double-click anywhere on the front artwork re-opens the
+    // photo editing controls. This deliberately does not require the second
+    // click to land on the photo itself, because the photo is normally behind
+    // the artwork and may only be partially visible through its cutout.
+    canvas.upperCanvasEl.addEventListener('dblclick', (e) => {
+        if (isMobileDevice() || !photoImg || currentPage !== 'front') return;
+        if (photoToolbarMode === 'idle') {
+            openPhotoToolbar();
+        }
+    }, { capture: true });
+
     canvas.on('mouse:down', (opt) => {
         if (isMobileDevice() || !photoImg || currentPage !== 'front') return;
 
@@ -1820,6 +1831,22 @@ function showQrForCapture(show) {
 // they're never used for anything print-related.
 async function captureAndBuildPrintPDF() {
     switchPage('front');
+
+    // Keep the personalised name anchored to the template's original centre
+    // point when the print image is generated. The editor and the PDF use the
+    // same Fabric coordinates, but explicitly restoring this anchor here also
+    // prevents any text-dimension/font-metric recalculation during JSON export
+    // from making the name appear to drift vertically in the print file.
+    if (nameText && activeTemplate?.name && !activeTemplate.name.isCurved) {
+        nameText.set({
+            left: activeTemplate.name.left,
+            top: activeTemplate.name.top,
+            originX: 'center',
+            originY: 'center'
+        });
+        nameText.setCoords();
+    }
+
     // Proof capture first, before the QR overlay goes on — the QR is a
     // print-only artifact (see showQrForCapture) and shouldn't appear in
     // the customer-facing proof.
