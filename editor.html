@@ -1016,7 +1016,14 @@ function loadPhotoIntoFrame(dataUrl) {
             openPhotoToolbar();
             if (modeToRestore === 'adjust') openAdjustPanel();
         } else {
-            canvas.requestRenderAll();
+            // On desktop, show the blue photo box immediately after upload.
+            // This makes the draggable corner handles obvious without
+            // requiring the customer to click the photo a second time.
+            if (!isMobileDevice()) {
+                openPhotoToolbar();
+            } else {
+                canvas.requestRenderAll();
+            }
         }
     }, { crossOrigin: 'anonymous' });
 }
@@ -1121,16 +1128,11 @@ function openPhotoToolbar() {
     photoToolbarMode = 'toolbar';
     photoImg.set({ evented: true, selectable: true, hasControls: true, hasBorders: true });
     canvas.setActiveObject(photoImg);
-    // The photo normally sits behind the artwork (see loadPhotoIntoFrame),
-    // which is correct for the finished card — but with
-    // preserveObjectStacking left on (see canvas init), Fabric draws the
-    // active object's own border/corner handles in that same behind-the-
-    // artwork position too, so they'd be invisible, painted over by the
-    // artwork drawn afterwards. Turning preserveObjectStacking off just
-    // for the duration of this edit makes Fabric render the active photo
-    // (and its resize box) on top instead, without actually changing its
-    // real position in the stack — closePhotoToolbar switches it back.
-    canvas.preserveObjectStacking = false;
+    // Keep the photo itself behind the artwork at all times. Fabric draws
+    // the active object's selection border/controls on the interactive
+    // upper canvas, so the blue resize box remains visible above the
+    // artwork without changing the real print layer order.
+    canvas.preserveObjectStacking = true;
     $('photo-adjust-panel').style.display = 'none';
     $('photo-toolbar').style.display = 'flex';
     positionPhotoWidget();
@@ -1154,7 +1156,7 @@ function closePhotoToolbar() {
         photoImg.set({ evented: false, selectable: false, hasControls: false, hasBorders: false });
         canvas.discardActiveObject();
     }
-    canvas.preserveObjectStacking = true; // back behind the artwork now editing's done — see openPhotoToolbar
+    canvas.preserveObjectStacking = true; // photo remains behind artwork
     $('photo-toolbar').style.display = 'none';
     $('photo-adjust-panel').style.display = 'none';
     canvas.requestRenderAll();
