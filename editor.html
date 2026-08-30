@@ -949,7 +949,16 @@ function loadPhotoIntoFrame(dataUrl) {
             // session; DESKTOP ONLY, see isMobileDevice() guards there —
             // mobile keeps using pinch-to-zoom instead.
             hasBorders: false, hasControls: false,
-            selectable: false, evented: false
+            selectable: false, evented: false,
+            // Fabric's defaults here are a translucent black border with
+            // hollow/transparent corner squares — barely visible against
+            // most photos, which is why the resize box looked invisible.
+            // Styled explicitly in the same blue used for the text boxes
+            // (STYLE_SOLID) so customers can actually see it.
+            borderColor: "#1A73E8", borderScaleFactor: 2,
+            cornerColor: "#1A73E8", cornerStrokeColor: "#ffffff",
+            transparentCorners: false, cornerStyle: "circle", cornerSize: 14,
+            padding: 4
         });
         // Clip to the printable front panel, in fixed canvas coordinates
         // (absolutePositioned) rather than relative to the photo itself —
