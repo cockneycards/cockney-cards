@@ -69,17 +69,17 @@
 
     /* ============================================================
        CARD-FIRST EDITOR
-       The card is the main thing on the page. Customers can scroll the
-       normal webpage naturally; the only area that captures a gesture is
-       the uploaded-photo frame. Controls sit underneath the card instead
-       of beside it, giving the editor a much more natural phone/tablet
-       experience.
+       The card is the main thing on the page. Customers scroll the
+       normal webpage naturally; only a deliberate press-and-hold on the
+       uploaded photo (see attachMobileCardGestures) breaks out of that
+       into positioning/zoom mode. Controls sit in a sticky column beside
+       the card on wide screens, and underneath it on phones/tablets.
        ============================================================ */
     .editor-workspace {
         width: 100%;
         max-width: 980px;
         margin: 28px auto 60px;
-        padding: 0 20px;
+        padding: 0 40px;
         box-sizing: border-box;
         display: grid;
         grid-template-columns: minmax(0, 595.5px) minmax(280px, 320px);
@@ -88,93 +88,81 @@
         gap: 32px;
     }
 
-    .card-stage {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        position: relative;
-        min-width: 0;
-    }
+    .card-stage { width: 100%; display: flex; justify-content: center; position: relative; min-width: 0; }
 
-    #canvas-wrapper {
-        position: relative;
-        width: 100%;
-        max-width: 595.5px;
-        background: white;
-        padding: 0;
-        border-radius: 14px;
-        border: 1px solid var(--border-color);
-        box-shadow: 0 8px 30px rgba(0,0,0,.10);
-        overflow: hidden;
-        box-sizing: border-box;
-    }
+    #canvas-wrapper { position: relative; width: 100%; max-width: 595.5px; background: white; padding: 0; border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 8px 30px rgba(0,0,0,.10); overflow: hidden; box-sizing: border-box; }
+    #canvas { display: block; width: 100%; height: auto; border: 0; }
+    #canvas-wrapper .canvas-container { width: 100% !important; height: auto !important; aspect-ratio: 595.5 / 840; }
+    #canvas-wrapper .canvas-container canvas { width: 100% !important; height: 100% !important; }
 
-    #canvas {
-        display: block;
-        width: 100%;
-        height: auto;
-        border: 0;
-    }
+    .editor-tip { grid-column: 1 / -1; text-align: center; margin: -18px auto 0; color: #777; font-size: 12px; line-height: 1.5; max-width: 720px; order: 3; }
 
-    #canvas-wrapper .canvas-container {
-        width: 100% !important;
-        height: auto !important;
-        aspect-ratio: 595.5 / 840;
-    }
+    /* PHOTO ADJUST WIDGET — floats above the photo once it's tapped/
+       clicked on desktop (see openPhotoToolbar/openAdjustPanel/
+       closePhotoToolbar in the script). Never shown below the 999px
+       breakpoint — see attachMobileCardGestures instead, which handles
+       positioning/zoom directly via press-and-hold + pinch. Positioned
+       in JS (positionPhotoWidget) since it has to track the photo's
+       on-screen box, which moves with drags and page toggles. */
+    .photo-float-widget { position: absolute; z-index: 20; top: 0; left: 0; background: var(--dark); color: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); font-size: 12px; user-select: none; }
+    #photo-toolbar { display: none; padding: 4px; gap: 2px; align-items: center; }
+    #photo-toolbar button { background: none; border: none; color: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-family: inherit; letter-spacing: 0.3px; }
+    #photo-toolbar button:hover { background: rgba(255,255,255,0.14); }
+    #photo-toolbar button svg { width: 17px; height: 17px; }
+    #photo-adjust-panel { display: none; flex-direction: column; align-items: stretch; padding: 14px 16px; gap: 8px; width: 220px; }
+    #photo-adjust-panel .zoom-label { color: white; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; }
+    #photo-adjust-panel input[type="range"] { width: 100%; }
+    #photo-adjust-panel .adjust-done-btn { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 9px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 2px; letter-spacing: 0.5px; }
+    #photo-adjust-panel .adjust-done-btn:hover { background: #1558b0; }
 
-    #canvas-wrapper .canvas-container canvas {
-        width: 100% !important;
-        height: 100% !important;
-    }
+    .side-column { width: 100%; max-width: 320px; margin: 0; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 20px; }
+    .page-toggle { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
+    .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
+    .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
+    .controls { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .control-group { display: flex; flex-direction: column; gap: 15px; }
+    .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
+    label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
+    input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    .flex-row { display: flex; align-items: center; gap: 10px; }
+    .color-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; }
+    .size-slider { flex: 1; }
 
-    .editor-tip {
-        grid-column: 1 / -1;
-        text-align: center;
-        margin: -18px auto 0;
-        color: #777;
-        font-size: 12px;
-        line-height: 1.5;
-        max-width: 720px;
-        order: 3;
-    }
+    /* STYLE / VARIANT PICKER (e.g. brighton-girl1..4) */
+    .variant-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .variant-thumb { width: 56px; height: 56px; padding: 0; border: 2px solid #ccc; border-radius: 6px; overflow: hidden; cursor: pointer; background: none; }
+    .variant-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .variant-thumb.active { border-color: #111; }
 
-    .side-column {
-        width: 100%;
-        max-width: 320px;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        position: sticky;
-        top: 20px;
-    }
-
-    .page-toggle {
-        display: flex;
-        gap: 8px;
-        width: 100%;
-        box-sizing: border-box;
-        background: rgba(246,246,248,.94);
-        backdrop-filter: blur(8px);
-        padding: 6px;
-        cursor: pointer;
-    }
-
-    .photo-action:hover { background: #333; }
-
-    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 9px; cursor: pointer; transition: background .2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
+    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
     .btn:hover { background-color: #444; }
     .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
 
+    /* Small Back / Next nav buttons, side by side, below the main actions */
     .nav-buttons { display: flex; gap: 10px; margin-top: 10px; }
-    .btn-small { flex: 1; padding: 10px; font-size: 12px; font-weight: bold; letter-spacing: .5px; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: background .2s; margin-top: 0; }
-    .btn-back, .btn-next { background-color: #1a1a1a; color: white; border: none; }
-    .btn-back:hover, .btn-next:hover { background-color: #444; }
+    .btn-small { flex: 1; padding: 8px; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 0; }
+    .btn-back { background-color: #1a1a1a; color: white; border: none; }
+    .btn-back:hover { background-color: #444; }
+    .btn-next { background-color: #1a1a1a; color: white; border: none; }
+    .btn-next:hover { background-color: #444; }
     .btn-small:disabled { background-color: #e8e8e8; color: #999; border-color: #e8e8e8; cursor: not-allowed; }
 
-    /* Phones/tablets: the card becomes the full-width main column and the
-       controls return underneath it. The desktop side frame is deliberately
-       preserved above this breakpoint. */
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+
+    /* ============================================================
+       MOBILE / TABLET RESPONSIVE LAYOUT
+       Below 999px, the header and footer are hidden and the card
+       becomes the full-width main column with controls underneath —
+       matches the 999px check in isMobileDevice(), which is what
+       switches the touch behaviour over to attachMobileCardGestures.
+       ============================================================ */
     @media (max-width: 999px) {
         header, footer { display: none; }
         .editor-workspace {
@@ -193,84 +181,12 @@
         .editor-tip { order: initial; margin: 0 auto; }
         .controls { padding: 18px; border-radius: 12px; }
         .toggle-btn { font-size: 12px; padding: 11px 6px; }
-        input[type="text"] { font-size: 16px; }
+        input[type="text"] { font-size: 16px; } /* avoids iOS auto-zoom on focus */
     }
 
     @media (max-width: 500px) {
         .editor-workspace { padding: 0 8px; margin: 8px auto 30px; }
         .controls { padding: 18px; }
-        .editor-tip { font-size: 11px; padding: 0 8px; }
-    }
-
-    @media (max-width: 480px) {
-        .toggle-btn { font-size: 12px; padding: 10px 6px; }
-        .variant-thumb { width: 48px; height: 48px; }
-        input[type="text"] { font-size: 16px; }
-    }
-    /* FOOTER */
-    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
-    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
-    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
-    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
-    .footer-col p { margin: 0 0 15px 0; }
-    .footer-col a { color: #111; text-decoration: underline; }
-    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
-
-    /* ============================================================
-       MOBILE / TABLET RESPONSIVE LAYOUT
-       Below 900px, the header and footer are hidden and the editor
-       workspace collapses to a single centered column — canvas, then
-       the front/write-message toggle, then the options — with the
-       canvas scaled purely with CSS (width:100% / aspect-ratio on the
-       Fabric-generated canvas elements). Fabric.js converts pointer
-       coordinates using the ratio between the CSS-rendered size and
-       the canvas's internal resolution, so dragging/resizing photos
-       and text stays accurate at any on-screen size. This matches the
-       900px breakpoint isMobileDevice() uses below to switch touch
-       behaviour (pinch/hold-to-scroll) on.
-       ============================================================ */
-    @media (max-width: 900px) {
-        /* Header and footer are PC/desktop-only — hidden on tablet and
-           phone so the mobile flow stays a focused single column. */
-        header, footer { display: none; }
-
-        .editor-workspace {
-            flex-direction: column;
-            align-items: center;
-            min-width: 0;
-            overflow-x: visible;
-            width: 100%;
-            max-width: 460px;
-            margin: 40px auto;
-            padding: 0 20px;
-            gap: 20px;
-            box-sizing: border-box;
-        }
-
-        #canvas-wrapper {
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        /* Force Fabric.js's generated canvas elements to scale to the
-           wrapper's width instead of staying at their fixed internal
-           pixel size (EDIT_WIDTH x EDIT_HEIGHT = 595.5 x 840). */
-        #canvas-wrapper .canvas-container {
-            width: 100% !important;
-            height: auto !important;
-            aspect-ratio: 595.5 / 840;
-        }
-        #canvas-wrapper .canvas-container canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        .side-column { width: 100%; }
-    }
-
-    @media (max-width: 500px) {
-        .editor-workspace { padding: 0 16px; margin: 16px auto; }
-        .controls { padding: 22px; }
     }
 
     @media (max-width: 480px) {
@@ -309,87 +225,124 @@
 
 <div class="editor-workspace">
     <div class="card-stage">
-        <div id="canvas-wrapper">
-            <canvas id="canvas"></canvas>
-            <p id="editor-load-error" style="display:none; color:#c0392b; font-size:13px; text-align:center; margin:12px; line-height:1.4;">
-                This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
-            </p>
+    <div id="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+        <p id="editor-load-error" style="display:none; color:#c0392b; font-size:13px; text-align:center; margin: 12px; line-height:1.4;">
+            This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
+        </p>
+
+        <!-- Shown when the photo is tapped/clicked (see openPhotoToolbar).
+             DESKTOP ONLY (see setupPhotoAdjustWidget's isMobileDevice()
+             guard) — below the 999px breakpoint, attachMobileCardGestures
+             handles positioning/zoom directly via press-and-hold + pinch
+             instead, and this widget is never shown. -->
+        <div id="photo-toolbar" class="photo-float-widget">
+            <button type="button" onclick="onReplacePhotoClick()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.5-7.1"/><path d="M21 3v6h-6"/></svg>
+                <span>Replace</span>
+            </button>
+            <button type="button" onclick="openAdjustPanel()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/></svg>
+                <span>Adjust</span>
+            </button>
+            <button type="button" onclick="closePhotoToolbar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>Done</span>
+            </button>
+        </div>
+
+        <!-- Shown when "Adjust" is tapped (desktop only — see above). The
+             Zoom slider is the only way to resize on desktop; on mobile
+             pinch-to-zoom (attachMobileCardGestures) does the same job. -->
+        <div id="photo-adjust-panel" class="photo-float-widget">
+            <span class="zoom-label">Zoom <span id="zoom-value">1.0x</span></span>
+            <input type="range" id="zoom-slider" min="1" max="3" step="0.02" value="1" oninput="onZoomSliderInput(this.value)">
+            <button type="button" class="adjust-done-btn" onclick="closePhotoToolbar()">Done</button>
         </div>
     </div>
-    <p class="editor-tip">Scroll the page normally. If your card has a photo, tap the photo frame to add one, then drag to position and pinch to zoom.</p>
+    </div>
+
+    <p class="editor-tip">Scroll the page normally — on a touchscreen, press and hold the photo for a moment to reposition it, and pinch with two fingers to zoom.</p>
+
 
     <div class="side-column">
-        <div class="page-toggle">
-            <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')" disabled>Front Cover</button>
-            <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Write Message</button>
-        </div>
+    <div class="page-toggle">
+        <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')" disabled>Front Cover</button>
+        <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Write Message</button>
+    </div>
 
-        <div class="controls">
-            <div id="front-controls" class="control-group">
-                <div id="variant-selector" class="variant-selector" style="display:none;"></div>
+    <div class="controls">
+        <div id="front-controls" class="control-group">
+            <div id="variant-selector" class="variant-selector" style="display:none;"></div>
 
-                <div id="front-text-inputs">
-                    <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
-                    <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)" style="margin-top:10px;">
-                    <div id="extra-fields-container"></div>
+            <div id="front-text-inputs">
+                <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
+
+                <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)" style="margin-top: 10px;">
+
+                <div id="extra-fields-container"></div>
+
+                <div class="flex-row">
+                    <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
+                    <span>Choose Font Colour</span>
+                </div>
+
+                <div id="front-size-controls" style="display:none; margin-top:15px;">
+                    <label>Font Size:</label>
                     <div class="flex-row">
-                        <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
-                        <span>Choose Font Colour</span>
-                    </div>
-                    <div id="front-size-controls" style="display:none; margin-top:15px;">
-                        <label>Font Size:</label>
-                        <div class="flex-row">
-                            <input type="range" id="front-size" class="size-slider" min="20" max="120" value="52" oninput="updateFrontSize(this.value)">
-                            <span id="front-size-val">52px</span>
-                        </div>
+                        <input type="range" id="front-size" class="size-slider" min="20" max="120" value="52" oninput="updateFrontSize(this.value)">
+                        <span id="front-size-val">52px</span>
                     </div>
                 </div>
-
-                <div id="front-photo-upload" style="display:none;">
-                    <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Photo</label>
-                    <button type="button" class="photo-action" onclick="document.getElementById('photo-input').click()">Choose / Change Photo</button>
-                    <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)" style="display:none;">
-                    <p style="font-size:12px; color:#666; margin:8px 0 0; line-height:1.5;">Tap the photo frame on the card to add a photo. Once added, drag with one finger to move it and pinch with two fingers to zoom.</p>
-                </div>
             </div>
 
-            <div id="inside-controls" class="control-group" style="margin-top:15px;">
-                <div class="flex-row" style="align-items:center; gap:10px;">
-                    <input type="checkbox" id="own-message-checkbox" onchange="onOwnMessageChange(this.checked)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0;">
-                    <label for="own-message-checkbox" style="text-transform:none;font-weight:normal;font-size:13px;color:#444;cursor:pointer;letter-spacing:normal;">Tick here if you have added your own personal message</label>
-                </div>
-                <div class="flex-row" style="align-items:center; gap:10px;">
-                    <input type="checkbox" id="blank-message-checkbox" onchange="onBlankMessageChange(this.checked)" style="width:18px;height:18px;cursor:pointer;flex-shrink:0;">
-                    <label for="blank-message-checkbox" style="text-transform:none;font-weight:normal;font-size:13px;color:#444;cursor:pointer;letter-spacing:normal;">Tick here to leave the card message blank</label>
-                </div>
-            </div>
-
-            <p id="account-nudge" style="font-size:12px;color:#666;text-align:center;margin:15px 0 10px 0;"></p>
-
-            <div id="delivery-section" style="display:none;margin:15px 0;padding-top:15px;border-top:1px solid #eee;">
-                <p style="font-size:12px;font-weight:bold;color:#333;margin:0 0 8px;letter-spacing:.5px;text-transform:uppercase;">Delivery</p>
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#333;margin-bottom:8px;cursor:pointer;">
-                    <input type="radio" name="delivery-choice" value="self" checked onchange="toggleRecipientFields()"> Send to me — I'll write in it myself
-                </label>
-                <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#333;margin-bottom:10px;cursor:pointer;">
-                    <input type="radio" name="delivery-choice" value="recipient" onchange="toggleRecipientFields()"> Send directly to the recipient
-                </label>
-                <div id="recipient-fields" style="display:none;flex-direction:column;gap:8px;">
-                    <input type="text" id="recipient-name" placeholder="Recipient's full name">
-                    <input type="text" id="recipient-address1" placeholder="Address line 1">
-                    <input type="text" id="recipient-address2" placeholder="Address line 2 (optional)">
-                    <input type="text" id="recipient-city" placeholder="Town / City">
-                    <input type="text" id="recipient-county" placeholder="County (optional)">
-                    <input type="text" id="recipient-postcode" placeholder="Postcode">
-                </div>
-            </div>
-
-            <button id="add-to-basket-btn" class="btn" style="display:none;background-color:#1a1a1a;" onclick="addCurrentCardToBasket()" disabled>Add to Basket</button>
-            <div class="nav-buttons">
-                <button class="btn-small btn-back" onclick="returnToShop()">Back</button>
-                <button id="next-btn" class="btn-small btn-next" onclick="goToBasket()" disabled>Next</button>
+            <div id="front-photo-upload" style="display:none;">
+                <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Upload Photo</label>
+                <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
+                <p style="font-size:12px; color:#666; margin-top:6px;">
+                    On desktop: tap the photo to Replace or Adjust it. On a touchscreen: press and hold the photo for a moment, then drag to reposition it — pinch with two fingers to zoom. It'll always stay filling the frame.
+                </p>
             </div>
         </div>
+
+        <div id="inside-controls" class="control-group" style="margin-top: 15px;">
+            <div class="flex-row" style="align-items: center; gap: 10px;">
+                <input type="checkbox" id="own-message-checkbox" onchange="onOwnMessageChange(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <label for="own-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Tick here if you have added your own personal message</label>
+            </div>
+            <div class="flex-row" style="align-items: center; gap: 10px;">
+                <input type="checkbox" id="blank-message-checkbox" onchange="onBlankMessageChange(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Tick here to leave the card message blank</label>
+            </div>
+        </div>
+
+        <p id="account-nudge" style="font-size: 12px; color: #666; text-align: center; margin: 15px 0 10px 0;"></p>
+
+        <div id="delivery-section" style="display:none; margin: 15px 0; padding-top: 15px; border-top: 1px solid #eee;">
+            <p style="font-size: 12px; font-weight: bold; color: #333; margin: 0 0 8px; letter-spacing: 0.5px; text-transform: uppercase;">Delivery</p>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:8px; cursor:pointer;">
+                <input type="radio" name="delivery-choice" value="self" checked onchange="toggleRecipientFields()"> Send to me — I'll write in it myself
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:10px; cursor:pointer;">
+                <input type="radio" name="delivery-choice" value="recipient" onchange="toggleRecipientFields()"> Send directly to the recipient
+            </label>
+            <div id="recipient-fields" style="display:none; flex-direction:column; gap:8px;">
+                <input type="text" id="recipient-name" placeholder="Recipient's full name">
+                <input type="text" id="recipient-address1" placeholder="Address line 1">
+                <input type="text" id="recipient-address2" placeholder="Address line 2 (optional)">
+                <input type="text" id="recipient-city" placeholder="Town / City">
+                <input type="text" id="recipient-county" placeholder="County (optional)">
+                <input type="text" id="recipient-postcode" placeholder="Postcode">
+            </div>
+        </div>
+
+        <button id="add-to-basket-btn" class="btn" style="display:none; background-color:#1a1a1a;" onclick="addCurrentCardToBasket()" disabled>Add to Basket</button>
+
+        <div class="nav-buttons">
+            <button class="btn-small btn-back" onclick="returnToShop()">Back</button>
+            <button id="next-btn" class="btn-small btn-next" onclick="goToBasket()" disabled>Next</button>
+        </div>
+    </div>
     </div>
 </div>
 
@@ -597,10 +550,12 @@ let editorReady = false;
 const $ = (id) => document.getElementById(id);
 
 // Matches the editor's own mobile CSS breakpoint (see the @media
-// max-width:900px rule above) so "small device" means the same thing to
-// the layout and to the touch behaviour below.
+// max-width:999px rule above). Used to switch the photo's touch/click
+// behaviour: desktop uses the tap → Replace/Adjust/Done widget
+// (setupPhotoAdjustWidget); mobile uses press-and-hold + pinch directly on
+// the card (attachMobileCardGestures).
 function isMobileDevice() {
-    return window.matchMedia('(max-width: 900px)').matches;
+    return window.matchMedia('(max-width: 999px)').matches;
 }
 
 // Scratch 2D context used to measure rendered text width for a given
@@ -676,11 +631,6 @@ function initEditor(templateKey) {
         // hold-to-scroll touch landed on empty canvas.
         selection: false
     });
-
-    // Mobile uses a gesture layer that treats vertical swipes as page scrolling
-    // and reserves a long-press on the photo for repositioning.
-    canvas.upperCanvasEl.style.touchAction = 'pan-y';
-    canvas.upperCanvasEl.style.webkitUserSelect = 'none';
     // Alt normally toggles centered-vs-corner-anchored scaling for
     // whatever's selected. The photo relies on centered scaling always
     // being on (see centeredScaling on the photo image, and the comment
@@ -694,9 +644,8 @@ function initEditor(templateKey) {
     canvas.setViewportTransform([1, 0, 0, 1, -PANEL_WIDTH, 0]);
     canvas.calcOffset();
 
+    setupPhotoAdjustWidget();
     attachMobileCardGestures(canvas.upperCanvasEl);
-    setupPhotoCoverageGuard();
-    setupPhotoFrameTapUpload();
 
     // Logo on the back cover panel
     fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
@@ -965,14 +914,16 @@ function handlePhotoUpload(inputEl) {
 // just a small logo), so relying on the artwork alone to mask an oversized
 // or repositioned photo isn't safe. The clipPath is what actually
 // guarantees the photo can never render outside its intended frame.
-// Cover-fit sized into the configured frame box, then the customer can
-// drag to reposition or use the corner handle to resize.
+// Cover-fit sized into the configured frame box to start.
 //
-// On desktop this keeps the normal visible blue selection box + corner
-// handle. On phones/tablets (see isMobileDevice()) the box/handle are
-// hidden instead — a finger-drag still repositions the photo exactly the
-// same way, and a two-finger pinch (set up in attachPinchToResize) takes
-// over resizing since there's no handle left to grab.
+// The photo is NOT interactive by default (evented/selectable: false) —
+// it's just a static layer until interacted with. On desktop, clicking it
+// switches this on via openPhotoToolbar (Replace/Adjust/Done widget). On
+// mobile it's never switched on at all — attachMobileCardGestures (further
+// down) manipulates left/top/scaleX/scaleY directly instead, so a touch
+// anywhere on the card, including right over the photo, scrolls the page
+// normally by default: with evented false there's no Fabric object there
+// to claim the gesture.
 function loadPhotoIntoFrame(dataUrl) {
     const p = activeTemplate?.photo;
     if (!p) return;
@@ -983,138 +934,245 @@ function loadPhotoIntoFrame(dataUrl) {
         // Cover-fit: scale so the photo fully fills the frame, like CSS
         // object-fit: cover, then let the customer drag/resize from there.
         const coverScale = Math.max(p.width / img.width, p.height / img.height);
-        const mobile = isMobileDevice();
 
         img.set({
             left: p.left, top: p.top,
             originX: 'center', originY: 'center',
             scaleX: coverScale, scaleY: coverScale,
             lockRotation: true,
-            // Anchors corner-drag resizing on the photo's own center
-            // instead of Fabric's default (opposite-corner anchor). This
-            // has to match the center-based assumption that
-            // keepPhotoCoveringFrame's math below relies on — without it,
-            // Fabric moves the anchor corner while our guard keeps
-            // snapping the center back, and the two fight each other so
-            // dragging a handle looks like it does nothing.
-            centeredScaling: true,
-            hasBorders: !mobile,
-            hasControls: !mobile,
-            evented: !mobile,
-            selectable: !mobile,
-            borderColor: '#1A73E8',
-            cornerColor: '#1A73E8',
-            cornerStrokeColor: '#1A73E8',
-            transparentCorners: false,
-            // No clipPath: once uploaded, the photo is a free-positioned
-            // layer and can be moved anywhere on the visible card panel.
+            hasBorders: false, hasControls: false, // no Fabric selection UI, ever — see photo-toolbar instead
+            // Idle by default (see comment above); openPhotoToolbar flips
+            // these on for the duration of a tap/adjust session.
+            selectable: false, evented: false,
+            // Hard-clips the photo to the frame's bounding box in canvas
+            // (not object-local) coordinates — see comment above.
+            clipPath: new fabric.Rect({
+                left: p.left, top: p.top,
+                originX: 'center', originY: 'center',
+                width: p.width, height: p.height,
+                absolutePositioned: true
+            })
         });
-        // Only the corner handles resize (uniform, diagonal drag). The
-        // side/middle handles (ml, mr, mt, mb) are hidden — leaving them
-        // on would let the customer squash/stretch the photo into a
-        // non-uniform shape, which the coverage guard below doesn't
-        // attempt to fix, so it's simplest to remove the option entirely.
-        img.setControlsVisibility({ mtr: false, ml: false, mr: false, mt: false, mb: false });
 
-        // frameBox + minScale travel with the image itself so the
-        // moving/scaling guard (keepPhotoCoveringFrame, below) and the
-        // pinch-resize handler both have what they need without reaching
-        // back into activeTemplate (which may have moved on by the time
-        // an in-flight gesture finishes).
+        // frameBox + minScale travel with the image itself so
+        // keepPhotoCoveringFrame and the Zoom slider both have what they
+        // need without reaching back into activeTemplate (which may have
+        // moved on by the time an in-flight gesture finishes).
         img.frameBox = p;
         img.minScale = coverScale;
 
         photoImg = img;
         canvas.add(photoImg);
-        // Put the uploaded photo above the card artwork so white/opaque areas
-        // in individual card PNGs cannot mask the customer's picture. Keep
-        // editable text above it where present.
-        canvas.bringToFront(photoImg);
-        [nameText, ageText, ...extraTexts].forEach((o) => o && canvas.bringToFront(o));
-        if (!mobile) canvas.setActiveObject(photoImg);
-        canvas.requestRenderAll();
+        canvas.sendToBack(photoImg); // behind everything, including the artwork —
+                                      // its transparent cutout is what shows this
+
+        // If a photo was already being adjusted (this is a Replace, not a
+        // first upload), carry that open state over to the new image
+        // instead of dropping back to idle — otherwise Replace would
+        // require a second tap to keep adjusting.
+        if (photoToolbarMode !== 'idle') {
+            const modeToRestore = photoToolbarMode;
+            photoToolbarMode = 'idle'; // openPhotoToolbar/openAdjustPanel both assume they're transitioning FROM idle
+            openPhotoToolbar();
+            if (modeToRestore === 'adjust') openAdjustPanel();
+        } else {
+            canvas.requestRenderAll();
+        }
     }, { crossOrigin: 'anonymous' });
 }
 
 // ---- Coverage guard: the frame can never show blank/white behind the
-// photo, no matter how it's dragged, pinched, or resized ----
+// photo, no matter how it's dragged or resized ----
 // The clipPath above stops the photo rendering OUTSIDE the frame; this is
 // the other half — stopping it from being dragged or shrunk so far that it
-// no longer fully covers the INSIDE of the frame. Called after every move,
-// scale (desktop corner-handle drag), and pinch, it:
-//   1) never lets the scale drop below the original cover-fit minimum
-//      (forcing scaleX === scaleY, so a stretch attempt just becomes a
-//      uniform resize instead — this can't happen via the UI any more
-//      since the side handles are hidden, but it's cheap insurance), then
+// no longer fully covers the INSIDE of the frame. Called after every move
+// and every Zoom-slider change, it:
+//   1) never lets the scale drop below the original cover-fit minimum,
+//      then
 //   2) clamps left/top so the (now guaranteed large-enough) photo
 //      rectangle still fully overlaps the frame rectangle on every side.
 // Both objects use originX/Y: 'center', so left/top is each one's center —
 // that's what makes the half-width/half-height math below correct.
 function keepPhotoCoveringFrame(img) {
-    if (!img) return;
+    const p = img.frameBox;
+    if (!p) return;
 
-    const scale = Math.max(img.scaleX, img.scaleY, img.minScale || 0.01);
+    const scale = Math.max(img.scaleX, img.scaleY, img.minScale);
     if (img.scaleX !== scale || img.scaleY !== scale) {
         img.set({ scaleX: scale, scaleY: scale });
     }
 
-    // The photo is no longer restricted to its original frame. Keep it within
-    // the visible front panel so it can be positioned anywhere on the card
-    // without disappearing completely off the artwork.
     const halfImgW = (img.width * scale) / 2;
     const halfImgH = (img.height * scale) / 2;
-    const minLeft = PANEL_WIDTH + halfImgW;
-    const maxLeft = CANVAS_WIDTH - halfImgW;
-    const minTop = halfImgH;
-    const maxTop = CANVAS_HEIGHT - halfImgH;
+    const halfFrameW = p.width / 2;
+    const halfFrameH = p.height / 2;
+
+    const minLeft = p.left + halfFrameW - halfImgW;
+    const maxLeft = p.left - halfFrameW + halfImgW;
+    const minTop = p.top + halfFrameH - halfImgH;
+    const maxTop = p.top - halfFrameH + halfImgH;
 
     img.set({
-        left: Math.min(Math.max(img.left, minLeft), Math.max(minLeft, maxLeft)),
-        top: Math.min(Math.max(img.top, minTop), Math.max(minTop, maxTop))
+        left: Math.min(Math.max(img.left, minLeft), maxLeft),
+        top: Math.min(Math.max(img.top, minTop), maxTop)
     });
     img.setCoords();
 }
 
-// Wires keepPhotoCoveringFrame into the two Fabric-native gestures that can
-// move or resize the photo: single-finger/mouse drag ('object:moving') and
-// the desktop corner-handle drag ('object:scaling'). Pinch-resize on mobile
-// isn't a Fabric gesture at all — it's handled separately in
-// attachPinchToResize, which calls keepPhotoCoveringFrame itself. Call once
-// at setup, not per-photo-upload — photoImg is checked fresh on every event.
-function setupPhotoFrameTapUpload() {
+// ---- Photo adjust widget (DESKTOP ONLY — see isMobileDevice() guards
+// below; mobile uses attachMobileCardGestures instead, further down) ----
+// Replaces the old desktop corner-handle resize with a tap → widget flow:
+//
+//   idle    — the photo sits there unselectable/un-evented (see
+//             loadPhotoIntoFrame). A click anywhere on the card,
+//             including directly over the photo, is completely ignored by
+//             Fabric and falls straight through to normal page scroll.
+//   toolbar — a click ON the photo (detected manually below, since the
+//             photo isn't evented in idle mode for Fabric to detect it
+//             itself) switches evented/selectable on and shows the
+//             Replace / Adjust / Done widget. The photo can now be
+//             dragged directly to reposition it.
+//   adjust  — "Adjust" swaps the widget for the Zoom slider — the only
+//             way to resize on desktop (mobile has pinch instead).
+//
+// "Done", or clicking anywhere else on the card, returns to idle.
+let photoToolbarMode = 'idle'; // 'idle' | 'toolbar' | 'adjust'
+let tapCandidate = null;
+const TAP_MOVE_THRESHOLD = 8;  // canvas-space px — more than this and it's a drag, not a tap
+const TAP_MAX_MS = 400;
+
+function setupPhotoAdjustWidget() {
     canvas.on('mouse:down', (opt) => {
-        if (currentPage !== 'front' || photoImg || !activeTemplate?.photo) return;
-        const p = canvas.getPointer(opt.e);
-        const f = activeTemplate.photo;
-        const inside = Math.abs(p.x - f.left) <= f.width / 2 && Math.abs(p.y - f.top) <= f.height / 2;
-        if (inside) {
-            const input = $('photo-input');
-            if (input) input.click();
+        if (isMobileDevice() || !photoImg || currentPage !== 'front') return;
+        const pointer = canvas.getPointer(opt.e);
+        const onPhoto = photoImg.containsPoint(pointer);
+
+        if (photoToolbarMode === 'idle') {
+            tapCandidate = onPhoto ? { x: pointer.x, y: pointer.y, time: Date.now() } : null;
+        } else if (!onPhoto) {
+            // Clicked away from the photo while the widget was open.
+            closePhotoToolbar();
         }
     });
-}
 
-function setupPhotoCoverageGuard() {
+    canvas.on('mouse:up', (opt) => {
+        if (isMobileDevice() || !tapCandidate) return;
+        const pointer = canvas.getPointer(opt.e);
+        const moved = Math.hypot(pointer.x - tapCandidate.x, pointer.y - tapCandidate.y);
+        const quick = Date.now() - tapCandidate.time < TAP_MAX_MS;
+        tapCandidate = null;
+        if (moved < TAP_MOVE_THRESHOLD && quick) openPhotoToolbar();
+    });
+
+    // Keep the floating widget glued to the photo as it's dragged, and
+    // keep the coverage guard enforced on every move.
     canvas.on('object:moving', ({ target }) => {
-        if (target === photoImg) keepPhotoCoveringFrame(target);
-    });
-    canvas.on('object:scaling', ({ target }) => {
-        if (target === photoImg) keepPhotoCoveringFrame(target);
+        if (isMobileDevice() || target !== photoImg) return;
+        keepPhotoCoveringFrame(target);
+        if (photoToolbarMode !== 'idle') positionPhotoWidget();
     });
 }
 
-// ---- Mobile card gestures ----
-// The card itself behaves like a normal web page on a phone:
-//   * vertical swipe anywhere on the card -> scroll the page
-//   * press/hold on the uploaded photo -> photo-edit mode
-//   * after the hold, drag -> reposition the photo
-//   * two fingers on the photo -> pinch to zoom
-// This avoids the common Fabric.js problem where an object on the canvas
-// captures the first finger and makes the entire card feel non-scrollable.
+function openPhotoToolbar() {
+    if (isMobileDevice() || !photoImg || photoToolbarMode !== 'idle') return;
+    photoToolbarMode = 'toolbar';
+    photoImg.set({ evented: true, selectable: true });
+    canvas.setActiveObject(photoImg);
+    $('photo-adjust-panel').style.display = 'none';
+    $('photo-toolbar').style.display = 'flex';
+    positionPhotoWidget();
+    canvas.requestRenderAll();
+}
+
+function openAdjustPanel() {
+    if (!photoImg) return;
+    photoToolbarMode = 'adjust';
+    const multiplier = photoImg.scaleX / photoImg.minScale;
+    $('zoom-slider').value = multiplier;
+    $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
+    $('photo-toolbar').style.display = 'none';
+    $('photo-adjust-panel').style.display = 'flex';
+    positionPhotoWidget();
+}
+
+function closePhotoToolbar() {
+    photoToolbarMode = 'idle';
+    if (photoImg) {
+        photoImg.set({ evented: false, selectable: false });
+        canvas.discardActiveObject();
+    }
+    $('photo-toolbar').style.display = 'none';
+    $('photo-adjust-panel').style.display = 'none';
+    canvas.requestRenderAll();
+}
+
+function onReplacePhotoClick() {
+    $('photo-input').click();
+}
+
+function onZoomSliderInput(value) {
+    if (!photoImg) return;
+    const multiplier = Number(value);
+    const scale = photoImg.minScale * multiplier;
+    photoImg.set({ scaleX: scale, scaleY: scale });
+    keepPhotoCoveringFrame(photoImg);
+    $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
+    canvas.requestRenderAll();
+}
+
+// Positions the floating toolbar/panel directly above the photo's current
+// on-screen box. Has to convert from the photo's logical canvas
+// coordinates through two layers: the workspace's fixed pan (see
+// setViewportTransform/PANEL_WIDTH above) and the CSS scaling that
+// stretches the fixed-resolution canvas element to the on-screen card
+// size (see the CARD-FIRST EDITOR / 999px breakpoint CSS rules). Desktop
+// only in practice — see isMobileDevice() guards above.
+function positionPhotoWidget() {
+    if (!photoImg) return;
+    const rect = photoImg.getBoundingRect(true, true);
+    const canvasEl = canvas.upperCanvasEl;
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const wrapperRect = $('canvas-wrapper').getBoundingClientRect();
+    const scaleX = canvasRect.width / canvas.width;
+    const scaleY = canvasRect.height / canvas.height;
+
+    const screenLeft = (rect.left - PANEL_WIDTH) * scaleX + (canvasRect.left - wrapperRect.left);
+    const screenTop = rect.top * scaleY + (canvasRect.top - wrapperRect.top);
+    const screenCenterX = screenLeft + (rect.width * scaleX) / 2;
+    const widgetTop = Math.max(8, screenTop - 56); // just above the photo; clamped so it doesn't run off the top of the card
+
+    [$('photo-toolbar'), $('photo-adjust-panel')].forEach((el) => {
+        el.style.left = screenCenterX + 'px';
+        el.style.top = widgetTop + 'px';
+        el.style.transform = 'translateX(-50%)';
+    });
+}
+
+// ---- Mobile card gestures (MOBILE ONLY — see isMobileDevice() guards;
+// desktop uses the photo adjust widget above instead) ----
+// Below the 999px breakpoint the card behaves like a normal part of the
+// web page:
+//   * a plain swipe anywhere on the card, including over the photo,
+//     scrolls the page — it does NOT drag the photo
+//   * press and hold on the photo for ~0.4s enters photo positioning mode
+//   * once held, dragging moves the photo — still clamped by
+//     keepPhotoCoveringFrame, so it can never be dragged off the frame
+//   * a two-finger touch that starts on the photo pinches to zoom — also
+//     clamped, so it can never shrink below the frame's cover-fit minimum
+//   * lifting all fingers and swiping again goes straight back to
+//     scrolling the page
+// This talks to the canvas element directly with raw touch listeners
+// (capture: true, so it gets first look at each touch) rather than
+// Fabric's own object-drag system — photoImg.evented/selectable stay
+// false the whole time on mobile (see loadPhotoIntoFrame and the
+// isMobileDevice() guards on the photo adjust widget above), so there's
+// nothing for Fabric itself to grab; every position/scale change here is
+// applied directly to photoImg and re-clamped through
+// keepPhotoCoveringFrame, same guard function the desktop widget uses.
 let mobileGesture = null;
 let mobileHoldTimer = null;
-const MOBILE_HOLD_MS = 380;
-const MOBILE_MOVE_THRESHOLD = 8;
+const MOBILE_HOLD_MS = 380;       // press-and-hold duration before positioning mode kicks in
+const MOBILE_MOVE_THRESHOLD = 8;  // px of finger movement before a hold is cancelled (i.e. it was a swipe, not a hold)
 
 function mobileCanvasPoint(touch) {
     const rect = canvas.upperCanvasEl.getBoundingClientRect();
@@ -1134,82 +1192,56 @@ function photoContainsPoint(point) {
            point.y >= photoImg.top - h / 2 && point.y <= photoImg.top + h / 2;
 }
 
-function distanceBetweenTouches(t1, t2) {
+function touchDistance(t1, t2) {
     return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
 }
 
 function cancelMobileHold() {
-    if (mobileHoldTimer) {
-        clearTimeout(mobileHoldTimer);
-        mobileHoldTimer = null;
-    }
-}
-
-function stopFabricTouchState() {
-    canvas._currentTransform = null;
-    canvas.discardActiveObject();
-    canvas.skipTargetFind = true;
+    if (mobileHoldTimer) { clearTimeout(mobileHoldTimer); mobileHoldTimer = null; }
 }
 
 function finishMobileGesture() {
     cancelMobileHold();
     if (mobileGesture?.photoMode) {
-        keepPhotoCoveringFrame(photoImg);
+        canvas.skipTargetFind = false;
         canvas.requestRenderAll();
     }
-    canvas.skipTargetFind = false;
     mobileGesture = null;
 }
 
 function attachMobileCardGestures(el) {
-    // Capture phase is intentional: it gets first chance to decide whether a
-    // moving finger should scroll the page before Fabric can turn the touch
-    // into an object drag.
     el.addEventListener('touchstart', (e) => {
         if (!isMobileDevice()) return;
 
         if (e.touches.length === 2) {
             cancelMobileHold();
-            if (mobileGesture?.onPhoto) {
+            if (mobileGesture?.onPhoto && photoImg) {
                 mobileGesture.photoMode = true;
                 mobileGesture.pinch = true;
-                mobileGesture.startDistance = distanceBetweenTouches(e.touches[0], e.touches[1]);
+                mobileGesture.startDistance = touchDistance(e.touches[0], e.touches[1]);
                 mobileGesture.startScale = photoImg.scaleX;
-                stopFabricTouchState();
-                e.preventDefault();
+                canvas.skipTargetFind = true;
+                e.preventDefault(); // this is a deliberate pinch, not a scroll
             }
             return;
         }
 
         if (e.touches.length !== 1) return;
         const t = e.touches[0];
-        const point = mobileCanvasPoint(t);
-        const onPhoto = photoContainsPoint(point);
-        const onPhotoFrame = activeTemplate?.photo &&
-            Math.abs(point.x - activeTemplate.photo.left) <= activeTemplate.photo.width / 2 &&
-            Math.abs(point.y - activeTemplate.photo.top) <= activeTemplate.photo.height / 2;
+        const onPhoto = photoContainsPoint(mobileCanvasPoint(t));
 
-        mobileGesture = {
-            startX: t.clientX,
-            startY: t.clientY,
-            lastX: t.clientX,
-            lastY: t.clientY,
-            onPhoto,
-            onPhotoFrame,
-            photoMode: false,
-            pinch: false,
-            moved: false
-        };
+        mobileGesture = { startX: t.clientX, startY: t.clientY, onPhoto, photoMode: false, pinch: false, moved: false };
 
-        // Once a photo exists, only a deliberate hold turns this touch into
-        // photo positioning. A normal swipe remains a page scroll.
+        // Only a deliberate hold turns this touch into photo positioning —
+        // a normal swipe (handled in touchmove below) stays a page scroll.
         if (onPhoto) {
             mobileHoldTimer = setTimeout(() => {
                 if (!mobileGesture || mobileGesture.moved || mobileGesture.pinch) return;
                 mobileGesture.photoMode = true;
-                stopFabricTouchState();
                 mobileGesture.photoStartX = photoImg.left;
                 mobileGesture.photoStartY = photoImg.top;
+                canvas.discardActiveObject();
+                canvas.skipTargetFind = true;
                 canvas.requestRenderAll();
             }, MOBILE_HOLD_MS);
         }
@@ -1218,12 +1250,11 @@ function attachMobileCardGestures(el) {
     el.addEventListener('touchmove', (e) => {
         if (!isMobileDevice() || !mobileGesture) return;
 
-        // Pinch: only the two-finger gesture on the photo is an editor gesture.
         if (mobileGesture.pinch && e.touches.length >= 2 && photoImg) {
             e.preventDefault();
-            const dist = distanceBetweenTouches(e.touches[0], e.touches[1]);
+            const dist = touchDistance(e.touches[0], e.touches[1]);
             const ratio = mobileGesture.startDistance ? dist / mobileGesture.startDistance : 1;
-            const newScale = Math.min(Math.max(mobileGesture.startScale * ratio, photoImg.minScale || 0.01), 10);
+            const newScale = Math.min(Math.max(mobileGesture.startScale * ratio, photoImg.minScale), 10);
             photoImg.set({ scaleX: newScale, scaleY: newScale });
             keepPhotoCoveringFrame(photoImg);
             canvas.requestRenderAll();
@@ -1234,28 +1265,26 @@ function attachMobileCardGestures(el) {
         const t = e.touches[0];
         const dx = t.clientX - mobileGesture.startX;
         const dy = t.clientY - mobileGesture.startY;
-        mobileGesture.lastX = t.clientX;
-        mobileGesture.lastY = t.clientY;
 
         if (!mobileGesture.photoMode) {
             if (Math.hypot(dx, dy) > MOBILE_MOVE_THRESHOLD) {
                 mobileGesture.moved = true;
-                cancelMobileHold();
-
-                // Manually scroll the real page. This works even if Fabric has
-                // attached its own touch listener to a text/object underneath.
-                e.preventDefault();
+                cancelMobileHold(); // a real swipe, not a hold
+                // Scroll the page manually rather than relying on the
+                // browser's own default touch-scroll: Fabric's own touch
+                // handling on this same element can otherwise still
+                // intercept the gesture even though photoImg itself isn't
+                // evented, and this guarantees the swipe reaches the page.
                 window.scrollBy(0, -dy);
                 mobileGesture.startX = t.clientX;
                 mobileGesture.startY = t.clientY;
-                stopFabricTouchState();
             }
             return;
         }
 
-        // Long-press has promoted the touch to photo positioning.
+        // Held long enough — this touch now repositions the photo instead.
         e.preventDefault();
-        const rect = el.getBoundingClientRect();
+        const rect = canvas.upperCanvasEl.getBoundingClientRect();
         const sx = canvas.getWidth() / rect.width;
         const sy = canvas.getHeight() / rect.height;
         photoImg.set({
@@ -1266,19 +1295,7 @@ function attachMobileCardGestures(el) {
         canvas.requestRenderAll();
     }, { passive: false, capture: true });
 
-    el.addEventListener('touchend', (e) => {
-        if (!mobileGesture) return;
-        if (e.touches.length > 0) return;
-
-        const wasTap = !mobileGesture.moved && !mobileGesture.photoMode && !mobileGesture.pinch;
-        const wasEmptyFrameTap = wasTap && mobileGesture.onPhotoFrame && !photoImg;
-        if (wasEmptyFrameTap) {
-            const input = $('photo-input');
-            if (input) input.click();
-        }
-        finishMobileGesture();
-    }, { passive: true, capture: true });
-
+    el.addEventListener('touchend', finishMobileGesture, { passive: true, capture: true });
     el.addEventListener('touchcancel', finishMobileGesture, { passive: true, capture: true });
 }
 
@@ -1402,7 +1419,11 @@ function switchPage(page) {
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
-    photoImg?.set({ visible: isFront, selectable: isFront && !isMobileDevice(), evented: isFront && !isMobileDevice() });
+    // Photo stays idle (not selectable/evented) regardless of which page
+    // we're on — see loadPhotoIntoFrame/closePhotoToolbar. Only the Adjust
+    // widget's open state needs resetting when we leave the front page.
+    photoImg?.set({ visible: isFront });
+    if (!isFront) closePhotoToolbar();
 
     canvas.discardActiveObject();
     resetBordersToDashed();
