@@ -1929,6 +1929,14 @@ function captureFrontThumbnail() {
         });
         exportCanvas.loadFromJSON(frontJson, () => {
             try {
+                // Same fix as captureFullSpread/syncPersonalisationForExport:
+                // Fabric's JSON deserialization recalculates each text
+                // object's metrics, which can nudge its position slightly
+                // from where it actually sits on the live canvas. That's
+                // already corrected for the print-ready PDF capture but was
+                // missing here, so the basket thumbnail could show the name
+                // sitting in a slightly different spot than the editor.
+                syncPersonalisationForExport(exportCanvas);
                 exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
                 // qrImg is part of the cloned JSON but stays hidden here —
                 // showQrForCapture() is never called during this capture,
