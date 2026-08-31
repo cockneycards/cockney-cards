@@ -735,10 +735,20 @@ function loadFrontCover(imageUrl) {
 
     fabric.Image.fromURL(imageUrl, (img) => {
         bgImg = img;
+        // Small overscan (3%) on top of an exact fill: some of the source
+        // artwork PNGs appear to have a hairline margin baked into the file
+        // itself (a few px of white right at the edge), which an exact
+        // width/height-matched scale faithfully reproduces as a visible gap
+        // along the panel's right/bottom edges. Scaling slightly past an
+        // exact fit pushes that margin just past the panel boundary, where
+        // it's harmlessly clipped by the canvas edge — left/top stay
+        // anchored exactly where they were, so only the right/bottom edges
+        // are affected, matching where the gap actually showed up.
+        const OVERSCAN = 1.03;
         bgImg.set({
             left: PANEL_WIDTH, top: 0,
-            scaleX: PANEL_WIDTH / bgImg.width,
-            scaleY: CANVAS_HEIGHT / bgImg.height,
+            scaleX: (PANEL_WIDTH / bgImg.width) * OVERSCAN,
+            scaleY: (CANVAS_HEIGHT / bgImg.height) * OVERSCAN,
             selectable: false, evented: false
         });
         canvas.add(bgImg);
