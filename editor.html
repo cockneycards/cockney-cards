@@ -986,12 +986,14 @@ function loadPhotoIntoFrame(dataUrl) {
             left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT,
             absolutePositioned: true
         });
-        // Only the four corner handles resize it (no side handles, no
-        // rotation handle) — that's the "drag the corners to size the
-        // photo" box. Has no visible effect until hasControls is switched
-        // on in openPhotoToolbar.
+        // All eight handles (corners + edge midpoints) resize the photo —
+        // dragging any of them scales it, never distorts it, since
+        // clampPhotoScale (further down) always keeps scaleX/scaleY equal
+        // regardless of which handle triggered the resize. No rotation
+        // handle. Has no visible effect until hasControls is switched on in
+        // openPhotoToolbar.
         img.setControlsVisibility({
-            mt: false, mb: false, ml: false, mr: false, mtr: false,
+            mt: true, mb: true, ml: true, mr: true, mtr: false,
             tl: true, tr: true, bl: true, br: true
         });
 
