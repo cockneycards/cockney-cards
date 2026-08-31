@@ -735,20 +735,10 @@ function loadFrontCover(imageUrl) {
 
     fabric.Image.fromURL(imageUrl, (img) => {
         bgImg = img;
-        // Small overscan (3%) on top of an exact fill: some of the source
-        // artwork PNGs appear to have a hairline margin baked into the file
-        // itself (a few px of white right at the edge), which an exact
-        // width/height-matched scale faithfully reproduces as a visible gap
-        // along the panel's right/bottom edges. Scaling slightly past an
-        // exact fit pushes that margin just past the panel boundary, where
-        // it's harmlessly clipped by the canvas edge — left/top stay
-        // anchored exactly where they were, so only the right/bottom edges
-        // are affected, matching where the gap actually showed up.
-        const OVERSCAN = 1.03;
         bgImg.set({
             left: PANEL_WIDTH, top: 0,
-            scaleX: (PANEL_WIDTH / bgImg.width) * OVERSCAN,
-            scaleY: (CANVAS_HEIGHT / bgImg.height) * OVERSCAN,
+            scaleX: PANEL_WIDTH / bgImg.width,
+            scaleY: CANVAS_HEIGHT / bgImg.height,
             selectable: false, evented: false
         });
         canvas.add(bgImg);
@@ -986,14 +976,12 @@ function loadPhotoIntoFrame(dataUrl) {
             left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT,
             absolutePositioned: true
         });
-        // All eight handles (corners + edge midpoints) resize the photo —
-        // dragging any of them scales it, never distorts it, since
-        // clampPhotoScale (further down) always keeps scaleX/scaleY equal
-        // regardless of which handle triggered the resize. No rotation
-        // handle. Has no visible effect until hasControls is switched on in
-        // openPhotoToolbar.
+        // Only the four corner handles resize it (no side handles, no
+        // rotation handle) — that's the "drag the corners to size the
+        // photo" box. Has no visible effect until hasControls is switched
+        // on in openPhotoToolbar.
         img.setControlsVisibility({
-            mt: true, mb: true, ml: true, mr: true, mtr: false,
+            mt: false, mb: false, ml: false, mr: false, mtr: false,
             tl: true, tr: true, bl: true, br: true
         });
 
