@@ -1734,6 +1734,14 @@ function syncPersonalisationForExport(exportCanvas) {
 
     targets.forEach((liveObj) => {
         const exportObj = exportObjects.find((o) => o.ccRole && o.ccRole === liveObj.ccRole) || null;
+        // TEMP DIAGNOSTIC — remove once the photo-card shift is confirmed fixed.
+        console.log('[CC DEBUG] syncPersonalisationForExport', {
+            ccRole: liveObj.ccRole,
+            liveLeft: liveObj.left, liveTop: liveObj.top,
+            foundExportObj: !!exportObj,
+            exportLeftBefore: exportObj ? exportObj.left : null,
+            exportTopBefore: exportObj ? exportObj.top : null
+        });
         if (!exportObj) return;
 
         exportObj.set({
@@ -1960,6 +1968,16 @@ function captureFrontThumbnail() {
                 // sitting in a slightly different spot than the editor.
                 syncPersonalisationForExport(exportCanvas);
                 exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+                // TEMP DIAGNOSTIC — remove once the photo-card shift is confirmed fixed.
+                const dbgName = exportCanvas.getObjects().find(o => o.ccRole === 'name');
+                console.log('[CC DEBUG] captureFrontThumbnail final state', {
+                    liveNameLeft: nameText?.left, liveNameTop: nameText?.top,
+                    exportNameLeft: dbgName?.left, exportNameTop: dbgName?.top,
+                    hasPhoto: !!photoImg,
+                    photoLeft: photoImg?.left, photoTop: photoImg?.top,
+                    photoScaleX: photoImg?.scaleX, photoScaleY: photoImg?.scaleY,
+                    canvasWidth: CANVAS_WIDTH, canvasHeight: CANVAS_HEIGHT
+                });
                 // qrImg is part of the cloned JSON but stays hidden here —
                 // showQrForCapture() is never called during this capture,
                 // so it keeps whatever visibility it already had (false,
