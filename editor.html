@@ -1734,14 +1734,6 @@ function syncPersonalisationForExport(exportCanvas) {
 
     targets.forEach((liveObj) => {
         const exportObj = exportObjects.find((o) => o.ccRole && o.ccRole === liveObj.ccRole) || null;
-        // TEMP DIAGNOSTIC — remove once the photo-card shift is confirmed fixed.
-        console.log('[CC DEBUG] syncPersonalisationForExport', {
-            ccRole: liveObj.ccRole,
-            liveLeft: liveObj.left, liveTop: liveObj.top,
-            foundExportObj: !!exportObj,
-            exportLeftBefore: exportObj ? exportObj.left : null,
-            exportTopBefore: exportObj ? exportObj.top : null
-        });
         if (!exportObj) return;
 
         exportObj.set({
@@ -1959,25 +1951,8 @@ function captureFrontThumbnail() {
         });
         exportCanvas.loadFromJSON(frontJson, () => {
             try {
-                // Same fix as captureFullSpread/syncPersonalisationForExport:
-                // Fabric's JSON deserialization recalculates each text
-                // object's metrics, which can nudge its position slightly
-                // from where it actually sits on the live canvas. That's
-                // already corrected for the print-ready PDF capture but was
-                // missing here, so the basket thumbnail could show the name
-                // sitting in a slightly different spot than the editor.
                 syncPersonalisationForExport(exportCanvas);
                 exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
-                // TEMP DIAGNOSTIC — remove once the photo-card shift is confirmed fixed.
-                const dbgName = exportCanvas.getObjects().find(o => o.ccRole === 'name');
-                console.log('[CC DEBUG] captureFrontThumbnail final state', {
-                    liveNameLeft: nameText?.left, liveNameTop: nameText?.top,
-                    exportNameLeft: dbgName?.left, exportNameTop: dbgName?.top,
-                    hasPhoto: !!photoImg,
-                    photoLeft: photoImg?.left, photoTop: photoImg?.top,
-                    photoScaleX: photoImg?.scaleX, photoScaleY: photoImg?.scaleY,
-                    canvasWidth: CANVAS_WIDTH, canvasHeight: CANVAS_HEIGHT
-                });
                 // qrImg is part of the cloned JSON but stays hidden here —
                 // showQrForCapture() is never called during this capture,
                 // so it keeps whatever visibility it already had (false,
@@ -1986,7 +1961,23 @@ function captureFrontThumbnail() {
                 // Small + low quality on purpose — this is a basket list
                 // thumbnail, not a print asset. multiplier: 0.3 on the
                 // 1191x840 editor canvas lands around 357x252px.
-                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality: 0.6, multiplier: 0.3 });
+                //
+                // CROP TO THE FRONT PANEL ONLY: exportCanvas holds the full
+                // outside spread (back cover + front cover side by side, same
+                // as the print file), but this thumbnail is meant to show just
+                // the front cover — what the customer actually designed and
+                // sees while editing. Left uncropped, the wide 2-panel image
+                // (roughly half of it blank back-cover space) got squeezed by
+                // the basket's object-fit:contain box, visually shrinking and
+                // off-centering the front artwork — which is what looked like
+                // the name "shifting". Cropping to the live editor's own
+                // panel window (left: PANEL_WIDTH, width: PANEL_WIDTH) fixes
+                // that regardless of card type; it was just most noticeable
+                // on photo cards because they have the most going on visually.
+                const dataUrl = exportCanvas.toDataURL({
+                    format: 'jpeg', quality: 0.6, multiplier: 0.3,
+                    left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT
+                });
                 exportCanvas.dispose();
                 resolve(dataUrl);
             } catch (err) {
