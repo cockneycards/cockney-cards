@@ -27,7 +27,7 @@ const CARD_CATALOGUE = {
   "birthday-f1-racer": { title: "F1 Racer", description: "A colourful birthday card.", categories: ["all", "for-him", "birthdays", "children"], preview: "birthday-f1-racer-preview.png", full: "birthday-f1-racer.png" },
   "birthday-cake1": { title: "Birthday Cake", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-cake1-preview.png", full: "birthday-cake1.png" },
   "birthday-cake2": { title: "Piece of Cake", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-cake2-preview.png", full: "birthday-cake2.png" },
-  "birthday-baking-girl": { title: "Baking Girls Birthday", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-baking-girl-preview.png", full: "birthday-baking-girl.png" },
+  "birthday-baking-girl": { title: "Baking Girls Birthday", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-baking-girl-preview.png", full: "birthday-baking.png" },
   "birthday-beachhut": { title: "Beach Hut Birthday", description: "A colourful birthday card.", categories: ["all", "for-him", "for-her", "birthdays"], preview: "birthday-beachhut-preview.png", full: "birthday-beachhut.png" },
   "birthday-coffee-cake": { title: "Coffee & Cake", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-coffee-cake-preview.png", full: "birthday-coffee-cake.png" },
   "birthday-hydrangea": { title: "Birthday Hydrangea", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-hydrangea-preview.png", full: "birthday-hydrangea.png" },
