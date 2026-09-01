@@ -5,7 +5,7 @@
 //
 // Load this BEFORE cards-data.js / prints-data.js in any page that needs
 // it — those files (and the shop pages' own inline scripts) reference the
-// CATEGORIES global defined here.
+// 
 
 const CATEGORIES = [
   ["all", "All Cards"],
