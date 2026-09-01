@@ -353,7 +353,7 @@ const PRINT_CATALOGUE = {
   "millwall-eatsleep": {
         title: "Millwall Prints - Eat, Sleep, Millwall, Repeat",
         description: "Millwall duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
         sizes: {
             A5: { price: "£9.99", priceValue: 6.99 },
             A4: { price: "£12.99", priceValue: 9.99 },
@@ -364,11 +364,11 @@ const PRINT_CATALOGUE = {
             onlyForVariants: ["millwallboy", "millwallgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
-        preview: "mfc-eatsleep-preview_a4dou9.png",
-        full: "mfc-eatsleep_psnawt.png",
+        preview: "mfc-eatsleep-preview.png",
+        full: "mfc-eatsleep.png",
         variants: [
-          { id: "millwallboy", full: "mfc-eatsleepboy_l8kozj.png" },
-            { id: "millwallgirl", full: "mfc-eatsleepgirl_mgpc3x.png" },
+          { id: "millwallboy", full: "mfc-eatsleepboy.png" },
+            { id: "millwallgirl", full: "mfc-eatsleepgirl.png" },
         ]
     },
     "arsenal-eatsleep": {
@@ -385,11 +385,11 @@ const PRINT_CATALOGUE = {
             onlyForVariants: ["arsenalboy", "arsenalgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
-        preview: "afc-eatsleep-preview_rrtfve.png",
-        full: "afc-eatsleep_trxugb.png",
+        preview: "afc-eatsleep-preview.png",
+        full: "afc-eatsleep.png",
         variants: [
-          { id: "arsenalboy", full: "afc-eatsleepboy_kbfdah.png" },
-            { id: "arsenalgirl", full: "afc-eatsleepgirl_eljiif.png" },
+          { id: "arsenalboy", full: "afc-eatsleepboy.png" },
+            { id: "arsenalgirl", full: "afc-eatsleepgirl.png" },
         ]
     },
     "villa-eatsleep": {
@@ -427,11 +427,11 @@ const PRINT_CATALOGUE = {
             onlyForVariants: ["cityboy", "citygirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
-        preview: "city-eatsleep-preview_cktda8.png",
-        full: "city-eatsleep_d3j7ca.png",
+        preview: "city-eatsleep-preview.png",
+        full: "city-eatsleep.png",
         variants: [
-          { id: "cityboy", full: "city-eatsleepboy_ecpyd3.png" },
-            { id: "citygirl", full: "city-eatsleepgirl_romiae.png" },
+          { id: "cityboy", full: "city-eatsleepboy.png" },
+            { id: "citygirl", full: "city-eatsleepgirl.png" },
         ]
     },
     "chelsea-eatsleep": {
@@ -448,11 +448,11 @@ const PRINT_CATALOGUE = {
             onlyForVariants: ["chelseaboy", "chelseagirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
-        preview: "chelsea-eatsleep-preview_uivgav.png",
-        full: "chelsea-eatsleep_iqyj3n.png",
+        preview: "chelsea-eatsleep-preview.png",
+        full: "chelsea-eatsleep.png",
         variants: [
-          { id: "chelseaboy", full: "chelsea-eatsleepboy_mcvzgh.png" },
-            { id: "chelseagirl", full: "chelsea-eatsleepgirl_lcgmib.png" },
+          { id: "chelseaboy", full: "chelsea-eatsleepboy.png" },
+            { id: "chelseagirl", full: "chelsea-eatsleepgirl.png" },
         ]
     },
     "united-eatsleep": {
@@ -469,11 +469,11 @@ const PRINT_CATALOGUE = {
             onlyForVariants: ["unitedboy", "unitedgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
-        preview: "united-eatsleep-preview_nvhkbv.png",
-        full: "united-eatsleep_xi5vq1.png",
+        preview: "united-eatsleep-preview.png",
+        full: "united-eatsleep.png",
         variants: [
-          { id: "unitedboy", full: "united-eatsleepboy_ljmjd8.png" },
-            { id: "unitedgirl", full: "united-eatsleepgirl_cvlkj4.png" },
+          { id: "unitedboy", full: "united-eatsleepboy.png" },
+            { id: "unitedgirl", full: "united-eatsleepgirl.png" },
         ]
     },   
     "houserules": {
@@ -486,8 +486,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "b&w"],
-        preview: "doghouserules-preview_iwabv0.png",
-        full: "houserules-preview_tv9joy.png"
+        preview: "doghouserules-preview.png",
+        full: "houserules-preview.png"
     },
    "dinosaurs": {
         title: "Dinosaur Duo",
@@ -499,10 +499,10 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 12.99 }
         },
         categories: ["all", "childrens"],
-        preview: "dinosaurs_ks45z8.png",
-        full: "dinosaurwoof_tojwk7.png",
+        preview: "dinosaurs.png",
+        full: "dinosaurwoof.png",
         variants: [
-          { id: "dinosauraghh", full: "dinosauraghh_pfrkfd.png" },
+          { id: "dinosauraghh", full: "dinosauraghh.png" },
         ]
     },    
     "itsnotwhatwehave": {
@@ -515,8 +515,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "b&w"],
-        preview: "itsnotwhatwehave-preview_xnh2nr.png",
-        full: "itsnotwhatwehave_qey0yj.png"
+        preview: "itsnotwhatwehave-preview.png",
+        full: "itsnotwhatwehave.png"
     },
     "underthesea": {
         title: "Under The Sea",
@@ -529,11 +529,11 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "childrens"],
         name: { label: "First Name", left: 378, top: 120, startSize: 56, minSize: 25, maxSize: 35, fontFamily: "LuckiestGuy", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 8, forceUppercase: false },
-        preview: "underthesea_a-preview_adonqr.png",
-        full: "underthesea_a_fqurwx.png",
+        preview: "underthesea_a-preview.png",
+        full: "underthesea_a.png",
         variants: [
-          { id: "underthesea_b", full: "underthesea_b_t4zlv6.png" },
-          { id: "underthesea_c", full: "underthesea_c_brdy35.png" },
+          { id: "underthesea_b", full: "underthesea_b.png" },
+          { id: "underthesea_c", full: "underthesea_c.png" },
         ]
     },
     "oasis-dontlookback": {
@@ -546,8 +546,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "b&w", "music"],
-        preview: "oasis-dontlookback-preview_yuwvyy.png",
-        full: "oasis-dontlookback_tjupo3.png"
+        preview: "oasis-dontlookback-preview.png",
+        full: "oasis-dontlookback.png"
     },
     "wham-massive": {
         title: "West Ham Are Massive!",
@@ -559,8 +559,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "wham-massive-preview_vljrfh.png",
-        full: "wham-massive_vj4kxq.png"
+        preview: "wham-massive-preview.png",
+        full: "wham-massive.png"
     },
     "mfc-stone": {
         title: "MFC Stone Island",
@@ -572,8 +572,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "mfc-stone-preview_bqjjdm.png",
-        full: "mfc-stone_otcbr5.png"
+        preview: "mfc-stone-preview.png",
+        full: "mfc-stone.png"
     },
     "mfc-boy1": {
         title: "MFC Boy 1",
@@ -585,8 +585,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "mfc-boy1-preview_atd6yj.png",
-        full: "mfc-boy1_bwwx7b.png",
+        preview: "mfc-boy1-preview.png",
+        full: "mfc-boy1.png",
         name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     },
@@ -600,8 +600,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "mfc-boy2-preview_acy95s.png",
-        full: "mfc-boy2_yfxjex.png",
+        preview: "mfc-boy2-preview.png",
+        full: "mfc-boy2.png",
         name: { label: "First Name", left: 287, top: 585, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 287, top: 650, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     },
@@ -615,8 +615,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "afc-boy1-preview_fk1pkz.png",
-        full: "afc-boy1_yubhjz.png",
+        preview: "afc-boy1-preview.png",
+        full: "afc-boy1.png",
         name: { label: "First Name", left: 286, top: 610, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 286, top: 675, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     },
@@ -630,8 +630,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "afc-boy2-preview_ex1356.png",
-        full: "afc-boy2_e6m5vw.png",
+        preview: "afc-boy2-preview.png",
+        full: "afc-boy2.png",
         name: { label: "First Name", left: 286, top: 610, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 286, top: 675, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     },
@@ -645,8 +645,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "afc-boy3-preview_sbq2z8.png",
-        full: "afc-boy3_mwlwu0.png",
+        preview: "afc-boy3-preview.png",
+        full: "afc-boy3.png",
         name: { label: "First Name", left: 286, top: 610, startSize: 30, minSize: 25, maxSize: 35, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 286, top: 673, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" }, 
     },
@@ -660,8 +660,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "afc-girl1-preview_w99q5x.png",
-        full: "afc-girl1_lnszx9.png",
+        preview: "afc-girl1-preview.png",
+        full: "afc-girl1.png",
         name: { label: "First Name", left: 305, top: 615, startSize: 28, minSize: 23, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 305, top: 675, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     },
@@ -675,8 +675,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "sports"],
-        preview: "afc-girl2-preview_vbyq9q.png",
-        full: "afc-girl2_smvcct.png",
+        preview: "afc-girl2-preview.png",
+        full: "afc-girl2.png",
         name: { label: "First Name", left: 294, top: 615, startSize: 28, minSize: 23, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 },
         age: { label: "Age", left: 294, top: 675, startSize: 70, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     },
