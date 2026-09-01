@@ -229,8 +229,8 @@ const PRINT_CATALOGUE = {
             A3: { price: "£12.99", priceValue: 9.99 }
         },
         categories: ["all", "music"],
-        preview: "album-prodigy-mftjg-preview.png",
-        full: "album-prodigy-mftjg.png"
+        preview: "album-prodigy-preview.png",
+        full: "album-prodigy.png"
     },
     "album-pinkfloyd": {
         title: "Pink Floyd's The Dark Side of The Moon - Album Artwork",
