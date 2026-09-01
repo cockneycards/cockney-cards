@@ -175,13 +175,9 @@ const CARD_CATALOGUE = {
   "engagement4": { title: "Engagement Ring Card", description: "Celebrate their engagement with this card.", categories: ["all", "for-her", "weddings-engagements"], preview: "engagement4-preview.png", full: "engagement4.png" },
   "engagement5": { title: "The Propsal", description: "Celebrate their engagement with this card.", categories: ["all", "for-her", "weddings-engagements"], preview: "engagement5-preview.png", full: "engagement5.png" },
 
-  "valentines1-photo": { title: "Cupids Couple", price: "£3.49", description: "A romantic Valentine's card - add a favourite photo of the two of you.", categories: ["all", "for-her", "valentines", "photo-upload"], preview: "valentines-photo1-preview.png", full: "valentines-photo1.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-
-  "wedding1": { title: "Over the Threshold", description: "Celebrate their wedding day with this card.", categories: ["all", "for-her", "weddings-engagements"], preview: "wedding1-preview.png", full: "wedding1.png" },
-  
-  "wedding3": { title: "Wedding Bubbles", description: "Celebrate their wedding day with this card.", categories: ["all", "for-her", "weddings-engagements"], preview: "wedding3-preview.png", full: "wedding3.png" },
-  "wedding4": { title: "Just Married", description: "Celebrate their wedding day with this card.", categories: ["all", "for-her", "weddings-engagements"], preview: "wedding4-preview.png", full: "wedding4.png" },
+  "wedding1": { title: "Over the Threshold", description: "Celebrate their wedding day with this card.", categories: ["all", "for-her", "weddings-engagements"], preview: "wedding-overthethreshold-preview.png", full: "wedding-overthethreshold.png" },
+  "wedding2": { title: "Wedding Bubbles", description: "Celebrate their wedding day with this card.", categories: ["all", "for-her", "weddings-engagements"], preview: "wedding-bubbles-preview.png", full: "wedding-bubbles.png" },
+  "wedding3": { title: "Just Married", description: "Celebrate their wedding day with this card.", categories: ["all", "for-her", "weddings-engagements"], preview: "wedding-car-justmarried-preview.png", full: "wedding-car-justmarried.png" },
 
   "happy-hen-party1": { title: "Hen Party Girls", description: "A fun card to celebrate the bride-to-be's hen party.", categories: ["all", "for-her", "weddings-engagements"], preview: "happy-hen-party1-preview.png", full: "happy-hen-party1.png" },
   "happy-hen-party2": { title: "Hen Party Sleep Over", description: "A fun card to celebrate the bride-to-be's hen party.", categories: ["all", "for-her", "weddings-engagements"], preview: "happy-hen-party2-preview.png", full: "happy-hen-party2.png" },
