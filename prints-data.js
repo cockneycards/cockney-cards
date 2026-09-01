@@ -1,4 +1,4 @@
-// ---- Cockney Cards | PRINTS catalogue ----
+// ---- Cockney Cards | PRINTS catalogue----
 //
 // Mirrors the idea of cards-data.js, but for prints: no photo-upload, no
 // inside-spread/message boxes — a print is just a single personalised page
