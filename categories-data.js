@@ -16,12 +16,10 @@ const CATEGORIES = [
   ["for-him", "Cards For Him"],
   ["photo-upload", "Photo Upload Cards"],
   ["birthdays", "Birthday Cards", [
-  ["family", "Family", [
-    ["mum", "Mum"],
-    ["dad", "Dad"],
-    ["nan", "Nan"],
-    ["grandad", "Grandad"],
-      ]],
+  ["mum", "Mum"],
+  ["dad", "Dad"],
+  ["nan", "Nan"],
+  ["grandad", "Grandad"],
   ["newbaby", "New Baby"],
   ["thank-you", "Thank You! Cards"],
   ["weddings-engagements", "Wedding & Engagement Cards"],
