@@ -4,7 +4,7 @@ const DEFAULT_PRICE = "£3.49";
 // CATEGORIES now lives in categories-data.js — shared with prints-data.js
 // / shop-prints.html so both catalogues use the same tree (and stay in
 // sync when a team or league gets added). Make sure categories-data.js
-// is loaded BEFORE this file wherever this file is included.
+// 
 
 const CARD_CATALOGUE = {
   "11plus-boy": { title: "11 Plus Boy Card", description: "A brilliant way to say congratulations on passing the 11 Plus! Add his name and school shirt colour to make it extra special.", categories: ["school-cards", "achievements","children"], preview: "11plus-boy-preview.png", full: "11plus-boy.png" },
