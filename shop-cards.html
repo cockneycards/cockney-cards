@@ -374,11 +374,11 @@ function renderCategoryLevel(categories, depth) {
 // (their immediate children visible), without needing a click. Nested
 // grandchildren (e.g. Football's own leagues) still stay closed until
 // clicked directly.
-const DEFAULT_EXPANDED_CATEGORIES = ["sports"];
+const DEFAULT_EXPANDED_CATEGORIES = ["sports", "birthdays"];
 
 // Categories in this list can never be collapsed -- their arrow is hidden
 // and clicking them never toggles them shut, only navigates/filters.
-const LOCKED_EXPANDED_CATEGORIES = ["sports"];
+const LOCKED_EXPANDED_CATEGORIES = ["sports", "birthdays"];
 
 function renderCategories() {
     const list = $('category-list');
