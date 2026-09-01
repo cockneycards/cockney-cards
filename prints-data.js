@@ -113,7 +113,7 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "music"],
         preview: "album-mj-bad-preview.png",
-        full: "album-mj-bad"
+        full: "album-mj-bad.png"
     },
     "album-oasis-dm": {
         title: "Oasis - Definitely Maybe - Album Artwork",
