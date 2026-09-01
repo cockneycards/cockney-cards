@@ -7,9 +7,9 @@ const DEFAULT_PRICE = "£3.49";
 // is loaded BEFORE this file wherever this file is included.
 
 const CARD_CATALOGUE = {
-  "11plus-boy": { title: "11 Plus Boy Card", description: "A brilliant way to say congratulations on passing the 11 Plus! Add his name and school shirt colour to make it extra special.", categories: ["school-cards", "achievements","children"], preview: "11plus-boy-preview.png", full: "11plus-boy.png" },
-  "11plus-girl": { title: "11 Plus Girl Card", description: "A brilliant way to say congratulations on passing the 11 Plus.", categories: ["school-cards", "achievements", "children"], preview: "11plus-girl-preview.png", full: "11plus-girl.png" },
-  "11plus-kids": { title: "11 Plus Kids Card", description: "A brilliant way to say congratulations on passing the 11 Plus.", categories: ["school-cards", "achievements", "children"], preview: "11plus-kids-preview.png", full: "11plus-kids.png" },
+  "11plus-boy": { title: "11 Plus Boy Card", description: "A brilliant way to say congratulations on passing the 11 Plus! Add his name and school shirt colour to make it extra special.", categories: ["school-cards", "achievements"], preview: "11plus-boy-preview.png", full: "11plus-boy.png" },
+  "11plus-girl": { title: "11 Plus Girl Card", description: "A brilliant way to say congratulations on passing the 11 Plus.", categories: ["school-cards", "achievements"], preview: "11plus-girl-preview.png", full: "11plus-girl.png" },
+  "11plus-kids": { title: "11 Plus Kids Card", description: "A brilliant way to say congratulations on passing the 11 Plus.", categories: ["school-cards", "achievements"], preview: "11plus-kids-preview.png", full: "11plus-kids.png" },
 
   "birthday-80sbirthday": { title: "80s Retro Birthday Card", description: "A colourful birthday card.", categories: ["all", "birthdays", "tv-movies"], preview: "80s-birthday-preview.png", full: "80s-birthday.png" },
   "birthday-90sbirthday": { title: "90s Retro Birthday Card", description: "A colourful birthday card.", categories: ["all", "birthdays", "tv-movies"], preview: "90s-birthday-preview.png", full: "90s-birthday.png" },
