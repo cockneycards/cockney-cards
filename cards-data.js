@@ -68,6 +68,7 @@ const CARD_CATALOGUE = {
   "birthday-nan-puddles": { title: "Puddles with Nan", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "nan-puddles-preview.png", full: "nan-puddles.png" },
   "birthday-dad-learntoride": { title: "Learning to Ride a Bike", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-him", "dad", "birthdays"], preview: "dad-learntoride-preview.png", full: "dad-learntoride.png" },
   "birthday-dad-diydad": { title: "DIY Dad", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-him", "dad", "birthdays"], preview: "dad-diydad-preview.png", full: "dad-diydad.png" },
+  "birthday-fabbirthday": { title: "Fab Birthday", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "birthdays"], preview: "fabbirthday-preview.png", full: "fabbirthday.png" },
   
   
 
@@ -266,7 +267,10 @@ const CARD_CATALOGUE = {
   "liv-ladies-celebrating": { title: "Liverpool Ladies Celebrating Card", description: "A celebration card for Liverpool fans.", categories: ["sports", "football", "wsl", "liverpool"], preview: "liv-ladies-celebrating-preview.png", full: "liv-ladies-celebrating.png" },
   
   "liv-shirt": { title: "Liverpool Shirt Card", description: "A personalised Liverpool shirt card - add their name and squad number to the back of the shirt.", categories: ["sports", "football", "premiership", "liverpool"], price: "£3.49", preview: "liv-shirt-preview.png", full: "liv-shirt.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" } },
-  
+
+  "charltonfan": { title: "Charlton Fan", description: "A beautifully designed \"Millwall Christmas Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "charlton"], preview: "charltonfan-preview.png", full: "charltonfan.png" },
+  "qprfan": { title: "QPR Fan", description: "A beautifully designed \"Millwall Christmas Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "qpr"], preview: "qprfan-preview.png", full: "qprfan.png" },
+  "wrexhamrfan": { title: "Wrexham Fan", description: "A beautifully designed \"Millwall Christmas Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "wrexham"], preview: "wrexhamrfan-preview.png", full: "wrexhamrfan.png" },
 
   "mfc-christmas": { title: "Millwall Christmas Card", description: "A beautifully designed \"Millwall Christmas Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "millwall"], preview: "mfc-christmas-preview.png", full: "mfc-christmas.png" },
   
