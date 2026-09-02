@@ -126,14 +126,19 @@ const CARD_CATALOGUE = {
   "newbaby-beautifulbabygirl": { title: "Beautiful Baby Girl", description: "Welcome the new arrival with this new baby card.", categories: ["all", "newbaby"], preview: "newbaby-beautifulbabygirl-preview.png", full: "newbaby-beautifulbabygirl.png" },
   "newbaby-beautifulbabyboy": { title: "Beautiful Baby Boy", description: "Welcome the new arrival with this new baby card.", categories: ["all", "newbaby"], preview: "newbaby-beautifulbabyboy-preview.png", full: "newbaby-beautifulbabyboy.png" },
   "newbaby-hellolittleone": { title: "Hello Little One", description: "Welcome the new arrival with this new baby card.", categories: ["all", "newbaby"], preview: "newbaby-hellolittleone-preview.png", full: "newbaby-hellolittleone.png" },
+  
   "newbaby-butterflies": { title: "Baby Butterflies", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-butterflies-preview.png", full: "newbaby-butterflies.png", name: { left: 893, top: 619, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 450, height: 350 } },
+  
   "newbaby-itsagirl": { title: "It's a Girl", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-itsagirl-preview.png", full: "newbaby-itsagirl.png", name: { left: 893, top: 634, startSize: 43, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 15 },
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 450, height: 350 } },
+  
   "newbaby-underthesea": { title: "Under the Sea", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-underthesea-preview.png", full: "newbaby-underthesea.png", name: { left: 889, top: 588, startSize: 37, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 12 },
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 450, height: 350 } },
+  
   "newbaby-rainbows": { title: "Baby Rainbows", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-rainbows-preview.png", full: "newbaby-rainbows.png", name: { left: 895, top: 622, startSize: 38, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 909.6, top: 331.3, width: 450, height: 350 } },
+  
   "newbaby-spacebaby": { title: "Baby Space", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-spacebaby-preview.png", full: "newbaby-spacebaby.png", name: { left: 893, top: 622, startSize: 42, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#2d659a", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
   
@@ -279,7 +284,7 @@ const CARD_CATALOGUE = {
   "nolu-lion1": { title: "No One Likes Us Lion Card", description: "A beautifully designed \"No One Likes Us Lion Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "millwall"], preview: "nolu-lion1-preview.png", full: "nolu-lion1.png", name: { left: 890, top: 246, startSize: 75, minSize: 70, maxSize: 78, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 610, tiltAngle: -3, label: "Name", maxChars: 12 } },
   
   "birthday-mfc-photo1": { title: "Lions Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo and their name.", categories: ["sports", "football", "championship", "millwall", "photo-upload"], preview: "lions-birthday-preview.png", full: "lions-birthday.png", name: { left: 892, top: 750, startSize: 65, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 12 },
-    photo: { left: 1010, top: 175, width: 360, height: 360 } },
+    photo: { left: 1008, top: 180, width: 360, height: 360 } },
   
   "whu-shirt": { title: "West Ham Shirt Card", description: "A personalised West Ham shirt card - add their name and squad number to the back of the shirt.", categories: ["sports", "football", "championship", "west-ham"], price: "£3.49", preview: "whu-shirt-preview.png", full: "whu-shirt.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" } },
   
