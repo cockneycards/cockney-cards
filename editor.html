@@ -866,9 +866,10 @@ function setupTextsAndOverlays() {
         });
     }
 
-    // "Upload Photo" hint over the frame's transparent cutout — visible
-    // until the customer supplies a photo (see loadPhotoIntoFrame, which
-    // hides it), and only for cards that actually have a photo frame.
+    // "Upload Photo" hint, sat behind the artwork so it only shows through
+    // the frame's transparent cutout — visible until the customer supplies
+    // a photo (see loadPhotoIntoFrame, which hides it), and only for cards
+    // that actually have a photo frame.
     // Not itself clickable (evented: false) — clicking anywhere in the
     // frame area is handled by the canvas-level mouse:down listener set
     // up in setupPhotoAdjustWidget, which works whether or not this hint
@@ -895,6 +896,10 @@ function setupTextsAndOverlays() {
             selectable: false, evented: false
         });
         canvas.add(photoPromptGroup);
+        // Sit behind the artwork, same as the uploaded photo itself (see
+        // canvas.sendToBack(photoImg) in loadPhotoIntoFrame) — only the
+        // part showing through the artwork's transparent cutout is visible.
+        canvas.sendToBack(photoPromptGroup);
     } else {
         photoPromptGroup = null;
     }
