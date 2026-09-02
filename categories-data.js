@@ -33,7 +33,7 @@ const CATEGORIES = [
   ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
   ["valentines", "Valentines"],
   ["christmas", "Christmas"],
-  ["sports", "Sports Cards", [
+  ["sports", "Sports", [
     ["football", "Football", [
       ["premiership", "Premiership", [
         ["arsenal", "Arsenal"],
