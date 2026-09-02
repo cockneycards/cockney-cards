@@ -587,7 +587,7 @@ function measureTextWidth(text, fontSize, fontFamily, fontWeight) {
 // draw, the canvas just uses a fallback and never redraws itself once the
 // real font arrives. So we explicitly ask the browser to load every custom
 // font up front and wait for that before building any text on the canvas.
-const CUSTOM_FONTS = ["BubblegumSans", "Anton", "BebasNeue"];
+const CUSTOM_FONTS = ["BubblegumSans", "Anton", "BebasNeue", "CaacupeOne-Regular", "Oswald-VariableFont_wght"];
 function preloadCustomFonts() {
     return Promise.all(
         CUSTOM_FONTS.map((f) =>
