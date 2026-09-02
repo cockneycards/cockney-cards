@@ -1,6 +1,5 @@
 const CLOUD_BASE = "https://images.cockneycards.com/";
 const DEFAULT_PRICE = "£3.49";
-//justin
 
 // CATEGORIES now lives in categories-data.js — shared with prints-data.js
 // / shop-prints.html so both catalogues use the same tree (and stay in
