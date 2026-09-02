@@ -128,19 +128,19 @@ const CARD_CATALOGUE = {
   "newbaby-hellolittleone": { title: "Hello Little One", description: "Welcome the new arrival with this new baby card.", categories: ["all", "newbaby"], preview: "newbaby-hellolittleone-preview.png", full: "newbaby-hellolittleone.png" },
   
   "newbaby-butterflies": { title: "Baby Butterflies", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-butterflies-preview.png", full: "newbaby-butterflies.png", name: { left: 893, top: 619, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
-    photo: { left: 909.6, top: 331.3, width: 450, height: 350 } },
+    photo: { left: 900, top: 370, width: 450, height: 350 } },
   
   "newbaby-itsagirl": { title: "It's a Girl", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-itsagirl-preview.png", full: "newbaby-itsagirl.png", name: { left: 893, top: 634, startSize: 43, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 15 },
-    photo: { left: 909.6, top: 331.3, width: 450, height: 350 } },
+    photo: { left: 900, top: 400, width: 450, height: 250 } },
   
   "newbaby-underthesea": { title: "Under the Sea", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-underthesea-preview.png", full: "newbaby-underthesea.png", name: { left: 889, top: 588, startSize: 37, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 12 },
-    photo: { left: 909.6, top: 331.3, width: 450, height: 350 } },
+    photo: { left: 900, top: 350, width: 460, height: 330 } },
   
   "newbaby-rainbows": { title: "Baby Rainbows", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-rainbows-preview.png", full: "newbaby-rainbows.png", name: { left: 895, top: 622, startSize: 38, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
-    photo: { left: 909.6, top: 331.3, width: 450, height: 350 } },
+    photo: { left: 900, top: 350, width: 460, height: 330 } },
   
   "newbaby-spacebaby": { title: "Baby Space", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-spacebaby-preview.png", full: "newbaby-spacebaby.png", name: { left: 893, top: 622, startSize: 42, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#2d659a", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 900, top: 360, width: 390, height: 350 } },
   
   "fathers-day-peaky": { title: "Fathers Day Peaky Dad", description: "A lovely card to celebrate Father's Day.", categories: ["mothersday-fathersday"], preview: "fathers-day-peaky-preview.png", full: "fathers-day-peaky.png" },
   "fathers-day-pub": { title: "Fathers Day Pub", description: "A lovely card to celebrate Father's Day.", categories: ["mothersday-fathersday"], preview: "fathers-day-pub-preview.png", full: "fathers-day-pub.png" },
