@@ -22,15 +22,11 @@ const CARD_CATALOGUE = {
   "birthday-horse-boy": { title: "Racing Gent", description: "A horse racing themed birthday card - perfect for the racing fan in your life.", categories: ["all", "for-him", "horseracing", "birthdays"], preview: "birthday-horse-boy-preview.png", full: "birthday-horse-boy.png" },
   "birthday-gymgirl": { title: "Gym Birthday Babe", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-gymgirl-preview.png", full: "birthday-gymgirl.png" },
   "birthday-gymboy": { title: "Gym Bro Birthday", description: "A colourful birthday card.", categories: ["all", "for-him", "birthdays"], preview: "birthday-gymboy-preview.png", full: "birthday-gymboy.png" },
-  "birthday-girl1": { title: "Kids Birthday Girl", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays", "children"], preview: "birthday-girl1-preview.png", full: "birthday-girl1.png" },
-  "birthday-boy1": { title: "Kids Birthday Boy", description: "A colourful birthday card.", categories: ["all", "for-him", "birthdays", "children"], preview: "birthday-boy1-preview.png", full: "birthday-boy1.png" },
   "birthday-f1-racer": { title: "F1 Racer", description: "A colourful birthday card.", categories: ["all", "for-him", "birthdays", "children"], preview: "birthday-f1-racer-preview.png", full: "birthday-f1-racer.png" },
   "birthday-cake1": { title: "Birthday Cake", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-cake1-preview.png", full: "birthday-cake1.png" },
-  "birthday-cake2": { title: "Piece of Cake", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-cake2-preview.png", full: "birthday-cake2.png" },
   "birthday-baking-girl": { title: "Baking Girls Birthday", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-baking-girl-preview.png", full: "birthday-baking.png" },
   "birthday-beachhut": { title: "Beach Hut Birthday", description: "A colourful birthday card.", categories: ["all", "for-him", "for-her", "birthdays"], preview: "birthday-beachhut-preview.png", full: "birthday-beachhut.png" },
   "birthday-coffee-cake": { title: "Coffee & Cake", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-coffee-cake-preview.png", full: "birthday-coffee-cake.png" },
-  "birthday-hydrangea": { title: "Birthday Hydrangea", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-hydrangea-preview.png", full: "birthday-hydrangea.png" },
   "birthday-flowers": { title: "Birthday Flowers", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-flowers-preview.png", full: "birthday-flowers.png" },
   "birthday-vintagegolf": { title: "Vintage Golfer", description: "A colourful birthday card.", categories: ["all", "for-him", "birthdays", "golf", "sports"], preview: "birthday-vintagegolf-preview.png", full: "birthday-vintagegolf.png" },
   "birthday-vintagefootball": { title: "Vintage Footballer", description: "A colourful birthday card.", categories: ["all", "for-him", "birthdays", "football", "sports"], preview: "birthday-vintagefootball-preview.png", full: "birthday-vintagefootball.png" },
@@ -47,8 +43,6 @@ const CARD_CATALOGUE = {
   "birthday-butterflies": { title: "Birthday Butterflies", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthdaybutterflies-preview.png", full: "birthdaybutterflies.png" },
   "birthday-bbqboss": { title: "BBQ Boss Birthday", description: "A fun birthday card for someone who loves a cold drink or a good BBQ.", categories: ["all", "for-him", "birthdays"], preview: "bbqboss-preview.png", full: "bbqboss.png", name: { left: 894, top: 287, startSize: 68, minSize: 68, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#feeec6", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 700, tiltAngle: 0, label: "Name", maxChars: 9 } },
   "birthday-djboy": { title: "DJ Boy Card", description: "A birthday card for the party-starter in your life.", categories: ["all", "for-him", "birthdays"], preview: "dj-boy-preview.png", full: "dj-boy.png" },
-  "birthday-gameboy-minecraft": { title: "Minecraft Gaming Boy Card", description: "A birthday card for the gamer in your life.", categories: ["all", "for-him", "birthdays", "children"], preview: "gamingboy-minecraft-preview.png", full: "gamingboy-minecraft.png" },
-  "birthday-gamegirl-minecraft": { title: "Minecraft Gaming Girl Card", description: "A birthday card for the gamer in your life.", categories: ["all", "for-her", "birthdays", "children"], preview: "gaminggirl-minecraft-preview.png", full: "gaminggirl-minecraft.png" },
   "birthday-gamer-boy": { title: "Game Boy", description: "A birthday card for the gamer in your life.", categories: ["all", "for-him", "birthdays", "children"], preview: "gaming-boy-preview.png", full: "gaming-boy.png" },
   "birthday-gamer-girl": { title: "Game Girl", description: "A birthday card for the gamer in your life.", categories: ["all", "for-her", "birthdays", "children"], preview: "gaming-girl-preview.png", full: "gaming-girl.png" },
   "birthday-gamer-fortnite-boy": { title: "Fortn1te Boy", description: "A birthday card for the gamer in your life.", categories: ["all", "for-him", "birthdays", "children"], preview: "gaming-fortnite-boy-preview.png", full: "gaming-fortnite-boy.png", name: { left: 890, top: 331, startSize: 88, minSize: 80, maxSize: 95, fontFamily: "Anton", fontWeight: "normal", color: "#ffc700", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 9 } },
@@ -69,8 +63,15 @@ const CARD_CATALOGUE = {
   "birthday-dad-diydad": { title: "DIY Dad", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-him", "dad", "birthdays"], preview: "dad-diydad-preview.png", full: "dad-diydad.png" },
   "birthday-fabbirthday": { title: "Fab Birthday", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "birthdays"], preview: "fabbirthday-preview.png", full: "fabbirthday.png" },
   
+  "birthday-boys-party": { title: "Boys Birthday Party", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "boys-party-preview.png", full: "boys-party.png" },
+  "birthday-dinos-birthday": { title: "Dinos Birthday", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "dinos-birthday-preview.png", full: "dinos-birthday.png" },
+  "birthday-girls-party": { title: "Girls Birthday Party", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "girls-party-preview.png", full: "girls-party.png" },
+  "birthday-boys-toys": { title: "Boys Toys", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "boys-toys-preview.png", full: "boys-toys.png" },
+  "birthday-girls-toys": { title: "Girls Toys", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "girls-toys-preview.png", full: "girls-toys.png" },
+  "birthday-girls-toys": { title: "Girls Toys", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "girls-toys-preview.png", full: "girls-toys.png" },
+  "birthday-minecraft-boy": { title: "Minecraft Birthday Boy", description: "S.", categories: ["children", "birthdays"], price: "£3.49", preview: "minecraft-girl-preview.png", full: "minecraft-girl.png", name: { left: 897, top: 728, startSize: 52, minSize: 35, maxSize: 60, fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FD7D96", canChangeSize: true, canChangeColor: true, canMove: false, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 14 } },
+  "birthday-minecraft-girl": { title: "Minecraft Birthday Girl", description: "S.", categories: ["children", "birthdays"], price: "£3.49", preview: "minecraft-girl-preview.png", full: "minecraft-girl.png", name: { left: 897, top: 728, startSize: 52, minSize: 35, maxSize: 60, fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FD7D96", canChangeSize: true, canChangeColor: true, canMove: false, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 14 } },
   
-
   
   "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["mum", "birthdays", "photo-upload"], preview: "birthday-mum-photo1-preview.png", full: "birthday-mum-photo1.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
@@ -85,7 +86,7 @@ const CARD_CATALOGUE = {
     // the center of the circle; width/height is a square slightly larger
     // than the circle's diameter (the artwork's own round cutout does the
     // actual round clipping, so the square only needs to fully cover it).
-    photo: { left: 742, top: 198, width: 290, height: 290 } },
+    photo: { left: 742, top: 180, width: 270, height: 290 } },
   
   
   "drivingtest-boy1": { title: "Driving Test Pass Boy", description: "Celebrate passing their driving test with this fun congratulations card.", categories: ["all", "for-him", "achievements"], preview: "drivingtest-boy1-preview.png", full: "drivingtest-boy1.png",
@@ -127,7 +128,7 @@ const CARD_CATALOGUE = {
   "newbaby-beautifulbabyboy": { title: "Beautiful Baby Boy", description: "Welcome the new arrival with this new baby card.", categories: ["all", "newbaby"], preview: "newbaby-beautifulbabyboy-preview.png", full: "newbaby-beautifulbabyboy.png" },
   "newbaby-hellolittleone": { title: "Hello Little One", description: "Welcome the new arrival with this new baby card.", categories: ["all", "newbaby"], preview: "newbaby-hellolittleone-preview.png", full: "newbaby-hellolittleone.png" },
   
-  "newbaby-butterflies": { title: "Baby Butterflies", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-butterflies-preview.png", full: "newbaby-butterflies.png", name: { left: 893, top: 620, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
+  "newbaby-butterflies": { title: "Baby Butterflies", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-butterflies-preview.png", full: "newbaby-butterflies.png", name: { left: 894, top: 620, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
     photo: { left: 897, top: 405, width: 450, height: 350 } },
   
   "newbaby-itsagirl": { title: "It's a Girl", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-itsagirl-preview.png", full: "newbaby-itsagirl.png", name: { left: 893, top: 635, startSize: 43, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 15 },
@@ -139,7 +140,7 @@ const CARD_CATALOGUE = {
   "newbaby-rainbows": { title: "Baby Rainbows", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-rainbows-preview.png", full: "newbaby-rainbows.png", name: { left: 895, top: 623, startSize: 38, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
     photo: { left: 894, top: 415, width: 465, height: 325 } },
   
-  "newbaby-spacebaby": { title: "Baby Space", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-spacebaby-preview.png", full: "newbaby-spacebaby.png", name: { left: 893, top: 623, startSize: 42, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#2d659a", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
+  "newbaby-spacebaby": { title: "Space Teddy", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-spacebaby-preview.png", full: "newbaby-spacebaby.png", name: { left: 893, top: 623, startSize: 42, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#2d659a", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
     photo: { left: 894, top: 413, width: 350, height: 330 } },
   
   "fathers-day-peaky": { title: "Fathers Day Peaky Dad", description: "A lovely card to celebrate Father's Day.", categories: ["mothersday-fathersday"], preview: "fathers-day-peaky-preview.png", full: "fathers-day-peaky.png" },
@@ -296,7 +297,7 @@ const CARD_CATALOGUE = {
   "vintagecricket": { title: "Vintage Cricket", description: "A cricket-themed card for the player who lives for the crease - add their name.", categories: ["sports", "for-him", "cricket"], preview: "vintagecricket-preview.png", full: "vintagecricket.png" },
   
   "dartsmasterphoto": { title: "Darts Master", price: "£3.49", description: "A darts-themed card for the player who's always aiming for the bullseye - add their name.", categories: ["sports", "darts", "for-him", "photo-upload"], preview: "dartsmasterphoto-preview.png", full: "dartsmasterphoto.png", 
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
+    photo: { left: 894, top: 413, width: 350, height: 330 } },
   
   
   "5kboy-photo": { title: "5K Achievement Boy", price: "£3.49", description: "Celebrate their 5K running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "5kboy-photo-preview.png", full: "5kboy-photo.png",
