@@ -534,6 +534,7 @@ const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth
 let canvas, bgImg, backCoverImg, nameText, ageText;
 let extraTexts = []; // fabric.Text objects, parallel to activeTemplate.extraFields
 let photoImg;
+let photoPromptGroup; // "Upload Photo" hint shown over the frame until a photo is uploaded — see setupTextsAndOverlays/loadPhotoIntoFrame
 let qrImg; // static QR-code overlay -- stays hidden on-screen, only made
            // visible for the brief moment the front spread is captured for
            // print/checkout (see showQrForCapture / captureAndBuildPrintPDF)
@@ -865,6 +866,44 @@ function setupTextsAndOverlays() {
         });
     }
 
+    // "Upload Photo" hint, sat behind the artwork so it only shows through
+    // the frame's transparent cutout — visible until the customer supplies
+    // a photo (see loadPhotoIntoFrame, which hides it), and only for cards
+    // that actually have a photo frame.
+    // Not itself clickable (evented: false) — clicking anywhere in the
+    // frame area is handled by the canvas-level mouse:down listener set
+    // up in setupPhotoAdjustWidget, which works whether or not this hint
+    // happens to be showing.
+    if (activeTemplate.photo) {
+        const p = activeTemplate.photo;
+        photoPromptGroup = new fabric.Group([
+            new fabric.Rect({
+                left: 0, top: 0, originX: "center", originY: "center",
+                width: p.width, height: p.height, rx: 12, ry: 12,
+                fill: "rgba(255,255,255,0.35)",
+                stroke: "#1A73E8", strokeDashArray: [10, 8], strokeWidth: 2
+            }),
+            new fabric.Text("+", {
+                left: 0, top: -24, originX: "center", originY: "center",
+                fontSize: 54, fontFamily: "Arial", fontWeight: "bold", fill: "#1A73E8"
+            }),
+            new fabric.Text("Upload Photo", {
+                left: 0, top: 26, originX: "center", originY: "center",
+                fontSize: 24, fontFamily: "Arial", fontWeight: "bold", fill: "#1A73E8"
+            })
+        ], {
+            left: p.left, top: p.top, originX: "center", originY: "center",
+            selectable: false, evented: false
+        });
+        canvas.add(photoPromptGroup);
+        // Sit behind the artwork, same as the uploaded photo itself (see
+        // canvas.sendToBack(photoImg) in loadPhotoIntoFrame) — only the
+        // part showing through the artwork's transparent cutout is visible.
+        canvas.sendToBack(photoPromptGroup);
+    } else {
+        photoPromptGroup = null;
+    }
+
     leftPageBg = new fabric.Rect({ left: 0, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
     rightPageBg = new fabric.Rect({ left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
 
@@ -935,6 +974,9 @@ function handlePhotoUpload(inputEl) {
 function loadPhotoIntoFrame(dataUrl) {
     const p = activeTemplate?.photo;
     if (!p) return;
+
+    // Photo supplied — the "Upload Photo" hint has done its job.
+    photoPromptGroup?.set({ visible: false });
 
     fabric.Image.fromURL(dataUrl, (img) => {
         if (photoImg) canvas.remove(photoImg);
@@ -1082,7 +1124,34 @@ let tapCandidate = null;
 const TAP_MOVE_THRESHOLD = 8;  // canvas-space px — more than this and it's a drag, not a tap
 const TAP_MAX_MS = 400;
 
+// Frame-click-to-upload: before a photo exists, clicking/tapping anywhere
+// inside the frame's bounding box opens the file picker — an alternative
+// to using the "Upload Photo" control in the sidebar. Works on both
+// desktop and mobile (unlike the rest of setupPhotoAdjustWidget, which is
+// desktop-only) since there's no photo object yet to conflict with.
+function pointInPhotoFrame(pointer) {
+    const p = activeTemplate?.photo;
+    if (!p) return false;
+    return pointer.x >= p.left - p.width / 2 && pointer.x <= p.left + p.width / 2 &&
+           pointer.y >= p.top - p.height / 2 && pointer.y <= p.top + p.height / 2;
+}
+
 function setupPhotoAdjustWidget() {
+    canvas.on('mouse:down', (opt) => {
+        if (photoImg || currentPage !== 'front' || !activeTemplate.photo) return;
+        if (pointInPhotoFrame(canvas.getPointer(opt.e))) {
+            $('photo-input').click();
+        }
+    });
+
+    // Show a pointer cursor while hovering the empty frame, as a hint that
+    // it's clickable.
+    canvas.on('mouse:move', (opt) => {
+        if (photoImg || currentPage !== 'front' || !activeTemplate.photo) return;
+        canvas.upperCanvasEl.style.cursor = pointInPhotoFrame(canvas.getPointer(opt.e))
+            ? 'pointer' : canvas.defaultCursor;
+    });
+
     // Desktop: a double-click anywhere on the front artwork re-opens the
     // photo editing controls. This deliberately does not require the second
     // click to land on the photo itself, because the photo is normally behind
@@ -1507,6 +1576,7 @@ function switchPage(page) {
     // we're on — see loadPhotoIntoFrame/closePhotoToolbar. Only the Adjust
     // widget's open state needs resetting when we leave the front page.
     photoImg?.set({ visible: isFront });
+    photoPromptGroup?.set({ visible: isFront && !photoImg });
     if (!isFront) closePhotoToolbar();
 
     canvas.discardActiveObject();
