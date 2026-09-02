@@ -137,7 +137,7 @@ const CARD_CATALOGUE = {
     photo: { left: 895, top: 370, width: 470, height: 340 } },
   
   "newbaby-rainbows": { title: "Baby Rainbows", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-rainbows-preview.png", full: "newbaby-rainbows.png", name: { left: 895, top: 623, startSize: 38, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
-    photo: { left: 894, top: 410, width: 465, height: 325 } },
+    photo: { left: 894, top: 415, width: 465, height: 325 } },
   
   "newbaby-spacebaby": { title: "Baby Space", price: "£3.49", description: "Welcome the new arrival with this new baby card. Add a photo and their name.", categories: ["all", "newbaby", "photo-upload"], preview: "newbaby-spacebaby-preview.png", full: "newbaby-spacebaby.png", name: { left: 893, top: 623, startSize: 42, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#2d659a", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
     photo: { left: 894, top: 413, width: 350, height: 330 } },
