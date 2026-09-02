@@ -1395,7 +1395,7 @@ function updateNameText(inputEl) {
     if (inputEl.value !== rawVal) inputEl.value = rawVal;
 
     if (n.isCurved) {
-        const size = Number($("front-size").value) || n.startSize;
+        const size = n.canChangeSize ? (Number($("front-size").value) || n.startSize) : n.startSize;
         const color = n.canChangeColor ? ($("front-color").value || n.color) : n.color;
         replaceNameText(buildCurvedNameGroup(displayVal, size, color));
     } else {
@@ -1468,7 +1468,7 @@ function updateFrontColor(hexColor) {
     const n = activeTemplate?.name;
     if (n?.isCurved) {
         const val = $("name-input").value;
-        const size = Number($("front-size").value) || n.startSize;
+        const size = n.canChangeSize ? (Number($("front-size").value) || n.startSize) : n.startSize;
         replaceNameText(buildCurvedNameGroup(val, size, hexColor));
     } else {
         nameText?.set({ fill: hexColor });
