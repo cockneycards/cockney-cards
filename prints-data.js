@@ -100,6 +100,20 @@ const PRINT_CATALOGUE = {
         categories: ["all", "b&w"],
         preview: "print-thistimenextyear-preview.png",
         full: "print-thistimenextyear.png"
+       
+    },
+    "album-oasis-dm": {
+        title: "Oasis - Definitely Maybe - Album Artwork",
+        description: "Oasis's Definitely Maybe album print will look great on any wall at home or even at work in the office.",
+        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 4.99 },
+            A4: { price: "£9.99", priceValue: 6.99 },
+            A3: { price: "£12.99", priceValue: 9.99 }
+        },
+        categories: ["all", "music"],
+        preview: "album-oasis-dm-preview.png",
+        full: "album-oasis-dm.png"
         
      },
     "album-mjbad": {
@@ -114,19 +128,7 @@ const PRINT_CATALOGUE = {
         categories: ["all", "music"],
         preview: "album-mj-bad-preview.png",
         full: "album-mj-bad.png"
-    },
-    "album-oasis-dm": {
-        title: "Oasis - Definitely Maybe - Album Artwork",
-        description: "Oasis's Definitely Maybe album print will look great on any wall at home or even at work in the office.",
-        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
-        sizes: {
-            A5: { price: "£6.99", priceValue: 4.99 },
-            A4: { price: "£9.99", priceValue: 6.99 },
-            A3: { price: "£12.99", priceValue: 9.99 }
-        },
-        categories: ["all", "music"],
-        preview: "album-oasis-dm-preview.png",
-        full: "album-oasis-dm.png"
+
     },
     "album--bobm": {
         title: "Bob Marley - Legend - Album Artwork",
@@ -487,23 +489,8 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "b&w"],
         preview: "doghouserules-preview.png",
-        full: "houserules-preview.png"
-    },
-   "dinosaurs": {
-        title: "Dinosaur Duo",
-        description: "Dinosaur duo prints that will look great on any wall at home or even at work in the office.",
-        price: "£6.99", priceValue: 4.99, // "from" price shown on the shop grid (cheapest size, A5)
-        sizes: {
-            A5: { price: "£9.99", priceValue: 6.99 },
-            A4: { price: "£12.99", priceValue: 9.99 },
-            A3: { price: "£12.99", priceValue: 12.99 }
-        },
-        categories: ["all", "childrens"],
-        preview: "dinosaurs.png",
-        full: "dinosaurwoof.png",
-        variants: [
-          { id: "dinosauraghh", full: "dinosauraghh.png" },
-        ]
+        full: "houserules.png"
+
     },    
     "itsnotwhatwehave": {
         title: "It's Not What We Have In Life...",
