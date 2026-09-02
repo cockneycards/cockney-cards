@@ -65,7 +65,12 @@ const CARD_CATALOGUE = {
   "birthday-youngones": { title: "The Young Ones", description: "A birthday card for fans of classic film and TV nostalgia.", categories: ["all", "birthdays", "tv-movies"], preview: "birthday-youngones-preview.png", full: "birthday-youngones.png" },
   "birthday-charlie-says": { title: "Charlie Says..", description: "A birthday card for fans of classic film and TV nostalgia.", categories: ["all", "for-him", "birthdays"], preview: "charlie-says-preview.png", full: "charlie-says.png" },
   "birthday-wine-girls": { title: "Wine Girls Card", description: "A fun birthday card for someone who loves a glass of wine with friends.", categories: ["all", "for-her", "birthdays"], preview: "wine-girls-preview.png", full: "wine-girls.png" },
-  "birthday-yoga-girl": { title: "Pilates Princess", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "sports", "birthdays", "fitness"], preview: "pilates-princess-yoga-preview.png", full: "pilates-princess-yoga.png" },
+  "birthday-nan-puddles": { title: "Puddles with Nan", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "nan-puddles-preview.png", full: "nan-puddles.png" },
+  "birthday-dad-learntoride": { title: "Learning to Ride a Bike", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-him", "dad", "birthdays"], preview: "dad-learntoride-preview.png", full: "dad-learntoride.png" },
+  "birthday-dad-diydad": { title: "DIY Dad", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-him", "dad", "birthdays"], preview: "dad-diydad-preview.png", full: "dad-diydad.png" },
+  
+  
+
   
   "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["mum", "birthdays", "photo-upload"], preview: "birthday-mum-photo1-preview.png", full: "birthday-mum-photo1.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
