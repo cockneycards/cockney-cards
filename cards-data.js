@@ -159,12 +159,12 @@ const CARD_CATALOGUE = {
   "fathers-day-sopranos": { title: "Fathers Day Sopranos Dad", categories: ["mothersday-fathersday"], preview: "fathers-day-sopranos-preview.png", full: "fathers-day-sopranos.png" },
   "fathers-day-godfather": { title: "Fathers Day Godfather Dad", categories: ["mothersday-fathersday"], preview: "fathers-day-godfather-preview.png", full: "fathers-day-godfather.png" },
   
-  "teaching-assistant1": { title: "Best Teaching Assistant", categories: ["all", "school-cards", "thank-you"], preview: "teaching-assistant1-preview.png", full: "teaching-assistant1.png" },
-  "teaching-assistant2": { title: "Teaching Assistant, Thank you", categories: ["all", "school-cards", "thank-you"], preview: "teaching-assistant2-preview.png", full: "teaching-assistant2.png" },
-  "thankyou-teacher1": { title: "Teacher, Thank You!", categories: ["all", "school-cards", "thank-you"], preview: "thankyou-teacher1-preview.png", full: "thankyou-teacher.png" },
-  "superteacher-boy": { title: "Greatest Teacher", categories: ["all", "school-cards", "thank-you"], preview: "superteacher-boy-preview.png", full: "superteacher-boy.png" },
-  "superteacher-girl": { title: "Super Teacher", categories: ["all", "school-cards", "thank-you"], preview: "superteacher-girl-preview.png", full: "superteacher-girl.png" },
-  "thankyou-teacher": { title: "Thank You, Teacher Card", categories: ["all", "school-cards", "thank-you"], price: "£3.49", preview: "thankyou-teacher-preview.png", full: "thankyou-teacher.png", name: { left: 897, top: 728, startSize: 52, minSize: 35, maxSize: 60, fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FD7D96", canChangeSize: true, canChangeColor: true, canMove: false, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 14 } },
+  "teaching-assistant1": { title: "Best Teaching Assistant", categories: ["all", "school-cards"], preview: "teaching-assistant1-preview.png", full: "teaching-assistant1.png" },
+  "teaching-assistant2": { title: "Teaching Assistant, Thank you", categories: ["all", "school-cards"], preview: "teaching-assistant2-preview.png", full: "teaching-assistant2.png" },
+  "thankyou-teacher1": { title: "Teacher, Thank You!", categories: ["all", "school-cards"], preview: "thankyou-teacher1-preview.png", full: "thankyou-teacher.png" },
+  "superteacher-boy": { title: "Greatest Teacher", categories: ["all", "school-cards"], preview: "superteacher-boy-preview.png", full: "superteacher-boy.png" },
+  "superteacher-girl": { title: "Super Teacher", categories: ["all", "school-cards"], preview: "superteacher-girl-preview.png", full: "superteacher-girl.png" },
+  "thankyou-teacher": { title: "Thank You, Teacher Card", categories: ["all", "school-cards], price: "£3.49", preview: "thankyou-teacher-preview.png", full: "thankyou-teacher.png", name: { left: 897, top: 728, startSize: 52, minSize: 35, maxSize: 60, fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FD7D96", canChangeSize: true, canChangeColor: true, canMove: false, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 14 } },
   
   "mothers-day1": { title: "Mothers Day", categories: ["mothersday-fathersday"], preview: "mothers-day1-preview.png", full: "mothers-day1.png" },
   "mothers-day2": { title: "Mothers Day", categories: ["mothersday-fathersday"], preview: "mothers-day2-preview.png", full: "mothers-day2.png" },
