@@ -527,7 +527,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const nudge = document.getElementById('account-nudge');
     if (nudge) {
         nudge.innerHTML = (typeof ccIsLoggedIn === 'function' && ccIsLoggedIn())
-            ? `Ordering as ${ccGetEmail()} — this'll be saved to your order history.`
+            ? ''
             : `<a href="account.html" style="color:#1A73E8;">Log in</a> to save this order to your account for next time.`;
     }
 
