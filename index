@@ -331,7 +331,7 @@
 
         <nav class="primary-nav" aria-label="Primary">
             <a href="index.html" class="active">Home</a>
-            <a href="shop.html">Shop
+            <a href="shop-cards.html">Shop
                 <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4"/></svg>
             </a>
             <a href="create-your-card.html">Create Your Card</a>
@@ -362,7 +362,7 @@
             <p class="lede">Create meaningful, personalised cards for any occasion. Add your own text, photos and make it truly yours.</p>
             <div class="hero-actions">
                 <a href="create-your-card.html" class="btn btn-solid">Create Your Card</a>
-                <a href="shop.html" class="btn btn-outline">Shop All Cards</a>
+                <a href="shop-cards.html" class="btn btn-outline">Shop All Cards</a>
             </div>
         </div>
         <div class="hero-visual">
@@ -386,7 +386,7 @@
         </div>
 
         <div class="occasion-grid">
-            <a href="shop.html?occasion=birthday" class="occasion-card">
+            <a href="shop-cards.html?occasion=birthday" class="occasion-card">
                 <div class="thumb">
                     <div class="card-scene">
                         <div class="envelope"></div>
@@ -399,7 +399,7 @@
                 </div>
             </a>
 
-            <a href="shop.html?occasion=thank-you" class="occasion-card">
+            <a href="shop-cards.html?occasion=thank-you" class="occasion-card">
                 <div class="thumb">
                     <div class="card-scene">
                         <div class="envelope"></div>
@@ -412,7 +412,7 @@
                 </div>
             </a>
 
-            <a href="shop.html?occasion=congratulations" class="occasion-card">
+            <a href="shop-cards.html?occasion=congratulations" class="occasion-card">
                 <div class="thumb">
                     <div class="card-scene">
                         <div class="envelope"></div>
@@ -425,7 +425,7 @@
                 </div>
             </a>
 
-            <a href="shop.html?occasion=thinking-of-you" class="occasion-card">
+            <a href="shop-cards.html?occasion=thinking-of-you" class="occasion-card">
                 <div class="thumb">
                     <div class="card-scene">
                         <div class="envelope"></div>
@@ -438,7 +438,7 @@
                 </div>
             </a>
 
-            <a href="shop.html?occasion=anniversary" class="occasion-card">
+            <a href="shop-cards.html?occasion=anniversary" class="occasion-card">
                 <div class="thumb">
                     <div class="card-scene">
                         <div class="envelope"></div>
@@ -453,7 +453,7 @@
         </div>
 
         <div class="view-all-wrap">
-            <a href="shop.html" class="btn-ghost">View All Occasions</a>
+            <a href="shop-cards.html" class="btn-ghost">View All Occasions</a>
         </div>
     </section>
 
