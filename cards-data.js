@@ -285,8 +285,8 @@ const CARD_CATALOGUE = {
 
   "nolu-lion1": { title: "No One Likes Us Lion Card", description: "A beautifully designed \"No One Likes Us Lion Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "millwall"], preview: "nolu-lion1-preview.png", full: "nolu-lion1.png", name: { left: 890, top: 246, startSize: 75, minSize: 70, maxSize: 78, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 610, tiltAngle: -3, label: "Name", maxChars: 12 } },
   
-  "birthday-mfc-photo1": { title: "Lions Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo and their name.", categories: ["sports", "football", "championship", "millwall", "photo-upload"], preview: "lions-birthday-preview.png", full: "lions-birthday.png", name: { left: 898, top: 752, startSize: 65, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 8 },
-    photo: { left: 1008, top: 180, width: 340, height: 340 } },
+  "birthday-mfc-photo1": { title: "Lions Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo and their name.", categories: ["sports", "football", "championship", "millwall", "photo-upload"], preview: "lions-birthday-preview.png", full: "lions-birthday.png", name: { left: 898, top: 752, startSize: 63, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 580, tiltAngle: -0, label: "Name", maxChars: 9 },
+    photo: { left: 1008, top: 180, width: 310, height: 310 } },
   
   "whu-shirt": { title: "West Ham Shirt Card", description: "A personalised West Ham shirt card - add their name and squad number to the back of the shirt.", categories: ["sports", "football", "championship", "west-ham"], price: "£3.49", preview: "whu-shirt-preview.png", full: "whu-shirt.png", name: { left: 885, top: 550, startSize: 40, minSize: 30, maxSize: 45, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 12 }, age: { left: 885, top: 635, startSize: 90, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: true, label: "Shirt", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "40" } },
   
@@ -298,7 +298,7 @@ const CARD_CATALOGUE = {
   "vintagecricket": { title: "Vintage Cricket", description: "A cricket-themed card for the player who lives for the crease - add their name.", categories: ["sports", "for-him", "cricket"], preview: "vintagecricket-preview.png", full: "vintagecricket.png" },
   
   "dartsmasterphoto": { title: "Darts Master", price: "£3.49", description: "A darts-themed card for the player who's always aiming for the bullseye - add their name.", categories: ["sports", "darts", "for-him", "photo-upload"], preview: "dartsmasterphoto-preview.png", full: "dartsmasterphoto.png", 
-    photo: { left: 892, top: 510, width: 320, height: 320 } },
+    photo: { left: 892, top: 530, width: 320, height: 320 } },
   
   
   "5kboy-photo": { title: "5K Achievement Boy", price: "£3.49", description: "Celebrate their 5K running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "5kboy-photo-preview.png", full: "5kboy-photo.png",
