@@ -46,10 +46,10 @@ const CARD_CATALOGUE = {
   "birthday-best-mum-ever": { title: "Best Mum Ever", description: "A colourful birthday card.", categories: ["all", "for-her", "mum", "birthdays"], preview: "best-mum-ever-preview.png", full: "best-mum-ever.png" },
   "birthday-superbusy-mum": { title: " Super Busy Mum", description: "A colourful birthday card.", categories: ["all", "for-her", "mum", "birthdays"], preview: "superbusy-mum-preview.png", full: "superbusy-mum.png" },
   "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["mum", "birthdays", "photo-upload"], preview: "mum-photo1-preview.png", full: "mum-photo1.png",
-    photo: { left: 890, top: 540, width: 408.1, height: 350 } },
+    photo: { left: 890, top: 520, width: 408.1, height: 350 } },
 
   "birthday-dad-photo1": { title: "Happy Birthday Dad", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["dad", "birthdays", "photo-upload"], preview: "dad-photo1-preview.png", full: "dad-photo1.png",
-    photo: { left: 890, top: 500, width: 440, height: 370 } },
+    photo: { left: 895, top: 490, width: 440, height: 350 } },
   
   "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "handsomehubby-preview.png", full: "handsomehubby.png",
     photo: { left: 870, top: 600, width: 380, height: 380 } },
@@ -86,7 +86,7 @@ const CARD_CATALOGUE = {
   "birthday-boys-toys": { title: "Boys Toys", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "boys-toys-preview.png", full: "boys-toys.png" },
   "birthday-girls-toys": { title: "Girls Toys", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "girls-toys-preview.png", full: "girls-toys.png" },
   "birthday-girls-toys": { title: "Girls Toys", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "girls-toys-preview.png", full: "girls-toys.png" },
-  "birthday-minecraft-girl": { title: "Minecraft Girl", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "minecraft-girly-preview.png", full: "minecraft-girly.png" },
+  "birthday-minecraft-girly": { title: "Minecraft Girl", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["children", "birthdays"], preview: "minecraft-girly-preview.png", full: "minecraft-girly.png" },
   "birthday-minecraft-boy": { title: "Minecraft Birthday Boy", description: "S.", categories: ["children", "birthdays"], price: "£3.49", preview: "minecraft-boy-preview.png", full: "minecraft-boy.png", name: { left: 895, top: 290, startSize: 80, minSize: 35, maxSize: 60, fontFamily: "CaacupeOne-Regular", fontWeight: "bold", color: "#004aad", canChangeSize: false, canChangeColor: false, canMove: true, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 9 } },
   "birthday-minecraft-girl": { title: "Minecraft Birthday Girl", description: "S.", categories: ["children", "birthdays"], price: "£3.49", preview: "minecraft-girl-preview.png", full: "minecraft-girl.png", name: { left: 894, top: 744, startSize: 110, minSize: 35, maxSize: 60, fontFamily: "CaacupeOne-Regular", fontWeight: "bold", color: "#5e17eb", canChangeSize: false, canChangeColor: false, canMove: true, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 9 } },
   
