@@ -114,7 +114,7 @@ const CARD_CATALOGUE = {
   "drivingtestboy": { title: "Driving Pass Congratulations Boy", categories: ["all", "achievements"], preview: "drivingtestboy-preview.png", full: "drivingtestboy.png" },
   "drivingtest-girl4": { title: "Driving Pass Congratulations Girl", categories: ["all", "achievements"], preview: "drivingtest-girl4-preview.png", full: "drivingtest-girl4.png" },
   "learner1": { title: "Driving Test Pass Card", categories: ["all", "achievements"], preview: "learner1-preview.png", full: "learner1.png" },
-  "learner2": { title: "Driving Test Pass Card Girl", categories: ["all", "achievements"], preview: "learner2-preview.png", full: "learner2.png" },
+  "learner": { title: "Driving Test Pass Card Girl", categories: ["all", "achievements"], preview: "learner-preview.png", full: "learner.png" },
   
   "exams-boy": { title: "Exams Congratulations Card", categories: ["all", "achievements"], preview: "exams-boy-preview.png", full: "exams-boy.png" },
   "exams-girl": { title: "Exams Congratulations Girl", categories: ["all", "achievements"], preview: "exams-girl-preview.png", full: "exams-girl.png" },
