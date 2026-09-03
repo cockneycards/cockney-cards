@@ -36,7 +36,7 @@ const CARD_CATALOGUE = {
   
   "birthday-grandad-horseracingtv": { title: "Grandad's Horse Racing", description: "A horse racing themed birthday card - perfect for the racing fan in your life.", categories: ["grandad","birthdays", "horseracing"], preview: "birthday-grandad-horseracingtv-preview.png", full: "birthday-grandad-horseracingtv.png" },
   "birthday-grandad-football-girl": { title: "Grandad & Granddaughter Football", description: "A warm birthday card celebrating time spent with the family.", categories: ["birthdays", "grandad"], preview: "birthday-grandad-football-girl-preview.png", full: "birthday-grandad-football-girl.png" },
-  "birthday-grandad-football-garden": { title: "Grandad's Garden Football", description: "A warm birthday card celebrating time spent with the family.", categories: ["birthdays", "grandad"], preview: "birthday-grandad-football-garden-preview.png", full: "birthday-grandad-football-garden.png" },
+  "birthday-grandad-football-garden": { title: "Grandad & Grandson Football", description: "A warm birthday card celebrating time spent with the family.", categories: ["birthdays", "grandad"], preview: "birthday-grandad-football-garden-preview.png", full: "birthday-grandad-football-garden.png" },
   "birthday-grandad-catch-girl": { title: "Grandad & Granddaughter Playing Catch", description: "A warm birthday card celebrating time spent with the family.", categories: ["grandad", "birthdays"], preview: "birthday-grandad-catch-girl-preview.png", full: "birthday-grandad-catch-girl.png" },
   "birthday-grandad-fishing-boy": { title: "Grandad & Grandson Fishing", description: "A warm birthday card celebrating time spent with the family.", categories: ["birthdays", "grandad"], preview: "birthday-grandad-fishing-preview.png", full: "birthday-grandad-fishing.png" },
   "birthday-grandads-caravan": { title: "Grandads Caravan", description: "A warm birthday card celebrating time spent with the family.", categories: ["all", "birthdays", "grandad"], preview: "grandads-caravan-preview.png", full: "grandads-caravan.png" },
@@ -52,7 +52,7 @@ const CARD_CATALOGUE = {
     photo: { left: 896, top: 470, width: 440, height: 350 } },
   
   "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "handsomehubby-preview.png", full: "handsomehubby.png",
-    photo: { left: 870, top: 300, width: 400, height: 380 } },
+    photo: { left: 880, top: 360, width: 380, height: 380 } },
   
   "birthday-nan-puddles": { title: "Puddles with Nan", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "nan-puddles-preview.png", full: "nan-puddles.png" },
   "birthday-baking-nan": { title: "Nans Bakery", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "baking-nan-preview.png", full: "baking-nan.png" },
