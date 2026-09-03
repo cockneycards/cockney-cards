@@ -283,7 +283,7 @@ const CARD_CATALOGUE = {
 
   "cardiff-fan": { title: "Cardiff City Fan", description: "A beautifully designed \"Millwall Christmas Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "cardiff"], preview: "cardiff-fan-preview.png", full: "cardiff-fan.png" },
   "norwich-fan": { title: "Norwich City Fan", description: "A beautifully designed \"Millwall Christmas Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "norwich"], preview: "norwich-fan-preview.png", full: "norwich-fan.png" },
-  "middlesbrough-lion": { title: "Middlesbrough Lion", description: "A beautifully designed \"Millwall Christmas Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "wrexham"], preview: "middlesbrough-lion-preview.png", full: "middlesbrough-lion.png" },
+  "middlesbrough-lion": { title: "Middlesbrough Lion", description: "A beautifully designed \"Millwall Christmas Card\" card, ready to personalise.", categories: ["sports", "football", "championship", "middlesbrough"], preview: "middlesbrough-lion-preview.png", full: "middlesbrough-lion.png" },
 
 
   
