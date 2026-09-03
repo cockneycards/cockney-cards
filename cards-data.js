@@ -46,7 +46,7 @@ const CARD_CATALOGUE = {
   "birthday-best-mum-ever": { title: "Best Mum Ever", description: "A colourful birthday card.", categories: ["all", "for-her", "mum", "birthdays"], preview: "best-mum-ever-preview.png", full: "best-mum-ever.png" },
   "birthday-superbusy-mum": { title: " Super Busy Mum", description: "A colourful birthday card.", categories: ["all", "for-her", "mum", "birthdays"], preview: "superbusy-mum-preview.png", full: "superbusy-mum.png" },
   "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["mum", "birthdays", "photo-upload"], preview: "mum-photo1-preview.png", full: "mum-photo1.png",
-    photo: { left: 890, top: 500, width: 408.1, height: 350 } },
+    photo: { left: 890, top: 500, width: 408.1, height: 340 } },
 
   "birthday-dad-photo1": { title: "Happy Birthday Dad", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["dad", "birthdays", "photo-upload"], preview: "dad-photo1-preview.png", full: "dad-photo1.png",
     photo: { left: 896, top: 470, width: 440, height: 350 } },
