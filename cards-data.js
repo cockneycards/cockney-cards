@@ -14,8 +14,7 @@ const CARD_CATALOGUE = {
   "birthday-80sbirthday": { title: "80s Retro Birthday Card", description: "A colourful birthday card.", categories: ["all", "birthdays", "tv-movies"], preview: "80s-birthday-preview.png", full: "80s-birthday.png" },
   "birthday-90sbirthday": { title: "90s Retro Birthday Card", description: "A colourful birthday card.", categories: ["all", "birthdays", "tv-movies"], preview: "90s-birthday-preview.png", full: "90s-birthday.png" },
   "birthday-artsy-girl": { title: "Artsy Girl Card", description: "A colourful birthday card.", categories: ["all", "for-her", "children", "birthdays"], preview: "artsy-girl-preview.png", full: "artsy-girl.png" },
-  "birthday-beerboy": { title: "Beer Boy Card", description: "A fun birthday card for someone who loves a cold drink or two.", categories: ["all", "for-him", "birthdays"], preview: "birthday-beer-preview.png", full: "birthday-beer.png" },
-  "birthday-nan1": { title: "Nans Garden", description: "A warm birthday card celebrating time spent with the family.", categories: ["nan", "birthdays"], preview: "birthday-nan1-preview.png", full: "birthday-nan1.png" },
+  "birthday-beerboy": { title: "Birthday Beer", description: "A fun birthday card for someone who loves a cold drink or two.", categories: ["all", "for-him", "birthdays"], preview: "birthday-beer-preview.png", full: "birthday-beer.png" },
   "birthday-grandad1": { title: "Grandads Garden", description: "A warm birthday card celebrating time spent with the family.", categories: ["grandad", "birthdays"], preview: "birthday-grandad1-preview.png", full: "birthday-grandad1.png" },
   "birthday-sweetie": { title: "Sweet Birthday", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthday-sweetie-preview.png", full: "birthday-sweetie.png" },
   "birthday-horse-girl": { title: "Racing Lady", description: "A horse racing themed birthday card - perfect for the racing fan in your life.", categories: ["all", "for-her", "horseracing", "birthdays"], preview: "birthday-horse-girl-preview.png", full: "birthday-horse-girl.png" },
@@ -46,10 +45,19 @@ const CARD_CATALOGUE = {
   "birthday-super-mum": { title: "Super Mum", description: "A colourful birthday card.", categories: ["all", "for-her", "mum", "birthdays"], preview: "super-mum-preview.png", full: "super-mum.png" },
   "birthday-best-mum-ever": { title: "Best Mum Ever", description: "A colourful birthday card.", categories: ["all", "for-her", "mum", "birthdays"], preview: "best-mum-ever-preview.png", full: "best-mum-ever.png" },
   "birthday-superbusy-mum": { title: " Super Busy Mum", description: "A colourful birthday card.", categories: ["all", "for-her", "mum", "birthdays"], preview: "superbusy-mum-preview.png", full: "superbusy-mum.png" },
+  "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["mum", "birthdays", "photo-upload"], preview: "mum-photo1-preview.png", full: "mum-photo1.png",
+    photo: { left: 890, top: 600, width: 408.1, height: 350 } },
 
+  "birthday-dad-photo1": { title: "Happy Birthday Dad", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["dad", "birthdays", "photo-upload"], preview: "dad-photo1-preview.png", full: "dad-photo1.png",
+    photo: { left: 909.6, top: 331.3, width: 440, height: 385.4 } },
+  
+  "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "handsomehubby-preview.png", full: "handsomehubby.png",
+    photo: { left: 870, top: 600, width: 380, height: 380 } },
+  
   "birthday-nan-puddles": { title: "Puddles with Nan", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "nan-puddles-preview.png", full: "nan-puddles.png" },
   "birthday-baking-nan": { title: "Nans Bakery", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "baking-nan-preview.png", full: "baking-nan.png" },
   "birthday-nans-garden": { title: "Nans Garden", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "nans-garden-preview.png", full: "nans-garden.png" },
+  "birthday-nan1": { title: "Nans Country Garden", description: "A warm birthday card celebrating time spent with the family.", categories: ["nan", "birthdays"], preview: "birthday-nan1-preview.png", full: "birthday-nan1.png" },
   
   "birthday-butterflies": { title: "Birthday Butterflies", description: "A colourful birthday card.", categories: ["all", "for-her", "birthdays"], preview: "birthdaybutterflies-preview.png", full: "birthdaybutterflies.png" },
   "birthday-bbqboss": { title: "BBQ Boss Birthday", description: "A fun birthday card for someone who loves a cold drink or a good BBQ.", categories: ["all", "for-him", "birthdays"], preview: "bbqboss-preview.png", full: "bbqboss.png", name: { left: 894, top: 287, startSize: 68, minSize: 68, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#feeec6", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 700, tiltAngle: 0, label: "Name", maxChars: 9 } },
@@ -82,13 +90,6 @@ const CARD_CATALOGUE = {
   "birthday-minecraft-boy": { title: "Minecraft Birthday Boy", description: "S.", categories: ["children", "birthdays"], price: "£3.49", preview: "minecraft-boy-preview.png", full: "minecraft-boy.png", name: { left: 895, top: 290, startSize: 80, minSize: 35, maxSize: 60, fontFamily: "CaacupeOne-Regular", fontWeight: "bold", color: "#004aad", canChangeSize: false, canChangeColor: false, canMove: true, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 9 } },
   "birthday-minecraft-girl": { title: "Minecraft Birthday Girl", description: "S.", categories: ["children", "birthdays"], price: "£3.49", preview: "minecraft-girl-preview.png", full: "minecraft-girl.png", name: { left: 894, top: 744, startSize: 110, minSize: 35, maxSize: 60, fontFamily: "CaacupeOne-Regular", fontWeight: "bold", color: "#5e17eb", canChangeSize: false, canChangeColor: false, canMove: true, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 9 } },
   
-  
-  "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["mum", "birthdays", "photo-upload"], preview: "mum-photo1-preview.png", full: "mum-photo1.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-  "birthday-dad-photo1": { title: "Happy Birthday Dad", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["dad", "birthdays", "photo-upload"], preview: "dad-photo1-preview.png", full: "dad-photo1.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-  "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "handsomehubby-preview.png", full: "handsomehubby.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "birthday-taxi": { title: "Birthday Taxi", price: "£3.49", description: "A fun birthday card - add a photo and their name for a personal touch.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-taxi-preview.png", full: "birthday-taxi.png", name: { left: 895, top: 668, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
     // Round gold-ringed photo window near the top of the card — measured
