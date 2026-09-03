@@ -185,7 +185,7 @@ const CARD_CATALOGUE = {
 
   "christmas-santas-christmas": { title: "Santa's Christmas", categories: ["christmas"], preview: "christmas-santa-preview.png", full: "christmas-santa.png" },
   "christmas-nicest-children": { title: "Santa's Nicest Children", price: "£3.49", categories: ["christmas"], preview: "nicest-children-preview.png", full: "nicest-children.png",
-    photo: { left: 909.6, top: 370, width: 350, height: 370 } },
+    photo: { left: 909.6, top: 390, width: 330, height: 360 } },
   
  "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", price: "£3.49", categories: ["christmas"], preview: "santa-video-preview.png", full: "santa-video.png",
     qr: { left: 915, top: 686, width: 130, height: 130, url: "https://images.cockneycards.com/santas-message-qr.png" } },
