@@ -485,8 +485,7 @@
 
     <script>
         // CLOUD_BASE and PRINT_CATALOGUE come from prints-data.js;
-        // CATEGORIES comes from categories-data.js (shared with cards) —
-        // both loaded above.
+        // PRINT_CATEGORIES comes from categories-data.js — both loaded above.
         const PRODUCTS = Object.entries(PRINT_CATALOGUE)
             .filter(([id, c]) => c.title)
             .map(([id, c]) => ({
@@ -512,10 +511,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             renderCategories();
-            // The shared CATEGORIES tree's top entry is labelled "All Cards"
-            // for shop-cards.html's benefit -- relabel it here for prints.
-            const allLink = document.querySelector('.category-list a[data-cat="all"]');
-            if (allLink) allLink.firstChild.textContent = 'All Prints';
 
             $('team-gallery').addEventListener('click', (e) => {
                 const tile = e.target.closest('.team-tile');
@@ -536,8 +531,8 @@
         // Leagues (depth 2) that have a team list open the team gallery on
         // click instead of expanding inline -- so the sidebar never nests
         // past 3 levels.
-        const DEFAULT_EXPANDED_CATEGORIES = ["sports", "birthdays"];
-        const LOCKED_EXPANDED_CATEGORIES = ["sports", "birthdays"];
+        const DEFAULT_EXPANDED_CATEGORIES = ["sports"];
+        const LOCKED_EXPANDED_CATEGORIES = ["sports"];
 
         function categoryHasProducts(node) {
             const [key, , children] = node;
@@ -548,7 +543,7 @@
             return false;
         }
 
-        function findCategoryNode(key, nodes = CATEGORIES) {
+        function findCategoryNode(key, nodes = PRINT_CATEGORIES) {
             for (const node of nodes) {
                 if (node[0] === key) return node;
                 if (Array.isArray(node[2])) {
@@ -559,7 +554,7 @@
             return null;
         }
 
-        function findPath(key, nodes = CATEGORIES, trail = []) {
+        function findPath(key, nodes = PRINT_CATEGORIES, trail = []) {
             for (const node of nodes) {
                 const newTrail = [...trail, node];
                 if (node[0] === key) return newTrail;
@@ -595,7 +590,7 @@
 
         function renderCategories() {
             const list = $('category-list');
-            list.innerHTML = renderCategoryLevel(CATEGORIES, 0);
+            list.innerHTML = renderCategoryLevel(PRINT_CATEGORIES, 0);
 
             DEFAULT_EXPANDED_CATEGORIES.forEach((key) => {
                 const link = list.querySelector(`a[data-cat="${key}"]`);
