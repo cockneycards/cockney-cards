@@ -81,7 +81,7 @@ const CARD_CATALOGUE = {
   "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-handsomehubby-preview.png", full: "birthday-handsomehubby.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
-  "birthday-taxi": { title: "Birthday Taxi", price: "£3.49", description: "A fun birthday card - add a photo and their name for a personal touch.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-taxi-preview.png", full: "birthday-taxi.png", name: { left: 895, top: 669, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+  "birthday-taxi": { title: "Birthday Taxi", price: "£3.49", description: "A fun birthday card - add a photo and their name for a personal touch.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-taxi-preview.png", full: "birthday-taxi.png", name: { left: 895, top: 668, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
     // Round gold-ringed photo window near the top of the card — measured
     // from the artwork itself, NOT the generic default box. left/top is
     // the center of the circle; width/height is a square slightly larger
@@ -298,7 +298,7 @@ const CARD_CATALOGUE = {
   "vintagecricket": { title: "Vintage Cricket", description: "A cricket-themed card for the player who lives for the crease - add their name.", categories: ["sports", "for-him", "cricket"], preview: "vintagecricket-preview.png", full: "vintagecricket.png" },
   
   "dartsmasterphoto": { title: "Darts Master", price: "£3.49", description: "A darts-themed card for the player who's always aiming for the bullseye - add their name.", categories: ["sports", "darts", "for-him", "photo-upload"], preview: "dartsmasterphoto-preview.png", full: "dartsmasterphoto.png", 
-    photo: { left: 894, top: 413, width: 350, height: 330 } },
+    photo: { left: 894, top: 460, width: 320, height: 320 } },
   
   
   "5kboy-photo": { title: "5K Achievement Boy", price: "£3.49", description: "Celebrate their 5K running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "5kboy-photo-preview.png", full: "5kboy-photo.png",
