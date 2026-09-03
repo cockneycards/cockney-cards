@@ -81,13 +81,13 @@ const CARD_CATALOGUE = {
   "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-handsomehubby-preview.png", full: "birthday-handsomehubby.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
-  "birthday-taxi": { title: "Birthday Taxi", price: "£3.49", description: "A fun birthday card - add a photo and their name for a personal touch.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-taxi-preview.png", full: "birthday-taxi.png", name: { left: 897, top: 672, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+  "birthday-taxi": { title: "Birthday Taxi", price: "£3.49", description: "A fun birthday card - add a photo and their name for a personal touch.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-taxi-preview.png", full: "birthday-taxi.png", name: { left: 895, top: 669, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
     // Round gold-ringed photo window near the top of the card — measured
     // from the artwork itself, NOT the generic default box. left/top is
     // the center of the circle; width/height is a square slightly larger
     // than the circle's diameter (the artwork's own round cutout does the
     // actual round clipping, so the square only needs to fully cover it).
-    photo: { left: 735, top: 180, width: 240, height: 230 } },
+    photo: { left: 733, top: 178, width: 240, height: 230 } },
   
   
   "drivingtest-boy1": { title: "Driving Test Pass Boy", description: "Celebrate passing their driving test with this fun congratulations card.", categories: ["all", "for-him", "achievements"], preview: "drivingtest-boy1-preview.png", full: "drivingtest-boy1.png",
