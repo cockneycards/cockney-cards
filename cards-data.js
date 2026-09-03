@@ -49,10 +49,10 @@ const CARD_CATALOGUE = {
     photo: { left: 890, top: 500, width: 408.1, height: 340 } },
 
   "birthday-dad-photo1": { title: "Happy Birthday Dad", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["dad", "birthdays", "photo-upload"], preview: "dad-photo1-preview.png", full: "dad-photo1.png",
-    photo: { left: 897, top: 470, width: 440, height: 320 } },
+    photo: { left: 897, top: 465, width: 440, height: 320 } },
   
   "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "handsomehubby-preview.png", full: "handsomehubby.png",
-    photo: { left: 890, top: 400, width: 405, height: 405 } },
+    photo: { left: 890, top: 410, width: 405, height: 405 } },
   
   "birthday-nan-puddles": { title: "Puddles with Nan", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "nan-puddles-preview.png", full: "nan-puddles.png" },
   "birthday-baking-nan": { title: "Nans Bakery", description: "A birthday card for anyone who loves their yoga or pilates class.", categories: ["all", "for-her", "nan", "birthdays"], preview: "baking-nan-preview.png", full: "baking-nan.png" },
