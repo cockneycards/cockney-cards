@@ -187,7 +187,7 @@
 </footer>
 
 <script>
-// CLOUD_BASE, DEFAULT_PRICE, CATEGORIES and CARD_CATALOGUE all come from
+// CLOUD_BASE, DEFAULT_PRICE, CARD_CATEGORIES and CARD_CATALOGUE all come from
 // cards-data.js (loaded above) -- that's the only place card data lives now.
 // Build the shop's product list straight from the shared catalogue. A card
 // only shows up here if its entry in cards-data.js has a title + preview.
@@ -321,7 +321,7 @@ function categoryHasProducts(node) {
     return false;
 }
 
-function findCategoryNode(key, nodes = CATEGORIES) {
+function findCategoryNode(key, nodes = CARD_CATEGORIES) {
     for (const node of nodes) {
         if (node[0] === key) return node;
         if (Array.isArray(node[2])) {
@@ -332,8 +332,8 @@ function findCategoryNode(key, nodes = CATEGORIES) {
     return null;
 }
 
-// Returns the chain of [key, label] nodes from the CATEGORIES root down to `key`.
-function findPath(key, nodes = CATEGORIES, trail = []) {
+// Returns the chain of [key, label] nodes from the CARD_CATEGORIES root down to `key`.
+function findPath(key, nodes = CARD_CATEGORIES, trail = []) {
     for (const node of nodes) {
         const newTrail = [...trail, node];
         if (node[0] === key) return newTrail;
@@ -382,7 +382,7 @@ const LOCKED_EXPANDED_CATEGORIES = ["sports", "birthdays"];
 
 function renderCategories() {
     const list = $('category-list');
-    list.innerHTML = renderCategoryLevel(CATEGORIES, 0);
+    list.innerHTML = renderCategoryLevel(CARD_CATEGORIES, 0);
 
     DEFAULT_EXPANDED_CATEGORIES.forEach((key) => {
         const link = list.querySelector(`a[data-cat="${key}"]`);
