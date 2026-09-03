@@ -49,7 +49,7 @@ const CARD_CATALOGUE = {
     photo: { left: 890, top: 500, width: 408.1, height: 340 } },
 
   "birthday-dad-photo1": { title: "Happy Birthday Dad", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["dad", "birthdays", "photo-upload"], preview: "dad-photo1-preview.png", full: "dad-photo1.png",
-    photo: { left: 896, top: 470, width: 440, height: 350 } },
+    photo: { left: 905, top: 500, width: 440, height: 350 } },
   
   "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "handsomehubby-preview.png", full: "handsomehubby.png",
     photo: { left: 880, top: 360, width: 380, height: 380 } },
