@@ -29,7 +29,7 @@ const CATEGORIES = [
   ["tv-movies", "TV / Movie Cards"],
   ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
   ["valentines", "Valentines"],
-  ["christmas", "Christmas"],
+  ["christmas", "Christmas Cards"],
   ["sports", "Sports", [
     ["football", "Football", [
       ["premiership", "Premiership", [
