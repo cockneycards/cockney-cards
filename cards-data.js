@@ -298,7 +298,7 @@ const CARD_CATALOGUE = {
   "vintagecricket": { title: "Vintage Cricket", description: "A cricket-themed card for the player who lives for the crease - add their name.", categories: ["sports", "for-him", "cricket"], preview: "vintagecricket-preview.png", full: "vintagecricket.png" },
   
   "dartsmasterphoto": { title: "Darts Master", price: "£3.49", description: "A darts-themed card for the player who's always aiming for the bullseye - add their name.", categories: ["sports", "darts", "for-him", "photo-upload"], preview: "dartsmasterphoto-preview.png", full: "dartsmasterphoto.png", 
-    photo: { left: 892, top: 530, width: 320, height: 320 } },
+    photo: { left: 892, top: 525, width: 320, height: 320 } },
   
   
   "5kboy-photo": { title: "5K Achievement Boy", price: "£3.49", description: "Celebrate their 5K running achievement - add a photo, the event name, date and finish time.", categories: ["running"], preview: "5kboy-photo-preview.png", full: "5kboy-photo.png",
