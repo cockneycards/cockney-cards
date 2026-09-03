@@ -74,11 +74,11 @@ const CARD_CATALOGUE = {
   "birthday-minecraft-girl": { title: "Minecraft Birthday Girl", description: "S.", categories: ["children", "birthdays"], price: "£3.49", preview: "minecraft-girl-preview.png", full: "minecraft-girl.png", name: { left: 894, top: 744, startSize: 110, minSize: 35, maxSize: 60, fontFamily: "CaacupeOne-Regular", fontWeight: "bold", color: "#5e17eb", canChangeSize: false, canChangeColor: false, canMove: true, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 9 } },
   
   
-  "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["mum", "birthdays", "photo-upload"], preview: "birthday-mum-photo1-preview.png", full: "birthday-mum-photo1.png",
+  "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["mum", "birthdays", "photo-upload"], preview: "mum-photo1-preview.png", full: "mum-photo1.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-  "birthday-dad-photo1": { title: "Happy Birthday Dad", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["dad", "birthdays", "photo-upload"], preview: "birthday-dad-photo1-preview.png", full: "birthday-dad-photo1.png",
+  "birthday-dad-photo1": { title: "Happy Birthday Dad", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["dad", "birthdays", "photo-upload"], preview: "dad-photo1-preview.png", full: "dad-photo1.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-  "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-handsomehubby-preview.png", full: "birthday-handsomehubby.png",
+  "birthday-handsomehubby": { title: "Handsome Hubby Birthday", price: "£3.49", description: "A personalised birthday card - add a favourite photo.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "handsomehubby-preview.png", full: "handsomehubby.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
 
   "birthday-taxi": { title: "Birthday Taxi", price: "£3.49", description: "A fun birthday card - add a photo and their name for a personal touch.", categories: ["all", "for-him", "birthdays", "photo-upload"], preview: "birthday-taxi-preview.png", full: "birthday-taxi.png", name: { left: 895, top: 668, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
@@ -174,11 +174,9 @@ const CARD_CATALOGUE = {
   "happy-hen-party2": { title: "Hen Party Sleep Over", description: "A fun card to celebrate the bride-to-be's hen party.", categories: ["all", "for-her", "weddings-engagements"], preview: "happy-hen-party2-preview.png", full: "happy-hen-party2.png" },
 
   "christmas-santas-christmas": { title: "Santa's Christmas", description: "A festive Christmas card for the whole family.", categories: ["christmas"], preview: "christmas-santa-preview.png", full: "christmas-santa.png" },
-  "christmas-taxi": { title: "Christmas Taxi", price: "£3.49", description: "A festive Christmas card for the whole family. Add a family photo to make it extra special.", categories: ["christmas"], preview: "chritmas-taxi-preview.png", full: "chritmas-taxi.png", name: { left: 894, top: 667, startSize: 30, minSize: 30, maxSize: 30, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: -1, label: "Name", maxChars: 10 },
+  "christmas-nicest-children": { title: "Santa's Nicest Children", price: "£3.49", description: "A festive Christmas card for the whole family. Add a family photo to make it extra special.", categories: ["christmas"], preview: "nicest-children-preview.png", full: "nicest-children.png",
     photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
-  "christmas-nicest-children": { title: "Santa's Nicest Children", price: "£3.49", description: "A festive Christmas card for the whole family. Add a family photo to make it extra special.", categories: ["christmas"], preview: "christmas-nicest-children-preview.png", full: "christmas-nicest-children.png",
-    photo: { left: 909.6, top: 331.3, width: 408.1, height: 385.4 } },
- "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", price: "£3.49", description: "A festive Christmas card with a video message from Santa they can scan to watch.", categories: ["christmas"], preview: "christmas-kids-video-preview.png", full: "christmas-kids-video.png",
+ "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", price: "£3.49", description: "A festive Christmas card with a video message from Santa they can scan to watch.", categories: ["christmas"], preview: "santa-video-preview.png", full: "santa-video.png",
     qr: { left: 915, top: 686, width: 130, height: 130, url: "https://images.cockneycards.com/santas-message-qr.png" } },
 
 //SPORTS
