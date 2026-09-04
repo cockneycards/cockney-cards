@@ -504,10 +504,17 @@ function sortItems(items) {
         case 'price-desc': sorted.sort((a, b) => b.priceValue - a.priceValue); break;
         case 'name-asc': sorted.sort((a, b) => a.title.localeCompare(b.title)); break;
         case 'name-desc': sorted.sort((a, b) => b.title.localeCompare(a.title)); break;
-        // 'best-selling': no real sales data wired in yet -- falls back to
+        case 'featured':
+            // Shuffle (Fisher-Yates) every time Featured is chosen/rendered,
+            // so the "featured" order looks fresh on each visit/selection.
+            for (let i = sorted.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
+            }
+            break;
+        // 'best-selling' (default): no real sales data wired in yet -- falls back to
         // catalogue order for now. Swap in real ranking once available
         // (e.g. a `sales` count per product, or a `bestseller` flag).
-        // 'featured' (default): keep original catalogue order
     }
     return sorted;
 }
