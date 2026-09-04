@@ -262,7 +262,19 @@ const CARD_CATALOGUE = {
   "norwich-fan": { title: "Norwich City Fan", categories: ["sports", "football", "championship", "norwich"], preview: "norwich-fan-preview.png", full: "norwich-fan.png" },
   "middlesbrough-lion": { title: "Middlesbrough Lion", categories: ["sports", "football", "championship", "middlesbrough"], preview: "middlesbrough-lion-preview.png", full: "middlesbrough-lion.png" },
 
-
+  "chelsea-photo": { title: "Chelseas No.1 Supporter", price: "£3.49", categories: ["sports", "football", "premiership", "chelsea", "photo-upload"], preview: "chelsea-photo-preview.png", full: "chelsea-photo.png", name: { left: 894, top: 620, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
+    photo: { left: 897, top: 405, width: 450, height: 350 } },
+  "spurs-photo": { title: "Tottenhams No.1 Supporter", price: "£3.49", categories: ["sports", "football", "premiership", "tottenham", "photo-upload"], preview: "spurs-photo-preview.png", full: "spurs-photo.png", name: { left: 894, top: 620, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
+    photo: { left: 897, top: 405, width: 450, height: 350 } },
+  "liverpool-photo": { title: "Liverpools No.1 Supporter", price: "£3.49", categories: ["sports", "football", "premiership", "liverpool", "photo-upload"], preview: "liverpool-photo-preview.png", full: "liverpool-photo.png", name: { left: 894, top: 620, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
+    photo: { left: 897, top: 405, width: 450, height: 350 } },
+  "westhamw-photo": { title: "West Ham Womens No.1 Supporter", price: "£3.49", categories: ["sports", "football", "wsl", "westhamw", "photo-upload"], preview: "whamw-photo-preview.png", full: "whamw-photo.png", name: { left: 894, top: 620, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
+    photo: { left: 897, top: 405, width: 450, height: 350 } },
+  "unitedw-photo": { title: "Manchester United Womens No.1 Supporter", price: "£3.49", categories: ["sports", "football", "wsl", "manchesterw", "photo-upload"], preview: "unitedw-photo-preview.png", full: "unitedw-photo.png", name: { left: 894, top: 620, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
+    photo: { left: 897, top: 405, width: 450, height: 350 } },
+  "lcl-photo": { title: "London City Lionesses No.1 Supporter", price: "£3.49", categories: ["sports", "football", "wsl", "Londoncitylionesses", "photo-upload"], preview: "lcl-photo-preview.png", full: "lcl-photo.png", name: { left: 894, top: 620, startSize: 38, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 13 },
+    photo: { left: 897, top: 405, width: 450, height: 350 } },
+  
   
   "mfc-christmas": { title: "Millwall Christmas Card", categories: ["sports", "football", "championship", "millwall"], preview: "mfc-christmas-preview.png", full: "mfc-christmas.png" },
   
