@@ -395,7 +395,7 @@
 const PRINT_PANEL_MM = { width: 133, height: 184 };
 // Bleed added to the outer edges of the flat spread only — not at the
 // centre fold, since nothing gets cut there.
-const PRINT_BLEED_MM = 2;
+const PRINT_BLEED_MM = 1;
 // Both captured spreads (outside = back+front, inside = both message
 // panels) are two panels joined side by side.
 const PRINT_PANELS_PER_SPREAD = 2;
@@ -1912,10 +1912,53 @@ function captureFullSpread({ multiplier = 3, quality = 0.92 } = {}) {
     });
 }
 
-// Draws one spread onto the current page of a jsPDF doc: the artwork at
-// exact bleed-inclusive size, centred on A4 landscape, plus trim marks at
+// Loads a data URL into an Image element (needed before we can crop it on
+// an offscreen canvas — data URLs can't be pixel-cropped directly).
+function loadImageFromDataUrl(dataUrl) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = dataUrl;
+    });
+}
+
+// Centre-crops (never stretches) an image to a target aspect ratio, so it
+// can then be placed into a print box at its exact physical size with zero
+// distortion and zero margin. Only trims the ~1-2% overflow on whichever
+// axis the artwork doesn't already match.
+async function cropImageToAspect(imageDataUrl, targetAspect, quality = 0.92) {
+    const img = await loadImageFromDataUrl(imageDataUrl);
+    const srcAspect = img.width / img.height;
+
+    let cropWidth, cropHeight, cropX, cropY;
+    if (srcAspect > targetAspect) {
+        // Source is proportionally wider than target — trim the sides.
+        cropHeight = img.height;
+        cropWidth = img.height * targetAspect;
+        cropX = (img.width - cropWidth) / 2;
+        cropY = 0;
+    } else {
+        // Source is proportionally taller than target — trim top/bottom.
+        cropWidth = img.width;
+        cropHeight = img.width / targetAspect;
+        cropX = 0;
+        cropY = (img.height - cropHeight) / 2;
+    }
+
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.width = Math.round(cropWidth);
+    cropCanvas.height = Math.round(cropHeight);
+    const ctx = cropCanvas.getContext('2d');
+    ctx.drawImage(img, cropX, cropY, cropWidth, cropHeight, 0, 0, cropCanvas.width, cropCanvas.height);
+    return cropCanvas.toDataURL('image/jpeg', quality);
+}
+
+// Draws one spread onto the current page of a jsPDF doc: the artwork
+// centre-cropped (never stretched) to exactly 133x184mm per panel + 1mm
+// bleed on the outer edges, centred on A4 landscape, plus trim marks at
 // the four corners of the cut line.
-function drawPrintPage(doc, imageDataUrl) {
+async function drawPrintPage(doc, imageDataUrl) {
     const spreadWidthMM = (PRINT_PANEL_MM.width * PRINT_PANELS_PER_SPREAD) + (PRINT_BLEED_MM * 2);
     const spreadHeightMM = PRINT_PANEL_MM.height + (PRINT_BLEED_MM * 2);
 
@@ -1923,11 +1966,22 @@ function drawPrintPage(doc, imageDataUrl) {
         console.warn(`Print spread (${spreadWidthMM}x${spreadHeightMM}mm) exceeds A4 landscape — check PRINT_PANEL_MM / bleed settings.`);
     }
 
+    // The artwork's native aspect ratio (1191x840, ~1.418 — confirmed
+    // against the reference card at 2000x1410) doesn't quite match the
+    // 133x184mm+1mm-bleed box's aspect ratio (~1.441), so rather than
+    // stretch it (the old bug) or letterbox it with a visible margin, we
+    // centre-crop the ~1.6% overflow off before placing it. This keeps
+    // the full multiplier:3 resolution gain (see captureFullSpread) and
+    // hits the exact 133x184mm (+1mm bleed) size with no distortion.
+    const boxAspect = spreadWidthMM / spreadHeightMM;
+    const croppedDataUrl = await cropImageToAspect(imageDataUrl, boxAspect);
+
     const offsetX = (A4_LANDSCAPE_MM.width - spreadWidthMM) / 2;
     const offsetY = (A4_LANDSCAPE_MM.height - spreadHeightMM) / 2;
 
-    // Card artwork, centred, at exact bleed-inclusive size.
-    doc.addImage(imageDataUrl, 'JPEG', offsetX, offsetY, spreadWidthMM, spreadHeightMM);
+    // Card artwork, centred, at exact bleed-inclusive size — no
+    // distortion, since the crop above already matches this box's aspect.
+    doc.addImage(croppedDataUrl, 'JPEG', offsetX, offsetY, spreadWidthMM, spreadHeightMM);
 }
 
 // Builds a single A4-landscape PDF with one page per spread passed in —
@@ -1938,10 +1992,10 @@ async function buildPrintReadyPDF(imageDataUrls) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-    imageDataUrls.forEach((imageDataUrl, i) => {
+    for (let i = 0; i < imageDataUrls.length; i++) {
         if (i > 0) doc.addPage('a4', 'landscape');
-        drawPrintPage(doc, imageDataUrl);
-    });
+        await drawPrintPage(doc, imageDataUrls[i]);
+    }
 
     return doc;
 }
