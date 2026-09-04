@@ -1001,7 +1001,12 @@ function setupTextsAndOverlays() {
                 left: q.left, top: q.top,
                 originX: 'center', originY: 'center',
                 scaleX: fitScale, scaleY: fitScale,
-                selectable: false, evented: false, visible: false
+                // TEMP (visual check only): visible: true instead of the
+                // normal false, so this shows above the artwork right away
+                // in the editor for review. MUST be flipped back to false
+                // before this goes live -- see comment at the top of this
+                // block for why (it should stay hidden until purchase).
+                selectable: false, evented: false, visible: true
             });
             qrImg = img;
             canvas.add(qrImg);
