@@ -984,7 +984,18 @@ function setupTextsAndOverlays() {
     // showQrForCapture() while the print-ready spread is being captured.
     if (activeTemplate.qr) {
         const q = activeTemplate.qr;
-        fabric.Image.fromURL(q.url, (img) => {
+        // DEBUG (temporary): pass isError through so a failed/blocked load
+        // (404, CORS, etc.) shows up loudly in the console instead of
+        // silently leaving qrImg undefined forever. Fabric's fromURL calls
+        // this callback with (img, isError) -- isError is true when the
+        // underlying <img> fired an 'error' event.
+        fabric.Image.fromURL(q.url, (img, isError) => {
+            if (isError) {
+                console.error('[QR DEBUG] Failed to load QR image from', q.url,
+                    '-- check the URL resolves directly in a new tab AND that it sends an Access-Control-Allow-Origin header (required because this request uses crossOrigin: "anonymous").');
+                return;
+            }
+            console.log('[QR DEBUG] QR image loaded OK:', q.url, `(${img.width}x${img.height}px)`);
             const fitScale = Math.min(q.width / img.width, q.height / img.height);
             img.set({
                 left: q.left, top: q.top,
@@ -998,6 +1009,23 @@ function setupTextsAndOverlays() {
             canvas.requestRenderAll();
         }, { crossOrigin: 'anonymous' });
     }
+}
+
+// DEBUG HELPER (temporary) -- not called automatically. Open this card in
+// the editor (?card=christmas-naughtyornice), open the browser console,
+// and run debugShowQr() to force the QR overlay permanently visible/on-top
+// so you can see whether it loaded and exactly where it's positioned,
+// without needing to trigger a full PDF capture. Run debugShowQr(false) (or
+// just reload the page) to hide it again.
+function debugShowQr(show = true) {
+    if (!qrImg) {
+        console.warn('[QR DEBUG] qrImg is not loaded yet (or failed to load) -- nothing to show. Check the console for a "[QR DEBUG] Failed to load" message above.');
+        return;
+    }
+    qrImg.set({ visible: show });
+    canvas.bringToFront(qrImg);
+    canvas.requestRenderAll();
+    console.log('[QR DEBUG] qrImg visible set to', show, '-- left/top/scale:', qrImg.left, qrImg.top, qrImg.scaleX);
 }
 
 // Reads the chosen file — the file-input "Choose File" button is the only
