@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personalise Your Card | Cockney Cards</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="auth.js"></script>
+<script src="cart.js"></script>
+<script src="cards-data.js"></script>
+
+<style>
+    @font-face {
+        font-family: 'CaacupeOne-Regular';
+        src: url('assets/fonts/CaacupeOne-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'BubblegumSans';
+        src: url('assets/fonts/BubblegumSans-Regular.woff2') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Anton';
+        src: url('assets/fonts/Anton-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+    @font-face {
+        font-family: 'BebasNeue';
+        src: url('assets/fonts/BebasNeue-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+     @font-face {
+        font-family: 'Oswald-VariableFont_wght';
+        src: url('assets/fonts/Oswald-VariableFont_wght.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    :root {
+        --primary: #1A73E8;
+        --dark: #1e1e24;
+        --light: #fcfcfc;
+        --border-color: #e0e0e0;
+        --font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html { overflow-y: scroll; scrollbar-gutter: stable; }
+
+    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #f6f6f8; color: var(--dark); }
+
+    /* HEADER & NAVIGATION */
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+    .logo-container { text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
+    .login-btn:hover { color: #111; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+
+    /* ============================================================
+       CARD-FIRST EDITOR
+       The card is the main thing on the page. Customers scroll the
+       normal webpage naturally; only a deliberate press-and-hold on the
+       uploaded photo (see attachMobileCardGestures) breaks out of that
+       into positioning/zoom mode. Controls sit in a sticky column beside
+       the card on wide screens, and underneath it on phones/tablets.
+       ============================================================ */
+    .editor-workspace {
+        width: 100%;
+        max-width: 980px;
+        margin: 28px auto 60px;
+        padding: 0 40px;
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: minmax(0, 595.5px) minmax(280px, 320px);
+        align-items: start;
+        justify-content: center;
+        gap: 32px;
+    }
+
+    .card-stage { width: 100%; display: flex; justify-content: center; position: relative; min-width: 0; }
+
+    #canvas-wrapper {
+        position: relative; width: 100%; max-width: 595.5px; background: white; padding: 0; border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 8px 30px rgba(0,0,0,.10); overflow: hidden; box-sizing: border-box;
+        /* Mobile card gestures (attachMobileCardGestures) reimplement
+           scrolling, panning, and pinch-zoom by hand in JS so the photo
+           can tell a page-scroll swipe apart from a deliberate
+           press-and-hold drag. touch-action: none (plus disabling the
+           iOS long-press callout/selection below) stops the browser's
+           own default touch handling from racing that JS for the same
+           touch — without it, the browser can already start its own
+           scroll or show a "save image" callout before our hold-timer or
+           drag math ever runs, which is what breaks the drag gesture. */
+        touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+    }
+    #canvas { display: block; width: 100%; height: auto; border: 0; }
+    #canvas-wrapper .canvas-container { width: 100% !important; height: auto !important; aspect-ratio: 595.5 / 840; }
+    #canvas-wrapper .canvas-container canvas { width: 100% !important; height: 100% !important; }
+
+    /* PHOTO ADJUST WIDGET — floats above the photo once it's tapped/
+       clicked on desktop (see openPhotoToolbar/openAdjustPanel/
+       closePhotoToolbar in the script). Never shown below the 999px
+       breakpoint — see attachMobileCardGestures instead, which handles
+       positioning/zoom directly via press-and-hold + pinch. Positioned
+       in JS (positionPhotoWidget) since it has to track the photo's
+       on-screen box, which moves with drags and page toggles. */
+    .photo-float-widget { position: absolute; z-index: 20; top: 0; left: 0; background: var(--dark); color: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); font-size: 12px; user-select: none; }
+    #photo-toolbar { display: none; padding: 4px; gap: 2px; align-items: center; }
+    #photo-toolbar button { background: none; border: none; color: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-family: inherit; letter-spacing: 0.3px; }
+    #photo-toolbar button:hover { background: rgba(255,255,255,0.14); }
+    #photo-toolbar button svg { width: 17px; height: 17px; }
+    #photo-adjust-panel { display: none; flex-direction: column; align-items: stretch; padding: 14px 16px; gap: 8px; width: 220px; }
+    #photo-adjust-panel .zoom-label { color: white; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; }
+    #photo-adjust-panel input[type="range"] { width: 100%; }
+    #photo-adjust-panel .adjust-done-btn { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 9px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 2px; letter-spacing: 0.5px; }
+    #photo-adjust-panel .adjust-done-btn:hover { background: #1558b0; }
+
+    .side-column { width: 100%; max-width: 320px; margin: 0; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 20px; }
+    .page-toggle { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
+    .toggle-btn { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: bold; transition: all 0.2s; }
+    .toggle-btn.active { background-color: #111; color: white; border-color: #111; }
+    .controls { width: 100%; background: white; padding: 30px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; }
+    .control-group { display: flex; flex-direction: column; gap: 15px; }
+    .control-group-divider { margin-top: 25px; padding-top: 15px; border-top: 1px solid #eee; display: block; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
+    label { font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
+    input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+    .flex-row { display: flex; align-items: center; gap: 10px; }
+    .color-picker { width: 50px; height: 40px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; padding: 0; }
+    .size-slider { flex: 1; }
+
+    /* STYLE / VARIANT PICKER (e.g. brighton-girl1..4) */
+    .variant-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .variant-thumb { width: 56px; height: 56px; padding: 0; border: 2px solid #ccc; border-radius: 6px; overflow: hidden; cursor: pointer; background: none; }
+    .variant-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .variant-thumb.active { border-color: #111; }
+    .variant-checkboxes { display: flex; gap: 20px; margin: -12px 0 20px; flex-wrap: wrap; }
+    .variant-checkboxes label { display: flex; align-items: center; gap: 6px; font-weight: normal; text-transform: none; letter-spacing: normal; font-size: 13px; color: #444; cursor: pointer; }
+    .variant-checkboxes input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+
+    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
+    .btn:hover { background-color: #444; }
+    .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+
+    /* Small Back / Next nav buttons, side by side, below the main actions */
+    .nav-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-small { flex: 1; padding: 8px; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 0; }
+    .btn-back { background-color: #1a1a1a; color: white; border: none; }
+    .btn-back:hover { background-color: #444; }
+    .btn-next { background-color: #1a1a1a; color: white; border: none; }
+    .btn-next:hover { background-color: #444; }
+    .btn-small:disabled { background-color: #e8e8e8; color: #999; border-color: #e8e8e8; cursor: not-allowed; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+
+    /* ============================================================
+       MOBILE / TABLET RESPONSIVE LAYOUT
+       Below 999px, the header and footer are hidden and the card
+       becomes the full-width main column with controls underneath —
+       matches the 999px check in isMobileDevice(), which is what
+       switches the touch behaviour over to attachMobileCardGestures.
+       ============================================================ */
+    @media (max-width: 999px) {
+        header, footer { display: none; }
+        .editor-workspace {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 595.5px;
+            margin: 12px auto 40px;
+            padding: 0 10px;
+            gap: 18px;
+        }
+        #canvas-wrapper { border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,.10); }
+        .side-column { width: 100%; max-width: 595.5px; margin: 0; position: static; }
+        .page-toggle { position: sticky; top: 4px; z-index: 5; }
+        .controls { padding: 18px; border-radius: 12px; }
+        .toggle-btn { font-size: 12px; padding: 11px 6px; }
+        input[type="text"] { font-size: 16px; } /* avoids iOS auto-zoom on focus */
+    }
+
+    @media (max-width: 500px) {
+        .editor-workspace { padding: 0 8px; margin: 8px auto 30px; }
+        .controls { padding: 18px; }
+    }
+
+    @media (max-width: 480px) {
+        .toggle-btn { font-size: 12px; padding: 10px 6px; }
+        .variant-thumb { width: 48px; height: 48px; }
+        input[type="text"] { font-size: 16px; } /* avoids iOS auto-zoom on focus */
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="cockney-club.html">Cockney Club</a></li>
+            <li><a href="account.html">My Account</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="editor-workspace">
+    <div class="card-stage">
+    <div id="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+        <p id="editor-load-error" style="display:none; color:#c0392b; font-size:13px; text-align:center; margin: 12px; line-height:1.4;">
+            This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
+        </p>
+
+        <!-- Shown when the photo is tapped/clicked (see openPhotoToolbar).
+             DESKTOP ONLY (see setupPhotoAdjustWidget's isMobileDevice()
+             guard) — below the 999px breakpoint, attachMobileCardGestures
+             handles positioning/zoom directly via press-and-hold + pinch
+             instead, and this widget is never shown. -->
+        <div id="photo-toolbar" class="photo-float-widget">
+            <button type="button" onclick="onReplacePhotoClick()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.5-7.1"/><path d="M21 3v6h-6"/></svg>
+                <span>Replace</span>
+            </button>
+            <button type="button" onclick="openAdjustPanel()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/></svg>
+                <span>Adjust</span>
+            </button>
+            <button type="button" onclick="closePhotoToolbar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                <span>Done</span>
+            </button>
+        </div>
+
+        <!-- Shown when "Adjust" is tapped (desktop only — see above). The
+             Zoom slider is a second way to resize on desktop, alongside
+             dragging the photo's corner handles directly; on mobile
+             pinch-to-zoom (attachMobileCardGestures) does the same job. -->
+        <div id="photo-adjust-panel" class="photo-float-widget">
+            <span class="zoom-label">Zoom <span id="zoom-value">1.0x</span></span>
+            <input type="range" id="zoom-slider" min="0.3" max="6" step="0.02" value="1" oninput="onZoomSliderInput(this.value)">
+            <button type="button" class="adjust-done-btn" onclick="closePhotoToolbar()">Done</button>
+        </div>
+    </div>
+    </div>
+
+    <div class="side-column">
+    <div class="page-toggle">
+        <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')" disabled>Front Cover</button>
+        <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Write Message</button>
+    </div>
+
+    <div class="controls">
+        <div id="front-controls" class="control-group">
+            <div id="variant-selector" class="variant-selector" style="display:none;"></div>
+            <div id="variant-checkboxes" class="variant-checkboxes" style="display:none;"></div>
+
+            <div id="front-text-inputs">
+                <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
+
+                <input type="text" id="age-input" placeholder="Shirt:" inputmode="numeric" oninput="updateAgeText(this)" style="margin-top: 10px;">
+
+                <div id="extra-fields-container"></div>
+
+                <div class="flex-row">
+                    <input type="color" id="front-color" class="color-picker" value="#FFFFFF" onchange="updateFrontColor(this.value)">
+                    <span>Choose Font Colour</span>
+                </div>
+
+                <div id="front-size-controls" style="display:none; margin-top:15px;">
+                    <label>Font Size:</label>
+                    <div class="flex-row">
+                        <input type="range" id="front-size" class="size-slider" min="20" max="120" value="52" oninput="updateFrontSize(this.value)">
+                        <span id="front-size-val">52px</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="front-photo-upload" style="display:none;">
+                <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Upload Photo</label>
+                <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
+                <p style="font-size:12px; color:#666; margin-top:6px;">
+                    On desktop: tap the photo to Replace or Adjust it. On a touchscreen: press and hold the photo for a moment, then drag to reposition it — pinch with two fingers to zoom. Place it anywhere on the front of the card.
+                </p>
+            </div>
+        </div>
+
+        <div id="inside-controls" class="control-group" style="margin-top: 15px;">
+            <div class="flex-row" style="align-items: center; gap: 10px;">
+                <input type="checkbox" id="own-message-checkbox" onchange="onOwnMessageChange(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <label for="own-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Tick here if you have added your own personal message</label>
+            </div>
+            <div class="flex-row" style="align-items: center; gap: 10px;">
+                <input type="checkbox" id="blank-message-checkbox" onchange="onBlankMessageChange(this.checked)" style="width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;">
+                <label for="blank-message-checkbox" style="text-transform: none; font-weight: normal; font-size: 13px; color: #444; cursor: pointer; letter-spacing: normal;">Tick here to leave the card message blank</label>
+            </div>
+        </div>
+
+        <p id="account-nudge" style="font-size: 12px; color: #666; text-align: center; margin: 15px 0 10px 0;"></p>
+
+        <div id="delivery-section" style="display:none; margin: 15px 0; padding-top: 15px; border-top: 1px solid #eee;">
+            <p style="font-size: 12px; font-weight: bold; color: #333; margin: 0 0 8px; letter-spacing: 0.5px; text-transform: uppercase;">Delivery</p>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:8px; cursor:pointer;">
+                <input type="radio" name="delivery-choice" value="self" checked onchange="toggleRecipientFields()"> Send to me — I'll write in it myself
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:10px; cursor:pointer;">
+                <input type="radio" name="delivery-choice" value="recipient" onchange="toggleRecipientFields()"> Send directly to the recipient
+            </label>
+            <div id="recipient-fields" style="display:none; flex-direction:column; gap:8px;">
+                <input type="text" id="recipient-name" placeholder="Recipient's full name">
+                <input type="text" id="recipient-address1" placeholder="Address line 1">
+                <input type="text" id="recipient-address2" placeholder="Address line 2 (optional)">
+                <input type="text" id="recipient-city" placeholder="Town / City">
+                <input type="text" id="recipient-county" placeholder="County (optional)">
+                <input type="text" id="recipient-postcode" placeholder="Postcode">
+            </div>
+        </div>
+
+        <button id="add-to-basket-btn" class="btn" style="display:none; background-color:#1a1a1a;" onclick="addCurrentCardToBasket()" disabled>Add to Basket</button>
+
+        <div class="nav-buttons">
+            <button class="btn-small btn-back" onclick="returnToShop()">Back</button>
+            <button id="next-btn" class="btn-small btn-next" onclick="goToBasket()" disabled>Next</button>
+        </div>
+    </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="https://www.tiktok.com/@cockneycards" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
+
+<script>
+// CLOUD_BASE comes from cards-data.js (loaded above).
+
+// ---- Print-ready PDF settings ----
+// Trim (cut) size of ONE card panel, before folding, in millimetres.
+const PRINT_PANEL_MM = { width: 133, height: 184 };
+// Bleed added to the outer edges of the flat spread only — not at the
+// centre fold, since nothing gets cut there.
+const PRINT_BLEED_MM = 2;
+// Both captured spreads (outside = back+front, inside = both message
+// panels) are two panels joined side by side.
+const PRINT_PANELS_PER_SPREAD = 2;
+// Spreads are wider than tall, so they're printed on landscape A4.
+const A4_LANDSCAPE_MM = { width: 297, height: 210 };
+
+// ---- Text style defaults (reused / overridden per template) ----
+const DEFAULT_NAME_SETTINGS = {
+    left: 892.5, top: 725, startSize: 52, minSize: 20, maxSize: 120,
+    fontFamily: "BubblegumSans", fontWeight: "bold", color: "#FFFFFF",
+    canChangeSize: true, canChangeColor: false,
+    canMove: false, canRotate: false, isCurved: false, curveRadius: 0,
+    tiltAngle: 0,  // rotates the whole curved arc (degrees, clockwise). No effect unless isCurved is true.
+    label: "Name",      // text shown on this card's label — override per card if needed
+    maxChars: 14   // hard cap on characters, also set as the input's maxlength
+};
+const DEFAULT_AGE_SETTINGS = {
+    left: 900, top: 600, startSize: 60, minSize: 20, maxSize: 120,
+    fontFamily: "Arial", fontWeight: "bold", color: "#FFFFFF",
+    canChangeSize: true, canChangeColor: true,
+    label: "Age",       // e.g. override to "Shirt" for a football-shirt card
+    maxChars: 3,        // hard cap on digits
+    numericOnly: true,  // strips any non-digit as the customer types
+    lettersOnly: false, // strips any non-letter as the customer types (use for position codes etc, instead of numericOnly)
+    forceUppercase: false, // uppercases the input as the customer types (canvas text is always uppercased separately)
+    defaultText: "40"   // placeholder text shown on the canvas before the customer types anything
+};
+
+// ---- Photo-upload frame defaults (reused / overridden per template) ----
+// A "photo" card gets an upload button and places the customer's picture
+// as a BACKGROUND layer, directly behind the card artwork. The card's PNG
+// must have a genuinely transparent (alpha) cutout where the photo should
+// show through — this only works if that cutout is real transparency, not
+// just a solid white/coloured area. left/top is the CENTER of the cutout;
+// width/height is its bounding box — the photo is scaled to cover that box
+// (like CSS object-fit: cover). All in the same full-spread coordinates as
+// name/age settings. Use findCoords() (bottom of this script) to read off
+// coordinates by clicking on the canvas.
+const DEFAULT_PHOTO_SETTINGS = {
+    left: 892.5, top: 400, width: 520, height: 520
+};
+
+// ---- Static QR-code overlay defaults (reused / overridden per template) ----
+// Unlike `photo`, this is NOT a customer upload -- it's a fixed image (e.g.
+// a link to a personalised video/message) that we own. It sits ON TOP of a
+// plain white box already baked into the card artwork. It's kept invisible
+// throughout editing and only switched on for the instant the front spread
+// is captured for the print-ready PDF, so customers can't scan/see it (or
+// screenshot it) before they've actually bought the card. left/top is the
+// CENTER of the box; width/height is its bounding box -- the QR is scaled
+// to fit inside it (contain, not cover, so the whole code stays intact).
+const DEFAULT_QR_SETTINGS = {
+    left: 892.5, top: 400, width: 400, height: 400
+};
+
+// ---- Extra text-field defaults (reused / overridden per template) ----
+// A card can define any number of simple extra text fields (e.g. "Event",
+// "Date", "Finish Time" on the running-achievement cards) via an
+// `extraFields` array in cards-data.js. Each entry needs at least
+// `key` (used internally) and `label` (shown on the input + as the
+// on-canvas placeholder); left/top/fontSize/color etc. fall back to these
+// defaults. Unlike name/age, there's no curve/curved-text support here --
+// these are always plain centered text.
+const DEFAULT_EXTRA_FIELD_SETTINGS = {
+    left: 892.5, top: 600, fontSize: 32, minSize: 20, maxSize: 60,
+    fontFamily: "Arial", fontWeight: "bold", color: "#000000",
+    maxChars: 24
+};
+
+// ---- Card catalogue: built from the shared CARD_CATALOGUE (cards-data.js) ----
+// CARD_TEMPLATES: what the editor actually needs per card -- full artwork
+// URL, plus name/age personalisation settings merged onto the defaults.
+const CARD_TEMPLATES = Object.fromEntries(
+    Object.entries(CARD_CATALOGUE)
+        .filter(([id, c]) => c.full)
+        .map(([id, c]) => {
+            const priceLabel = c.price || DEFAULT_PRICE;
+            return [
+            id,
+            {
+                url: CLOUD_BASE + c.full,
+                title: c.title || null,
+                description: c.description || null,
+                // Same price the card is listed at in shop-cards.html —
+                // used on the "Add to Basket" button and the basket page.
+                price: priceLabel,
+                priceValue: parseFloat(priceLabel.replace(/[^0-9.]/g, '')),
+                name: c.name ? { ...DEFAULT_NAME_SETTINGS, ...c.name } : null,
+                age: c.age ? { ...DEFAULT_AGE_SETTINGS, ...c.age } : null,
+                photo: c.photo ? { ...DEFAULT_PHOTO_SETTINGS, ...c.photo } : null,
+                qr: c.qr ? { ...DEFAULT_QR_SETTINGS, ...c.qr } : null,
+                extraFields: c.extraFields
+                    ? c.extraFields.map((f) => ({ ...DEFAULT_EXTRA_FIELD_SETTINGS, ...f }))
+                    : null
+            }
+            ];
+        })
+);
+
+// CARD_VARIANTS: swappable picture options per card, e.g. brighton-girl1's
+// 4 alternate photos. Built from each catalogue entry's `variants` list.
+const CARD_VARIANTS = Object.fromEntries(
+    Object.entries(CARD_CATALOGUE)
+        .filter(([id, c]) => c.variants && c.variants.length)
+        .map(([id, c]) => [id, [id, ...c.variants.map(v => v.id)]])
+);
+
+// Cloudinary path lookup for every variant sub-image (the primary image for
+// each card already comes from CARD_TEMPLATES[id].url above).
+const VARIANT_PATHS = Object.fromEntries(
+    Object.values(CARD_CATALOGUE)
+        .filter(c => c.variants)
+        .flatMap(c => c.variants.map(v => [v.id, v.full]))
+);
+
+// ---- Canvas / layout constants ----
+const PANEL_WIDTH = 595.5, CANVAS_WIDTH = 1191, CANVAS_HEIGHT = 840;
+
+// On-screen editor: A4-portrait shaped, showing ONLY the right-hand panel
+// (the side the customer personalises). All objects are still built using
+// their normal full-spread coordinates (x = PANEL_WIDTH..CANVAS_WIDTH) — we
+// just pan the view so that range fills the visible canvas. The full spread
+// (both panels) is only ever rendered again briefly, off-screen, at checkout.
+const EDIT_WIDTH = PANEL_WIDTH, EDIT_HEIGHT = CANVAS_HEIGHT;
+
+const BOX_WIDTH = 495, BOX_LEFT = 50 + PANEL_WIDTH;
+// Each inside panel has its own top position + height now (rather than one
+// shared size for all three). The top panel is shorter, sized for ~2 lines
+// of text at the default 45px font size.
+// - To move a panel further up/down the inside page, change its `top`.
+// - To let a panel fit more/fewer lines, change its `height`
+//   (roughly: lines x fontSize x 1.16, plus a little breathing room).
+const BOX_CONFIGS = [
+    { top: 107, height: 120 }, // top panel — ~2 lines (moved down one line, closer to the middle panel)
+    { top: 305, height: 225 }, // middle panel
+    { top: 570, height: 225 }  // bottom panel
+];
+const BOX_DEFAULT_TEXTS = ["Add Message Here", "Add\nMessage\nHere", "Add Message Here"];
+// Max number of lines (hard returns AND wrapped lines) allowed in each inside
+// box — top, middle, bottom. Typing/returning past this limit is blocked.
+const BOX_MAX_LINES = [2, 3, 2];
+
+const STYLE_DASHED = { borderDashArray: [4, 4], borderColor: "#cccccc", strokeWidth: 1.5 };
+const STYLE_SOLID = { borderDashArray: null, borderColor: "#1A73E8", strokeWidth: 2 };
+
+// ---- Mutable editor state ----
+let canvas, bgImg, backCoverImg, nameText, ageText;
+let extraTexts = []; // fabric.Text objects, parallel to activeTemplate.extraFields
+let photoImg;
+let photoPromptGroup; // "Upload Photo" hint shown over the frame until a photo is uploaded — see setupTextsAndOverlays/loadPhotoIntoFrame
+let qrImg; // static QR-code overlay -- stays hidden on-screen, only made
+           // visible for the brief moment the front spread is captured for
+           // print/checkout (see showQrForCapture / captureAndBuildPrintPDF)
+let leftPageBg, rightPageBg;
+let insideBgRects = [];   // [top, middle, bottom]
+let insideTexts = [];     // [top, middle, bottom]
+let currentPage = "front", activeTemplate = null, activeVariantKey = null;
+
+// Flips true only once setupTextsAndOverlays() has actually created
+// leftPageBg/rightPageBg/insideBgRects/insideTexts (see below). The
+// front/inside toggle buttons use inline onclick="switchPage(...)" in the
+// HTML, which makes them clickable the instant the page renders — well
+// before DOMContentLoaded, font preloading, and the front-cover image
+// load have all finished. If switchPage() ran before that setup
+// completed, those objects were still undefined and it crashed (which
+// also broke Add to Basket, since it calls switchPage() internally while
+// building the print PDF). switchPage() now just no-ops until this is
+// true, and the buttons that can trigger it start out disabled.
+let editorReady = false;
+
+const $ = (id) => document.getElementById(id);
+
+// Matches the editor's own mobile CSS breakpoint (see the @media
+// max-width:999px rule above). Used to switch the photo's touch/click
+// behaviour: desktop uses the tap → Replace/Adjust/Done widget
+// (setupPhotoAdjustWidget); mobile uses press-and-hold + pinch directly on
+// the card (attachMobileCardGestures).
+function isMobileDevice() {
+    return window.matchMedia('(max-width: 999px)').matches;
+}
+
+// Scratch 2D context used to measure rendered text width for a given
+// font — used to lay out curved-text characters using the same metrics
+// the browser will actually render with.
+const measureCtx = document.createElement('canvas').getContext('2d');
+function measureTextWidth(text, fontSize, fontFamily, fontWeight) {
+    measureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    return measureCtx.measureText(text).width;
+}
+
+// Canvas text (unlike normal DOM text) does NOT wait for a @font-face font
+// to finish downloading — if the font isn't already loaded by the time we
+// draw, the canvas just uses a fallback and never redraws itself once the
+// real font arrives. So we explicitly ask the browser to load every custom
+// font up front and wait for that before building any text on the canvas.
+const CUSTOM_FONTS = ["BubblegumSans", "Anton", "BebasNeue", "CaacupeOne-Regular", "Oswald-VariableFont_wght"];
+function preloadCustomFonts() {
+    return Promise.all(
+        CUSTOM_FONTS.map((f) =>
+            document.fonts.load(`400 60px "${f}"`).catch((err) => {
+                console.warn(`Font "${f}" failed to load — check its file exists at the URL in its @font-face rule.`, err);
+            })
+        )
+    );
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const cardId = params.get('card') || '11plus-boy';
+
+    const nudge = document.getElementById('account-nudge');
+    if (nudge) {
+        nudge.innerHTML = (typeof ccIsLoggedIn === 'function' && ccIsLoggedIn())
+            ? ''
+            : `<a href="account.html" style="color:#1A73E8;">Log in</a> to save this order to your account for next time.`;
+    }
+
+    preloadCustomFonts().finally(() => {
+        if (CARD_TEMPLATES[cardId]) {
+            initEditor(cardId);
+        } else {
+            window.location.href = 'shop-cards.html';
+        }
+    });
+
+});
+
+function initEditor(templateKey) {
+    activeTemplate = CARD_TEMPLATES[templateKey];
+    activeVariantKey = templateKey;
+    setupVariantSelector(templateKey);
+
+    $('add-to-basket-btn').innerText = activeTemplate.price ? `Add to Basket — ${activeTemplate.price}` : 'Add to Basket';
+
+    $("front-size-controls").style.display = activeTemplate.name?.canChangeSize ? "block" : "none";
+    $("front-color").parentElement.style.display = activeTemplate.name?.canChangeColor ? "flex" : "none";
+    $("front-color").value = activeTemplate.name?.color || "#FFFFFF";
+
+    const canvasElement = $("canvas");
+    canvasElement.width = EDIT_WIDTH;
+    canvasElement.height = EDIT_HEIGHT;
+
+    canvas = new fabric.Canvas(canvasElement, {
+        width: EDIT_WIDTH, height: EDIT_HEIGHT,
+        preserveObjectStacking: true, backgroundColor: '#ffffff',
+        allowTouchScrolling: true,
+        // This editor never needs multi-object selection — every field is
+        // edited individually via its own control. Turning it off entirely
+        // rules out Fabric's rubber-band "select everything the drag
+        // passes over" rectangle, which is what was appearing (and briefly
+        // treating the locked message boxes as a moveable group) when a
+        // hold-to-scroll touch landed on empty canvas.
+        selection: false
+    });
+    // Alt normally toggles centered-vs-corner-anchored scaling for
+    // whatever's selected. The photo relies on centered scaling always
+    // being on (see centeredScaling on the photo image, and
+    // clampPhotoScale) — nulling this out stops Alt from silently
+    // flipping it back to corner-anchored mid-drag.
+    canvas.centeredKey = null;
+
+    // Pan so logical x = PANEL_WIDTH..CANVAS_WIDTH (the right/front panel)
+    // fills the on-screen edit view. Objects keep their normal full-spread
+    // coordinates; only the display is panned.
+    canvas.setViewportTransform([1, 0, 0, 1, -PANEL_WIDTH, 0]);
+    canvas.calcOffset();
+
+    setupPhotoAdjustWidget();
+    attachMobileCardGestures(canvas.upperCanvasEl);
+
+    // Logo on the back cover panel
+    fabric.Image.fromURL(`https://images.cockneycards.com/logo.png`, (logoImg) => {
+        backCoverImg = logoImg;
+        backCoverImg.set({
+            left: PANEL_WIDTH / 2, top: 710,
+            originX: 'center', originY: 'center',
+            scaleX: 0.15, scaleY: 0.15,
+            selectable: false, evented: false
+        });
+        canvas.add(backCoverImg);
+        canvas.sendToBack(backCoverImg);
+    }, { crossOrigin: 'anonymous' });
+
+    // Show/hide the personalisation inputs based on what this card supports
+    const hasPersonalisation = activeTemplate.name || activeTemplate.age || activeTemplate.extraFields;
+    $('front-text-inputs').style.display = hasPersonalisation ? 'block' : 'none';
+    buildExtraFieldInputs();
+    if (hasPersonalisation) {
+        $('name-input').style.display = activeTemplate.name ? 'block' : 'none';
+        $('age-input').style.display = activeTemplate.age ? 'block' : 'none';
+        if (activeTemplate.name) {
+            const nameLabel = activeTemplate.name.label || 'Name';
+            $('name-input').placeholder = nameLabel + ':';
+        }
+        if (activeTemplate.age) {
+            const ageLabel = activeTemplate.age.label || 'Age';
+            $('age-input').placeholder = ageLabel + ':';
+            $('age-input').setAttribute('inputmode', activeTemplate.age.lettersOnly ? 'text' : 'numeric');
+        }
+    }
+    if (activeTemplate.name?.maxChars) $('name-input').maxLength = activeTemplate.name.maxChars;
+    if (activeTemplate.age?.maxChars) $('age-input').maxLength = activeTemplate.age.maxChars;
+
+    // Photo upload only shows up for cards with a `photo` frame configured.
+    // If there's no name/age/extra-field box showing above it, pull it up
+    // flush with the top of its section instead of leaving a gap.
+    photoImg = null;
+    $('front-photo-upload').style.display = activeTemplate.photo ? 'block' : 'none';
+    $('front-photo-upload').style.marginTop = hasPersonalisation ? '10px' : '0';
+    $('photo-input').value = '';
+
+    qrImg = null;
+
+    updateCardDescription(activeTemplate);
+
+    loadFrontCover(activeTemplate.url);
+}
+
+// Shows the card's blurb underneath the side panel, if the template has
+// one set. Expects an optional `description` string (and optional
+// `title`, falls back to the template's own name/label) on the
+// CARD_TEMPLATES entry, e.g.:
+//   CARD_TEMPLATES['11plus-boy'] = { ..., title: '11+ Boy Card',
+//     description: 'A colourful card celebrating passing the 11+.' }
+function updateCardDescription(template) {
+    // The #card-description box was removed from the page (editor-only
+    // layout, no blurb section) — kept as a no-op so callers elsewhere
+    // don't need to change.
+    const box = $('card-description');
+    if (!box) return;
+    if (!template || !template.description) {
+        box.style.display = 'none';
+        return;
+    }
+    $('card-description-title').textContent = template.title || 'About This Card';
+    $('card-description-text').textContent = template.description;
+    box.style.display = 'block';
+}
+
+function loadFrontCover(imageUrl) {
+    // If the front cover image never loads at all (bad URL, network
+    // failure, etc.) the fromURL callback below simply never fires, so
+    // editorReady never flips true and the buttons stay disabled forever
+    // with no explanation. This gives the customer an actual message
+    // instead of a page that just silently never finishes loading.
+    setTimeout(() => {
+        if (!editorReady) $('editor-load-error').style.display = 'block';
+    }, 10000);
+
+    fabric.Image.fromURL(imageUrl, (img) => {
+        bgImg = img;
+        bgImg.set({
+            left: PANEL_WIDTH, top: 0,
+            scaleX: PANEL_WIDTH / bgImg.width,
+            scaleY: CANVAS_HEIGHT / bgImg.height,
+            selectable: false, evented: false
+        });
+        canvas.add(bgImg);
+        canvas.sendToBack(bgImg);
+
+        setupTextsAndOverlays();
+        editorReady = true;
+        $('toggle-front').disabled = false;
+        $('toggle-inside').disabled = false;
+        updateAddToBasketAvailability();
+        $('delivery-section').style.display = 'block';
+        switchPage('front');
+    }, { crossOrigin: 'anonymous' });
+}
+
+// Full artwork URL for any card id OR variant sub-id, from whichever of
+// the two catalogue-derived lookups has it.
+function artUrlFor(key) {
+    if (CARD_TEMPLATES[key]) return CARD_TEMPLATES[key].url;
+    if (VARIANT_PATHS[key]) return CLOUD_BASE + VARIANT_PATHS[key];
+    return null;
+}
+
+// Builds the row of thumbnail buttons for a card's picture options (if it
+// has any). Clicking a thumbnail just swaps the background picture via
+// selectVariant() below — name/age text, position, colour etc. all stay
+// exactly as defined by this card's entry in cards-data.js the whole time.
+//
+// Every card that has picture variations also gets an explicit tickbox
+// under the thumbnails — one per option, INCLUDING the base/default
+// picture — labelled "Card 1", "Card 2" etc. in thumbnail order, so
+// customers can tick whichever of the alternatives they actually want.
+// Same pattern as the prints editor's "Eat Sleep" checkboxes, just with
+// every option (not only the non-default ones) getting a box.
+function setupVariantSelector(templateKey) {
+    const variants = CARD_VARIANTS[templateKey];
+    const container = $("variant-selector");
+    const checkboxContainer = $("variant-checkboxes");
+    container.innerHTML = "";
+    checkboxContainer.innerHTML = "";
+
+    if (!variants || variants.length < 2) {
+        container.style.display = "none";
+        checkboxContainer.style.display = "none";
+        return;
+    }
+
+    container.style.display = "flex";
+    variants.forEach((key) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "variant-thumb" + (key === activeVariantKey ? " active" : "");
+        btn.dataset.key = key;
+        btn.title = key;
+        btn.innerHTML = `<img src="${artUrlFor(key)}" alt="${key}">`;
+        btn.onclick = () => selectVariant(key);
+        container.appendChild(btn);
+    });
+
+    checkboxContainer.style.display = "flex";
+    variants.forEach((key, index) => {
+        const wrapper = document.createElement("label");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.dataset.key = key;
+        cb.checked = key === activeVariantKey;
+        cb.onchange = () => {
+            if (cb.checked) {
+                selectVariant(key);
+            } else {
+                // Behave like a radio button — a different box needs to
+                // be ticked instead of just clearing this one.
+                cb.checked = true;
+            }
+        };
+        wrapper.appendChild(cb);
+        wrapper.appendChild(document.createTextNode(`Card ${index + 1}`));
+        checkboxContainer.appendChild(wrapper);
+    });
+}
+
+// Swaps just the front picture for a different option from the same
+// CARD_VARIANTS group, then re-fits it to the panel and highlights the
+// matching thumbnail.
+function selectVariant(key) {
+    const url = artUrlFor(key);
+    if (!bgImg || key === activeVariantKey || !url) return;
+    activeVariantKey = key;
+
+    bgImg.setSrc(url, () => {
+        bgImg.set({
+            scaleX: PANEL_WIDTH / bgImg.width,
+            scaleY: CANVAS_HEIGHT / bgImg.height
+        });
+        canvas.requestRenderAll();
+    }, { crossOrigin: "anonymous" });
+
+    document.querySelectorAll("#variant-selector .variant-thumb").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.key === key);
+    });
+
+    // Only move the tick if the newly-selected picture actually has a box
+    // of its own. Clicking back to the base/default image doesn't — so
+    // this leaves whichever box was last ticked exactly as it was, rather
+    // than clearing it just because the default is being previewed again.
+    const matchingCheckbox = document.querySelector(`#variant-checkboxes input[data-key="${CSS.escape(key)}"]`);
+    if (matchingCheckbox) {
+        document.querySelectorAll("#variant-checkboxes input[type=checkbox]").forEach((cb) => {
+            cb.checked = cb.dataset.key === key;
+        });
+    }
+}
+
+function setupTextsAndOverlays() {
+    if (activeTemplate.name) {
+        const n = activeTemplate.name;
+
+        nameText = n.isCurved
+            ? buildCurvedNameGroup("NAME", n.startSize, n.color)
+            : new fabric.Text("NAME", {
+                left: n.left, top: n.top, originX: "center", originY: "center",
+                fontSize: n.startSize, fontFamily: n.fontFamily || "Arial",
+                fontWeight: n.fontWeight || "bold", fill: n.color, textAlign: "center",
+                hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+            });
+        // Stable tag used by syncPersonalisationForExport to find this
+        // object again on the export clone — see that function for why
+        // this can't just be an array index lookup.
+        nameText.ccRole = "name";
+
+        if (n.canChangeSize) {
+            const slider = $("front-size");
+            slider.min = n.minSize;
+            slider.max = n.maxSize;
+            slider.value = n.startSize;
+            $("front-size-val").innerText = n.startSize + "px";
+        }
+        canvas.add(nameText);
+    }
+
+    if (activeTemplate.age) {
+        const a = activeTemplate.age;
+        ageText = new fabric.Text(a.defaultText || "40", {
+            left: a.left, top: a.top, originX: "center", originY: "center",
+            fontSize: a.startSize, fontFamily: a.fontFamily || "Arial", fontWeight: "bold",
+            fill: a.color, hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+        });
+        ageText.ccRole = "age"; // see nameText.ccRole above
+        canvas.add(ageText);
+    }
+
+    extraTexts = [];
+    if (activeTemplate.extraFields) {
+        activeTemplate.extraFields.forEach((f) => {
+            // Left-aligned: `left`/`top` mark the LEFT edge of the text
+            // (not its center) -- text grows rightward from that point.
+            const t = new fabric.Text((f.label || f.key || '').toUpperCase(), {
+                left: f.left, top: f.top, originX: "left", originY: "center",
+                fontSize: f.fontSize, fontFamily: f.fontFamily || "Arial",
+                fontWeight: f.fontWeight || "bold", fill: f.color, textAlign: "left",
+                hasControls: false, hasBorders: false, lockMovementX: true, lockMovementY: true
+            });
+            t.ccRole = `extra-${extraTexts.length}`; // see nameText.ccRole above
+            extraTexts.push(t);
+            canvas.add(t);
+        });
+    }
+
+    // "Upload Photo" hint, drawn in front of the artwork (easier to line
+    // up against each card's frame while positioning it) — visible until
+    // the customer supplies a photo (see loadPhotoIntoFrame, which hides
+    // it), and only for cards that actually have a photo frame.
+    // Not itself clickable (evented: false) — clicking anywhere in the
+    // frame area is handled by the canvas-level mouse:down listener set
+    // up in setupPhotoAdjustWidget, which works whether or not this hint
+    // happens to be showing.
+    if (activeTemplate.photo) {
+        const p = activeTemplate.photo;
+        photoPromptGroup = new fabric.Group([
+            new fabric.Rect({
+                left: 0, top: 0, originX: "center", originY: "center",
+                width: p.width, height: p.height, rx: 12, ry: 12,
+                fill: "rgba(255,255,255,0.35)",
+                stroke: "#1A73E8", strokeDashArray: [10, 8], strokeWidth: 2
+            }),
+            new fabric.Text("+", {
+                left: 0, top: -26, originX: "center", originY: "center",
+                fontSize: 62, fontFamily: "Arial", fontWeight: "bold", fill: "#1c2b41"
+            }),
+            new fabric.Text("Upload Photo", {
+                left: 0, top: 30, originX: "center", originY: "center",
+                fontSize: 28, fontFamily: "Arial", fontWeight: "bold", fill: "#1c2b41"
+            })
+        ], {
+            left: p.left, top: p.top, originX: "center", originY: "center",
+            selectable: false, evented: false
+        });
+        canvas.add(photoPromptGroup);
+    } else {
+        photoPromptGroup = null;
+    }
+
+    leftPageBg = new fabric.Rect({ left: 0, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
+    rightPageBg = new fabric.Rect({ left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT, fill: '#ffffff', visible: false, selectable: false, evented: false });
+
+    const bgPanelDefaults = { width: BOX_WIDTH, left: BOX_LEFT, fill: "#fcfcfc", rx: 8, ry: 8, selectable: false, evented: false, visible: false };
+    insideBgRects = BOX_CONFIGS.map((cfg) => new fabric.Rect({ ...bgPanelDefaults, top: cfg.top, height: cfg.height }));
+
+    const textDefaults = {
+        width: BOX_WIDTH, left: BOX_LEFT,
+        fontFamily: "Arial", fill: "#000000", textAlign: "center",
+        visible: false, hasControls: false,
+        lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
+        hasBorders: true, splitByGrapheme: true, backgroundColor: "transparent",
+        ...STYLE_DASHED
+    };
+    insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
+
+    canvas.add(leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts);
+    setupTextEvents();
+
+    // Static QR overlay (see DEFAULT_QR_SETTINGS above) -- loaded now so
+    // it's ready to go, but kept invisible/non-interactive the entire time
+    // the customer is editing. It's only revealed momentarily by
+    // showQrForCapture() while the print-ready spread is being captured.
+    if (activeTemplate.qr) {
+        const q = activeTemplate.qr;
+        fabric.Image.fromURL(q.url, (img) => {
+            const fitScale = Math.min(q.width / img.width, q.height / img.height);
+            img.set({
+                left: q.left, top: q.top,
+                originX: 'center', originY: 'center',
+                scaleX: fitScale, scaleY: fitScale,
+                selectable: false, evented: false, visible: false
+            });
+            qrImg = img;
+            canvas.add(qrImg);
+            canvas.bringToFront(qrImg); // sits on top of the white box in the artwork
+            canvas.requestRenderAll();
+        }, { crossOrigin: 'anonymous' });
+    }
+}
+
+// Reads the chosen file — the file-input "Choose File" button is the only
+// way a photo gets added, there's nothing clickable on the canvas itself.
+function handlePhotoUpload(inputEl) {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => loadPhotoIntoFrame(e.target.result);
+    reader.readAsDataURL(file);
+}
+
+// Adds the customer's photo as a free-positioned layer BEHIND the card
+// artwork, showing through the artwork's transparent cutout (see
+// DEFAULT_PHOTO_SETTINGS) — it can be dragged and zoomed freely, including
+// past the edge of the front panel altogether; a clipPath (below) keeps
+// anything past the printable page invisible, so there's no need to pen
+// it in with a position clamp. The artwork stays layered on top of it.
+//
+// The photo is NOT interactive by default (evented/selectable: false) —
+// it's just a static layer until interacted with. On desktop, clicking it
+// switches this on via openPhotoToolbar (Replace/Adjust/Done widget). On
+// mobile it's never switched on at all — attachMobileCardGestures (further
+// down) manipulates left/top/scaleX/scaleY directly instead, so a touch
+// anywhere on the card, including right over the photo, scrolls the page
+// normally by default: with evented false there's no Fabric object there
+// to claim the gesture.
+function loadPhotoIntoFrame(dataUrl) {
+    const p = activeTemplate?.photo;
+    if (!p) return;
+
+    // Photo supplied — the "Upload Photo" hint has done its job.
+    photoPromptGroup?.set({ visible: false });
+
+    fabric.Image.fromURL(dataUrl, (img) => {
+        if (photoImg) canvas.remove(photoImg);
+
+        // Cover-fit to the frame box as a starting size — not a hard
+        // limit, just where it lands before the customer drags/zooms it.
+        const coverScale = Math.max(p.width / img.width, p.height / img.height);
+
+        img.set({
+            left: p.left, top: p.top,
+            originX: 'center', originY: 'center',
+            scaleX: coverScale, scaleY: coverScale,
+            lockRotation: true, lockUniScaling: true, // corner drag always scales evenly, never distorts
+            centeredScaling: true, // corner drag resizes around the photo's own center, not the opposite corner
+            // hasBorders/hasControls are OFF by default (idle) — see
+            // comment below. openPhotoToolbar flips these on, showing the
+            // corner-drag resize box, for the duration of a tap/adjust
+            // session; DESKTOP ONLY, see isMobileDevice() guards there —
+            // mobile keeps using pinch-to-zoom instead.
+            hasBorders: false, hasControls: false,
+            selectable: false, evented: false,
+            // Fabric's defaults here are a translucent black border with
+            // hollow/transparent corner squares — barely visible against
+            // most photos, which is why the resize box looked invisible.
+            // Styled explicitly in the same blue used for the text boxes
+            // (STYLE_SOLID) so customers can actually see it.
+            borderColor: "#1A73E8", borderScaleFactor: 2,
+            cornerColor: "#1A73E8", cornerStrokeColor: "#ffffff",
+            transparentCorners: false, cornerStyle: "circle", cornerSize: 14,
+            padding: 4
+        });
+        // Clip to the printable front panel, in fixed canvas coordinates
+        // (absolutePositioned) rather than relative to the photo itself —
+        // so wherever the photo gets dragged or zoomed to, including
+        // beyond the panel's edges, only the part actually over the front
+        // panel ever renders. This is what lets movement/resizing below
+        // be left free instead of clamped to stay fully on-page.
+        img.clipPath = new fabric.Rect({
+            left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT,
+            absolutePositioned: true
+        });
+        // Only the four corner handles resize it (no side handles, no
+        // rotation handle) — that's the "drag the corners to size the
+        // photo" box. Has no visible effect until hasControls is switched
+        // on in openPhotoToolbar.
+        img.setControlsVisibility({
+            mt: false, mb: false, ml: false, mr: false, mtr: false,
+            tl: true, tr: true, bl: true, br: true
+        });
+
+        // frameBox is kept around only as the original starting point;
+        // minScale is fixed at upload time from that same frame box and
+        // used purely as the reference point (1x) that the Zoom slider and
+        // pinch-to-zoom scale relative to — see PHOTO_MIN_ZOOM/
+        // PHOTO_MAX_ZOOM below for the actual allowed range, which now
+        // goes both smaller and larger than this cover-fit size. Both
+        // travel with the image itself so clampPhotoScale and the Zoom
+        // slider have what they need without reaching back into
+        // activeTemplate.
+        img.frameBox = p;
+        img.minScale = coverScale;
+
+        photoImg = img;
+        canvas.add(photoImg);
+        // Behind the artwork, not on top of it — the photo shows through
+        // the artwork's transparent cutout (see DEFAULT_PHOTO_SETTINGS),
+        // with the card's frame/graphics layered on top of it, same as
+        // the printed card. Text/QR were already added above the artwork
+        // in setupTextsAndOverlays, so sending the photo to the very back
+        // is enough to put it behind everything else too. While it's
+        // actively being adjusted, openPhotoToolbar/closePhotoToolbar
+        // temporarily float it back on top instead (see
+        // canvas.preserveObjectStacking there) so the resize box is
+        // actually visible — this sendToBack only governs how it sits the
+        // rest of the time.
+        canvas.sendToBack(photoImg);
+
+        // If a photo was already being adjusted (this is a Replace, not a
+        // first upload), carry that open state over to the new image
+        // instead of dropping back to idle — otherwise Replace would
+        // require a second tap to keep adjusting.
+        if (photoToolbarMode !== 'idle') {
+            const modeToRestore = photoToolbarMode;
+            photoToolbarMode = 'idle'; // openPhotoToolbar/openAdjustPanel both assume they're transitioning FROM idle
+            openPhotoToolbar();
+            if (modeToRestore === 'adjust') openAdjustPanel();
+        } else {
+            // On desktop, show the blue photo box immediately after upload.
+            // This makes the draggable corner handles obvious without
+            // requiring the customer to click the photo a second time.
+            if (!isMobileDevice()) {
+                openPhotoToolbar();
+            } else {
+                canvas.requestRenderAll();
+            }
+        }
+    }, { crossOrigin: 'anonymous' });
+}
+
+// ---- Scale guard: keeps the photo's zoom within a sane range ----
+// PHOTO_MIN_ZOOM/PHOTO_MAX_ZOOM are multiples of the cover-fit size the
+// photo started at (img.minScale, set in loadPhotoIntoFrame) — e.g. 0.3
+// lets it zoom out to 30% of that starting size, 6 lets it zoom in to 6x.
+// Position is NOT constrained here — the photo can be dragged freely,
+// including off the edge of the card altogether; its clipPath (also set
+// in loadPhotoIntoFrame) is what keeps anything past the printable page
+// invisible, so there's no need to pen it in by clamping left/top.
+const PHOTO_MIN_ZOOM = 0.3;
+const PHOTO_MAX_ZOOM = 6;
+
+function clampPhotoScale(img) {
+    if (!img) return;
+
+    const requested = Math.max(img.scaleX, img.scaleY);
+    const scale = Math.min(Math.max(requested, img.minScale * PHOTO_MIN_ZOOM), img.minScale * PHOTO_MAX_ZOOM);
+    if (img.scaleX !== scale || img.scaleY !== scale) {
+        img.set({ scaleX: scale, scaleY: scale });
+    }
+    img.setCoords();
+}
+
+// ---- Photo adjust widget (DESKTOP ONLY — see isMobileDevice() guards
+// below; mobile uses attachMobileCardGestures instead, further down) ----
+// A tap → widget flow, layered on top of Fabric's own corner-handle resize:
+//
+//   idle    — the photo sits there unselectable/un-evented (see
+//             loadPhotoIntoFrame). A click anywhere on the card,
+//             including directly over the photo, is completely ignored by
+//             Fabric and falls straight through to normal page scroll.
+//   toolbar — a click ON the photo (detected manually below, since the
+//             photo isn't evented in idle mode for Fabric to detect it
+//             itself) switches evented/selectable on and shows the
+//             Replace / Adjust / Done widget, plus Fabric's corner-drag
+//             resize box (see setControlsVisibility in loadPhotoIntoFrame
+//             — corners only, no rotation handle). The photo can now be
+//             dragged directly to reposition it, or resized from a
+//             corner.
+//   adjust  — "Adjust" additionally shows the Zoom slider, a second way to
+//             resize on desktop (mobile has pinch instead); the
+//             corner-drag box stays available too.
+//
+// "Done", or clicking anywhere else on the card, returns to idle.
+let photoToolbarMode = 'idle'; // 'idle' | 'toolbar' | 'adjust'
+let tapCandidate = null;
+const TAP_MOVE_THRESHOLD = 8;  // canvas-space px — more than this and it's a drag, not a tap
+const TAP_MAX_MS = 400;
+
+// Frame-click-to-upload: before a photo exists, clicking/tapping anywhere
+// inside the frame's bounding box opens the file picker — an alternative
+// to using the "Upload Photo" control in the sidebar. Works on both
+// desktop and mobile (unlike the rest of setupPhotoAdjustWidget, which is
+// desktop-only) since there's no photo object yet to conflict with.
+function pointInPhotoFrame(pointer) {
+    const p = activeTemplate?.photo;
+    if (!p) return false;
+    return pointer.x >= p.left - p.width / 2 && pointer.x <= p.left + p.width / 2 &&
+           pointer.y >= p.top - p.height / 2 && pointer.y <= p.top + p.height / 2;
+}
+
+function setupPhotoAdjustWidget() {
+    canvas.on('mouse:down', (opt) => {
+        if (photoImg || currentPage !== 'front' || !activeTemplate.photo) return;
+        if (pointInPhotoFrame(canvas.getPointer(opt.e))) {
+            $('photo-input').click();
+        }
+    });
+
+    // Show a pointer cursor while hovering the empty frame, as a hint that
+    // it's clickable.
+    canvas.on('mouse:move', (opt) => {
+        if (photoImg || currentPage !== 'front' || !activeTemplate.photo) return;
+        canvas.upperCanvasEl.style.cursor = pointInPhotoFrame(canvas.getPointer(opt.e))
+            ? 'pointer' : canvas.defaultCursor;
+    });
+
+    // Desktop: a double-click anywhere on the front artwork re-opens the
+    // photo editing controls. This deliberately does not require the second
+    // click to land on the photo itself, because the photo is normally behind
+    // the artwork and may only be partially visible through its cutout.
+    canvas.upperCanvasEl.addEventListener('dblclick', (e) => {
+        if (isMobileDevice() || !photoImg || currentPage !== 'front') return;
+        if (photoToolbarMode === 'idle') {
+            openPhotoToolbar();
+        }
+    }, { capture: true });
+
+    canvas.on('mouse:down', (opt) => {
+        if (isMobileDevice() || !photoImg || currentPage !== 'front') return;
+
+        if (photoToolbarMode === 'idle') {
+            const pointer = canvas.getPointer(opt.e);
+            const onPhoto = photoImg.containsPoint(pointer);
+            tapCandidate = onPhoto ? { x: pointer.x, y: pointer.y, time: Date.now() } : null;
+        } else if (opt.target !== photoImg) {
+            // Keep the photo controls and blue resize box open when the
+            // customer clicks elsewhere on the card. Re-select the photo so
+            // its corner handles remain visible and ready for further edits.
+            canvas.setActiveObject(photoImg);
+            canvas.requestRenderAll();
+            return;
+        }
+    });
+
+    canvas.on('mouse:up', (opt) => {
+        if (isMobileDevice() || !tapCandidate) return;
+        const pointer = canvas.getPointer(opt.e);
+        const moved = Math.hypot(pointer.x - tapCandidate.x, pointer.y - tapCandidate.y);
+        const quick = Date.now() - tapCandidate.time < TAP_MAX_MS;
+        tapCandidate = null;
+        if (moved < TAP_MOVE_THRESHOLD && quick) openPhotoToolbar();
+    });
+
+    // After the customer presses Done the blue box/tools are hidden.
+    // A deliberate double-click on the photo brings them back so the
+    // customer can amend its position or size at any time.  We do this
+    // manually because the photo is non-evented while idle.
+    canvas.on('mouse:dblclick', (opt) => {
+        if (isMobileDevice() || !photoImg || currentPage !== 'front' || photoToolbarMode !== 'idle') return;
+        const pointer = canvas.getPointer(opt.e);
+        if (photoImg.containsPoint(pointer)) {
+            openPhotoToolbar();
+        }
+    });
+
+    // Keep the floating widget glued to the photo as it's dragged, and
+    // keep the coverage guard enforced on every move.
+    canvas.on('object:moving', ({ target }) => {
+        if (isMobileDevice() || target !== photoImg) return;
+        clampPhotoScale(target);
+        if (photoToolbarMode !== 'idle') positionPhotoWidget();
+    });
+
+    // Same guard + widget-repositioning, but for the corner-drag resize
+    // handles (see setControlsVisibility in loadPhotoIntoFrame) instead of
+    // a plain drag-move.
+    canvas.on('object:scaling', ({ target }) => {
+        if (isMobileDevice() || target !== photoImg) return;
+        clampPhotoScale(target);
+        if (photoToolbarMode !== 'idle') positionPhotoWidget();
+    });
+}
+
+function openPhotoToolbar() {
+    if (isMobileDevice() || !photoImg || photoToolbarMode !== 'idle') return;
+    photoToolbarMode = 'toolbar';
+    photoImg.set({ evented: true, selectable: true, hasControls: true, hasBorders: true });
+    canvas.setActiveObject(photoImg);
+    // Keep the photo itself behind the artwork at all times. Fabric draws
+    // the active object's selection border/controls on the interactive
+    // upper canvas, so the blue resize box remains visible above the
+    // artwork without changing the real print layer order.
+    canvas.preserveObjectStacking = true;
+    $('photo-adjust-panel').style.display = 'none';
+    $('photo-toolbar').style.display = 'flex';
+    positionPhotoWidget();
+    canvas.requestRenderAll();
+}
+
+function openAdjustPanel() {
+    if (!photoImg) return;
+    photoToolbarMode = 'adjust';
+    const multiplier = photoImg.scaleX / photoImg.minScale;
+    $('zoom-slider').value = multiplier;
+    $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
+    $('photo-toolbar').style.display = 'none';
+    $('photo-adjust-panel').style.display = 'flex';
+    positionPhotoWidget();
+}
+
+function closePhotoToolbar() {
+    photoToolbarMode = 'idle';
+    if (photoImg) {
+        photoImg.set({ evented: false, selectable: false, hasControls: false, hasBorders: false });
+        canvas.discardActiveObject();
+    }
+    canvas.preserveObjectStacking = true; // photo remains behind artwork
+    $('photo-toolbar').style.display = 'none';
+    $('photo-adjust-panel').style.display = 'none';
+    canvas.requestRenderAll();
+}
+
+function onReplacePhotoClick() {
+    $('photo-input').click();
+}
+
+function onZoomSliderInput(value) {
+    if (!photoImg) return;
+    const multiplier = Number(value);
+    const scale = photoImg.minScale * multiplier;
+    photoImg.set({ scaleX: scale, scaleY: scale });
+    clampPhotoScale(photoImg);
+    $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
+    canvas.requestRenderAll();
+}
+
+// Positions the floating toolbar/panel directly above the photo's current
+// on-screen box. Has to convert from the photo's logical canvas
+// coordinates through two layers: the workspace's fixed pan (see
+// setViewportTransform/PANEL_WIDTH above) and the CSS scaling that
+// stretches the fixed-resolution canvas element to the on-screen card
+// size (see the CARD-FIRST EDITOR / 999px breakpoint CSS rules). Desktop
+// only in practice — see isMobileDevice() guards above.
+function positionPhotoWidget() {
+    if (!photoImg) return;
+    const rect = photoImg.getBoundingRect(true, true);
+    const canvasEl = canvas.upperCanvasEl;
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const wrapperRect = $('canvas-wrapper').getBoundingClientRect();
+    const scaleX = canvasRect.width / canvas.width;
+    const scaleY = canvasRect.height / canvas.height;
+
+    const screenLeft = (rect.left - PANEL_WIDTH) * scaleX + (canvasRect.left - wrapperRect.left);
+    const screenTop = rect.top * scaleY + (canvasRect.top - wrapperRect.top);
+    const screenCenterX = screenLeft + (rect.width * scaleX) / 2;
+    const widgetTop = Math.max(8, screenTop - 56); // just above the photo; clamped so it doesn't run off the top of the card
+
+    [$('photo-toolbar'), $('photo-adjust-panel')].forEach((el) => {
+        el.style.left = screenCenterX + 'px';
+        el.style.top = widgetTop + 'px';
+        el.style.transform = 'translateX(-50%)';
+    });
+}
+
+// ---- Mobile card gestures (MOBILE ONLY — see isMobileDevice() guards;
+// desktop uses the photo adjust widget above instead) ----
+// Below the 999px breakpoint the card behaves like a normal part of the
+// web page:
+//   * a plain swipe anywhere on the card, including over the photo,
+//     scrolls the page — it does NOT drag the photo
+//   * press and hold on the photo for ~0.4s enters photo positioning mode
+//   * once held, dragging moves the photo freely — not clamped to stay
+//     on-page; its clipPath (see loadPhotoIntoFrame) just keeps whatever
+//     goes past the printable page invisible
+//   * a two-finger touch that starts on the photo pinches to zoom, from
+//     PHOTO_MIN_ZOOM to PHOTO_MAX_ZOOM times its starting size (see
+//     clampPhotoScale)
+//   * lifting all fingers and swiping again goes straight back to
+//     scrolling the page
+// This talks to the canvas element directly with raw touch listeners
+// (capture: true, so it gets first look at each touch) rather than
+// Fabric's own object-drag system — photoImg.evented/selectable stay
+// false the whole time on mobile (see loadPhotoIntoFrame and the
+// isMobileDevice() guards on the photo adjust widget above), so there's
+// nothing for Fabric itself to grab; every position/scale change here is
+// applied directly to photoImg and re-clamped through clampPhotoScale,
+// same guard function the desktop widget uses.
+let mobileGesture = null;
+let mobileHoldTimer = null;
+const MOBILE_HOLD_MS = 380;       // press-and-hold duration before positioning mode kicks in
+const MOBILE_MOVE_THRESHOLD = 8;  // px of finger movement before a hold is cancelled (i.e. it was a swipe, not a hold)
+
+function mobileCanvasPoint(touch) {
+    const rect = canvas.upperCanvasEl.getBoundingClientRect();
+    const sx = canvas.getWidth() / rect.width;
+    const sy = canvas.getHeight() / rect.height;
+    return {
+        x: (touch.clientX - rect.left) * sx - canvas.viewportTransform[4],
+        y: (touch.clientY - rect.top) * sy - canvas.viewportTransform[5]
+    };
+}
+
+function photoContainsPoint(point) {
+    if (!photoImg || !photoImg.visible || currentPage !== 'front') return false;
+    const w = photoImg.width * photoImg.scaleX;
+    const h = photoImg.height * photoImg.scaleY;
+    return point.x >= photoImg.left - w / 2 && point.x <= photoImg.left + w / 2 &&
+           point.y >= photoImg.top - h / 2 && point.y <= photoImg.top + h / 2;
+}
+
+function touchDistance(t1, t2) {
+    return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+}
+
+function cancelMobileHold() {
+    if (mobileHoldTimer) { clearTimeout(mobileHoldTimer); mobileHoldTimer = null; }
+}
+
+function finishMobileGesture() {
+    cancelMobileHold();
+    if (mobileGesture?.photoMode) {
+        canvas.skipTargetFind = false;
+        canvas.requestRenderAll();
+    }
+    mobileGesture = null;
+}
+
+function attachMobileCardGestures(el) {
+    el.addEventListener('touchstart', (e) => {
+        if (!isMobileDevice()) return;
+
+        if (e.touches.length === 2) {
+            cancelMobileHold();
+            if (mobileGesture?.onPhoto && photoImg) {
+                mobileGesture.photoMode = true;
+                mobileGesture.pinch = true;
+                mobileGesture.startDistance = touchDistance(e.touches[0], e.touches[1]);
+                mobileGesture.startScale = photoImg.scaleX;
+                canvas.skipTargetFind = true;
+                e.preventDefault(); // this is a deliberate pinch, not a scroll
+            }
+            return;
+        }
+
+        if (e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const onPhoto = photoContainsPoint(mobileCanvasPoint(t));
+
+        mobileGesture = { startX: t.clientX, startY: t.clientY, onPhoto, photoMode: false, pinch: false, moved: false };
+
+        // Only a deliberate hold turns this touch into photo positioning —
+        // a normal swipe (handled in touchmove below) stays a page scroll.
+        if (onPhoto) {
+            mobileHoldTimer = setTimeout(() => {
+                if (!mobileGesture || mobileGesture.moved || mobileGesture.pinch) return;
+                mobileGesture.photoMode = true;
+                mobileGesture.photoStartX = photoImg.left;
+                mobileGesture.photoStartY = photoImg.top;
+                canvas.discardActiveObject();
+                canvas.skipTargetFind = true;
+                canvas.requestRenderAll();
+            }, MOBILE_HOLD_MS);
+        }
+    }, { passive: false, capture: true });
+
+    el.addEventListener('touchmove', (e) => {
+        if (!isMobileDevice() || !mobileGesture) return;
+
+        if (mobileGesture.pinch && e.touches.length >= 2 && photoImg) {
+            e.preventDefault();
+            const dist = touchDistance(e.touches[0], e.touches[1]);
+            const ratio = mobileGesture.startDistance ? dist / mobileGesture.startDistance : 1;
+            photoImg.set({ scaleX: mobileGesture.startScale * ratio, scaleY: mobileGesture.startScale * ratio });
+            clampPhotoScale(photoImg);
+            canvas.requestRenderAll();
+            return;
+        }
+
+        if (e.touches.length !== 1) return;
+        const t = e.touches[0];
+        const dx = t.clientX - mobileGesture.startX;
+        const dy = t.clientY - mobileGesture.startY;
+
+        if (!mobileGesture.photoMode) {
+            if (Math.hypot(dx, dy) > MOBILE_MOVE_THRESHOLD) {
+                mobileGesture.moved = true;
+                cancelMobileHold(); // a real swipe, not a hold
+                // Scroll the page manually rather than relying on the
+                // browser's own default touch-scroll: Fabric's own touch
+                // handling on this same element can otherwise still
+                // intercept the gesture even though photoImg itself isn't
+                // evented, and this guarantees the swipe reaches the page.
+                window.scrollBy(0, -dy);
+                mobileGesture.startX = t.clientX;
+                mobileGesture.startY = t.clientY;
+            }
+            return;
+        }
+
+        // Held long enough — this touch now repositions the photo instead.
+        e.preventDefault();
+        const rect = canvas.upperCanvasEl.getBoundingClientRect();
+        const sx = canvas.getWidth() / rect.width;
+        const sy = canvas.getHeight() / rect.height;
+        photoImg.set({
+            left: mobileGesture.photoStartX + dx * sx,
+            top: mobileGesture.photoStartY + dy * sy
+        });
+        clampPhotoScale(photoImg);
+        canvas.requestRenderAll();
+    }, { passive: false, capture: true });
+
+    el.addEventListener('touchend', finishMobileGesture, { passive: true, capture: true });
+    el.addEventListener('touchcancel', finishMobileGesture, { passive: true, capture: true });
+}
+
+function updateNameText(inputEl) {
+    const n = activeTemplate?.name;
+    if (!nameText || !n) return;
+
+    let rawVal = inputEl.value;
+    if (n.maxChars) rawVal = rawVal.slice(0, n.maxChars);
+
+    const displayVal = rawVal.toUpperCase();
+
+    if (inputEl.value !== rawVal) inputEl.value = rawVal;
+
+    if (n.isCurved) {
+        const size = n.canChangeSize ? (Number($("front-size").value) || n.startSize) : n.startSize;
+        const color = n.canChangeColor ? ($("front-color").value || n.color) : n.color;
+        replaceNameText(buildCurvedNameGroup(displayVal, size, color));
+    } else {
+        nameText.set({ text: displayVal || "NAME" });
+    }
+    canvas.requestRenderAll();
+}
+
+function updateAgeText(inputEl) {
+    if (!ageText) return;
+    const a = activeTemplate?.age;
+
+    let val = inputEl.value;
+    if (a?.numericOnly) val = val.replace(/[^0-9]/g, "");
+    if (a?.lettersOnly) val = val.replace(/[^a-zA-Z]/g, "");
+    if (a?.forceUppercase) val = val.toUpperCase();
+    if (a?.maxChars) val = val.slice(0, a.maxChars);
+
+    if (inputEl.value !== val) inputEl.value = val;
+
+    ageText.set({ text: (val || a?.defaultText || "40").toUpperCase() });
+    canvas.requestRenderAll();
+}
+
+// Builds one label+input pair per entry in activeTemplate.extraFields
+// (e.g. "Event:", "Date:", "Finish Time:") into #extra-fields-container.
+// Rebuilt fresh every time a template loads, since different cards can
+// have a different number/set of extra fields (or none at all). Colour is
+// NOT customer-editable here -- set each field's `color` in cards-data.js.
+function buildExtraFieldInputs() {
+    const container = $('extra-fields-container');
+    container.innerHTML = '';
+
+    const fields = activeTemplate.extraFields;
+    if (!fields) return;
+
+    fields.forEach((f, i) => {
+        const label = document.createElement('label');
+        label.setAttribute('for', `extra-input-${i}`);
+        label.style.marginTop = '10px';
+        label.style.display = 'block';
+        label.textContent = (f.label || f.key) + ':';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `extra-input-${i}`;
+        input.placeholder = (f.label || f.key) + ':';
+        if (f.maxChars) input.maxLength = f.maxChars;
+        input.addEventListener('input', () => updateExtraFieldText(i, input.value));
+
+        container.appendChild(label);
+        container.appendChild(input);
+    });
+}
+
+// Updates the on-canvas text for one extra field as the customer types.
+function updateExtraFieldText(index, value) {
+    const f = activeTemplate?.extraFields?.[index];
+    const t = extraTexts[index];
+    if (!f || !t) return;
+
+    let val = value;
+    if (f.maxChars) val = val.slice(0, f.maxChars);
+
+    t.set({ text: val ? val.toUpperCase() : (f.label || f.key || '').toUpperCase() });
+    canvas.requestRenderAll();
+}
+
+function updateFrontColor(hexColor) {
+    const n = activeTemplate?.name;
+    if (n?.isCurved) {
+        const val = $("name-input").value;
+        const size = n.canChangeSize ? (Number($("front-size").value) || n.startSize) : n.startSize;
+        replaceNameText(buildCurvedNameGroup(val, size, hexColor));
+    } else {
+        nameText?.set({ fill: hexColor });
+    }
+    ageText?.set({ fill: hexColor });
+    canvas.requestRenderAll();
+}
+
+function updateFrontSize(size) {
+    $("front-size-val").innerText = size + "px";
+    const n = activeTemplate?.name;
+    if (nameText && n) {
+        if (n.isCurved) {
+            const val = $("name-input").value;
+            const color = n.canChangeColor ? ($("front-color").value || n.color) : n.color;
+            replaceNameText(buildCurvedNameGroup(val, Number(size), color));
+        } else {
+            nameText.set({ fontSize: Number(size) });
+        }
+    }
+    canvas.requestRenderAll();
+}
+
+function switchPage(page) {
+    if (!editorReady) return; // see editorReady declaration above
+
+    currentPage = page;
+    const isFront = page === 'front';
+
+    $('toggle-front').classList.toggle('active', isFront);
+    $('toggle-inside').classList.toggle('active', !isFront);
+
+    [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
+    [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
+    // Photo stays idle (not selectable/evented) regardless of which page
+    // we're on — see loadPhotoIntoFrame/closePhotoToolbar. Only the Adjust
+    // widget's open state needs resetting when we leave the front page.
+    photoImg?.set({ visible: isFront });
+    photoPromptGroup?.set({ visible: isFront && !photoImg });
+    if (!isFront) closePhotoToolbar();
+
+    canvas.discardActiveObject();
+    resetBordersToDashed();
+
+    if (!isFront) insideTexts.forEach((t) => t.setCoords());
+    canvas.requestRenderAll();
+}
+
+function setupTextEvents() {
+    canvas.on("mouse:down", ({ target }) => {
+        if (currentPage !== 'inside' || !insideTexts.includes(target)) return;
+        resetBordersToDashed();
+        target.set(STYLE_SOLID);
+        canvas.requestRenderAll();
+    });
+
+    canvas.on('text:editing:entered', ({ target }) => {
+        const idx = insideTexts.indexOf(target);
+        if (idx !== -1 && target.text === BOX_DEFAULT_TEXTS[idx]) {
+            // Keep the placeholder text visible on click — select it all
+            // instead of wiping it, so it stays on screen until the
+            // customer actually starts typing (which replaces the
+            // selection in one go, same as any pre-filled text field).
+            target.selectAll();
+            canvas.requestRenderAll();
+        }
+        target._lastValidText = target.text;
+
+        // Fabric edits text through a hidden off-screen <textarea> that
+        // grabs focus the moment you tap into a message box. Phones/tablets
+        // then do what they'd do for any focused field — auto-scroll it
+        // into view — except this one is invisible, so the whole page just
+        // jumps under the customer's finger with nothing to explain why.
+        // Snapping the scroll position back straight after undoes that jump
+        // without touching the actual editing behaviour.
+        const scrollX = window.scrollX, scrollY = window.scrollY;
+        requestAnimationFrame(() => window.scrollTo(scrollX, scrollY));
+        setTimeout(() => window.scrollTo(scrollX, scrollY), 60);
+    });
+
+    // Enforce each box's max line count (BOX_MAX_LINES) — blocks typing or
+    // pressing return once the box has wrapped/broken to the limit, by
+    // reverting to the last valid text and restoring the cursor position.
+    insideTexts.forEach((textbox, i) => {
+        textbox._lastValidText = textbox.text;
+        const maxLines = BOX_MAX_LINES[i];
+
+        textbox.on('changed', () => {
+            if (textbox._textLines.length > maxLines) {
+                const cursorPos = textbox.selectionStart;
+                textbox.text = textbox._lastValidText;
+                const pos = Math.max(0, Math.min(cursorPos - 1, textbox.text.length));
+                textbox.selectionStart = textbox.selectionEnd = pos;
+                textbox.hiddenTextarea.value = textbox.text;
+                textbox.hiddenTextarea.selectionStart = textbox.hiddenTextarea.selectionEnd = pos;
+                textbox.initDimensions();
+                textbox.setCoords();
+            } else {
+                textbox._lastValidText = textbox.text;
+            }
+            canvas.requestRenderAll();
+        });
+    });
+}
+
+function resetBordersToDashed() {
+    insideTexts.forEach((t) => t.set(STYLE_DASHED));
+}
+
+// Holds whatever the customer had typed into each message box just before
+// they ticked "Leave Message Blank", so it can be restored if they untick
+// it. Reset to null whenever the box goes back to holding real text.
+let savedInsideMessages = null;
+
+// Ticking "Leave Message Blank" wipes all three inside message boxes so the
+// printed card has no text at all (the customer will write their own
+// message by hand once it arrives). Unticking restores whatever was typed
+// before, or the default placeholder if nothing had been.
+function toggleBlankMessage(isChecked) {
+    canvas.discardActiveObject();
+
+    if (isChecked) {
+        savedInsideMessages = insideTexts.map((t) => t.text);
+        insideTexts.forEach((t) => {
+            t.set({ text: "", editable: false, selectable: false, evented: false });
+        });
+    } else {
+        insideTexts.forEach((t, i) => {
+            t.set({
+                text: (savedInsideMessages && savedInsideMessages[i]) || BOX_DEFAULT_TEXTS[i],
+                editable: true, selectable: true, evented: true
+            });
+        });
+        savedInsideMessages = null;
+    }
+
+    resetBordersToDashed();
+    canvas.requestRenderAll();
+}
+
+// "I've added my own message" and "Leave the message blank" are mutually
+// exclusive — ticking one always unticks the other. Add to Basket only
+// becomes available once the customer has told us which one applies.
+function onOwnMessageChange(isChecked) {
+    if (isChecked && $('blank-message-checkbox').checked) {
+        $('blank-message-checkbox').checked = false;
+        toggleBlankMessage(false); // restore any text that had been blanked
+    }
+    if (isChecked) switchPage('inside');
+    updateAddToBasketAvailability();
+}
+
+function onBlankMessageChange(isChecked) {
+    if (isChecked && $('own-message-checkbox').checked) {
+        $('own-message-checkbox').checked = false;
+    }
+    toggleBlankMessage(isChecked);
+    updateAddToBasketAvailability();
+}
+
+// Add to Basket only shows/enables once the editor has finished loading
+// AND exactly one of the two message checkboxes has been ticked.
+function updateAddToBasketAvailability() {
+    const ownChecked = $('own-message-checkbox').checked;
+    const blankChecked = $('blank-message-checkbox').checked;
+    const oneTicked = ownChecked !== blankChecked; // exactly one, since they're mutually exclusive
+    const btn = $('add-to-basket-btn');
+
+    if (editorReady && oneTicked) {
+        btn.disabled = false;
+        btn.style.display = 'block';
+    } else {
+        btn.disabled = true;
+        btn.style.display = 'none';
+    }
+}
+
+// Builds the name as a Fabric Group of individually-rotated characters
+// arranged along a real circle of radius `curveRadius`. Because every
+// character's position is derived purely from that fixed radius and the
+// template's anchor point (never from the current on-screen text's
+// bounding box), the arch keeps its shape and stays anchored at the same
+// spot on the card no matter how the font size or the name itself changes
+// — unlike Fabric's built-in text-on-path mode, which recalculates the
+// object's effective bounding box (and therefore its position) every time
+// the font size changes. Smaller curveRadius = tighter curve, larger = flatter.
+function buildCurvedNameGroup(rawValue, fontSize, color) {
+    const n = activeTemplate.name;
+    const text = (rawValue || "").toUpperCase() || "NAME";
+    const fontFamily = n.fontFamily || "Arial";
+    const fontWeight = n.fontWeight || "bold";
+    const radius = n.curveRadius;
+
+    measureCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    const chars = text.split("");
+    const charWidths = chars.map((c) => measureCtx.measureText(c).width);
+    const totalAngle = charWidths.reduce((sum, w) => sum + w / radius, 0);
+
+    let angle = -totalAngle / 2;
+    const letters = chars.map((c, i) => {
+        const charAngle = charWidths[i] / radius;
+        const midAngle = angle + charAngle / 2;
+        angle += charAngle;
+
+        return new fabric.Text(c, {
+            fontSize, fontFamily, fontWeight, fill: color,
+            originX: "center", originY: "center",
+            left: radius * Math.sin(midAngle),
+            top: radius - radius * Math.cos(midAngle),
+            angle: (midAngle * 180) / Math.PI,
+            selectable: false, evented: false
+        });
+    });
+
+    const group = new fabric.Group(letters, {
+        left: n.left, top: n.top, originX: "center", originY: "center",
+        angle: n.tiltAngle || 0,
+        hasControls: false, hasBorders: false,
+        lockMovementX: true, lockMovementY: true
+    });
+    group.ccRole = "name"; // see nameText.ccRole in setupTextsAndOverlays
+    return group;
+}
+
+// Swaps the on-canvas name object for a freshly-built one (used whenever
+// the curved name's text, size, or color changes).
+function replaceNameText(newNameObj) {
+    if (nameText) canvas.remove(nameText);
+    nameText = newNameObj;
+    canvas.add(nameText);
+}
+
+// Renders the full 1191x840 spread — both panels, no crop/pan — on a
+// completely separate, invisible canvas that's never attached to the
+// page. The customer's on-screen editor canvas is untouched throughout:
+// it stays at its normal cropped size the whole time this runs. We just
+// snapshot the current objects (via toJSON, so it picks up whichever
+// front/inside visibility state is active right now) onto that hidden
+// canvas, grab a JPEG, then discard it.
+//
+// options lets callers trade resolution/file size for quality:
+//   multiplier — export scale relative to the 1191x840 canvas (default 3,
+//                the print-ready setting: ~3573x2520px, ~335 DPI at real
+//                print size)
+//   quality    — JPEG quality 0-1 (default 0.92)
+// Re-applies the live editor's personalisation transforms to the export
+// clone.  The editor is displayed through a viewport that pans to the front
+// panel, while the PDF is rendered from the full spread.  Copying the exact
+// live transform (rather than relying only on JSON deserialisation) makes the
+// customer's on-screen name position the single source of truth for print.
+//
+// Matches live objects to their export-clone counterpart by the stable
+// `ccRole` tag (set at creation time — see nameText.ccRole etc. in
+// setupTextsAndOverlays/buildCurvedNameGroup) rather than by array index.
+// Index-matching broke specifically on photo-upload cards: photoImg is a
+// large, async-decoding image that canvas.sendToBack()'s into the object
+// list, and re-enlivening that same image from JSON on the export canvas
+// doesn't reliably finish/settle into the exact same array position as the
+// live canvas, which silently shifted every later index (name/age/extra
+// text) out of alignment. Tag-matching sidesteps that entirely.
+function syncPersonalisationForExport(exportCanvas) {
+    const exportObjects = exportCanvas.getObjects();
+    const targets = [nameText, ageText, ...(extraTexts || [])].filter(Boolean);
+
+    targets.forEach((liveObj) => {
+        const exportObj = exportObjects.find((o) => o.ccRole && o.ccRole === liveObj.ccRole) || null;
+        if (!exportObj) return;
+
+        exportObj.set({
+            left: liveObj.left,
+            top: liveObj.top,
+            scaleX: liveObj.scaleX,
+            scaleY: liveObj.scaleY,
+            angle: liveObj.angle,
+            skewX: liveObj.skewX,
+            skewY: liveObj.skewY,
+            flipX: liveObj.flipX,
+            flipY: liveObj.flipY,
+            originX: liveObj.originX,
+            originY: liveObj.originY
+        });
+
+        // Curved names are Fabric groups, so their internal character layout
+        // is already carried by the clone; only the group's exact transform
+        // needs to be synchronised.
+        exportObj.setCoords();
+    });
+}
+
+function captureFullSpread({ multiplier = 3, quality = 0.92 } = {}) {
+    return new Promise((resolve, reject) => {
+        const exportEl = document.createElement('canvas');
+        const exportCanvas = new fabric.StaticCanvas(exportEl, {
+            width: CANVAS_WIDTH, height: CANVAS_HEIGHT
+        });
+        // 'ccRole' must be explicitly listed here — Fabric only serialises
+        // custom (non-default) properties that are asked for, and
+        // syncPersonalisationForExport needs this tag to survive the
+        // round-trip so it can match objects up on the export clone.
+        exportCanvas.loadFromJSON(canvas.toJSON(['ccRole']), () => {
+            try {
+                syncPersonalisationForExport(exportCanvas);
+                exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+                exportCanvas.renderAll();
+                // multiplier: 3 (the default/print setting) pushes the
+                // 1191x840 editor canvas up to ~3573x2520px, which lands at
+                // ~335 DPI once stretched to fill the real 270x188mm spread
+                // — without this, the export was going out at ~112 DPI and
+                // printing pixelated.
+                // JPEG rather than lossless PNG — visually identical at
+                // print size/distance, but a fraction of the file size (PNG
+                // was producing ~90MB+ files that blew past storage
+                // limits; JPEG at quality 0.92 typically lands under 10MB
+                // for the same artwork).
+                const dataUrl = exportCanvas.toDataURL({ format: 'jpeg', quality, multiplier });
+                exportCanvas.dispose();
+                resolve(dataUrl);
+            } catch (err) {
+                exportCanvas.dispose();
+                reject(err);
+            }
+        });
+    });
+}
+
+// Draws one spread onto the current page of a jsPDF doc: the artwork at
+// exact bleed-inclusive size, centred on A4 landscape, plus trim marks at
+// the four corners of the cut line.
+function drawPrintPage(doc, imageDataUrl) {
+    const spreadWidthMM = (PRINT_PANEL_MM.width * PRINT_PANELS_PER_SPREAD) + (PRINT_BLEED_MM * 2);
+    const spreadHeightMM = PRINT_PANEL_MM.height + (PRINT_BLEED_MM * 2);
+
+    if (spreadWidthMM > A4_LANDSCAPE_MM.width || spreadHeightMM > A4_LANDSCAPE_MM.height) {
+        console.warn(`Print spread (${spreadWidthMM}x${spreadHeightMM}mm) exceeds A4 landscape — check PRINT_PANEL_MM / bleed settings.`);
+    }
+
+    const offsetX = (A4_LANDSCAPE_MM.width - spreadWidthMM) / 2;
+    const offsetY = (A4_LANDSCAPE_MM.height - spreadHeightMM) / 2;
+
+    // Card artwork, centred, at exact bleed-inclusive size.
+    doc.addImage(imageDataUrl, 'JPEG', offsetX, offsetY, spreadWidthMM, spreadHeightMM);
+}
+
+// Builds a single A4-landscape PDF with one page per spread passed in —
+// page 1 = outside spread, page 2 = inside spread. Returns the jsPDF doc,
+// ready for either .save() (local download) or .output('datauristring')
+// (for emailing later).
+async function buildPrintReadyPDF(imageDataUrls) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    imageDataUrls.forEach((imageDataUrl, i) => {
+        if (i > 0) doc.addPage('a4', 'landscape');
+        drawPrintPage(doc, imageDataUrl);
+    });
+
+    return doc;
+}
+
+// Toggles the static QR overlay on/off. Only ever called around the front
+// capture in captureAndBuildPrintPDF -- never during normal editing -- so
+// the QR is invisible on-screen the whole time the customer is designing
+// the card, and only exists in the print-ready file generated at checkout.
+function showQrForCapture(show) {
+    if (!qrImg) return;
+    qrImg.set({ visible: show });
+    canvas.requestRenderAll();
+}
+
+// Captures both spreads (outside, inside) straight off the live editor
+// canvas and builds a single two-page print-ready PDF (page 1 = outside,
+// page 2 = inside). Shared by the real checkout flow and the local
+// test-download button so the capture logic — panel switching, hiding
+// editor-only borders/dashes, etc — only lives once.
+//
+// Also captures a smaller, lower-quality "proof" version of each spread
+// (previewFront/previewInside) in the same pass — same panel-switching/
+// border-hiding work already has to happen for the print capture, so
+// grabbing a second, cheaper export alongside it avoids doing that twice.
+// These are what the customer sees in the basket's "Preview card" modal;
+// they're never used for anything print-related.
+async function captureAndBuildPrintPDF() {
+    switchPage('front');
+
+    // Keep the personalised name anchored to the template's original centre
+    // point when the print image is generated. The editor and the PDF use the
+    // same Fabric coordinates, but explicitly restoring this anchor here also
+    // prevents any text-dimension/font-metric recalculation during JSON export
+    // from making the name appear to drift vertically in the print file.
+    if (nameText && activeTemplate?.name && !activeTemplate.name.isCurved) {
+        nameText.set({
+            left: activeTemplate.name.left,
+            top: activeTemplate.name.top,
+            originX: 'center',
+            originY: 'center'
+        });
+        nameText.setCoords();
+    }
+
+    // Proof capture first, before the QR overlay goes on — the QR is a
+    // print-only artifact (see showQrForCapture) and shouldn't appear in
+    // the customer-facing proof.
+    const previewFront = await captureFullSpread({ multiplier: 1, quality: 0.85 });
+    showQrForCapture(true);
+    const outsideDataUrl = await captureFullSpread();
+    showQrForCapture(false);
+
+    switchPage('inside');
+    resetBordersToDashed();
+    insideBgRects.forEach((r) => r.set({ visible: false }));
+    insideTexts.forEach((t) => t.set({ borderDashArray: null, borderColor: "transparent" }));
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+
+    const insideDataUrl = await captureFullSpread();
+    const previewInside = await captureFullSpread({ multiplier: 1, quality: 0.85 });
+
+    insideBgRects.forEach((r) => r.set({ visible: true }));
+    switchPage('inside');
+
+    const doc = await buildPrintReadyPDF([outsideDataUrl, insideDataUrl]);
+    return { doc, previewFront, previewInside };
+}
+
+// Shows/hides the recipient address fields based on which delivery
+// radio is selected.
+function toggleRecipientFields() {
+    const wantsRecipient = document.querySelector('input[name="delivery-choice"]:checked')?.value === 'recipient';
+    $('recipient-fields').style.display = wantsRecipient ? 'flex' : 'none';
+}
+
+// Reads the current delivery choice + (if applicable) recipient address
+// fields into a plain object, and clears them back to the default ("send
+// to me") ready for the next item — since this is a per-item choice, each
+// "Add to Basket" should start fresh rather than carrying the
+// previous item's recipient over.
+function collectAndResetDeliveryInfo() {
+    const wantsRecipient = document.querySelector('input[name="delivery-choice"]:checked')?.value === 'recipient';
+
+    const delivery = wantsRecipient ? {
+        type: 'recipient',
+        recipient: {
+            name: $('recipient-name').value.trim(),
+            address1: $('recipient-address1').value.trim(),
+            address2: $('recipient-address2').value.trim(),
+            city: $('recipient-city').value.trim(),
+            county: $('recipient-county').value.trim(),
+            postcode: $('recipient-postcode').value.trim(),
+            country: 'United Kingdom'
+        }
+    } : { type: 'self' };
+
+    // Reset for the next item.
+    document.querySelector('input[name="delivery-choice"][value="self"]').checked = true;
+    ['recipient-name', 'recipient-address1', 'recipient-address2', 'recipient-city', 'recipient-county', 'recipient-postcode']
+        .forEach((id) => { $(id).value = ''; });
+    toggleRecipientFields();
+
+    return delivery;
+}
+
+// Builds a small, low-quality preview of the actual personalised front
+// page (photo, text, everything) for the basket list — NOT the print-ready
+// capture (that's high-res/high-quality and meant for printing, far too
+// large to store as basket metadata). Grabs the front page's JSON, then
+// immediately restores whatever page was showing before, so this doesn't
+// visibly disrupt the customer's current view even though the "Add to
+// Basket" button only shows while viewing the inside page.
+function captureFrontThumbnail() {
+    const pageBeforeCapture = currentPage;
+    switchPage('front');
+    // 'ccRole' included so syncPersonalisationForExport can match objects
+    // by tag rather than array position — see that function's comment.
+    const frontJson = canvas.toJSON(['ccRole']);
+    switchPage(pageBeforeCapture);
+
+    return new Promise((resolve, reject) => {
+        const exportEl = document.createElement('canvas');
+        const exportCanvas = new fabric.StaticCanvas(exportEl, {
+            width: CANVAS_WIDTH, height: CANVAS_HEIGHT
+        });
+        exportCanvas.loadFromJSON(frontJson, () => {
+            try {
+                syncPersonalisationForExport(exportCanvas);
+                exportCanvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+                // qrImg is part of the cloned JSON but stays hidden here —
+                // showQrForCapture() is never called during this capture,
+                // so it keeps whatever visibility it already had (false,
+                // same as during normal editing).
+                exportCanvas.renderAll();
+                // Small + low quality on purpose — this is a basket list
+                // thumbnail, not a print asset. multiplier: 0.3 on the
+                // 1191x840 editor canvas lands around 357x252px.
+                //
+                // CROP TO THE FRONT PANEL ONLY: exportCanvas holds the full
+                // outside spread (back cover + front cover side by side, same
+                // as the print file), but this thumbnail is meant to show just
+                // the front cover — what the customer actually designed and
+                // sees while editing. Left uncropped, the wide 2-panel image
+                // (roughly half of it blank back-cover space) got squeezed by
+                // the basket's object-fit:contain box, visually shrinking and
+                // off-centering the front artwork — which is what looked like
+                // the name "shifting". Cropping to the live editor's own
+                // panel window (left: PANEL_WIDTH, width: PANEL_WIDTH) fixes
+                // that regardless of card type; it was just most noticeable
+                // on photo cards because they have the most going on visually.
+                const dataUrl = exportCanvas.toDataURL({
+                    format: 'jpeg', quality: 0.6, multiplier: 0.3,
+                    left: PANEL_WIDTH, top: 0, width: PANEL_WIDTH, height: CANVAS_HEIGHT
+                });
+                exportCanvas.dispose();
+                resolve(dataUrl);
+            } catch (err) {
+                exportCanvas.dispose();
+                reject(err);
+            }
+        });
+    });
+}
+
+// Builds the same print-ready PDF "Add to Basket" already used to send,
+// but instead of going straight to checkout it stashes the PDF + this
+// card's personalisation into the shared basket (see cart.js) so the
+// customer can keep personalising more cards before paying for all of
+// them together.
+async function addCurrentCardToBasket() {
+    const addBtn = $('add-to-basket-btn');
+    const originalText = addBtn.innerText;
+    addBtn.innerText = "Adding...";
+    addBtn.disabled = true;
+
+    try {
+        const { doc, previewFront, previewInside } = await captureAndBuildPrintPDF();
+        const pdfDataUri = doc.output('datauristring');
+        const thumbnail = await captureFrontThumbnail();
+        const delivery = collectAndResetDeliveryInfo();
+
+        const optionsParts = [];
+        if (activeTemplate.name) optionsParts.push(`${activeTemplate.name.label || 'Name'}: ${$('name-input').value || '—'}`);
+        if (activeTemplate.age) optionsParts.push(`${activeTemplate.age.label || 'Age'}: ${ageText?.text ?? '—'}`);
+        (activeTemplate.extraFields || []).forEach((f, i) => {
+            const val = $(`extra-input-${i}`)?.value;
+            if (val) optionsParts.push(`${f.label || f.key || 'Field'}: ${val}`);
+        });
+        if (delivery.type === 'recipient') optionsParts.push(`Deliver to: ${delivery.recipient.name || 'recipient'}`);
+
+        await ccCart.addToCart({
+            kind: 'card',
+            templateId: activeVariantKey,
+            variantId: activeVariantKey,
+            title: activeTemplate.title || activeVariantKey,
+            thumbnail,
+            optionsSummary: optionsParts.join(' · '),
+            price: activeTemplate.price || null,
+            priceValue: activeTemplate.priceValue || 0,
+            pdfDataUri,
+            previewFront,
+            previewInside,
+            delivery
+        });
+
+        addBtn.innerText = "Added to Basket ✓";
+        $('next-btn').disabled = false;
+        setTimeout(() => {
+            addBtn.innerText = originalText;
+            addBtn.disabled = false;
+        }, 1500);
+    } catch (err) {
+        console.error(err);
+        alert("Couldn't add this card to your basket — check the console for details.");
+        addBtn.innerText = originalText;
+        addBtn.disabled = false;
+    }
+}
+
+// Returns to shop-cards.html and tells it (via ?resume=1) to restore
+// whatever category, football league, or team page the user left --
+// instead of resetting to "all cards".
+function returnToShop() {
+    window.location.href = 'shop-cards.html?resume=1';
+}
+
+// Takes the customer straight to the basket page.
+function goToBasket() {
+    window.location.href = 'basket.html';
+}
+
+// DEV HELPER — not called automatically. Open this card in the editor,
+// open the browser console, run findCoords(), then click anywhere on the
+// canvas: it logs the {left, top} under your cursor so you can copy those
+// numbers straight into a new CARD_OVERRIDES entry above.
+function findCoords() {
+    canvas.on('mouse:down', (e) => {
+        const p = canvas.getPointer(e.e);
+        console.log(`left: ${Math.round(p.x)}, top: ${Math.round(p.y)}`);
+    });
+    console.log('findCoords active — click anywhere on the canvas.');
+}
+</script>
+</body>
+</html>
