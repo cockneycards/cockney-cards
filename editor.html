@@ -150,6 +150,9 @@
     .variant-thumb { width: 56px; height: 56px; padding: 0; border: 2px solid #ccc; border-radius: 6px; overflow: hidden; cursor: pointer; background: none; }
     .variant-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .variant-thumb.active { border-color: #111; }
+    .variant-checkboxes { display: flex; gap: 20px; margin: -12px 0 20px; flex-wrap: wrap; }
+    .variant-checkboxes label { display: flex; align-items: center; gap: 6px; font-weight: normal; text-transform: none; letter-spacing: normal; font-size: 13px; color: #444; cursor: pointer; }
+    .variant-checkboxes input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 
     .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 20px; letter-spacing: 1px; text-transform: uppercase; }
     .btn:hover { background-color: #444; }
@@ -288,6 +291,7 @@
     <div class="controls">
         <div id="front-controls" class="control-group">
             <div id="variant-selector" class="variant-selector" style="display:none;"></div>
+            <div id="variant-checkboxes" class="variant-checkboxes" style="display:none;"></div>
 
             <div id="front-text-inputs">
                 <input type="text" id="name-input" placeholder="Name:" oninput="updateNameText(this)">
@@ -770,17 +774,38 @@ function artUrlFor(key) {
     return null;
 }
 
+// Turns a variant id into a friendly checkbox label — e.g. "millwallboy"
+// -> "Boy", "millwallgirl" -> "Girl". Falls back to the raw id
+// (capitalised) for anything that isn't a boy/girl-style variant.
+function variantDisplayLabel(key) {
+    const lower = key.toLowerCase();
+    if (lower.endsWith("boy")) return "Boy";
+    if (lower.endsWith("girl")) return "Girl";
+    return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
 // Builds the row of thumbnail buttons for a card's picture options (if it
 // has any). Clicking a thumbnail just swaps the background picture via
 // selectVariant() below — name/age text, position, colour etc. all stay
 // exactly as defined by this card's entry in cards-data.js the whole time.
+//
+// Every card that has picture variations also gets an explicit tickbox
+// under the thumbnails for each of its non-default options — same pattern
+// as the prints editor's "Eat Sleep" checkboxes — so it's unambiguous
+// which picture the customer has actually picked, on top of the thumbnail
+// highlight. The base/default picture (the card's own id, always first in
+// CARD_VARIANTS) has no box of its own; see selectVariant() for why
+// clicking back to it doesn't clear whichever box is currently ticked.
 function setupVariantSelector(templateKey) {
     const variants = CARD_VARIANTS[templateKey];
     const container = $("variant-selector");
+    const checkboxContainer = $("variant-checkboxes");
     container.innerHTML = "";
+    checkboxContainer.innerHTML = "";
 
     if (!variants || variants.length < 2) {
         container.style.display = "none";
+        checkboxContainer.style.display = "none";
         return;
     }
 
@@ -795,6 +820,32 @@ function setupVariantSelector(templateKey) {
         btn.onclick = () => selectVariant(key);
         container.appendChild(btn);
     });
+
+    const pictureVariants = variants.slice(1);
+    if (pictureVariants.length) {
+        checkboxContainer.style.display = "flex";
+        pictureVariants.forEach((key) => {
+            const wrapper = document.createElement("label");
+            const cb = document.createElement("input");
+            cb.type = "checkbox";
+            cb.dataset.key = key;
+            cb.checked = key === activeVariantKey;
+            cb.onchange = () => {
+                if (cb.checked) {
+                    selectVariant(key);
+                } else {
+                    // Behave like a radio button — a different box needs
+                    // to be ticked instead of just clearing this one.
+                    cb.checked = true;
+                }
+            };
+            wrapper.appendChild(cb);
+            wrapper.appendChild(document.createTextNode(variantDisplayLabel(key)));
+            checkboxContainer.appendChild(wrapper);
+        });
+    } else {
+        checkboxContainer.style.display = "none";
+    }
 }
 
 // Swaps just the front picture for a different option from the same
@@ -816,6 +867,17 @@ function selectVariant(key) {
     document.querySelectorAll("#variant-selector .variant-thumb").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.key === key);
     });
+
+    // Only move the tick if the newly-selected picture actually has a box
+    // of its own. Clicking back to the base/default image doesn't — so
+    // this leaves whichever box was last ticked exactly as it was, rather
+    // than clearing it just because the default is being previewed again.
+    const matchingCheckbox = document.querySelector(`#variant-checkboxes input[data-key="${CSS.escape(key)}"]`);
+    if (matchingCheckbox) {
+        document.querySelectorAll("#variant-checkboxes input[type=checkbox]").forEach((cb) => {
+            cb.checked = cb.dataset.key === key;
+        });
+    }
 }
 
 function setupTextsAndOverlays() {
