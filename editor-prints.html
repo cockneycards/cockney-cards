@@ -878,9 +878,17 @@ function selectVariant(key) {
     document.querySelectorAll("#variant-selector .variant-thumb").forEach((btn) => {
         btn.classList.toggle("active", btn.dataset.key === key);
     });
-    document.querySelectorAll("#variant-checkboxes input[type=checkbox]").forEach((cb) => {
-        cb.checked = cb.dataset.key === key;
-    });
+
+    // Only move the tick if the newly-selected picture actually has a box
+    // of its own. Clicking back to the base/default image doesn't — so
+    // this leaves whichever box was last ticked exactly as it was, rather
+    // than clearing it just because the default is being previewed again.
+    const matchingCheckbox = document.querySelector(`#variant-checkboxes input[data-key="${CSS.escape(key)}"]`);
+    if (matchingCheckbox) {
+        document.querySelectorAll("#variant-checkboxes input[type=checkbox]").forEach((cb) => {
+            cb.checked = cb.dataset.key === key;
+        });
+    }
 }
 
 // Loads the print's artwork so it fills the ENTIRE canvas edge-to-edge —
