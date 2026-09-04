@@ -98,7 +98,14 @@
     .print-stage { width: 100%; display: flex; justify-content: center; position: relative; min-width: 0; }
 
     #canvas-wrapper {
-        position: relative; width: 100%; max-width: 625.5px; background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box;
+        position: relative; width: 100%; max-width: 625.5px; background: white; padding: 0; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; box-sizing: border-box;
+        /* Matches the card editor's #canvas-wrapper: touch-action: none (plus
+           disabling the iOS long-press callout/selection) stops the browser's
+           own default touch handling from racing Fabric's own touch listeners
+           on the same element — without it, a swipe here can still get
+           swallowed instead of scrolling the page. attachPrintScrollForwarding
+           (below) is what actually forwards the swipe to the page. */
+        touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
     }
     /* Fixed aspect ratio to match EDIT_WIDTH/EDIT_HEIGHT in the script
        below, scaled fluidly with the wrapper's width rather than pinned to
@@ -111,7 +118,7 @@
     #canvas-stage { position: relative; width: 100%; height: auto; aspect-ratio: 595.5 / 840; }
     #canvas-stage .canvas-container { width: 100% !important; height: 100% !important; }
     #canvas-stage .canvas-container canvas { width: 100% !important; height: 100% !important; }
-    #canvas { display: block; border: 1px solid #e2e2e2; box-sizing: border-box; }
+    #canvas { display: block; width: 100%; height: 100%; border: 0; }
     /* On-screen only — a tiled, semi-transparent watermark sat over the live
        canvas so a screenshot/print-screen of the editor isn't directly
        print-usable. It's a plain DOM overlay, not a Fabric object, so it's
@@ -528,6 +535,39 @@ function preloadCustomFonts() {
     );
 }
 
+// ---- Touch-scroll forwarding ----
+// Every object placed on this canvas (text, background art, logo) is
+// selectable:false, evented:false — see initEditor below — so there's
+// nothing on it a customer should ever drag; a touch swipe here should
+// always just scroll the page. Relying on Fabric's own allowTouchScrolling
+// flag isn't enough by itself: Fabric's touch handling on this element can
+// still swallow the gesture even with nothing evented on the canvas. So
+// #canvas-wrapper sets touch-action:none (disabling the browser's own
+// touch-scroll so it doesn't race Fabric for the same touch) and this
+// manually forwards the swipe to the page instead — the same fix the card
+// editor uses for its press-and-hold photo gesture, just without any of
+// the hold/pinch branching since prints have nothing to reposition.
+function attachPrintScrollForwarding(el) {
+    let startY = 0, tracking = false;
+
+    el.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) { tracking = false; return; }
+        tracking = true;
+        startY = e.touches[0].clientY;
+    }, { passive: true, capture: true });
+
+    el.addEventListener('touchmove', (e) => {
+        if (!tracking || e.touches.length !== 1) return;
+        e.preventDefault(); // stop Fabric's own touch handling from racing this
+        const t = e.touches[0];
+        window.scrollBy(0, -(t.clientY - startY));
+        startY = t.clientY;
+    }, { passive: false, capture: true });
+
+    el.addEventListener('touchend', () => { tracking = false; }, { passive: true, capture: true });
+    el.addEventListener('touchcancel', () => { tracking = false; }, { passive: true, capture: true });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const printId = params.get('print') || Object.keys(PRINT_TEMPLATES)[0];
@@ -573,6 +613,8 @@ function initEditor(templateKey) {
         // gesture landed on empty canvas.
         selection: false
     });
+
+    attachPrintScrollForwarding(canvas.upperCanvasEl);
 
     // Show/hide the personalisation inputs based on what this print (and,
     // for the name field, this variant — see refreshNameVisibilityForVariant) supports
