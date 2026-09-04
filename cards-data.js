@@ -188,7 +188,7 @@ const CARD_CATALOGUE = {
     photo: { left: 909.6, top: 396, width: 310, height: 360 } },
   
  "christmas-naughtyornice": { title: "Santa's Naughty or Nice? (Video Card)", price: "£3.49", categories: ["christmas"], preview: "santa-video-preview.png", full: "santa-video.png",
-    qr: { left: 915, top: 686, width: 130, height: 130, url: "https://images.cockneycards.com/santas-message-qr.png" } },
+    qr: { left: 915, top: 686, width: 130, height: 130, url: "santas-message-qr.png" } },
 
 //SPORTS
 
