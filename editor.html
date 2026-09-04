@@ -774,28 +774,17 @@ function artUrlFor(key) {
     return null;
 }
 
-// Turns a variant id into a friendly checkbox label — e.g. "millwallboy"
-// -> "Boy", "millwallgirl" -> "Girl". Falls back to the raw id
-// (capitalised) for anything that isn't a boy/girl-style variant.
-function variantDisplayLabel(key) {
-    const lower = key.toLowerCase();
-    if (lower.endsWith("boy")) return "Boy";
-    if (lower.endsWith("girl")) return "Girl";
-    return key.charAt(0).toUpperCase() + key.slice(1);
-}
-
 // Builds the row of thumbnail buttons for a card's picture options (if it
 // has any). Clicking a thumbnail just swaps the background picture via
 // selectVariant() below — name/age text, position, colour etc. all stay
 // exactly as defined by this card's entry in cards-data.js the whole time.
 //
 // Every card that has picture variations also gets an explicit tickbox
-// under the thumbnails for each of its non-default options — same pattern
-// as the prints editor's "Eat Sleep" checkboxes — so it's unambiguous
-// which picture the customer has actually picked, on top of the thumbnail
-// highlight. The base/default picture (the card's own id, always first in
-// CARD_VARIANTS) has no box of its own; see selectVariant() for why
-// clicking back to it doesn't clear whichever box is currently ticked.
+// under the thumbnails — one per option, INCLUDING the base/default
+// picture — labelled "Card 1", "Card 2" etc. in thumbnail order, so
+// customers can tick whichever of the alternatives they actually want.
+// Same pattern as the prints editor's "Eat Sleep" checkboxes, just with
+// every option (not only the non-default ones) getting a box.
 function setupVariantSelector(templateKey) {
     const variants = CARD_VARIANTS[templateKey];
     const container = $("variant-selector");
@@ -821,31 +810,26 @@ function setupVariantSelector(templateKey) {
         container.appendChild(btn);
     });
 
-    const pictureVariants = variants.slice(1);
-    if (pictureVariants.length) {
-        checkboxContainer.style.display = "flex";
-        pictureVariants.forEach((key) => {
-            const wrapper = document.createElement("label");
-            const cb = document.createElement("input");
-            cb.type = "checkbox";
-            cb.dataset.key = key;
-            cb.checked = key === activeVariantKey;
-            cb.onchange = () => {
-                if (cb.checked) {
-                    selectVariant(key);
-                } else {
-                    // Behave like a radio button — a different box needs
-                    // to be ticked instead of just clearing this one.
-                    cb.checked = true;
-                }
-            };
-            wrapper.appendChild(cb);
-            wrapper.appendChild(document.createTextNode(variantDisplayLabel(key)));
-            checkboxContainer.appendChild(wrapper);
-        });
-    } else {
-        checkboxContainer.style.display = "none";
-    }
+    checkboxContainer.style.display = "flex";
+    variants.forEach((key, index) => {
+        const wrapper = document.createElement("label");
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.dataset.key = key;
+        cb.checked = key === activeVariantKey;
+        cb.onchange = () => {
+            if (cb.checked) {
+                selectVariant(key);
+            } else {
+                // Behave like a radio button — a different box needs to
+                // be ticked instead of just clearing this one.
+                cb.checked = true;
+            }
+        };
+        wrapper.appendChild(cb);
+        wrapper.appendChild(document.createTextNode(`Card ${index + 1}`));
+        checkboxContainer.appendChild(wrapper);
+    });
 }
 
 // Swaps just the front picture for a different option from the same
