@@ -331,6 +331,27 @@ const PRINT_CATALOGUE = {
             { id: "birmingham-girl", full: "eatsleep-birmingham-girl.png" },
         ]
     }, 
+    "palace-eatsleep": {
+        title: "Crystal Palace Prints - Eat, Sleep, Palace, Repeat",
+        description: "Crystal Palace duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
+        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["palace-boy", "palace-girl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-palace-preview.png",
+        full: "eatsleep-palace.png",
+        variants: [
+          { id: "palace-boy", full: "eatsleep-palace-boy.png" },
+            { id: "palace-girl", full: "eatsleep-palace-girl.png" },
+        ]
+    }, 
     "lionesses-eatsleep": {
         title: "London City Lionesses Prints - Eat, Sleep, Lionesses, Repeat",
         description: "London City Lionesses duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
@@ -394,48 +415,6 @@ const PRINT_CATALOGUE = {
             { id: "arsenalgirl", full: "afc-eatsleepgirl.png" },
         ]
     },
-    "villa-eatsleep": {
-        title: "Aston Villa Prints - Eat, Sleep, Villa, Repeat",
-        description: "Aston Villa duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
-        sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
-            A3: { price: "£12.99", priceValue: 12.99 }
-        },
-        categories: ["all", "sports"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
-            onlyForVariants: ["villaboy", "villagirl"], // no name field on the plain full/duo version — only these two personalised variants
-            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
-        },
-        preview: "eatsleep-villaboy-preview-girl.png",
-        full: "eatsleep-villa.png",
-        variants: [
-          { id: "villaboy", full: "eatsleep-villaboy1.png" },
-            { id: "villagirl", full: "eatsleep-villagirl1.png" },
-        ]
-    }, 
-    "city-eatsleep": {
-        title: "Manchester City Prints - Eat, Sleep, City, Repeat",
-        description: "Manchester City duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
-        sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
-            A3: { price: "£12.99", priceValue: 12.99 }
-        },
-        categories: ["all", "sports"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
-            onlyForVariants: ["cityboy", "citygirl"], // no name field on the plain full/duo version — only these two personalised variants
-            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
-        },
-        preview: "city-eatsleep-preview.png",
-        full: "city-eatsleep.png",
-        variants: [
-          { id: "cityboy", full: "city-eatsleepboy.png" },
-            { id: "citygirl", full: "city-eatsleepgirl.png" },
-        ]
-    },
     "chelsea-eatsleep": {
         title: "Chelsea Prints - Eat, Sleep, Chelsea, Repeat",
         description: "Chelsea duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
@@ -457,6 +436,48 @@ const PRINT_CATALOGUE = {
             { id: "chelseagirl", full: "chelsea-eatsleepgirl.png" },
         ]
     },
+    "city-eatsleep": {
+        title: "Manchester City Prints - Eat, Sleep, City, Repeat",
+        description: "Manchester City duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
+        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["cityboy", "citygirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "city-eatsleep-preview.png",
+        full: "city-eatsleep.png",
+        variants: [
+          { id: "cityboy", full: "city-eatsleepboy.png" },
+            { id: "citygirl", full: "city-eatsleepgirl.png" },
+        ]
+    },
+    "villa-eatsleep": {
+        title: "Aston Villa Prints - Eat, Sleep, Villa, Repeat",
+        description: "Aston Villa duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
+        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#ffffff", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["villaboy", "villagirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-villaboy-preview-girl.png",
+        full: "eatsleep-villa.png",
+        variants: [
+          { id: "villaboy", full: "eatsleep-villaboy1.png" },
+            { id: "villagirl", full: "eatsleep-villagirl1.png" },
+        ]
+    }, 
     "united-eatsleep": {
         title: "Manchester United Prints - Eat, Sleep, United, Repeat",
         description: "Manchester United duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
