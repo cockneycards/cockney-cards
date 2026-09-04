@@ -123,7 +123,7 @@ const CARD_CATALOGUE = {
   "leaving-girl": { title: "Sorry You're Leaving Girl", categories: ["all", "work-related"], preview: "leaving-girl-preview.png", full: "leaving-girl.png" },
   
   "new-home": { title: "Home Sweet Home", categories: ["all", "home"], preview: "newhome-preview.png", full: "newhome.png" }, 
-  "new-home-happy": { title: "Happy Home", categories: ["all", "home"], preview: "newhome-happyhome-preview.png", full: "newhome-happyhome.png", name: { left: 884, top: 455, startSize: 72, minSize: 20, maxSize: 30, fontFamily: "CaacupeOne-Regular", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 7 } },
+  "new-home-happy": { title: "Happy Home", categories: ["all", "home"], preview: "newhome-happyhome-preview.png", full: "newhome-happyhome.png", name: { left: 882, top: 455, startSize: 74, minSize: 20, maxSize: 30, fontFamily: "CaacupeOne-Regular", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 7 } },
   "newhome1": { title: "New Home, New Beginnings", categories: ["all", "home"], preview: "newhome1-preview.png", full: "newhome1.png" },
   "newhome2": { title: "New Home Unboxed", categories: ["all", "home"], preview: "newhome2-preview.png", full: "newhome2.png" },
   "newhome3": { title: "New Home, New Adventures", categories: ["all", "home"], preview: "newhome3-preview.png", full: "newhome3.png" },
