@@ -327,8 +327,8 @@ const PRINT_CATALOGUE = {
         preview: "eatsleep-birmingham-previewgirl.png",
         full: "eatsleep-birmingham.png",
         variants: [
-          { id: "cityboy", full: "eatsleep-birmingham-boy.png" },
-            { id: "citygirl", full: "eatsleep-birmingham-girl.png" },
+          { id: "birmingham-boy", full: "eatsleep-birmingham-boy.png" },
+            { id: "birmingham-girl", full: "eatsleep-birmingham-girl.png" },
         ]
     }, 
     "lionesses-eatsleep": {
@@ -348,7 +348,7 @@ const PRINT_CATALOGUE = {
         preview: "eatsleep-lionesses-preview.png",
         full: "eatsleep-lionesses.png",
         variants: [
-          { id: "lionessoy", full: "eatsleep-lionesses-boy.png" },
+          { id: "lionessboy", full: "eatsleep-lionesses-boy.png" },
             { id: "lionessgirl", full: "eatsleep-lionesses-girl.png" },
         ]
     },
@@ -411,8 +411,8 @@ const PRINT_CATALOGUE = {
         preview: "eatsleep-villaboy-preview-girl.png",
         full: "eatsleep-villa.png",
         variants: [
-          { id: "villaboy", full: "eatsleep-villaboy.png" },
-            { id: "villagirl", full: "eatsleep-villagirl.png" },
+          { id: "villaboy", full: "eatsleep-villaboy1.png" },
+            { id: "villagirl", full: "eatsleep-villagirl1.png" },
         ]
     }, 
     "city-eatsleep": {
@@ -471,11 +471,11 @@ const PRINT_CATALOGUE = {
             onlyForVariants: ["unitedboy", "unitedgirl"], // no name field on the plain full/duo version — only these two personalised variants
             shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
         },
-        preview: "united-eatsleep-preview.png",
-        full: "united-eatsleep.png",
+        preview: "eatsleep-munited-preview.png",
+        full: "eatsleep-munited.png",
         variants: [
-          { id: "unitedboy", full: "united-eatsleepboy.png" },
-            { id: "unitedgirl", full: "united-eatsleepgirl.png" },
+          { id: "munitedboy", full: "eatsleep-munited-boy.png" },
+            { id: "munitedgirl", full: "eatsleep-munited-girl.png" },
         ]
     },   
     "houserules": {
@@ -489,7 +489,7 @@ const PRINT_CATALOGUE = {
         },
         categories: ["all", "b&w"],
         preview: "doghouserules-preview.png",
-        full: "houserules.png"
+        full: "doghouserules.png"
 
     },    
     "itsnotwhatwehave": {
@@ -521,6 +521,23 @@ const PRINT_CATALOGUE = {
         variants: [
           { id: "underthesea_b", full: "underthesea_b.png" },
           { id: "underthesea_c", full: "underthesea_c.png" },
+        ]
+    },
+    "dinobones": {
+        title: "Dinosaur Bones Duo Set",
+        description: "Bring prehistoric adventure to any boy’s bedroom with this cool dinosaur bones print. A fun and eye-catching design that’s perfect for little dinosaur fans and adds a roar-some touch to their room!",
+        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "childrens"],
+        name: { label: "First Name", left: 378, top: 120, startSize: 56, minSize: 25, maxSize: 35, fontFamily: "LuckiestGuy", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 8, forceUppercase: false },
+        preview: "dino-bones-preview.png",
+        full: "dino-bones1.png",
+        variants: [
+          { id: "dino-bones2", full: "dino-bones2.png" },
         ]
     },
     "oasis-dontlookback": {
