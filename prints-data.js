@@ -288,28 +288,7 @@ const PRINT_CATALOGUE = {
           { id: "spursboy", full: "eatsleep-spurs-boy.png" },
             { id: "spursgirl", full: "eatsleep-spurs-girl.png" },
         ]
-    }, 
-    "charlton-eatsleep": {
-        title: "Charlton Athletic Prints - Eat, Sleep, Charlton, Repeat",
-        description: "Charlton Athletic duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
-        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
-        sizes: {
-            A5: { price: "£6.99", priceValue: 6.99 },
-            A4: { price: "£9.99", priceValue: 9.99 },
-            A3: { price: "£12.99", priceValue: 12.99 }
-        },
-        categories: ["all", "sports"],
-        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
-            onlyForVariants: ["charltonboy", "charltongirl"], // no name field on the plain full/duo version — only these two personalised variants
-            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
-        },
-        preview: "eatsleep-charlton-girl-preview.png",
-        full: "eatsleep-charlton.png",
-        variants: [
-          { id: "charltonboy", full: "eatsleep-charlton-boy.png" },
-            { id: "charltongirl", full: "eatsleep-charlton-girl.png" },
-        ]
-    }, 
+    },  
     "birmingham-eatsleep": {
         title: "Birmingham City Prints - Eat, Sleep, City, Repeat",
         description: "Birmingham City duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
@@ -434,6 +413,27 @@ const PRINT_CATALOGUE = {
         variants: [
           { id: "chelseaboy", full: "chelsea-eatsleepboy.png" },
             { id: "chelseagirl", full: "chelsea-eatsleepgirl.png" },
+        ]
+    },
+    "charlton-eatsleep": {
+        title: "Charlton Athletic Prints - Eat, Sleep, Charlton, Repeat",
+        description: "Charlton Athletic duo prints that will look great on any wall at home or even at work in the office. Choose from either a girl or boy version.",
+        price: "£6.99", priceValue: 6.99, // "from" price shown on the shop grid (cheapest size, A5)
+        sizes: {
+            A5: { price: "£6.99", priceValue: 6.99 },
+            A4: { price: "£9.99", priceValue: 9.99 },
+            A3: { price: "£12.99", priceValue: 12.99 }
+        },
+        categories: ["all", "sports"],
+        name: { label: "First Name", left: 294, top: 708, startSize: 100, minSize: 23, maxSize: 100, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 9,
+            onlyForVariants: ["charltonboy", "charltongirl"], // no name field on the plain full/duo version — only these two personalised variants
+            shadow: { color: "rgba(0,0,0,1)", blur: 1, offsetX: -7, offsetY: 7 } // bold, hard, dark drop shadow, offset left to match the footballer silhouette shading
+        },
+        preview: "eatsleep-charlton-girl-preview.png",
+        full: "eatsleep-charlton.png",
+        variants: [
+          { id: "charltonboy", full: "eatsleep-charlton-boy.png" },
+            { id: "charltongirl", full: "eatsleep-charlton-girl.png" },
         ]
     },
     "city-eatsleep": {
