@@ -416,6 +416,7 @@ function renderItem(item) {
 // ---------------------------------------------------------------------
 let previewActiveTab = 'front';
 let previewImagesCache = { front: null, inside: null };
+let previewActiveKind = null;
 
 async function openPreview(id) {
     const item = ccCart.getCart().find((i) => i.id === id);
@@ -449,6 +450,7 @@ async function openPreview(id) {
         inside: stored.inside || null
     };
     previewActiveTab = previewImagesCache.front ? 'front' : 'inside';
+    previewActiveKind = item.kind;
 
     renderPreviewTabs(previewImagesCache);
     renderPreviewImage(previewImagesCache);
@@ -462,10 +464,15 @@ function renderPreviewTabs(images) {
         tabsEl.style.display = 'none';
         return;
     }
+    // Cards bundle a Front + Inside Message; multi-page prints (dino duo's
+    // base + variant, eat-sleep's main image + boy/girl, etc — see
+    // getOrderVariantKeys() in editor-prints.html) bundle two separate
+    // front designs instead, so "Inside Message" would be misleading there.
+    const secondLabel = previewActiveKind === 'print' ? 'Second Design' : 'Inside Message';
     tabsEl.style.display = 'flex';
     tabsEl.innerHTML = `
         <button type="button" class="preview-tab ${previewActiveTab === 'front' ? 'active' : ''}" onclick="switchPreviewTab('front')">Front</button>
-        <button type="button" class="preview-tab ${previewActiveTab === 'inside' ? 'active' : ''}" onclick="switchPreviewTab('inside')">Inside Message</button>
+        <button type="button" class="preview-tab ${previewActiveTab === 'inside' ? 'active' : ''}" onclick="switchPreviewTab('inside')">${secondLabel}</button>
     `;
 }
 
