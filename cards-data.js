@@ -44,7 +44,7 @@ const CARD_CATALOGUE = {
   "birthday-greatestmum": { title: "Greatest Mums Birthday", categories: ["all", "mum", "birthdays"], preview: "greatestmum-preview.png", full: "greatestmum.png" },
   "birthday-super-mum": { title: "Super Mum", categories: ["all", "mum", "birthdays"], preview: "super-mum-preview.png", full: "my-super-mum.png" },
   "birthday-best-mum-ever": { title: "Best Mum Ever", categories: ["all", "mum", "birthdays"], preview: "best-mum-ever-preview.png", full: "best-mum-ever.png" },
-  "birthday-superbusy-mum": { title: " Super Busy Mum", categories: ["all", "mum", "birthdays"], preview: "superbusy-mum-preview.png", full: "superbusy-mum.png" },
+  "birthday-superbusy-mum": { title: "Super Busy Mum", categories: ["all", "mum", "birthdays"], preview: "superbusy-mum-preview.png", full: "superbusy-mum.png" },
   "birthday-mum-photo1": { title: "Happy Birthday Mum", price: "£3.49", categories: ["mum", "birthdays", "photo-upload"], preview: "mum-photo1-preview.png", full: "mum-photo1.png",
     photo: { left: 890, top: 500, width: 408.1, height: 340 } },
 
