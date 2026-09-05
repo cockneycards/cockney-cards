@@ -81,6 +81,17 @@ export function qualifiesForFreeDelivery(items) {
     return unitCount(items, 'card') + a5PrintUnits >= 3;
 }
 
+// 2 or more A4/A3 prints (either size, mixed is fine) plus at least one
+// card, going to the same address. Companion to the A5 envelope rule
+// above — A4/A3 prints need the bigger parcel regardless, but still earn
+// free delivery as their own card + large-print bundle.
+export function qualifiesForFreeLargePrintDelivery(items) {
+    const largePrintUnits = items
+        .filter((item) => item.kind === 'print' && (item.size === 'A4' || item.size === 'A3'))
+        .reduce((sum, item) => sum + (item.quantity || 1), 0);
+    return unitCount(items, 'card') >= 1 && largePrintUnits >= 2;
+}
+
 // Single entry point for what to actually charge a given destination's
 // items: free if any of the promos above apply, or the customer is a
 // Cockney Cards Club member (isClubMember) — any one reason is enough.
@@ -90,7 +101,8 @@ export function postageForDestination(items, { isClubMember = false } = {}) {
         isClubMember ||
         qualifiesForFreeCardDelivery(items) ||
         qualifiesForFreePrintDelivery(items) ||
-        qualifiesForFreeDelivery(items)
+        qualifiesForFreeDelivery(items) ||
+        qualifiesForFreeLargePrintDelivery(items)
     ) {
         return 0;
     }
