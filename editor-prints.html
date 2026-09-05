@@ -1440,6 +1440,22 @@ function collectAndResetDeliveryInfo() {
     return delivery;
 }
 
+// Returns exactly the picture-variant keys that belong in this print's
+// final order — same decision buildFinalOrderPDF() makes (see its comment
+// for why restricted prints like mfcduoprints and unrestricted prints like
+// dinosaurs differ). Shared here so the basket "Preview" modal can show
+// every page that will actually be printed, not just whichever one is on
+// screen right now.
+function getOrderVariantKeys() {
+    const restrictedVariants = activeTemplate.name?.onlyForVariants;
+    if (restrictedVariants) {
+        return restrictedVariants.includes(activeVariantKey)
+            ? [activeTemplateId, activeVariantKey]
+            : [activeTemplateId];
+    }
+    return PRINT_VARIANTS[activeTemplateId] || [activeTemplateId];
+}
+
 async function addCurrentPrintToBasket() {
     const addBtn = $('add-to-basket-btn');
     const originalText = addBtn.innerText;
@@ -1455,13 +1471,18 @@ async function addCurrentPrintToBasket() {
         // capture, which is high-res and far too large for basket
         // metadata. Same idea as the card editor's captureFrontThumbnail().
         const thumbnail = await captureFrontPage(0.3);
-        // Separate, higher-resolution capture for the basket's "Preview"
-        // modal — same idea as the card editor's previewFront/previewInside
-        // (captureAndBuildPrintPDF). Without this, the modal fell back to
-        // the tiny 0.3-multiplier thumbnail above and stretched it up to
-        // fill the preview box, which is what made prints look pixelated
-        // next to cards there.
-        const previewFront = await captureFrontPage(1);
+        // Full-resolution proofs for the basket's "Preview" modal — same
+        // idea as the card editor's previewFront/previewInside. Prints
+        // that bundle a second page into the final order (dino duo's base
+        // + variant, eat-sleep's main image + boy/girl, etc — see
+        // getOrderVariantKeys()) get a preview of BOTH pages, the same way
+        // cards show a Front / Inside Message toggle. Single-page prints
+        // just get the one preview, same as before.
+        const orderVariantKeys = getOrderVariantKeys();
+        const previewFront = await captureFrontPageForVariant(orderVariantKeys[0], 1);
+        const previewInside = orderVariantKeys.length > 1
+            ? await captureFrontPageForVariant(orderVariantKeys[1], 1)
+            : null;
         const delivery = collectAndResetDeliveryInfo();
 
         const optionsParts = [];
@@ -1483,6 +1504,7 @@ async function addCurrentPrintToBasket() {
             title: activeTemplate.title || activeTemplateId,
             thumbnail,
             previewFront,
+            previewInside,
             optionsSummary: optionsParts.join(' · '),
             price: sizeInfo?.price || null,
             // Explicit size (A5/A4/A3) — used for postage tier calculation
