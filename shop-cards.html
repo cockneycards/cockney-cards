@@ -502,8 +502,12 @@ function sortItems(items) {
     switch (currentSort) {
         case 'price-asc': sorted.sort((a, b) => a.priceValue - b.priceValue); break;
         case 'price-desc': sorted.sort((a, b) => b.priceValue - a.priceValue); break;
-        case 'name-asc': sorted.sort((a, b) => a.title.localeCompare(b.title)); break;
-        case 'name-desc': sorted.sort((a, b) => b.title.localeCompare(a.title)); break;
+        // .trim() guards against stray leading/trailing spaces in a
+        // title's data (invisible once rendered in HTML, since browsers
+        // collapse leading whitespace — but a real character as far as
+        // localeCompare is concerned, which sorts it before any letter).
+        case 'name-asc': sorted.sort((a, b) => a.title.trim().localeCompare(b.title.trim())); break;
+        case 'name-desc': sorted.sort((a, b) => b.title.trim().localeCompare(a.title.trim())); break;
         case 'featured':
             // Shuffle (Fisher-Yates) every time Featured is chosen/rendered,
             // so the "featured" order looks fresh on each visit/selection.
