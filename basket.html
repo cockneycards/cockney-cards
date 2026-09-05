@@ -47,6 +47,7 @@
 
     .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 10px; }
     .summary-row.total { font-size: 16px; font-weight: bold; color: #111; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
+    .free-delivery-nudge { background: #fff8e6; border: 1px solid var(--gold, #c8a04d); color: #7a5c1e; font-size: 13px; font-weight: bold; text-align: center; padding: 10px 12px; border-radius: 6px; margin-bottom: 15px; }
     .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 15px; letter-spacing: 1px; text-transform: uppercase; box-sizing: border-box; }
     .btn:hover { background-color: #444; }
     .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
@@ -336,6 +337,70 @@ function basketSubtotal(items) {
     return items.reduce((sum, item) => sum + (displayUnitPrice(item) || 0) * (item.quantity || 1), 0);
 }
 
+// If any destination's parcel is exactly ONE item short of a free-delivery
+// promo (see estimatePostage above — this mirrors the same rules), returns
+// the friendliest nudge for the cheapest thing they could add. Checked
+// across every destination group, but only ever the single cheapest
+// candidate is returned, so the basket never shows or flickers between two
+// equally-true nudges at once. Returns null if nothing is one-away, or the
+// customer already has free delivery everywhere.
+function basketFreeDeliveryNudge(items) {
+    const groups = groupItemsByDestination(items);
+    let best = null;
+
+    for (const groupItems of groups.values()) {
+        const allCardsInGroup = groupItems.every((i) => i.kind === 'card');
+        const allPrintsInGroup = groupItems.length > 0 && groupItems.every((i) => i.kind === 'print');
+        const cardUnitsInGroup = groupItems
+            .filter((i) => i.kind === 'card')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const printItemsInGroup = groupItems.filter((i) => i.kind === 'print');
+        const printUnitsInGroup = printItemsInGroup.reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const printSizesInGroup = new Set(printItemsInGroup.map((i) => i.size || null));
+        const a5PrintUnitsInGroup = printItemsInGroup
+            .filter((i) => (i.size || null) === 'A5')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const hasNonA5PrintInGroup = printItemsInGroup.some((i) => (i.size || null) !== 'A5');
+        const largePrintUnitsInGroup = printItemsInGroup
+            .filter((i) => i.size === 'A4' || i.size === 'A3')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+
+        const alreadyFree =
+            (allCardsInGroup && cardUnitsInGroup >= 3) ||
+            (allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2) ||
+            (!hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) >= 3) ||
+            (cardUnitsInGroup >= 1 && largePrintUnitsInGroup >= 2);
+        if (alreadyFree) continue;
+
+        // Lower priority = cheaper to add = wins when more than one nudge
+        // applies to the same group. Cards are the cheapest add, then A5
+        // prints, then A4/A3 prints.
+        const candidates = [];
+        if (allCardsInGroup && cardUnitsInGroup === 2) {
+            candidates.push({ priority: 0, message: 'Add 1 more card for free delivery!' });
+        }
+        if (allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup === 1) {
+            const size = [...printSizesInGroup][0];
+            candidates.push({ priority: size === 'A5' ? 1 : size === 'A4' ? 2 : 3, message: `Add 1 more ${size} print for free delivery!` });
+        }
+        if (!hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) === 2) {
+            candidates.push({ priority: 0, message: 'Add 1 more card or A5 print for free delivery!' });
+        }
+        if (cardUnitsInGroup >= 1 && largePrintUnitsInGroup === 1) {
+            candidates.push({ priority: 2, message: 'Add 1 more A4/A3 print for free delivery!' });
+        }
+        if (cardUnitsInGroup === 0 && largePrintUnitsInGroup >= 2) {
+            candidates.push({ priority: 0, message: 'Add a card for free delivery!' });
+        }
+
+        for (const candidate of candidates) {
+            if (!best || candidate.priority < best.priority) best = candidate;
+        }
+    }
+
+    return best ? best.message : null;
+}
+
 function renderBasket() {
     const items = ccCart.getCart();
     const content = $('basket-content');
@@ -357,6 +422,7 @@ function renderBasket() {
     const postage = estimatePostage(items, { isPromoValid: promoIsValid });
     const postagePounds = postage.totalPence / 100;
     const grandTotal = subtotal + postagePounds;
+    const freeDeliveryNudge = basketFreeDeliveryNudge(items);
 
     const postageRowsHtml = postage.parcels.map((p) => `
         <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
@@ -366,12 +432,17 @@ function renderBasket() {
         ? `<div class="summary-row" style="color:#1a7a3c;"><span>Cockney Cards Club discount (25% off cards)</span><span>−${ccCart.formatGBP(clubSavings)}</span></div>`
         : '';
 
+    const freeDeliveryNudgeHtml = freeDeliveryNudge
+        ? `<div class="free-delivery-nudge">🎁 ${freeDeliveryNudge}</div>`
+        : '';
+
     content.innerHTML = `
         <div class="basket-layout">
             <div class="basket-items">
                 ${items.map(renderItem).join('')}
             </div>
             <div class="basket-summary">
+                ${freeDeliveryNudgeHtml}
                 <div class="summary-row"><span>Items</span><span>${count}</span></div>
                 <div class="summary-row"><span>Subtotal</span><span>${ccCart.formatGBP(rawSubtotal)}</span></div>
                 ${clubSavingsRowHtml}
