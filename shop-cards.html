@@ -203,7 +203,7 @@ const PRODUCTS = Object.entries(CARD_CATALOGUE)
 const $ = (id) => document.getElementById(id);
 
 let currentCategory = 'all';
-let currentSort = 'best-selling';
+let currentSort = 'featured';
 let viewMode = 'grid';       // 'grid' | 'gallery' | 'team'
 let currentLeague = null;    // e.g. "premiership" -- set when viewMode is 'gallery' or 'team'
 let currentTeam = null;      // e.g. "arsenal"      -- set when viewMode is 'team'
@@ -290,7 +290,7 @@ function restoreShopState() {
     let state;
     try { state = JSON.parse(raw); } catch (e) { filterProducts('all'); return; }
 
-    currentSort = state.currentSort || 'best-selling';
+    currentSort = state.currentSort || 'featured';
     const sortSelect = $('sort-select');
     if (sortSelect) sortSelect.value = currentSort;
 
