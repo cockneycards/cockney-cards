@@ -39,25 +39,53 @@ export function highestTier(items) {
     return best;
 }
 
-// FREE DELIVERY PROMO: a destination ships free when its parcel contains
-// at least one card AND two or more prints — any size (A5, A4, A3) counts,
-// and sizes can be mixed (e.g. one A4 + one A3 print still qualifies).
-// This is checked per-destination (see groupItemsByDestination), so it's
-// "2+ prints and a card going to the same place", not just anywhere in
-// the basket.
+// FREE DELIVERY PROMOS — checked per destination (see
+// groupItemsByDestination), so these are "same address", not just
+// "anywhere in the basket". Quantity counts, not just line-item counts —
+// e.g. one print line with quantity 2 counts as 2 prints. Any ONE of
+// these being true is enough to waive postage for that destination; they
+// don't need to combine with each other.
+function unitCount(items, kind) {
+    return items
+        .filter((item) => item.kind === kind)
+        .reduce((sum, item) => sum + (item.quantity || 1), 0);
+}
+
+// 3 or more cards, and nothing but cards, going to the same address.
+export function qualifiesForFreeCardDelivery(items) {
+    return items.length > 0 && items.every((item) => item.kind === 'card') && unitCount(items, 'card') >= 3;
+}
+
+// 2 or more prints, all the SAME size, and nothing but prints, going to
+// the same address.
+export function qualifiesForFreePrintDelivery(items) {
+    const prints = items.filter((item) => item.kind === 'print');
+    if (!items.length || prints.length !== items.length) return false;
+    const sizes = new Set(prints.map((item) => item.size || null));
+    return sizes.size === 1 && !sizes.has(null) && unitCount(items, 'print') >= 2;
+}
+
+// 2 or more prints — any size, mixed sizes included — PLUS at least one
+// card, going to the same address. Unlike qualifiesForFreePrintDelivery
+// above, a card in the mix doesn't disqualify this one, and the prints
+// don't need to match size.
 export function qualifiesForFreeDelivery(items) {
-    const printCount = items.filter((item) => item.kind === 'print').length;
-    const hasCard = items.some((item) => item.kind === 'card');
-    return hasCard && printCount >= 2;
+    return unitCount(items, 'card') >= 1 && unitCount(items, 'print') >= 2;
 }
 
 // Single entry point for what to actually charge a given destination's
-// items: free if either the print+card promo above applies, or the
-// customer is a Cockney Cards Club member (isClubMember) — either reason
-// on its own is enough, they don't need to combine. Otherwise, the normal
-// tier-based amount from POSTAGE_TIERS/highestTier.
+// items: free if any of the promos above apply, or the customer is a
+// Cockney Cards Club member (isClubMember) — any one reason is enough.
+// Otherwise, the normal tier-based amount from POSTAGE_TIERS/highestTier.
 export function postageForDestination(items, { isClubMember = false } = {}) {
-    if (isClubMember || qualifiesForFreeDelivery(items)) return 0;
+    if (
+        isClubMember ||
+        qualifiesForFreeCardDelivery(items) ||
+        qualifiesForFreePrintDelivery(items) ||
+        qualifiesForFreeDelivery(items)
+    ) {
+        return 0;
+    }
     return POSTAGE_TIERS[highestTier(items)];
 }
 
