@@ -1455,6 +1455,13 @@ async function addCurrentPrintToBasket() {
         // capture, which is high-res and far too large for basket
         // metadata. Same idea as the card editor's captureFrontThumbnail().
         const thumbnail = await captureFrontPage(0.3);
+        // Separate, higher-resolution capture for the basket's "Preview"
+        // modal — same idea as the card editor's previewFront/previewInside
+        // (captureAndBuildPrintPDF). Without this, the modal fell back to
+        // the tiny 0.3-multiplier thumbnail above and stretched it up to
+        // fill the preview box, which is what made prints look pixelated
+        // next to cards there.
+        const previewFront = await captureFrontPage(1);
         const delivery = collectAndResetDeliveryInfo();
 
         const optionsParts = [];
@@ -1475,6 +1482,7 @@ async function addCurrentPrintToBasket() {
             variantId: activeVariantKey,
             title: activeTemplate.title || activeTemplateId,
             thumbnail,
+            previewFront,
             optionsSummary: optionsParts.join(' · '),
             price: sizeInfo?.price || null,
             // Explicit size (A5/A4/A3) — used for postage tier calculation
