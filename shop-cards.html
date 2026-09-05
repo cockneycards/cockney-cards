@@ -359,7 +359,7 @@ function renderCategoryLevel(categories, depth) {
         const inlineExpand = hasKids && depth <= 1;
         const isGallery = hasKids && depth >= 2;
 
-        const showArrow = hasKids && !LOCKED_EXPANDED_CATEGORIES.includes(key);
+        const showArrow = inlineExpand && !LOCKED_EXPANDED_CATEGORIES.includes(key);
 
         return `
             <li class="${inlineExpand ? 'has-children' : ''}"${isGallery ? ' data-gallery="true"' : ''}>
