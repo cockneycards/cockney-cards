@@ -65,12 +65,20 @@ export function qualifiesForFreePrintDelivery(items) {
     return sizes.size === 1 && !sizes.has(null) && unitCount(items, 'print') >= 2;
 }
 
-// 2 or more prints — any size, mixed sizes included — PLUS at least one
-// card, going to the same address. Unlike qualifiesForFreePrintDelivery
-// above, a card in the mix doesn't disqualify this one, and the prints
-// don't need to match size.
+// 3 or more combined units of cards + A5 prints, mixed is fine (e.g. 2
+// cards + 1 A5 print, or 1 card + 2 A5 prints) — as long as nothing
+// bigger than A5 is in the same parcel. A5 prints fold down to the same
+// envelope size as a card, so they travel together for free; A4/A3
+// prints don't fit that envelope, so they're excluded from this promo
+// (they can still qualify separately via qualifiesForFreePrintDelivery
+// above if 2+ of the same larger size ship together with no cards).
 export function qualifiesForFreeDelivery(items) {
-    return unitCount(items, 'card') >= 1 && unitCount(items, 'print') >= 2;
+    const a5PrintUnits = items
+        .filter((item) => item.kind === 'print' && (item.size || null) === 'A5')
+        .reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const hasNonA5Print = items.some((item) => item.kind === 'print' && (item.size || null) !== 'A5');
+    if (hasNonA5Print) return false;
+    return unitCount(items, 'card') + a5PrintUnits >= 3;
 }
 
 // Single entry point for what to actually charge a given destination's
