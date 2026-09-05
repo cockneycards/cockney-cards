@@ -110,6 +110,19 @@
         }
 
         #logged-out-view, #logged-in-view { display: none; }
+
+        /* FOOTER */
+        footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; }
+        .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; }
+        .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+        .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+        .footer-col p { margin: 0 0 15px 0; }
+        .footer-col a { color: #111; text-decoration: underline; }
+        .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+
+        @media (max-width: 850px) {
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+        }
     </style>
     <link rel="stylesheet" href="mobile.css">
 </head>
@@ -314,6 +327,29 @@
             </main>
         </div>
     </div>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4> 
+            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="https://www.tiktok.com/@cockneycards" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
 
 <script>
     // These endpoints now live on the same Worker/domain as this page
