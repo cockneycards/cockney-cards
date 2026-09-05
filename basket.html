@@ -276,7 +276,12 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
 
         const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
         const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
-        const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || (allCardsInGroup && isPromoValid);
+        // 2+ prints — any size, mixed sizes included — plus at least one
+        // card, all going to the same address. Unlike
+        // qualifiesForFreePrintDelivery above, this one is fine with a
+        // card in the mix and doesn't care whether the prints match size.
+        const qualifiesForFreePrintPlusCardDelivery = cardUnitsInGroup >= 1 && printUnitsInGroup >= 2;
+        const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || qualifiesForFreePrintPlusCardDelivery || (allCardsInGroup && isPromoValid);
 
         const tier = highestTier(groupItems);
         const amountPence = postageWaived ? 0 : POSTAGE_TIERS[tier];
@@ -286,6 +291,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         let label;
         if (qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address${parcelLabel}`;
         else if (qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address${parcelLabel}`;
+        else if (qualifiesForFreePrintPlusCardDelivery) label = `Free Postage — 2+ prints + a card, same address${parcelLabel}`;
         else if (postageWaived) label = `Free Postage — Promo Code${parcelLabel}`;
         else label = `Postage${parcelLabel}`;
 
