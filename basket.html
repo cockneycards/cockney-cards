@@ -376,15 +376,17 @@ function basketFreeDeliveryNudge(items) {
         // applies to the same group. Cards are the cheapest add, then A5
         // prints, then A4/A3 prints.
         const candidates = [];
-        if (allCardsInGroup && cardUnitsInGroup === 2) {
-            candidates.push({ priority: 0, message: 'Add 1 more card for free delivery!' });
+        if (allCardsInGroup && cardUnitsInGroup >= 1 && cardUnitsInGroup < 3) {
+            const needed = 3 - cardUnitsInGroup;
+            candidates.push({ priority: 0, message: `Add ${needed} more card${needed > 1 ? 's' : ''} for free delivery!` });
         }
         if (allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup === 1) {
             const size = [...printSizesInGroup][0];
             candidates.push({ priority: size === 'A5' ? 1 : size === 'A4' ? 2 : 3, message: `Add 1 more ${size} print for free delivery!` });
         }
-        if (!hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) === 2) {
-            candidates.push({ priority: 0, message: 'Add 1 more card or A5 print for free delivery!' });
+        if (!hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) >= 1 && (cardUnitsInGroup + a5PrintUnitsInGroup) < 3) {
+            const needed = 3 - (cardUnitsInGroup + a5PrintUnitsInGroup);
+            candidates.push({ priority: 0, message: `Add ${needed} more card${needed > 1 ? 's' : ''} or A5 print${needed > 1 ? 's' : ''} for free delivery!` });
         }
         if (cardUnitsInGroup >= 1 && largePrintUnitsInGroup === 1) {
             candidates.push({ priority: 2, message: 'Add 1 more A4/A3 print for free delivery!' });
