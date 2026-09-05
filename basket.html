@@ -273,15 +273,22 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         const printItemsInGroup = groupItems.filter((i) => i.kind === 'print');
         const printUnitsInGroup = printItemsInGroup.reduce((sum, i) => sum + (i.quantity || 1), 0);
         const printSizesInGroup = new Set(printItemsInGroup.map((i) => i.size || null));
+        // A5 prints fold down to the same envelope size as a card, so they
+        // can travel in the same envelope — A4/A3 prints can't, so they're
+        // excluded from this specific promo (see qualifiesForFreeEnvelopeDelivery).
+        const a5PrintUnitsInGroup = printItemsInGroup
+            .filter((i) => (i.size || null) === 'A5')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const hasNonA5PrintInGroup = printItemsInGroup.some((i) => (i.size || null) !== 'A5');
 
         const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
         const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
-        // 2+ prints — any size, mixed sizes included — plus at least one
-        // card, all going to the same address. Unlike
-        // qualifiesForFreePrintDelivery above, this one is fine with a
-        // card in the mix and doesn't care whether the prints match size.
-        const qualifiesForFreePrintPlusCardDelivery = cardUnitsInGroup >= 1 && printUnitsInGroup >= 2;
-        const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || qualifiesForFreePrintPlusCardDelivery || (allCardsInGroup && isPromoValid);
+        // 3+ combined units of cards + A5 prints, mixed is fine (e.g. 2
+        // cards + 1 A5 print, or 1 card + 2 A5 prints) — as long as
+        // nothing bigger than A5 is in the same parcel, since an A4/A3
+        // print wouldn't fit in the envelope alongside the cards anyway.
+        const qualifiesForFreeEnvelopeDelivery = !hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) >= 3;
+        const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || qualifiesForFreeEnvelopeDelivery || (allCardsInGroup && isPromoValid);
 
         const tier = highestTier(groupItems);
         const amountPence = postageWaived ? 0 : POSTAGE_TIERS[tier];
@@ -291,7 +298,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         let label;
         if (qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address${parcelLabel}`;
         else if (qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address${parcelLabel}`;
-        else if (qualifiesForFreePrintPlusCardDelivery) label = `Free Postage — 2+ prints + a card, same address${parcelLabel}`;
+        else if (qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address${parcelLabel}`;
         else if (postageWaived) label = `Free Postage — Promo Code${parcelLabel}`;
         else label = `Postage${parcelLabel}`;
 
