@@ -39,6 +39,28 @@ export function highestTier(items) {
     return best;
 }
 
+// FREE DELIVERY PROMO: a destination ships free when its parcel contains
+// at least one card AND two or more prints — any size (A5, A4, A3) counts,
+// and sizes can be mixed (e.g. one A4 + one A3 print still qualifies).
+// This is checked per-destination (see groupItemsByDestination), so it's
+// "2+ prints and a card going to the same place", not just anywhere in
+// the basket.
+export function qualifiesForFreeDelivery(items) {
+    const printCount = items.filter((item) => item.kind === 'print').length;
+    const hasCard = items.some((item) => item.kind === 'card');
+    return hasCard && printCount >= 2;
+}
+
+// Single entry point for what to actually charge a given destination's
+// items: free if either the print+card promo above applies, or the
+// customer is a Cockney Cards Club member (isClubMember) — either reason
+// on its own is enough, they don't need to combine. Otherwise, the normal
+// tier-based amount from POSTAGE_TIERS/highestTier.
+export function postageForDestination(items, { isClubMember = false } = {}) {
+    if (isClubMember || qualifiesForFreeDelivery(items)) return 0;
+    return POSTAGE_TIERS[highestTier(items)];
+}
+
 // Groups basket items by where they're actually going, for the basket
 // checkout specifically (single-item checkouts trivially have one
 // destination, so they don't need this). Every "self" item is treated as
