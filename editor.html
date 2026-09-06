@@ -114,31 +114,16 @@
     #canvas-wrapper .canvas-container { width: 100% !important; height: auto !important; aspect-ratio: 595.5 / 840; }
     #canvas-wrapper .canvas-container canvas { width: 100% !important; height: 100% !important; }
 
-    /* PHOTO ADJUST WIDGET — floats above the photo once it's tapped/
-       clicked on desktop (see openPhotoToolbar/openAdjustPanel/
-       closePhotoToolbar in the script). Never shown below the 999px
-       breakpoint — see attachMobileCardGestures instead, which handles
-       positioning/zoom directly via press-and-hold + pinch. Positioned
-       in JS (positionPhotoWidget) since it has to track the photo's
-       on-screen box, which moves with drags and page toggles. */
-    .photo-float-widget { position: absolute; z-index: 20; top: 0; left: 0; background: var(--dark); color: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); font-size: 12px; user-select: none; }
-    #photo-toolbar { display: none; padding: 4px; gap: 2px; align-items: center; }
-    #photo-toolbar button { background: none; border: none; color: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-family: inherit; letter-spacing: 0.3px; }
-    #photo-toolbar button:hover { background: rgba(255,255,255,0.14); }
-    #photo-toolbar button svg { width: 17px; height: 17px; }
-    #photo-adjust-panel { display: none; flex-direction: column; align-items: stretch; padding: 14px 16px; gap: 8px; width: 220px; }
-    #photo-adjust-panel .zoom-label { color: white; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; }
-    #photo-adjust-panel input[type="range"] { width: 100%; }
-    #photo-adjust-panel .adjust-done-btn { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 9px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 2px; letter-spacing: 0.5px; }
-    #photo-adjust-panel .adjust-done-btn:hover { background: #1558b0; }
-
-    /* MOBILE PHOTO BAR — a persistent Replace/Adjust bar below the card on
-       phones/tablets (see updateMobilePhotoBar in the script), so those
-       controls are always visible instead of only surfacing via a
-       press-and-hold gesture the customer has to discover. Desktop keeps
-       using the floating #photo-toolbar/#photo-adjust-panel widget above
-       instead — this is hidden there both by JS (isMobileDevice() guard)
-       and, as a belt-and-braces fallback, by the min-width rule below. */
+    /* PHOTO BAR — a persistent Photo/Adjust/Zoom bar below the card (see
+       updateMobilePhotoBar in the script), shown on desktop and mobile
+       alike so those controls are always visible instead of only
+       surfacing via a click or a press-and-hold gesture the customer has
+       to discover. On desktop the photo also carries its own always-on
+       blue corner-drag box the moment it's uploaded (see
+       syncPhotoDesktopBox in the script) — dragging it or its corners
+       repositions/resizes directly, so the bar's Adjust button (mobile's
+       equivalent, needed there because a plain swipe scrolls the page) is
+       hidden on desktop; only Photo and Zoom show. */
     .mobile-photo-bar { display: none; width: 100%; background: white; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); box-sizing: border-box; }
     .mobile-photo-bar-buttons { display: flex; align-items: center; justify-content: center; }
     .mobile-photo-bar-buttons button { flex: 1; max-width: 140px; background: none; border: none; color: var(--dark); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; font-family: inherit; letter-spacing: 0.3px; }
@@ -151,7 +136,6 @@
     .mobile-panel-row .move-hint { flex: 1; font-size: 12px; color: #444; }
     .mobile-panel-row input[type="range"] { flex: 1; }
     .mobile-panel-row .mobile-panel-done { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 9px 14px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
-    @media (min-width: 1000px) { .mobile-photo-bar { display: none !important; } }
 
     .side-column { width: 100%; max-width: 320px; margin: 0; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 20px; }
     .page-toggle { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
@@ -271,53 +255,27 @@
             This card's artwork didn't load. Try refreshing the page — if it still doesn't work, <a href="mailto:contact@cockneycards.com">let us know</a> and we'll sort it out.
         </p>
 
-        <!-- Shown when the photo is tapped/clicked (see openPhotoToolbar).
-             DESKTOP ONLY (see setupPhotoAdjustWidget's isMobileDevice()
-             guard) — below the 999px breakpoint, attachMobileCardGestures
-             handles positioning/zoom directly via press-and-hold + pinch
-             instead, and this widget is never shown. -->
-        <div id="photo-toolbar" class="photo-float-widget">
-            <button type="button" onclick="onReplacePhotoClick()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.5-7.1"/><path d="M21 3v6h-6"/></svg>
-                <span>Replace</span>
-            </button>
-            <button type="button" onclick="openAdjustPanel()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/></svg>
-                <span>Zoom</span>
-            </button>
-            <button type="button" onclick="closePhotoToolbar()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                <span>Done</span>
-            </button>
-        </div>
-
-        <!-- Shown when "Adjust" is tapped (desktop only — see above). The
-             Zoom slider is a second way to resize on desktop, alongside
-             dragging the photo's corner handles directly; on mobile
-             pinch-to-zoom (attachMobileCardGestures) does the same job. -->
-        <div id="photo-adjust-panel" class="photo-float-widget">
-            <span class="zoom-label">Zoom <span id="zoom-value">1.0x</span></span>
-            <input type="range" id="zoom-slider" min="0.3" max="6" step="0.02" value="1" oninput="onZoomSliderInput(this.value)">
-            <button type="button" class="adjust-done-btn" onclick="closePhotoToolbar()">Done</button>
-        </div>
     </div>
     </div>
 
-    <!-- Mobile-only persistent Replace/Adjust/Zoom bar. It's a direct
-         child of .editor-workspace (sibling of .card-stage/.side-column)
-         so that on the mobile flex-column layout it naturally lands
-         between the card and the rest of the controls, i.e. directly
-         below the card — see updateMobilePhotoBar, which shows/hides it.
-         Adjust and Zoom are deliberately separate: Adjust puts the photo
-         into direct drag mode (see mobileAdjustMode in the script) so a
-         single finger repositions it immediately, no press-and-hold
-         needed; Zoom opens a slider driving the same scale range/clamp as
-         pinch-to-zoom (see onMobileZoomSliderInput / clampPhotoScale). -->
+    <!-- Persistent Photo/Adjust/Zoom bar, shown on both desktop and
+         mobile now. It's a direct child of .editor-workspace (sibling of
+         .card-stage/.side-column) so that on the mobile flex-column
+         layout it naturally lands between the card and the rest of the
+         controls, i.e. directly below the card — see updateMobilePhotoBar,
+         which shows/hides it and which buttons appear. On desktop the
+         photo's own always-on corner-drag box (see syncPhotoDesktopBox)
+         handles repositioning/resizing directly, so Adjust is hidden
+         there and only Photo/Zoom show; on mobile, Adjust puts the photo
+         into direct one-finger-drag mode (see mobileAdjustMode in the
+         script), since a plain swipe normally scrolls the page. Zoom
+         opens a slider driving the same scale range/clamp as pinch-to-zoom
+         (see onMobileZoomSliderInput / clampPhotoScale). -->
     <div id="mobile-photo-bar" class="mobile-photo-bar">
         <div id="mobile-bar-buttons" class="mobile-photo-bar-buttons">
             <button type="button" onclick="onReplacePhotoClick()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.5-7.1"/><path d="M21 3v6h-6"/></svg>
-                <span>Replace</span>
+                <span>Photo</span>
             </button>
             <button type="button" id="mobile-adjust-btn" onclick="onMobileAdjustClick()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
@@ -372,11 +330,13 @@
             </div>
 
             <div id="front-photo-upload" style="display:none;">
-                <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Upload Photo</label>
-                <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
-                <p style="font-size:12px; color:#666; margin-top:6px;">
-                    On desktop: tap the photo to Replace or Zoom it. On a touchscreen: use the Replace/Adjust/Zoom bar below the card — Adjust lets you drag the photo directly, Zoom gives you a slider — or press and hold the photo to drag it and pinch with two fingers to zoom. Place it anywhere on the front of the card.
-                </p>
+                <!-- No visible sidebar upload control anymore — adding a
+                     photo happens via the frame-click-to-upload handler
+                     (see pointInPhotoFrame/setupPhotoAdjustWidget) or the
+                     "Photo" button in the persistent bar below the card
+                     (see onReplacePhotoClick). This input just stays
+                     hidden in the DOM for those to trigger via .click(). -->
+                <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)" style="display:none;">
             </div>
         </div>
 
@@ -627,9 +587,9 @@ const $ = (id) => document.getElementById(id);
 
 // Matches the editor's own mobile CSS breakpoint (see the @media
 // max-width:999px rule above). Used to switch the photo's touch/click
-// behaviour: desktop uses the tap → Replace/Adjust/Done widget
-// (setupPhotoAdjustWidget); mobile uses press-and-hold + pinch directly on
-// the card (attachMobileCardGestures).
+// behaviour: desktop keeps an always-on corner-drag box for direct mouse
+// drag/resize (setupPhotoAdjustWidget/syncPhotoDesktopBox); mobile uses
+// press-and-hold + pinch directly on the card (attachMobileCardGestures).
 function isMobileDevice() {
     return window.matchMedia('(max-width: 999px)').matches;
 }
@@ -1085,13 +1045,15 @@ function handlePhotoUpload(inputEl) {
 // it in with a position clamp. The artwork stays layered on top of it.
 //
 // The photo is NOT interactive by default (evented/selectable: false) —
-// it's just a static layer until interacted with. On desktop, clicking it
-// switches this on via openPhotoToolbar (Replace/Adjust/Done widget). On
-// mobile it's never switched on at all — attachMobileCardGestures (further
-// down) manipulates left/top/scaleX/scaleY directly instead, so a touch
-// anywhere on the card, including right over the photo, scrolls the page
-// normally by default: with evented false there's no Fabric object there
-// to claim the gesture.
+// it's just a static layer until switched on. On desktop it's switched on
+// immediately after every upload/replace (see syncPhotoDesktopBox below)
+// and stays on the whole time there's a photo, giving the always-on blue
+// corner-drag box. On mobile it's never switched on at all —
+// attachMobileCardGestures (further down) manipulates
+// left/top/scaleX/scaleY directly instead, so a touch anywhere on the
+// card, including right over the photo, scrolls the page normally by
+// default: with evented false there's no Fabric object there to claim
+// the gesture.
 function loadPhotoIntoFrame(dataUrl) {
     const p = activeTemplate?.photo;
     if (!p) return;
@@ -1112,10 +1074,8 @@ function loadPhotoIntoFrame(dataUrl) {
             scaleX: coverScale, scaleY: coverScale,
             lockRotation: true, lockUniScaling: true, // corner drag always scales evenly, never distorts
             centeredScaling: true, // corner drag resizes around the photo's own center, not the opposite corner
-            // hasBorders/hasControls are OFF by default (idle) — see
-            // comment below. openPhotoToolbar flips these on, showing the
-            // corner-drag resize box, for the duration of a tap/adjust
-            // session; DESKTOP ONLY, see isMobileDevice() guards there —
+            // hasBorders/hasControls start OFF here and are switched on
+            // right after, by syncPhotoDesktopBox below, on desktop only —
             // mobile keeps using pinch-to-zoom instead.
             hasBorders: false, hasControls: false,
             selectable: false, evented: false,
@@ -1142,7 +1102,7 @@ function loadPhotoIntoFrame(dataUrl) {
         // Only the four corner handles resize it (no side handles, no
         // rotation handle) — that's the "drag the corners to size the
         // photo" box. Has no visible effect until hasControls is switched
-        // on in openPhotoToolbar.
+        // on, by syncPhotoDesktopBox below.
         img.setControlsVisibility({
             mt: false, mb: false, ml: false, mr: false, mtr: false,
             tl: true, tr: true, bl: true, br: true
@@ -1167,36 +1127,19 @@ function loadPhotoIntoFrame(dataUrl) {
         // with the card's frame/graphics layered on top of it, same as
         // the printed card. Text/QR were already added above the artwork
         // in setupTextsAndOverlays, so sending the photo to the very back
-        // is enough to put it behind everything else too. While it's
-        // actively being adjusted, openPhotoToolbar/closePhotoToolbar
-        // temporarily float it back on top instead (see
-        // canvas.preserveObjectStacking there) so the resize box is
-        // actually visible — this sendToBack only governs how it sits the
-        // rest of the time.
+        // is enough to put it behind everything else too — Fabric draws
+        // the active object's selection border/controls on the separate
+        // interactive upper canvas regardless (canvas.preserveObjectStacking
+        // is on), so the blue resize box still shows above the artwork on
+        // desktop without changing the real print layer order.
         canvas.sendToBack(photoImg);
 
-        // If a photo was already being adjusted (this is a Replace, not a
-        // first upload), carry that open state over to the new image
-        // instead of dropping back to idle — otherwise Replace would
-        // require a second tap to keep adjusting.
-        if (photoToolbarMode !== 'idle') {
-            const modeToRestore = photoToolbarMode;
-            photoToolbarMode = 'idle'; // openPhotoToolbar/openAdjustPanel both assume they're transitioning FROM idle
-            openPhotoToolbar();
-            if (modeToRestore === 'adjust') openAdjustPanel();
-        } else {
-            // On desktop, show the blue photo box immediately after upload.
-            // This makes the draggable corner handles obvious without
-            // requiring the customer to click the photo a second time.
-            if (!isMobileDevice()) {
-                openPhotoToolbar();
-            } else {
-                canvas.requestRenderAll();
-            }
-        }
-        // Show (or refresh) the persistent mobile Replace/Adjust bar now
-        // that there's a photo to act on. A replace collapses any open
-        // zoom row back to the plain button row, same as a fresh upload.
+        // Desktop: switch on the corner-drag box immediately, whether this
+        // is a first upload or a Replace — see syncPhotoDesktopBox.
+        syncPhotoDesktopBox();
+        // Show (or refresh) the persistent Photo/Adjust/Zoom bar now that
+        // there's a photo to act on. A replace collapses any open zoom
+        // row back to the plain button row, same as a fresh upload.
         updateMobilePhotoBar();
     }, { crossOrigin: 'anonymous' });
 }
@@ -1223,37 +1166,33 @@ function clampPhotoScale(img) {
     img.setCoords();
 }
 
-// ---- Photo adjust widget (DESKTOP ONLY — see isMobileDevice() guards
-// below; mobile uses attachMobileCardGestures instead, further down) ----
-// A tap → widget flow, layered on top of Fabric's own corner-handle resize:
-//
-//   idle    — the photo sits there unselectable/un-evented (see
-//             loadPhotoIntoFrame). A click anywhere on the card,
-//             including directly over the photo, is completely ignored by
-//             Fabric and falls straight through to normal page scroll.
-//   toolbar — a click ON the photo (detected manually below, since the
-//             photo isn't evented in idle mode for Fabric to detect it
-//             itself) switches evented/selectable on and shows the
-//             Replace / Adjust / Done widget, plus Fabric's corner-drag
-//             resize box (see setControlsVisibility in loadPhotoIntoFrame
-//             — corners only, no rotation handle). The photo can now be
-//             dragged directly to reposition it, or resized from a
-//             corner.
-//   adjust  — "Adjust" additionally shows the Zoom slider, a second way to
-//             resize on desktop (mobile has pinch instead); the
-//             corner-drag box stays available too.
-//
-// "Done", or clicking anywhere else on the card, returns to idle.
-let photoToolbarMode = 'idle'; // 'idle' | 'toolbar' | 'adjust'
-let tapCandidate = null;
-const TAP_MOVE_THRESHOLD = 8;  // canvas-space px — more than this and it's a drag, not a tap
-const TAP_MAX_MS = 400;
+// ---- Photo adjust box (DESKTOP ONLY — see isMobileDevice() guards below;
+// mobile uses attachMobileCardGestures instead, further down) ----
+// Once there's a photo, it's always evented/selectable with Fabric's
+// corner-drag resize box showing (see syncPhotoDesktopBox) — no click
+// needed to reveal it. The customer can drag the photo directly to
+// reposition it, or drag a corner to resize. Clicking elsewhere on the
+// card — even empty space — re-selects the photo instead of letting
+// Fabric deselect it (see the 'selection:cleared' handler below), so the
+// box stays up the whole time there's a photo on the front page.
+function syncPhotoDesktopBox() {
+    if (!photoImg) return;
+    const active = !isMobileDevice() && currentPage === 'front';
+    photoImg.set({ evented: active, selectable: active, hasControls: active, hasBorders: active });
+    if (active) {
+        canvas.setActiveObject(photoImg);
+    } else if (canvas.getActiveObject() === photoImg) {
+        canvas.discardActiveObject();
+    }
+    canvas.requestRenderAll();
+}
 
 // Frame-click-to-upload: before a photo exists, clicking/tapping anywhere
-// inside the frame's bounding box opens the file picker — an alternative
-// to using the "Upload Photo" control in the sidebar. Works on both
-// desktop and mobile (unlike the rest of setupPhotoAdjustWidget, which is
-// desktop-only) since there's no photo object yet to conflict with.
+// inside the frame's bounding box opens the file picker — the only way to
+// add a photo now that there's no visible "Upload Photo" control in the
+// sidebar (see "Photo" button in the persistent bar for the other way).
+// Works on both desktop and mobile since there's no photo object yet to
+// conflict with.
 function pointInPhotoFrame(pointer) {
     const p = activeTemplate?.photo;
     if (!p) return false;
@@ -1277,179 +1216,57 @@ function setupPhotoAdjustWidget() {
             ? 'pointer' : canvas.defaultCursor;
     });
 
-    // Desktop: a double-click anywhere on the front artwork re-opens the
-    // photo editing controls. This deliberately does not require the second
-    // click to land on the photo itself, because the photo is normally behind
-    // the artwork and may only be partially visible through its cutout.
-    canvas.upperCanvasEl.addEventListener('dblclick', (e) => {
+    // Desktop: keep the box selected/active no matter where else on the
+    // card the customer clicks, so it never has to be re-opened.
+    canvas.on('selection:cleared', () => {
         if (isMobileDevice() || !photoImg || currentPage !== 'front') return;
-        if (photoToolbarMode === 'idle') {
-            openPhotoToolbar();
-        }
-    }, { capture: true });
-
-    canvas.on('mouse:down', (opt) => {
-        if (isMobileDevice() || !photoImg || currentPage !== 'front') return;
-
-        if (photoToolbarMode === 'idle') {
-            const pointer = canvas.getPointer(opt.e);
-            const onPhoto = photoImg.containsPoint(pointer);
-            tapCandidate = onPhoto ? { x: pointer.x, y: pointer.y, time: Date.now() } : null;
-        } else if (opt.target !== photoImg) {
-            // Keep the photo controls and blue resize box open when the
-            // customer clicks elsewhere on the card. Re-select the photo so
-            // its corner handles remain visible and ready for further edits.
-            canvas.setActiveObject(photoImg);
-            canvas.requestRenderAll();
-            return;
-        }
+        canvas.setActiveObject(photoImg);
+        canvas.requestRenderAll();
     });
 
-    canvas.on('mouse:up', (opt) => {
-        if (isMobileDevice() || !tapCandidate) return;
-        const pointer = canvas.getPointer(opt.e);
-        const moved = Math.hypot(pointer.x - tapCandidate.x, pointer.y - tapCandidate.y);
-        const quick = Date.now() - tapCandidate.time < TAP_MAX_MS;
-        tapCandidate = null;
-        if (moved < TAP_MOVE_THRESHOLD && quick) openPhotoToolbar();
-    });
-
-    // After the customer presses Done the blue box/tools are hidden.
-    // A deliberate double-click on the photo brings them back so the
-    // customer can amend its position or size at any time.  We do this
-    // manually because the photo is non-evented while idle.
-    canvas.on('mouse:dblclick', (opt) => {
-        if (isMobileDevice() || !photoImg || currentPage !== 'front' || photoToolbarMode !== 'idle') return;
-        const pointer = canvas.getPointer(opt.e);
-        if (photoImg.containsPoint(pointer)) {
-            openPhotoToolbar();
-        }
-    });
-
-    // Keep the floating widget glued to the photo as it's dragged, and
-    // keep the coverage guard enforced on every move.
+    // Keep the coverage guard enforced on every move/resize.
     canvas.on('object:moving', ({ target }) => {
-        if (isMobileDevice() || target !== photoImg) return;
+        if (target !== photoImg) return;
         clampPhotoScale(target);
-        if (photoToolbarMode !== 'idle') positionPhotoWidget();
     });
-
-    // Same guard + widget-repositioning, but for the corner-drag resize
-    // handles (see setControlsVisibility in loadPhotoIntoFrame) instead of
-    // a plain drag-move.
     canvas.on('object:scaling', ({ target }) => {
-        if (isMobileDevice() || target !== photoImg) return;
+        if (target !== photoImg) return;
         clampPhotoScale(target);
-        if (photoToolbarMode !== 'idle') positionPhotoWidget();
     });
-}
-
-function openPhotoToolbar() {
-    if (isMobileDevice() || !photoImg || photoToolbarMode !== 'idle') return;
-    photoToolbarMode = 'toolbar';
-    photoImg.set({ evented: true, selectable: true, hasControls: true, hasBorders: true });
-    canvas.setActiveObject(photoImg);
-    // Keep the photo itself behind the artwork at all times. Fabric draws
-    // the active object's selection border/controls on the interactive
-    // upper canvas, so the blue resize box remains visible above the
-    // artwork without changing the real print layer order.
-    canvas.preserveObjectStacking = true;
-    $('photo-adjust-panel').style.display = 'none';
-    $('photo-toolbar').style.display = 'flex';
-    positionPhotoWidget();
-    canvas.requestRenderAll();
-}
-
-function openAdjustPanel() {
-    if (!photoImg) return;
-    photoToolbarMode = 'adjust';
-    const multiplier = photoImg.scaleX / photoImg.minScale;
-    $('zoom-slider').value = multiplier;
-    $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
-    $('photo-toolbar').style.display = 'none';
-    $('photo-adjust-panel').style.display = 'flex';
-    positionPhotoWidget();
-}
-
-function closePhotoToolbar() {
-    photoToolbarMode = 'idle';
-    if (photoImg) {
-        photoImg.set({ evented: false, selectable: false, hasControls: false, hasBorders: false });
-        canvas.discardActiveObject();
-    }
-    canvas.preserveObjectStacking = true; // photo remains behind artwork
-    $('photo-toolbar').style.display = 'none';
-    $('photo-adjust-panel').style.display = 'none';
-    canvas.requestRenderAll();
 }
 
 function onReplacePhotoClick() {
     $('photo-input').click();
 }
 
-function onZoomSliderInput(value) {
-    if (!photoImg) return;
-    const multiplier = Number(value);
-    const scale = photoImg.minScale * multiplier;
-    photoImg.set({ scaleX: scale, scaleY: scale });
-    clampPhotoScale(photoImg);
-    $('zoom-value').textContent = multiplier.toFixed(1) + 'x';
-    canvas.requestRenderAll();
-}
-
-// Positions the floating toolbar/panel directly above the photo's current
-// on-screen box. Has to convert from the photo's logical canvas
-// coordinates through two layers: the workspace's fixed pan (see
-// setViewportTransform/PANEL_WIDTH above) and the CSS scaling that
-// stretches the fixed-resolution canvas element to the on-screen card
-// size (see the CARD-FIRST EDITOR / 999px breakpoint CSS rules). Desktop
-// only in practice — see isMobileDevice() guards above.
-function positionPhotoWidget() {
-    if (!photoImg) return;
-    const rect = photoImg.getBoundingRect(true, true);
-    const canvasEl = canvas.upperCanvasEl;
-    const canvasRect = canvasEl.getBoundingClientRect();
-    const wrapperRect = $('canvas-wrapper').getBoundingClientRect();
-    const scaleX = canvasRect.width / canvas.width;
-    const scaleY = canvasRect.height / canvas.height;
-
-    const screenLeft = (rect.left - PANEL_WIDTH) * scaleX + (canvasRect.left - wrapperRect.left);
-    const screenTop = rect.top * scaleY + (canvasRect.top - wrapperRect.top);
-    const screenCenterX = screenLeft + (rect.width * scaleX) / 2;
-    const widgetTop = Math.max(8, screenTop - 56); // just above the photo; clamped so it doesn't run off the top of the card
-
-    [$('photo-toolbar'), $('photo-adjust-panel')].forEach((el) => {
-        el.style.left = screenCenterX + 'px';
-        el.style.top = widgetTop + 'px';
-        el.style.transform = 'translateX(-50%)';
-    });
-}
-
-// ---- Persistent mobile Replace/Adjust/Zoom bar (MOBILE ONLY) ----
-// Unlike the desktop widget above, which only appears once the customer
-// taps/clicks the photo, this bar is always on screen — directly below
-// the card — whenever there's a photo-capable frame on the front page,
-// so Replace/Adjust/Zoom don't depend on discovering the press-and-hold/
-// pinch gestures first.
-//   Adjust ("move" mode) — puts the photo into direct one-finger drag:
-//   see the mobileAdjustMode check in attachMobileCardGestures below,
-//   which skips the usual press-and-hold delay and starts repositioning
-//   on the very first touch instead. Pinch-to-zoom still works at the
-//   same time, same as always.
+// ---- Persistent Photo/Adjust/Zoom bar (desktop + mobile) ----
+// Always on screen — directly below the card — whenever there's a
+// photo-capable frame on the front page, so Photo/Zoom (and, on
+// touchscreens, Adjust) don't depend on discovering a click or a
+// press-and-hold/pinch gesture first.
+//   Adjust ("move" mode, mobile only — see the mobile-adjust-btn
+//   show/hide below) puts the photo into direct one-finger drag: see the
+//   mobileAdjustMode check in attachMobileCardGestures below, which skips
+//   the usual press-and-hold delay and starts repositioning on the very
+//   first touch instead. Pinch-to-zoom still works at the same time, same
+//   as always. Desktop doesn't need this button — the photo's own
+//   always-on corner-drag box (see syncPhotoDesktopBox) is already
+//   draggable with no mode to enter.
 //   Zoom — opens a slider that scales the photo through the exact same
 //   PHOTO_MIN_ZOOM..PHOTO_MAX_ZOOM range and clampPhotoScale guard as
-//   pinch, so dragging it zooms the picture the same way pinching does.
+//   pinch/corner-drag, so dragging it zooms the picture the same way.
 let mobileAdjustMode = 'idle'; // 'idle' | 'move'
 
 function updateMobilePhotoBar() {
     const bar = $('mobile-photo-bar');
     if (!bar) return;
-    // Shown as soon as we're on the front page on mobile — even before a
-    // photo's been uploaded — so Replace/Adjust/Zoom are visible
-    // immediately. Adjust/Zoom themselves stay disabled until there's a
-    // photo to act on.
-    const show = isMobileDevice() && currentPage === 'front' && !!activeTemplate?.photo;
+    const mobile = isMobileDevice();
+    // Shown as soon as we're on the front page — even before a photo's
+    // been uploaded — so Photo/Zoom are visible immediately. Adjust/Zoom
+    // themselves stay disabled until there's a photo to act on.
+    const show = currentPage === 'front' && !!activeTemplate?.photo;
     bar.style.display = show ? 'block' : 'none';
+    $('mobile-adjust-btn').style.display = mobile ? '' : 'none';
     $('mobile-adjust-btn').disabled = !photoImg;
     $('mobile-zoom-btn').disabled = !photoImg;
     if (!show || !photoImg) {
@@ -1498,8 +1315,13 @@ function onMobileZoomSliderInput(value) {
 }
 
 // Rotating a tablet, or resizing a desktop window past the breakpoint,
-// can flip isMobileDevice() mid-session — keep the bar in sync either way.
-window.addEventListener('resize', () => { if (typeof canvas !== 'undefined' && canvas) updateMobilePhotoBar(); });
+// can flip isMobileDevice() mid-session — keep the bar and the photo's
+// corner-drag box in sync either way.
+window.addEventListener('resize', () => {
+    if (typeof canvas === 'undefined' || !canvas) return;
+    syncPhotoDesktopBox();
+    updateMobilePhotoBar();
+});
 
 // ---- Mobile card gestures (MOBILE ONLY — see isMobileDevice() guards;
 // desktop uses the photo adjust widget above instead) ----
@@ -1793,15 +1615,18 @@ function switchPage(page) {
 
     [backCoverImg, bgImg, nameText, ageText, ...extraTexts].forEach((o) => o?.set({ visible: isFront }));
     [leftPageBg, rightPageBg, ...insideBgRects, ...insideTexts].forEach((o) => o?.set({ visible: !isFront }));
-    // Photo stays idle (not selectable/evented) regardless of which page
-    // we're on — see loadPhotoIntoFrame/closePhotoToolbar. Only the Adjust
-    // widget's open state needs resetting when we leave the front page.
     photoImg?.set({ visible: isFront });
     photoPromptGroup?.set({ visible: isFront && !photoImg });
-    if (!isFront) closePhotoToolbar();
+    // Switches the photo's corner-drag box off when leaving the front
+    // page (desktop only) and back on when returning to it — see
+    // syncPhotoDesktopBox.
+    syncPhotoDesktopBox();
     updateMobilePhotoBar();
 
-    canvas.discardActiveObject();
+    // Don't discard the photo's own active selection here — syncPhotoDesktopBox
+    // just set it (desktop, front page) or cleared it (everywhere else),
+    // and this would undo that when returning to the front page.
+    if (canvas.getActiveObject() !== photoImg) canvas.discardActiveObject();
     resetBordersToDashed();
 
     if (!isFront) insideTexts.forEach((t) => t.setCoords());
