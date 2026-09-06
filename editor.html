@@ -146,10 +146,11 @@
     .mobile-photo-bar-buttons button:disabled { color: #bbb; cursor: not-allowed; }
     .mobile-photo-bar-buttons button:disabled:active { background: none; }
     .mobile-photo-bar-buttons button svg { width: 20px; height: 20px; }
-    .mobile-adjust-row { display: none; align-items: center; gap: 12px; padding: 10px 16px; }
-    .mobile-adjust-row .zoom-label { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; white-space: nowrap; }
-    .mobile-adjust-row input[type="range"] { flex: 1; }
-    .mobile-adjust-row .mobile-adjust-done { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 9px 14px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+    .mobile-panel-row { display: none; align-items: center; gap: 12px; padding: 10px 16px; }
+    .mobile-panel-row .zoom-label { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; white-space: nowrap; }
+    .mobile-panel-row .move-hint { flex: 1; font-size: 12px; color: #444; }
+    .mobile-panel-row input[type="range"] { flex: 1; }
+    .mobile-panel-row .mobile-panel-done { background: var(--primary); color: white; border: none; border-radius: 6px; padding: 9px 14px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
     @media (min-width: 1000px) { .mobile-photo-bar { display: none !important; } }
 
     .side-column { width: 100%; max-width: 320px; margin: 0; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 20px; }
@@ -302,11 +303,16 @@
     </div>
     </div>
 
-    <!-- Mobile-only persistent Replace/Adjust bar. It's a direct child of
-         .editor-workspace (sibling of .card-stage/.side-column) so that on
-         the mobile flex-column layout it naturally lands between the card
-         and the rest of the controls, i.e. directly below the card — see
-         updateMobilePhotoBar, which shows/hides it. -->
+    <!-- Mobile-only persistent Replace/Adjust/Zoom bar. It's a direct
+         child of .editor-workspace (sibling of .card-stage/.side-column)
+         so that on the mobile flex-column layout it naturally lands
+         between the card and the rest of the controls, i.e. directly
+         below the card — see updateMobilePhotoBar, which shows/hides it.
+         Adjust and Zoom are deliberately separate: Adjust puts the photo
+         into direct drag mode (see mobileAdjustMode in the script) so a
+         single finger repositions it immediately, no press-and-hold
+         needed; Zoom opens a slider driving the same scale range/clamp as
+         pinch-to-zoom (see onMobileZoomSliderInput / clampPhotoScale). -->
     <div id="mobile-photo-bar" class="mobile-photo-bar">
         <div id="mobile-bar-buttons" class="mobile-photo-bar-buttons">
             <button type="button" onclick="onReplacePhotoClick()">
@@ -314,14 +320,22 @@
                 <span>Replace</span>
             </button>
             <button type="button" id="mobile-adjust-btn" onclick="onMobileAdjustClick()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
                 <span>Adjust</span>
             </button>
+            <button type="button" id="mobile-zoom-btn" onclick="onMobileZoomClick()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6M11 8v6"/></svg>
+                <span>Zoom</span>
+            </button>
         </div>
-        <div id="mobile-adjust-row" class="mobile-adjust-row">
+        <div id="mobile-move-row" class="mobile-panel-row">
+            <span class="move-hint">Drag the photo on the card to reposition it.</span>
+            <button type="button" class="mobile-panel-done" onclick="onMobileMoveDone()">Done</button>
+        </div>
+        <div id="mobile-zoom-row" class="mobile-panel-row">
             <span class="zoom-label">Zoom <span id="mobile-zoom-value">1.0x</span></span>
             <input type="range" id="mobile-zoom-slider" min="0.3" max="6" step="0.02" value="1" oninput="onMobileZoomSliderInput(this.value)">
-            <button type="button" class="mobile-adjust-done" onclick="onMobileAdjustDone()">Done</button>
+            <button type="button" class="mobile-panel-done" onclick="onMobileZoomDone()">Done</button>
         </div>
     </div>
 
@@ -361,7 +375,7 @@
                 <label class="control-group-divider" style="margin-top:0; padding-top:0; border-top:none;">Upload Photo</label>
                 <input type="file" id="photo-input" accept="image/*" onchange="handlePhotoUpload(this)">
                 <p style="font-size:12px; color:#666; margin-top:6px;">
-                    On desktop: tap the photo to Replace or Zoom it. On a touchscreen: use the Replace/Adjust bar below the card, or press and hold the photo to drag it and pinch with two fingers to zoom. Place it anywhere on the front of the card.
+                    On desktop: tap the photo to Replace or Zoom it. On a touchscreen: use the Replace/Adjust/Zoom bar below the card — Adjust lets you drag the photo directly, Zoom gives you a slider — or press and hold the photo to drag it and pinch with two fingers to zoom. Place it anywhere on the front of the card.
                 </p>
             </div>
         </div>
@@ -1411,40 +1425,67 @@ function positionPhotoWidget() {
     });
 }
 
-// ---- Persistent mobile Replace/Adjust bar (MOBILE ONLY) ----
+// ---- Persistent mobile Replace/Adjust/Zoom bar (MOBILE ONLY) ----
 // Unlike the desktop widget above, which only appears once the customer
 // taps/clicks the photo, this bar is always on screen — directly below
-// the card — whenever there's a photo to act on, so the option to
-// replace or zoom it doesn't depend on discovering the press-and-hold/
-// pinch gestures first. It sits alongside those gestures rather than
-// replacing them: Replace reuses the same hidden file input as desktop
-// (onReplacePhotoClick), and Adjust exposes the same zoom range as pinch
-// (PHOTO_MIN_ZOOM..PHOTO_MAX_ZOOM) as an explicit slider.
+// the card — whenever there's a photo-capable frame on the front page,
+// so Replace/Adjust/Zoom don't depend on discovering the press-and-hold/
+// pinch gestures first.
+//   Adjust ("move" mode) — puts the photo into direct one-finger drag:
+//   see the mobileAdjustMode check in attachMobileCardGestures below,
+//   which skips the usual press-and-hold delay and starts repositioning
+//   on the very first touch instead. Pinch-to-zoom still works at the
+//   same time, same as always.
+//   Zoom — opens a slider that scales the photo through the exact same
+//   PHOTO_MIN_ZOOM..PHOTO_MAX_ZOOM range and clampPhotoScale guard as
+//   pinch, so dragging it zooms the picture the same way pinching does.
+let mobileAdjustMode = 'idle'; // 'idle' | 'move'
+
 function updateMobilePhotoBar() {
     const bar = $('mobile-photo-bar');
     if (!bar) return;
     // Shown as soon as we're on the front page on mobile — even before a
-    // photo's been uploaded — so Replace/Adjust are visible immediately
-    // rather than only appearing once a photo exists. Adjust itself stays
-    // disabled until there's a photo to zoom.
+    // photo's been uploaded — so Replace/Adjust/Zoom are visible
+    // immediately. Adjust/Zoom themselves stay disabled until there's a
+    // photo to act on.
     const show = isMobileDevice() && currentPage === 'front' && !!activeTemplate?.photo;
     bar.style.display = show ? 'block' : 'none';
     $('mobile-adjust-btn').disabled = !photoImg;
-    if (!show || !photoImg) onMobileAdjustDone(); // collapse the zoom row back to idle
+    $('mobile-zoom-btn').disabled = !photoImg;
+    if (!show || !photoImg) {
+        onMobileMoveDone();
+        onMobileZoomDone();
+    }
 }
 
 function onMobileAdjustClick() {
+    if (!photoImg) return;
+    mobileAdjustMode = 'move';
+    $('mobile-bar-buttons').style.display = 'none';
+    $('mobile-zoom-row').style.display = 'none';
+    $('mobile-move-row').style.display = 'flex';
+}
+
+function onMobileMoveDone() {
+    mobileAdjustMode = 'idle';
+    $('mobile-move-row').style.display = 'none';
+    $('mobile-bar-buttons').style.display = 'flex';
+}
+
+function onMobileZoomClick() {
     if (!photoImg) return;
     const multiplier = photoImg.scaleX / photoImg.minScale;
     $('mobile-zoom-slider').value = multiplier;
     $('mobile-zoom-value').textContent = multiplier.toFixed(1) + 'x';
     $('mobile-bar-buttons').style.display = 'none';
-    $('mobile-adjust-row').style.display = 'flex';
+    $('mobile-move-row').style.display = 'none';
+    $('mobile-zoom-row').style.display = 'flex';
 }
 
-function onMobileAdjustDone() {
-    $('mobile-adjust-row').style.display = 'none';
-    $('mobile-bar-buttons').style.display = 'flex';
+function onMobileZoomDone() {
+    $('mobile-zoom-row').style.display = 'none';
+    // Only restore the button row if Adjust isn't the one currently open.
+    if (mobileAdjustMode === 'idle') $('mobile-bar-buttons').style.display = 'flex';
 }
 
 function onMobileZoomSliderInput(value) {
@@ -1470,11 +1511,16 @@ window.addEventListener('resize', () => { if (typeof canvas !== 'undefined' && c
 //   * once held, dragging moves the photo freely — not clamped to stay
 //     on-page; its clipPath (see loadPhotoIntoFrame) just keeps whatever
 //     goes past the printable page invisible
+//   * tapping "Adjust" in the persistent mobile bar (see
+//     onMobileAdjustClick) does the same thing without the hold delay —
+//     the very next touch on the photo starts dragging it straight away
 //   * a two-finger touch that starts on the photo pinches to zoom, from
 //     PHOTO_MIN_ZOOM to PHOTO_MAX_ZOOM times its starting size (see
-//     clampPhotoScale)
+//     clampPhotoScale) — this works the same whether or not Adjust mode
+//     is on
 //   * lifting all fingers and swiping again goes straight back to
-//     scrolling the page
+//     scrolling the page (unless Adjust mode is still on, in which case
+//     the next touch on the photo drags it again)
 // This talks to the canvas element directly with raw touch listeners
 // (capture: true, so it gets first look at each touch) rather than
 // Fabric's own object-drag system — photoImg.evented/selectable stay
@@ -1545,6 +1591,21 @@ function attachMobileCardGestures(el) {
         const onPhoto = photoContainsPoint(mobileCanvasPoint(t));
 
         mobileGesture = { startX: t.clientX, startY: t.clientY, onPhoto, photoMode: false, pinch: false, moved: false };
+
+        if (onPhoto && mobileAdjustMode === 'move') {
+            // Adjust mode is on (see onMobileAdjustClick) — skip the
+            // hold-and-wait ambiguity entirely and start repositioning
+            // on this very touch, since the customer already told us
+            // via the bar that they want to move the photo.
+            mobileGesture.photoMode = true;
+            mobileGesture.photoStartX = photoImg.left;
+            mobileGesture.photoStartY = photoImg.top;
+            canvas.discardActiveObject();
+            canvas.skipTargetFind = true;
+            canvas.requestRenderAll();
+            e.preventDefault();
+            return;
+        }
 
         // Only a deliberate hold turns this touch into photo positioning —
         // a normal swipe (handled in touchmove below) stays a page scroll.
