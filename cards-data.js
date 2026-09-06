@@ -280,7 +280,7 @@ const CARD_CATALOGUE = {
 
   //"nolu-lion1": { title: "No One Likes Us Lion Card", categories: ["sports", "football", "championship", "millwall"], preview: "nolu-lion1-preview.png", full: "nolu-lion1.png", name: { left: 890, top: 246, startSize: 75, minSize: 70, maxSize: 78, fontFamily: "Anton", fontWeight: "normal", color: "#FFFFFF", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 610, tiltAngle: -3, label: "Name", maxChars: 12 } },
   
-  "birthday-mfc-photo1": { title: "Lions Birthday", price: "£3.49", categories: ["sports", "football", "championship", "millwall", "photo-upload"], preview: "lions-birthday-preview.png", full: "lions-birthday.png", name: { left: 898, top: 752, startSize: 63, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: true, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 580, tiltAngle: -0, label: "Name", maxChars: 9 },
+  "birthday-mfc-photo1": { title: "Lions Birthday", price: "£3.49", categories: ["sports", "football", "championship", "millwall", "photo-upload"], preview: "lions-birthday-preview.png", full: "lions-birthday.png", name: { left: 898, top: 752, startSize: 63, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 580, tiltAngle: -0, label: "Name", maxChars: 9 },
     photo: { left: 1008, top: 180, width: 310, height: 310 } },
   
   
