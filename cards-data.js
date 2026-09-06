@@ -163,7 +163,7 @@ const CARD_CATALOGUE = {
   "thankyou-teacher1": { title: "Teacher, Thank You!", categories: ["school-cards"], preview: "thankyou-teacher1-preview.png", full: "thankyou-teacher.png" },
   "superteacher-boy": { title: "Greatest Teacher", categories: ["school-cards"], preview: "superteacher-boy-preview.png", full: "superteacher-boy.png" },
   "superteacher-girl": { title: "Super Teacher", categories: ["school-cards"], preview: "superteacher-girl-preview.png", full: "superteacher-girl.png" },
-  "thankyou-teacher": { title: "Thank You, Teacher Card", categories: ["school-cards"], preview: "thankyou-teacher-preview.png", full: "thankyou-teacher.png", name: { left: 900, top: 731, startSize: 54, minSize: 35, maxSize: 60, fontFamily: "anton", fontWeight: "bold", color: "#FD7D96", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 9 } },
+  "thankyou-teacher": { title: "Thank You, Teacher Card", categories: ["school-cards"], preview: "thankyou-teacher-preview.png", full: "thankyou-teacher.png", name: { left: 900, top: 733, startSize: 54, minSize: 35, maxSize: 60, fontFamily: "anton", fontWeight: "bold", color: "#FD7D96", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 9 } },
   
   //"mothers-day1": { title: "Mothers Day", categories: ["mothersday-fathersday"], preview: "mothers-day1-preview.png", full: "mothers-day1.png" },
   //"mothers-day2": { title: "Mothers Day", categories: ["mothersday-fathersday"], preview: "mothers-day2-preview.png", full: "mothers-day2.png" },
