@@ -114,16 +114,17 @@
     #canvas-wrapper .canvas-container { width: 100% !important; height: auto !important; aspect-ratio: 595.5 / 840; }
     #canvas-wrapper .canvas-container canvas { width: 100% !important; height: 100% !important; }
 
-    /* PHOTO BAR — a persistent Photo/Adjust/Zoom bar below the card (see
+    /* PHOTO BAR — a persistent Photo/Adjust/Zoom bar, now sitting at the
+       top of .side-column above Front Cover/Write Message (see
        updateMobilePhotoBar in the script), shown on desktop and mobile
        alike so those controls are always visible instead of only
        surfacing via a click or a press-and-hold gesture the customer has
-       to discover. On desktop the photo also carries its own always-on
-       blue corner-drag box the moment it's uploaded (see
-       syncPhotoDesktopBox in the script) — dragging it or its corners
-       repositions/resizes directly, so the bar's Adjust button (mobile's
-       equivalent, needed there because a plain swipe scrolls the page) is
-       hidden on desktop; only Photo and Zoom show. */
+       to discover. The photo itself has no visible on-canvas box on
+       either device (see syncPhotoDesktopBox in the script) — on desktop
+       it's still directly draggable with the mouse even without a
+       visible box, and resizing now goes through the bar's Zoom slider
+       instead of corner-drag handles; Photo, Adjust and Zoom all show on
+       both desktop and mobile now, for a consistent toolbar. */
     .mobile-photo-bar { display: none; width: 100%; background: white; border: 1px solid var(--border-color); border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); box-sizing: border-box; }
     .mobile-photo-bar-buttons { display: flex; align-items: center; justify-content: center; }
     .mobile-photo-bar-buttons button { flex: 1; max-width: 140px; background: none; border: none; color: var(--dark); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 8px; border-radius: 8px; font-size: 12px; font-weight: bold; font-family: inherit; letter-spacing: 0.3px; }
@@ -258,19 +259,26 @@
     </div>
     </div>
 
-    <!-- Persistent Photo/Adjust/Zoom bar, shown on both desktop and
-         mobile now. It's a direct child of .editor-workspace (sibling of
-         .card-stage/.side-column) so that on the mobile flex-column
-         layout it naturally lands between the card and the rest of the
-         controls, i.e. directly below the card — see updateMobilePhotoBar,
-         which shows/hides it and which buttons appear. On desktop the
-         photo's own always-on corner-drag box (see syncPhotoDesktopBox)
-         handles repositioning/resizing directly, so Adjust is hidden
-         there and only Photo/Zoom show; on mobile, Adjust puts the photo
-         into direct one-finger-drag mode (see mobileAdjustMode in the
-         script), since a plain swipe normally scrolls the page. Zoom
-         opens a slider driving the same scale range/clamp as pinch-to-zoom
-         (see onMobileZoomSliderInput / clampPhotoScale). -->
+    <div class="side-column">
+    <!-- Persistent Photo/Adjust/Zoom bar. It lives as the first item
+         inside .side-column (rather than as a sibling of .card-stage) so
+         it stacks above Front Cover/Write Message and the controls in a
+         single column — on desktop that's the sticky right-hand column
+         next to the card; on the mobile flex-column layout the same DOM
+         order puts it directly below the card, above everything else —
+         see updateMobilePhotoBar, which shows/hides it and which buttons
+         appear. Photo/Adjust/Zoom now show on both desktop and mobile:
+         the photo itself has no visible on-canvas drag box on either
+         (see syncPhotoDesktopBox) — the mouse (desktop) or a
+         press-and-hold/pinch (mobile) still repositions/resizes it
+         directly, and Adjust/Zoom in this bar offer the same actions
+         explicitly so the toolbar matches across devices. Adjust puts the
+         photo into direct one-finger-drag mode on touch, since a plain
+         swipe normally scrolls the page (see mobileAdjustMode in the
+         script) — on desktop it's just a hint, since mouse-drag always
+         works. Zoom opens a slider driving the same scale range/clamp as
+         pinch-to-zoom or corner-drag (see onMobileZoomSliderInput /
+         clampPhotoScale). -->
     <div id="mobile-photo-bar" class="mobile-photo-bar">
         <div id="mobile-bar-buttons" class="mobile-photo-bar-buttons">
             <button type="button" onclick="onReplacePhotoClick()">
@@ -297,7 +305,6 @@
         </div>
     </div>
 
-    <div class="side-column">
     <div class="page-toggle">
         <button id="toggle-front" class="toggle-btn active" onclick="switchPage('front')" disabled>Front Cover</button>
         <button id="toggle-inside" class="toggle-btn" onclick="switchPage('inside')" disabled>Write Message</button>
@@ -1168,17 +1175,19 @@ function clampPhotoScale(img) {
 
 // ---- Photo adjust box (DESKTOP ONLY — see isMobileDevice() guards below;
 // mobile uses attachMobileCardGestures instead, further down) ----
-// Once there's a photo, it's always evented/selectable with Fabric's
-// corner-drag resize box showing (see syncPhotoDesktopBox) — no click
-// needed to reveal it. The customer can drag the photo directly to
-// reposition it, or drag a corner to resize. Clicking elsewhere on the
-// card — even empty space — re-selects the photo instead of letting
-// Fabric deselect it (see the 'selection:cleared' handler below), so the
-// box stays up the whole time there's a photo on the front page.
+// Once there's a photo, it's always evented/selectable — no click needed
+// to reveal it, and no visible border/corner-drag box either (hasBorders/
+// hasControls stay off): the customer just drags the photo directly with
+// the mouse to reposition it, and resizes it via the Zoom slider in the
+// persistent Photo/Adjust/Zoom bar instead of dragging a corner. Clicking
+// elsewhere on the card — even empty space — re-selects the photo instead
+// of letting Fabric deselect it (see the 'selection:cleared' handler
+// below), so it stays draggable the whole time there's a photo on the
+// front page.
 function syncPhotoDesktopBox() {
     if (!photoImg) return;
     const active = !isMobileDevice() && currentPage === 'front';
-    photoImg.set({ evented: active, selectable: active, hasControls: active, hasBorders: active });
+    photoImg.set({ evented: active, selectable: active, hasControls: false, hasBorders: false });
     if (active) {
         canvas.setActiveObject(photoImg);
     } else if (canvas.getActiveObject() === photoImg) {
@@ -1244,14 +1253,15 @@ function onReplacePhotoClick() {
 // photo-capable frame on the front page, so Photo/Zoom (and, on
 // touchscreens, Adjust) don't depend on discovering a click or a
 // press-and-hold/pinch gesture first.
-//   Adjust ("move" mode, mobile only — see the mobile-adjust-btn
-//   show/hide below) puts the photo into direct one-finger drag: see the
-//   mobileAdjustMode check in attachMobileCardGestures below, which skips
-//   the usual press-and-hold delay and starts repositioning on the very
-//   first touch instead. Pinch-to-zoom still works at the same time, same
-//   as always. Desktop doesn't need this button — the photo's own
-//   always-on corner-drag box (see syncPhotoDesktopBox) is already
-//   draggable with no mode to enter.
+//   Adjust ("move" mode — shown on both desktop and mobile so the
+//   toolbar matches) puts the photo into direct one-finger drag on
+//   touch: see the mobileAdjustMode check in attachMobileCardGestures
+//   below, which skips the usual press-and-hold delay and starts
+//   repositioning on the very first touch instead. Pinch-to-zoom still
+//   works at the same time, same as always. On desktop, Adjust is really
+//   just a hint/consistency button — the photo is already directly
+//   draggable with the mouse at all times (see syncPhotoDesktopBox), with
+//   no mode to enter.
 //   Zoom — opens a slider that scales the photo through the exact same
 //   PHOTO_MIN_ZOOM..PHOTO_MAX_ZOOM range and clampPhotoScale guard as
 //   pinch/corner-drag, so dragging it zooms the picture the same way.
@@ -1260,13 +1270,12 @@ let mobileAdjustMode = 'idle'; // 'idle' | 'move'
 function updateMobilePhotoBar() {
     const bar = $('mobile-photo-bar');
     if (!bar) return;
-    const mobile = isMobileDevice();
     // Shown as soon as we're on the front page — even before a photo's
-    // been uploaded — so Photo/Zoom are visible immediately. Adjust/Zoom
-    // themselves stay disabled until there's a photo to act on.
+    // been uploaded — so Photo/Adjust/Zoom are visible immediately, the
+    // same set of buttons on desktop and mobile. Adjust/Zoom themselves
+    // stay disabled until there's a photo to act on.
     const show = currentPage === 'front' && !!activeTemplate?.photo;
     bar.style.display = show ? 'block' : 'none';
-    $('mobile-adjust-btn').style.display = mobile ? '' : 'none';
     $('mobile-adjust-btn').disabled = !photoImg;
     $('mobile-zoom-btn').disabled = !photoImg;
     if (!show || !photoImg) {
