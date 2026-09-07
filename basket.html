@@ -602,7 +602,6 @@ function renderBasket() {
     const postage = estimatePostage(items, { isPromoValid: promoIsValid });
     const postagePounds = postage.totalPence / 100;
     const grandTotal = subtotal + postagePounds;
-    const freeDeliveryNudge = basketFreeDeliveryNudge(items);
 
     const postageRowsHtml = postage.parcels.map((p) => `
         <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
@@ -665,8 +664,12 @@ function renderBasket() {
 // items as 'self'; see editor.html/editor-prints.html).
 function renderDeliveryLine(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
-    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to: Me';
-    const actionText = wantsRecipient ? 'Change' : 'Select Recipient';
+    const selfAddress = getChosenSelfAddress();
+    const selfName = selfAddress?.name;
+    const label = wantsRecipient
+        ? `Sending to: ${item.delivery.recipient.name || 'recipient'}`
+        : (selfName ? `Sending to: ${selfName}` : 'Sending to');
+    const actionText = wantsRecipient || selfName ? 'Change' : 'Select Recipient';
     return `
         <p class="item-delivery">
             ${label}
@@ -682,8 +685,8 @@ function renderDeliveryLine(item) {
 // delivery is created (see chooseRecipientSavedAddress/submitRecipientAddress).
 function renderEnvelopeSection(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
-    if (!wantsRecipient) return '';
-    const mode = item.delivery.envelopeMode || 'direct';
+    if (item.kind !== 'card') return '';
+    const mode = item.delivery?.envelopeMode || 'direct';
     return `
         <div class="item-envelope">
             <p class="item-envelope-label">Envelope</p>
