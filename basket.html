@@ -290,6 +290,13 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 window.addEventListener('cc-cart-updated', renderBasket);
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closePreview(); closeRecipientPicker(); } });
+window.addEventListener('pageshow', () => {
+    const btn = document.getElementById('checkout-btn');
+    const errorEl = document.getElementById('checkout-error');
+    if (btn) { btn.disabled = false; btn.innerText = 'Checkout'; }
+    if (errorEl) errorEl.style.display = 'none';
+    renderBasket();
+});
 
 // ---------------------------------------------------------------------
 // Postage estimate — mirrors functions/postage.js + the grouping/waiver
@@ -618,6 +625,8 @@ function renderBasket() {
 
     // A "recipient" item already has its address locked in from the
     // editor — only a "self" item needs a "deliver to" chosen here.
+    const hasSelfItem = items.some((item) => item.delivery?.type !== 'recipient');
+    const deliverToHtml = hasSelfItem ? renderDeliverToBlock() : '';
 
     // Checkout is disabled until every "self" item has a resolved
     // address — avoids the old flow where clicking Checkout was the
@@ -663,8 +672,8 @@ function renderBasket() {
 // items as 'self'; see editor.html/editor-prints.html).
 function renderDeliveryLine(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
-    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to: Me';
-    const actionText = wantsRecipient ? 'Change' : 'Select Recipient';
+    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to Home';
+    const actionText = wantsRecipient ? 'Change Recipient' : 'Select Recipient';
     return `
         <p class="item-delivery">
             ${label}
@@ -680,8 +689,8 @@ function renderDeliveryLine(item) {
 // delivery is created (see chooseRecipientSavedAddress/submitRecipientAddress).
 function renderEnvelopeSection(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
-    if (!wantsRecipient) return '';
-    const mode = item.delivery.envelopeMode || 'direct';
+    if (item.kind !== 'card') return '';
+    const mode = item.delivery?.envelopeMode || 'home';
     return `
         <div class="item-envelope">
             <p class="item-envelope-label">Envelope</p>
