@@ -222,6 +222,12 @@ let clubIsMember = false;
 // before this has resolved.
 let savedAddresses = [];
 let selectedSelfAddressId = null;
+// Ad-hoc "self" delivery address for guests, typed directly into the
+// "Deliver to" block below — needed now that checkout.html/Stripe's
+// Payment Element collects card details only, with no address step of
+// its own for a guest to fall back on the way Stripe's hosted Checkout
+// page used to provide.
+let guestSelfAddress = null;
 
 async function loadSavedAddresses() {
     if (!ccIsLoggedIn()) { savedAddresses = []; return; }
@@ -467,12 +473,37 @@ function renderDeliverToBlock() {
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
     const wrapStyle = 'margin-bottom:15px; padding:12px; border:1px solid var(--border-color); border-radius:6px; font-size:12px; color:#666;';
     const labelHtml = '<strong style="display:block; margin-bottom:6px; font-size:13px; color:#333;">Deliver to</strong>';
+    const inputStyle = 'width:100%; padding:8px; margin-bottom:6px; border:1px solid var(--border-color); border-radius:6px; font-size:13px; box-sizing:border-box; font-family:var(--font-family);';
 
     if (!loggedIn) {
+        // Guests can't pick a saved address, but every "self" item still
+        // needs one before checkout.html can take payment — there's no
+        // Stripe-hosted address step left to fall back on now, so it's
+        // collected right here instead.
+        if (guestSelfAddress) {
+            return `
+                <div style="${wrapStyle}">
+                    ${labelHtml}
+                    <div style="font-size:12px; color:#333; line-height:1.5; margin-bottom:8px;">
+                        ${guestSelfAddress.name}<br>
+                        ${guestSelfAddress.address1}${guestSelfAddress.address2 ? ', ' + guestSelfAddress.address2 : ''}<br>
+                        ${guestSelfAddress.city}, ${guestSelfAddress.postcode}<br>
+                        ${guestSelfAddress.country}
+                    </div>
+                    <button type="button" class="recipient-link" onclick="guestSelfAddress = null; renderBasket();">Change address</button>
+                </div>
+            `;
+        }
         return `
             <div style="${wrapStyle}">
                 ${labelHtml}
-                <a href="account.html" style="color:var(--primary);">Log in</a> to use a saved address — otherwise you'll enter one on the payment page.
+                <p style="margin:0 0 8px;">Where should we deliver? <a href="account.html" style="color:var(--primary);">Log in</a> to use a saved address, or enter one below.</p>
+                <input type="text" id="guest-self-name" placeholder="Full name" style="${inputStyle}">
+                <input type="text" id="guest-self-address1" placeholder="Address line 1" style="${inputStyle}">
+                <input type="text" id="guest-self-address2" placeholder="Address line 2 (optional)" style="${inputStyle}">
+                <input type="text" id="guest-self-city" placeholder="Town / City" style="${inputStyle}">
+                <input type="text" id="guest-self-postcode" placeholder="Postcode" style="${inputStyle}">
+                <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0;" onclick="saveGuestSelfAddress()">Use this address</button>
             </div>
         `;
     }
@@ -499,6 +530,25 @@ function renderDeliverToBlock() {
             <a href="account.html" style="font-size:11px; color:var(--primary); display:inline-block; margin-top:6px;">Manage addresses</a>
         </div>
     `;
+}
+
+// Reads the ad-hoc guest address form above and stores it — validated
+// the same way handleAddAddress (account-api.js) validates a saved
+// address, so a guest can't reach checkout.html with an incomplete one.
+function saveGuestSelfAddress() {
+    const name = $('guest-self-name').value.trim();
+    const address1 = $('guest-self-address1').value.trim();
+    const address2 = $('guest-self-address2').value.trim();
+    const city = $('guest-self-city').value.trim();
+    const postcode = $('guest-self-postcode').value.trim();
+
+    if (!name || !address1 || !city || !postcode) {
+        alert('Please fill in at least name, address, city, and postcode.');
+        return;
+    }
+
+    guestSelfAddress = { label: 'Delivery address', name, address1, address2, city, county: '', postcode, country: 'United Kingdom' };
+    renderBasket();
 }
 
 function renderBasket() {
@@ -940,13 +990,20 @@ async function goToCheckout() {
         const items = await ccCart.getCartWithPdfs();
         const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
 
-        // The address the customer picked in the "Deliver to" block above,
-        // if any — sent once per order (not per item), same as how a
-        // recipient address is already attached per item. Server treats a
-        // missing/null value the same as before (falls back to collecting
-        // it on the Stripe page), so guests and customers with no saved
-        // addresses see no change in behaviour.
-        const chosenAddress = savedAddresses.find((a) => a.id === selectedSelfAddressId) || null;
+        // The address the customer picked (logged in) or typed in (guest)
+        // in the "Deliver to" block above, if any — sent once per order
+        // (not per item), same as how a recipient address is already
+        // attached per item. There's no Stripe-hosted address step left
+        // downstream (see checkout.html) to fall back on, so this is
+        // checked here before leaving the page at all.
+        const chosenAddress = loggedIn
+            ? (savedAddresses.find((a) => a.id === selectedSelfAddressId) || null)
+            : guestSelfAddress;
+
+        const needsCustomerAddress = items.some((item) => item.delivery?.type !== 'recipient');
+        if (needsCustomerAddress && !chosenAddress) {
+            throw new Error('Please add a delivery address for the item(s) going to you.');
+        }
 
         const checkoutData = {
             customerEmail: loggedIn ? ccGetEmail() : null,
@@ -976,26 +1033,13 @@ async function goToCheckout() {
             }))
         };
 
-        const response = await fetch('/create-checkout-basket', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Sent so the server can verify Cockney Cards Club
-                // membership before waiving postage — never trust a
-                // client-side "I'm a member" claim for anything that
-                // affects price. Omitted entirely for guests; the server
-                // just treats a missing/invalid token as "not a member".
-                ...(loggedIn ? { Authorization: `Bearer ${ccGetSession()}` } : {})
-            },
-            body: JSON.stringify(checkoutData)
-        });
-
-        const session = await response.json();
-        if (session.url) {
-            window.location.href = session.url;
-        } else {
-            throw new Error(session.error || 'Please verify environment settings.');
-        }
+        // Hand off to checkout.html, which shows a full review of every
+        // item's delivery address and takes payment on our own page
+        // (Stripe's embedded Payment Element, card entry only) instead of
+        // redirecting to Stripe's hosted Checkout — see checkout.html and
+        // create-payment-intent-basket.js.
+        sessionStorage.setItem('cc_checkout_data', JSON.stringify(checkoutData));
+        window.location.href = 'checkout.html';
     } catch (err) {
         console.error(err);
         errorEl.textContent = 'Checkout Error: ' + err.message;
