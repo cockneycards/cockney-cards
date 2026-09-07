@@ -536,10 +536,16 @@ function renderDeliverToBlock() {
     }
 
     if (!savedAddresses.length) {
+        // Addresses aren't added on account.html here — they're added via
+        // "Select Recipient" on a basket item (see openRecipientPicker),
+        // which is also the only place that knows which item to attach a
+        // freshly-added address to. This jumps straight into that same
+        // modal's "add a new address" form instead of making the customer
+        // find the button on an item themselves.
         return `
             <div style="${wrapStyle}">
                 ${labelHtml}
-                No saved addresses yet. <a href="account.html" style="color:var(--primary);">Add one</a>, or you'll enter one on the payment page.
+                <button type="button" class="recipient-link" onclick="openAddSelfAddressFromSidebar()">Add a delivery address</button>
             </div>
         `;
     }
@@ -873,6 +879,20 @@ function closeRecipientPicker() {
     document.body.style.overflow = '';
     recipientPickerItemId = null;
     recipientPickerMode = 'menu';
+}
+
+// Entry point for the sidebar's "Add a delivery address" link (see
+// renderDeliverToBlock) — jumps straight into the same modal's "add a new
+// address" form, attached to the first "self" item in the basket, since
+// that's what submitSelfAddress() needs to attach the new address to.
+function openAddSelfAddressFromSidebar() {
+    const item = ccCart.getCart().find((i) => i.delivery?.type !== 'recipient');
+    if (!item) return;
+    recipientPickerItemId = item.id;
+    recipientPickerMode = 'addSelf';
+    $('recipient-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderRecipientPicker();
 }
 
 function renderRecipientPicker() {
