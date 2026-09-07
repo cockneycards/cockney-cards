@@ -258,6 +258,104 @@ export async function onRequestPost(context) {
         }
     }
 
+    // Basket orders from the new custom checkout page (checkout.html +
+    // create-payment-intent-basket.js) land here instead of
+    // checkout.session.completed — a PaymentIntent, not a Checkout
+    // Session, since there's no Stripe-hosted page involved any more
+    // (see create-payment-intent-basket.js's comment for why). Mirrors
+    // the isBasket branch above: same R2 lookup, D1 recording, fulfilment
+    // email, and customer confirmation — just reading order data off the
+    // PaymentIntent instead of session.metadata/customer_details.
+    if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const meta = paymentIntent.metadata || {};
+        const orderId = meta.order_id;
+
+        if (!orderId) {
+            console.error('Stripe webhook: payment_intent.succeeded with no order_id in metadata', paymentIntent.id);
+            return new Response('OK', { status: 200 });
+        }
+
+        // create-payment-intent-basket.js stores everything a Checkout
+        // Session's own fields (customer_details.email, line items) used
+        // to provide directly here instead, since a PaymentIntent doesn't
+        // carry any of that itself.
+        let basketItems = [];
+        let selfAddress = null;
+        let customerEmail = null;
+        let amountTotal = paymentIntent.amount;
+        const object = await env.ORDER_PDFS.get(orderId);
+        const raw = object ? await object.text() : null;
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                basketItems = parsed.items || [];
+                selfAddress = parsed.selfAddress || null;
+                customerEmail = parsed.customerEmail || null;
+                amountTotal = parsed.amountTotal ?? paymentIntent.amount;
+            } catch (err) {
+                console.error('Stripe webhook: could not parse order payload for order', orderId, err);
+            }
+        } else {
+            console.error('Stripe webhook: no R2 order payload found for order', orderId);
+        }
+
+        try {
+            if (customerEmail && basketItems.length) {
+                for (const item of basketItems) {
+                    await env.DB.prepare(
+                        `INSERT OR IGNORE INTO orders
+                            (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, created_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                    ).bind(
+                        `${orderId}-${item.index}`,
+                        customerEmail.toLowerCase(),
+                        item.kind || null,
+                        item.title || null,
+                        `${item.optionsSummary || ''}${item.quantity > 1 ? ` (Qty: ${item.quantity})` : ''}`.slice(0, 480) || null,
+                        null,
+                        null,
+                        item.price || null,
+                        item.priceValue != null ? Math.round(item.priceValue * 100) * item.quantity : null,
+                        paymentIntent.created ? paymentIntent.created * 1000 : Date.now()
+                    ).run();
+                }
+            } else {
+                console.error('Stripe webhook: missing email or items, order not recorded in D1', orderId);
+            }
+        } catch (err) {
+            console.error('Failed to write order to D1:', err);
+        }
+
+        try {
+            await sendBasketOrderEmail(env, {
+                customerEmail: customerEmail || 'N/A',
+                amountTotal,
+                items: basketItems,
+                shippingDetails: null,
+                selfAddress,
+            });
+        } catch (err) {
+            console.error('Failed to send order email:', err);
+        }
+
+        try {
+            await sendCustomerOrderConfirmationEmail(env, {
+                customerEmail,
+                isBasket: true,
+                order: { items: basketItems, amountTotal },
+            });
+        } catch (err) {
+            console.error('Failed to send customer confirmation email:', err);
+        }
+
+        await checkAndQualifyReferral(env, customerEmail, sendCustomerEmail);
+
+        await env.ORDER_PDFS.delete(orderId);
+
+        return new Response('OK', { status: 200 });
+    }
+
     // Subscription lifecycle — keeps a Club member's status in sync with
     // what Stripe actually has on file (renewed, past due, cancelled,
     // etc.), independent of the initial checkout.session.completed above.
