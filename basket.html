@@ -813,8 +813,8 @@ function renderRecipientPicker() {
 
     $('recipient-modal-body').innerHTML = `
         <div class="recipient-option${!currentIsRecipient ? ' selected' : ''}" onclick="chooseRecipientSelf()" style="${!currentIsRecipient ? 'border-color:var(--primary); background:#f7faff;' : ''}">
-            <strong>Just for me</strong>
-            <span>Choose the address you're delivering to yourself at checkout.</span>
+            <strong>Saved Addresses</strong>
+            <span>Choose from saved addresses.</span>
         </div>
         ${savedSectionHtml}
         <button type="button" class="btn btn-secondary" style="width:100%;" onclick="showRecipientAddForm()">+ Add a new address</button>
