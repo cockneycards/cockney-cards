@@ -340,6 +340,7 @@ function groupItemsByDestination(items) {
 // Returns { parcels: [{ label, amountPence }], totalPence }.
 function estimatePostage(items, { isPromoValid = false } = {}) {
     const groups = groupItemsByDestination(items);
+    if (groups.size > 1) return null;
     const parcels = [];
     let totalPence = 0;
     let parcelNumber = 0;
@@ -427,8 +428,6 @@ function basketSubtotal(items) {
 // customer already has free delivery everywhere.
 function basketFreeDeliveryNudge(items) {
     const groups = groupItemsByDestination(items);
-    if (groups.size > 1) return null;
-
     let best = null;
 
     for (const groupItems of groups.values()) {
@@ -670,7 +669,7 @@ function renderDeliveryLine(item) {
     const selfAddress = getChosenSelfAddress();
     const selfName = selfAddress?.name;
     const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : (selfName ? `Sending to: ${selfName}` : 'Sending to');
-    const actionText = (wantsRecipient || selfName) ? 'Change' : 'Select Recipient';
+    const actionText = wantsRecipient ? 'Change Recipient' : (selfName ? 'Change Home Address' : 'Select Recipient');
     return `
         <p class="item-delivery">
             ${label}
@@ -913,13 +912,13 @@ function renderRecipientPicker() {
         : `<p style="font-size:12px; color:#888; margin:0 0 10px;"><a href="account.html" style="color:var(--primary);">Log in</a> to pick from saved addresses.</p>`;
 
     $('recipient-modal-body').innerHTML = `
-        <p class="recipient-section-title">Saved Addresses</p>
-        <p class="recipient-section-sub">Choose from saved addresses.</p>
+        <p class="recipient-section-title">Send to Home</p>
+        <p class="recipient-section-sub">Choose home address.</p>
         ${selfSectionHtml}
         <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0; margin-bottom:20px;" onclick="recipientPickerMode='addSelf'; renderRecipientPicker();">+ Add a new address</button>
 
-        <p class="recipient-section-title recipient-section-divider">Send to someone else</p>
-        <p class="recipient-section-sub">Pick a saved address, or add a new one.</p>
+        <p class="recipient-section-title recipient-section-divider">Send to Recipient</p>
+        <p class="recipient-section-sub">Choose a saved recipient address or add a new one.</p>
         ${savedRecipientSectionHtml}
         <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0;" onclick="recipientPickerMode='addRecipient'; renderRecipientPicker();">+ Add a new address</button>
     `;
