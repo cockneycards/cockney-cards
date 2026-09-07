@@ -50,6 +50,29 @@ export async function onRequestPost(context) {
 
         const orderId = crypto.randomUUID();
 
+        // The address the customer picked from their saved addresses on
+        // basket.html for any "self" delivery item(s), if any — same
+        // shape as a recipient address, plus a user-facing label. When
+        // present, this is what's actually used (see selfAddress usage
+        // below and in stripe-webhook.js) instead of asking Stripe to
+        // collect one, which is what was previously letting Stripe/Link
+        // silently autofill the wrong address on a mixed-destination
+        // basket. Null for guests or anyone who hasn't saved an address —
+        // those orders fall back to Stripe's own shipping_address_collection,
+        // unchanged from before.
+        const rawSelfAddress = data.selfAddress;
+        const hasSelfAddress = !!(rawSelfAddress && rawSelfAddress.name && rawSelfAddress.address1 && rawSelfAddress.city && rawSelfAddress.postcode);
+        const selfAddress = hasSelfAddress ? {
+            label: (rawSelfAddress.label || '').toString().slice(0, 100),
+            name: (rawSelfAddress.name || '').toString().slice(0, 200),
+            address1: (rawSelfAddress.address1 || '').toString().slice(0, 200),
+            address2: (rawSelfAddress.address2 || '').toString().slice(0, 200),
+            city: (rawSelfAddress.city || '').toString().slice(0, 200),
+            county: (rawSelfAddress.county || '').toString().slice(0, 200),
+            postcode: (rawSelfAddress.postcode || '').toString().slice(0, 50),
+            country: (rawSelfAddress.country || 'United Kingdom').toString().slice(0, 100),
+        } : null;
+
         // Basket priceValue is in POUNDS throughout (see editor.html /
         // editor-prints.html's addCurrentCardToBasket / addCurrentPrintToBasket)
         // — Stripe's unit_amount wants pence, converted per-item below.
@@ -104,19 +127,25 @@ export async function onRequestPost(context) {
         // PDFs need auto-cleanup, add an R2 Lifecycle rule on the
         // order-pdfs-r2 bucket itself (R2 > order-pdfs-r2 > Settings >
         // Object lifecycle rules) rather than relying on this call.
-        await env.ORDER_PDFS.put(orderId, JSON.stringify({ items }));
+        await env.ORDER_PDFS.put(orderId, JSON.stringify({ items, selfAddress }));
 
         const origin = new URL(request.url).origin;
 
         const params = new URLSearchParams();
         params.append('payment_method_types[]', 'card');
         params.append('mode', 'payment');
-        // Collect the customer's own address regardless of any per-item
-        // "send to recipient" choice — the order still needs to go
-        // *somewhere* when the customer picks "send to me" (a gap this
-        // didn't cover before), and it's harmless/useful to have even
-        // when every item is going straight to a recipient instead.
-        params.append('shipping_address_collection[allowed_countries][]', 'GB');
+        // Only ask Stripe to collect a shipping address when the customer
+        // DIDN'T already confirm one via a saved address on basket.html
+        // (see selfAddress above). Previously this ran unconditionally,
+        // which meant Stripe's own field — subject to Link's autofill —
+        // could silently override or duplicate a destination the basket
+        // had already worked out correctly, especially on a basket mixing
+        // a "self" item with a "recipient" item (see the two-address
+        // checkout bug). Guests and anyone without a saved address keep
+        // the exact old behaviour.
+        if (!selfAddress) {
+            params.append('shipping_address_collection[allowed_countries][]', 'GB');
+        }
         params.append('success_url', `${origin}/thankyou.html?session_id={CHECKOUT_SESSION_ID}`);
         params.append('cancel_url', `${origin}/basket.html?status=cancel`);
         // Deliberately NOT passing customer_email here — Stripe locks
