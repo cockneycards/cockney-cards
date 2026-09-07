@@ -242,6 +242,12 @@ let selectedSelfAddressId = null;
 // its own for a guest to fall back on the way Stripe's hosted Checkout
 // page used to provide.
 let guestSelfAddress = null;
+// A self address just entered in the "Who's this for?" form for a
+// LOGGED-IN customer — set immediately so this order can use it even if
+// saving it to the account (below) fails, is skipped (box left
+// unchecked), or /api/addresses is unavailable. Cleared once the address
+// is confirmed saved and selectable from savedAddresses instead.
+let adHocSelfAddress = null;
 
 async function loadSavedAddresses() {
     if (!ccIsLoggedIn()) { savedAddresses = []; return; }
@@ -571,7 +577,7 @@ function saveGuestSelfAddress() {
 function getChosenSelfAddress() {
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
     return loggedIn
-        ? (savedAddresses.find((a) => a.id === selectedSelfAddressId) || null)
+        ? (savedAddresses.find((a) => a.id === selectedSelfAddressId) || adHocSelfAddress)
         : guestSelfAddress;
 }
 
@@ -978,27 +984,39 @@ async function submitSelfAddress() {
     ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
 
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
-    if (loggedIn && $('rcpt-save')?.checked) {
-        try {
-            const label = $('rcpt-label').value.trim();
-            const res = await fetch('/api/addresses', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ccGetSession()}` },
-                body: JSON.stringify(Object.assign({ label }, address))
-            });
-            const data = await res.json().catch(() => null);
-            await loadSavedAddresses();
-            // Auto-select the address just added, so the customer doesn't
-            // have to separately choose it in the "Deliver to" block. Falls
-            // back to matching on the fields we just saved if the API
-            // doesn't hand back the new id directly.
-            const newId = data?.address?.id ?? data?.id ?? null;
-            const match = newId
-                ? savedAddresses.find((a) => a.id === newId)
-                : savedAddresses.find((a) => a.name === address.name && a.address1 === address.address1 && a.postcode === address.postcode);
-            if (match) selectedSelfAddressId = match.id;
-        } catch (err) {
-            console.error('Could not save address for next time:', err);
+    if (loggedIn) {
+        // Use it for this order right away — independent of whether saving
+        // it to the account below succeeds. Otherwise a failed or slow
+        // /api/addresses call (or the box being left unchecked) would leave
+        // the customer with an address that's saved on the item's delivery
+        // type but nothing selectable to actually check out with.
+        const label = $('rcpt-label').value.trim();
+        adHocSelfAddress = Object.assign({ label: label || 'Delivery address' }, address);
+
+        if ($('rcpt-save')?.checked) {
+            try {
+                const res = await fetch('/api/addresses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ccGetSession()}` },
+                    body: JSON.stringify(Object.assign({ label }, address))
+                });
+                const data = await res.json().catch(() => null);
+                await loadSavedAddresses();
+                // Auto-select the address just added, so the customer doesn't
+                // have to separately choose it in the "Deliver to" block. Falls
+                // back to matching on the fields we just saved if the API
+                // doesn't hand back the new id directly.
+                const newId = data?.address?.id ?? data?.id ?? null;
+                const match = newId
+                    ? savedAddresses.find((a) => a.id === newId)
+                    : savedAddresses.find((a) => a.name === address.name && a.address1 === address.address1 && a.postcode === address.postcode);
+                // Once it's confirmed saved and selectable, drop the ad-hoc
+                // copy in favour of the real saved address.
+                if (match) { selectedSelfAddressId = match.id; adHocSelfAddress = null; }
+            } catch (err) {
+                console.error('Could not save address for next time:', err);
+                // adHocSelfAddress (set above) still lets this order proceed.
+            }
         }
     } else {
         guestSelfAddress = Object.assign({ label: 'Delivery address' }, address);
@@ -1020,6 +1038,7 @@ function chooseRecipientSavedAddress(addressId) {
         envelopeMode: 'direct'
     });
     closeRecipientPicker();
+    renderBasket();
 }
 
 async function submitRecipientAddress() {
@@ -1062,6 +1081,7 @@ async function submitRecipientAddress() {
     }
 
     closeRecipientPicker();
+    renderBasket();
 }
 
 function changeQty(id, value) {
