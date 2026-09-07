@@ -210,6 +210,15 @@
         writeCart(readCart().map((i) => (i.id === id ? Object.assign({}, i, { quantity: qty }) : i)));
     }
 
+    // Sets which delivery a line item uses — { type: 'self' } or
+    // { type: 'recipient', recipient: {...} }. This is now the ONLY place
+    // an item's delivery gets set (the editor always adds items as
+    // 'self' — see editor.html/editor-prints.html), via the "Sending to"
+    // picker on basket.html.
+    function updateItemDelivery(id, delivery) {
+        writeCart(readCart().map((i) => (i.id === id ? Object.assign({}, i, { delivery }) : i)));
+    }
+
     async function clearCart() {
         writeCart([]);
         await clearAllPdfs();
@@ -289,7 +298,7 @@
 
     window.ccCart = {
         getCart, getCartWithPdfs, getCartCount, getCartTotal,
-        addToCart, removeFromCart, updateCartQuantity, clearCart,
+        addToCart, removeFromCart, updateCartQuantity, updateItemDelivery, clearCart,
         getItemPreviews, formatGBP, updateCartBadge
     };
 })();
