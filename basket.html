@@ -79,6 +79,23 @@
     .preview-unavailable { font-size: 13px; color: #999; padding: 40px 20px; }
     .preview-modal-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); font-size: 11px; color: #999; text-align: center; }
 
+    .item-delivery { font-size: 12px; color: #666; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .recipient-link { font-size: 12px; color: var(--primary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+    .recipient-link:hover { color: #0d5bc4; }
+
+    .recipient-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    .recipient-overlay.open { display: flex; }
+    .recipient-modal { background: white; border-radius: 10px; max-width: 440px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+    .recipient-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+    .recipient-modal-header h3 { margin: 0; font-size: 15px; font-weight: bold; }
+    .recipient-modal-body { padding: 16px 20px 20px; overflow-y: auto; }
+    .recipient-option { border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; font-size: 13px; transition: border-color 0.15s, background 0.15s; }
+    .recipient-option:hover { border-color: var(--primary); background: #f7faff; }
+    .recipient-option strong { display: block; margin-bottom: 3px; }
+    .recipient-option span { color: #777; font-size: 12px; line-height: 1.5; }
+    .recipient-form input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; box-sizing: border-box; font-family: var(--font-family); margin-bottom: 10px; }
+    .recipient-form label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #555; margin-bottom: 12px; }
+
     footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
     .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
     .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
@@ -136,6 +153,16 @@
         <div class="preview-tabs" id="preview-tabs"></div>
         <div class="preview-image-wrap" id="preview-image-wrap"></div>
         <div class="preview-modal-footer">Please check spelling and layout carefully — this is exactly how your card will print.</div>
+    </div>
+</div>
+
+<div class="recipient-overlay" id="recipient-overlay" onclick="if(event.target===this) closeRecipientPicker();">
+    <div class="recipient-modal">
+        <div class="recipient-modal-header">
+            <h3>Who's this for?</h3>
+            <button class="preview-close" onclick="closeRecipientPicker()">&times;</button>
+        </div>
+        <div class="recipient-modal-body" id="recipient-modal-body"></div>
     </div>
 </div>
 
@@ -236,7 +263,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadSavedAddresses();
 });
 window.addEventListener('cc-cart-updated', renderBasket);
-window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview(); });
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closePreview(); closeRecipientPicker(); } });
 
 // ---------------------------------------------------------------------
 // Postage estimate — mirrors functions/postage.js + the grouping/waiver
@@ -544,6 +571,21 @@ function renderBasket() {
     `;
 }
 
+// Per-item "Sending to" line, shown under the title in the basket list —
+// this is the only place delivery is set now (the editor always adds
+// items as 'self'; see editor.html/editor-prints.html).
+function renderDeliveryLine(item) {
+    const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to: Me';
+    const actionText = wantsRecipient ? 'Change' : 'Select Recipient';
+    return `
+        <p class="item-delivery">
+            ${label}
+            <button type="button" class="recipient-link" onclick="openRecipientPicker('${item.id}')">${actionText}</button>
+        </p>
+    `;
+}
+
 function renderItem(item) {
     const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
     const isDiscountedCard = item.kind === 'card' && clubIsMember && hasPrice;
@@ -563,6 +605,7 @@ function renderItem(item) {
             <div class="item-info">
                 <p class="item-title">${item.title || 'Personalised item'}</p>
                 <p class="item-options">${item.optionsSummary || ''}</p>
+                ${renderDeliveryLine(item)}
                 <p class="item-price">${priceHtml} each</p>
             </div>
             <div class="item-actions">
@@ -666,6 +709,155 @@ function renderPreviewImage(images) {
 function closePreview() {
     $('preview-overlay').classList.remove('open');
     document.body.style.overflow = '';
+}
+
+// ---------------------------------------------------------------------
+// Per-item recipient picker — "Sending to: ... [Select Recipient]" on
+// each basket line opens this. Three things it can do for the item
+// currently open (recipientPickerItemId):
+//   - "Just for me" -> delivery = { type: 'self' }
+//   - pick a saved address -> delivery = { type: 'recipient', recipient }
+//   - add a brand-new address ad hoc -> same, optionally POSTed to
+//     /api/addresses first (logged-in only) so it's saved for next time.
+// A guest can still add a one-off recipient address here (no login
+// required) — same as the old per-item delivery form in the editor used
+// to allow — they just don't get the "save for next time" option.
+// ---------------------------------------------------------------------
+let recipientPickerItemId = null;
+let recipientAddNewMode = false;
+
+function openRecipientPicker(itemId) {
+    recipientPickerItemId = itemId;
+    recipientAddNewMode = false;
+    $('recipient-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderRecipientPicker();
+}
+
+function closeRecipientPicker() {
+    $('recipient-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    recipientPickerItemId = null;
+}
+
+function renderRecipientPicker() {
+    if (recipientAddNewMode) {
+        renderRecipientAddForm();
+        return;
+    }
+
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    const item = ccCart.getCart().find((i) => i.id === recipientPickerItemId);
+    const currentIsRecipient = item?.delivery?.type === 'recipient';
+
+    const savedOptionsHtml = savedAddresses.map((a) => `
+        <div class="recipient-option" onclick="chooseRecipientSavedAddress('${a.id}')">
+            <strong>${a.label || 'Address'}</strong>
+            <span>${a.name}<br>${a.address1}, ${a.postcode}</span>
+        </div>
+    `).join('');
+
+    const savedSectionHtml = loggedIn
+        ? (savedAddresses.length ? savedOptionsHtml : `<p style="font-size:12px; color:#888; margin:0 0 10px;">No saved addresses yet.</p>`)
+        : `<p style="font-size:12px; color:#888; margin:0 0 10px;"><a href="account.html" style="color:var(--primary);">Log in</a> to pick from saved addresses.</p>`;
+
+    $('recipient-modal-body').innerHTML = `
+        <div class="recipient-option${!currentIsRecipient ? ' selected' : ''}" onclick="chooseRecipientSelf()" style="${!currentIsRecipient ? 'border-color:var(--primary); background:#f7faff;' : ''}">
+            <strong>Just for me</strong>
+            <span>Choose the address you're delivering to yourself at checkout.</span>
+        </div>
+        ${savedSectionHtml}
+        <button type="button" class="btn btn-secondary" style="width:100%;" onclick="showRecipientAddForm()">+ Add a new address</button>
+    `;
+}
+
+function showRecipientAddForm() {
+    recipientAddNewMode = true;
+    renderRecipientPicker();
+}
+
+function renderRecipientAddForm() {
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    $('recipient-modal-body').innerHTML = `
+        <div class="recipient-form">
+            <input type="text" id="rcpt-label" placeholder="Label (e.g. Mum's house) — optional">
+            <input type="text" id="rcpt-name" placeholder="Recipient's full name">
+            <input type="text" id="rcpt-address1" placeholder="Address line 1">
+            <input type="text" id="rcpt-address2" placeholder="Address line 2 (optional)">
+            <input type="text" id="rcpt-city" placeholder="Town / City">
+            <input type="text" id="rcpt-county" placeholder="County (optional)">
+            <input type="text" id="rcpt-postcode" placeholder="Postcode">
+            <input type="text" id="rcpt-country" placeholder="Country" value="United Kingdom">
+            ${loggedIn
+                ? `<label><input type="checkbox" id="rcpt-save" checked> Save this address for next time</label>`
+                : `<p style="font-size:11px; color:#999; margin:-4px 0 12px;"><a href="account.html" style="color:var(--primary);">Log in</a> to save this address for next time.</p>`}
+            <p id="rcpt-status" style="font-size:12px; color:#c0392b; margin:0 0 10px; display:none;"></p>
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="btn" style="margin-top:0;" onclick="submitRecipientAddress()">Use this address</button>
+                <button type="button" class="btn btn-secondary" style="margin-top:0;" onclick="recipientAddNewMode = false; renderRecipientPicker();">Cancel</button>
+            </div>
+        </div>
+    `;
+}
+
+function chooseRecipientSelf() {
+    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
+    closeRecipientPicker();
+}
+
+function chooseRecipientSavedAddress(addressId) {
+    const a = savedAddresses.find((x) => x.id === addressId);
+    if (!a) return;
+    ccCart.updateItemDelivery(recipientPickerItemId, {
+        type: 'recipient',
+        recipient: {
+            name: a.name, address1: a.address1, address2: a.address2,
+            city: a.city, county: a.county, postcode: a.postcode, country: a.country,
+        }
+    });
+    closeRecipientPicker();
+}
+
+async function submitRecipientAddress() {
+    const statusEl = $('rcpt-status');
+    statusEl.style.display = 'none';
+
+    const recipient = {
+        name: $('rcpt-name').value.trim(),
+        address1: $('rcpt-address1').value.trim(),
+        address2: $('rcpt-address2').value.trim(),
+        city: $('rcpt-city').value.trim(),
+        county: $('rcpt-county').value.trim(),
+        postcode: $('rcpt-postcode').value.trim(),
+        country: $('rcpt-country').value.trim() || 'United Kingdom',
+    };
+
+    if (!recipient.name || !recipient.address1 || !recipient.city || !recipient.postcode) {
+        statusEl.textContent = 'Please fill in at least name, address, city, and postcode.';
+        statusEl.style.display = 'block';
+        return;
+    }
+
+    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'recipient', recipient });
+
+    // Optionally save it to the account for next time — never blocks
+    // using the address on this item, which is already applied above
+    // regardless of whether this save succeeds.
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    if (loggedIn && $('rcpt-save')?.checked) {
+        try {
+            await fetch('/api/addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ccGetSession()}` },
+                body: JSON.stringify(Object.assign({ label: $('rcpt-label').value.trim() }, recipient))
+            });
+            loadSavedAddresses();
+        } catch (err) {
+            console.error('Could not save address for next time:', err);
+        }
+    }
+
+    closeRecipientPicker();
 }
 
 function changeQty(id, value) {
