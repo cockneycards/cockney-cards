@@ -89,7 +89,8 @@
     .preview-unavailable { font-size: 13px; color: #999; padding: 40px 20px; }
     .preview-modal-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); font-size: 11px; color: #999; text-align: center; }
 
-    .item-delivery { font-size: 12px; color: #666; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .item-delivery { font-size: 12px; color: #666; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .item-delivery-address { font-size: 11px; color: #888; line-height: 1.5; margin: 0 0 8px; }
     .recipient-link { font-size: 12px; color: var(--primary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
     .recipient-link:hover { color: #0d5bc4; }
 
@@ -708,12 +709,27 @@ function renderDeliveryLine(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
     const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to Home';
     const actionText = wantsRecipient ? 'Change Recipient' : 'Select Recipient';
+    const addressHtml = wantsRecipient ? renderRecipientAddressBlock(item.delivery.recipient) : '';
     return `
         <p class="item-delivery">
             ${label}
             <button type="button" class="recipient-link" onclick="openRecipientPicker('${item.id}')">${actionText}</button>
         </p>
+        ${addressHtml}
     `;
+}
+
+// The address lines shown under "Sending to: <name>" for a card sent to
+// a specific recipient — same fields entered in the recipient form
+// (submitRecipientAddress), each item keeping its own since delivery is
+// per-item, not per-basket.
+function renderRecipientAddressBlock(recipient) {
+    if (!recipient) return '';
+    const lines = [recipient.address1, recipient.address2, [recipient.city, recipient.county].filter(Boolean).join(', '), recipient.postcode, recipient.country]
+        .filter(Boolean)
+        .map((l) => l.replace(/</g, '&lt;'))
+        .join('<br>');
+    return `<p class="item-delivery-address">${lines}</p>`;
 }
 
 // Only relevant once an item has a specific recipient address — asks
