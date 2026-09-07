@@ -249,6 +249,40 @@ let guestSelfAddress = null;
 // is confirmed saved and selectable from savedAddresses instead.
 let adHocSelfAddress = null;
 
+// guestSelfAddress/selectedSelfAddressId/adHocSelfAddress above are plain
+// in-memory variables, so a full page navigation (e.g. going to
+// checkout.html and back via the basket icon) used to wipe them and
+// leave the "Deliver to" block empty again. Persisting them to
+// sessionStorage — restored on load, saved every time renderBasket()
+// runs — makes them survive that round trip for the rest of the tab's
+// session, the same way the cart items themselves already do via cart.js.
+const SELF_ADDRESS_STORAGE_KEY = 'cc_self_address_state';
+
+function persistSelfAddressState() {
+    try {
+        sessionStorage.setItem(SELF_ADDRESS_STORAGE_KEY, JSON.stringify({
+            guestSelfAddress,
+            selectedSelfAddressId,
+            adHocSelfAddress,
+        }));
+    } catch (err) {
+        console.error('Could not persist delivery address:', err);
+    }
+}
+
+function restoreSelfAddressState() {
+    try {
+        const raw = sessionStorage.getItem(SELF_ADDRESS_STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        guestSelfAddress = saved.guestSelfAddress || null;
+        selectedSelfAddressId = saved.selectedSelfAddressId || null;
+        adHocSelfAddress = saved.adHocSelfAddress || null;
+    } catch (err) {
+        console.error('Could not restore delivery address:', err);
+    }
+}
+
 async function loadSavedAddresses() {
     if (!ccIsLoggedIn()) { savedAddresses = []; return; }
     try {
@@ -284,6 +318,7 @@ async function refreshMembershipStatus() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    restoreSelfAddressState();
     renderBasket();
     refreshMembershipStatus();
     loadSavedAddresses();
@@ -549,7 +584,7 @@ function renderDeliverToBlock() {
     return `
         <div style="${wrapStyle}">
             ${labelHtml}
-            <select id="self-address-select" onchange="selectedSelfAddressId = this.value;" style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px; font-size:13px; box-sizing:border-box; font-family:var(--font-family);">
+            <select id="self-address-select" onchange="selectedSelfAddressId = this.value; persistSelfAddressState();" style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px; font-size:13px; box-sizing:border-box; font-family:var(--font-family);">
                 ${options}
             </select>
             <a href="account.html" style="font-size:11px; color:var(--primary); display:inline-block; margin-top:6px;">Manage addresses</a>
@@ -587,6 +622,7 @@ function getChosenSelfAddress() {
 }
 
 function renderBasket() {
+    persistSelfAddressState();
     const items = ccCart.getCart();
     const content = $('basket-content');
 
