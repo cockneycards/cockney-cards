@@ -427,6 +427,8 @@ function basketSubtotal(items) {
 // customer already has free delivery everywhere.
 function basketFreeDeliveryNudge(items) {
     const groups = groupItemsByDestination(items);
+    if (groups.size > 1) return null;
+
     let best = null;
 
     for (const groupItems of groups.values()) {
@@ -602,6 +604,7 @@ function renderBasket() {
     const postage = estimatePostage(items, { isPromoValid: promoIsValid });
     const postagePounds = postage.totalPence / 100;
     const grandTotal = subtotal + postagePounds;
+    const freeDeliveryNudge = basketFreeDeliveryNudge(items);
 
     const postageRowsHtml = postage.parcels.map((p) => `
         <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
@@ -666,10 +669,8 @@ function renderDeliveryLine(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
     const selfAddress = getChosenSelfAddress();
     const selfName = selfAddress?.name;
-    const label = wantsRecipient
-        ? `Sending to: ${item.delivery.recipient.name || 'recipient'}`
-        : (selfName ? `Sending to: ${selfName}` : 'Sending to');
-    const actionText = wantsRecipient || selfName ? 'Change' : 'Select Recipient';
+    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : (selfName ? `Sending to: ${selfName}` : 'Sending to');
+    const actionText = (wantsRecipient || selfName) ? 'Change' : 'Select Recipient';
     return `
         <p class="item-delivery">
             ${label}
