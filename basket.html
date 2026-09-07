@@ -187,6 +187,33 @@ let promoFeedbackColor = '#c0392b';
 // itself server-side regardless.
 let clubIsMember = false;
 
+// Saved addresses for "self" delivery items (see account-api.js's
+// /api/addresses) — lets a logged-in customer pick a confirmed address
+// here instead of Stripe's own shipping_address_collection field, which
+// is what was letting Stripe/Link silently autofill the wrong address on
+// a basket with mixed self/recipient destinations. Empty for guests, or
+// before this has resolved.
+let savedAddresses = [];
+let selectedSelfAddressId = null;
+
+async function loadSavedAddresses() {
+    if (!ccIsLoggedIn()) { savedAddresses = []; return; }
+    try {
+        const res = await fetch('/api/addresses', {
+            headers: { Authorization: `Bearer ${ccGetSession()}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            savedAddresses = data.addresses || [];
+            const preselect = savedAddresses.find((a) => a.is_default) || savedAddresses[0];
+            if (preselect && !selectedSelfAddressId) selectedSelfAddressId = preselect.id;
+            renderBasket();
+        }
+    } catch (err) {
+        console.error('Could not load saved addresses:', err);
+    }
+}
+
 async function refreshMembershipStatus() {
     if (!ccIsLoggedIn()) return;
     try {
@@ -206,6 +233,7 @@ async function refreshMembershipStatus() {
 window.addEventListener('DOMContentLoaded', () => {
     renderBasket();
     refreshMembershipStatus();
+    loadSavedAddresses();
 });
 window.addEventListener('cc-cart-updated', renderBasket);
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePreview(); });
@@ -403,6 +431,49 @@ function basketFreeDeliveryNudge(items) {
     return best ? best.message : null;
 }
 
+// "Deliver to" picker — only shown when the basket has at least one
+// "self" delivery item (a "recipient" item already carries its own
+// address, set in the editor, and doesn't need this). Three states:
+// not logged in, logged in with no saved addresses, logged in with some.
+// The chosen id is read back out in goToCheckout().
+function renderDeliverToBlock() {
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    const wrapStyle = 'margin-bottom:15px; padding:12px; border:1px solid var(--border-color); border-radius:6px; font-size:12px; color:#666;';
+    const labelHtml = '<strong style="display:block; margin-bottom:6px; font-size:13px; color:#333;">Deliver to</strong>';
+
+    if (!loggedIn) {
+        return `
+            <div style="${wrapStyle}">
+                ${labelHtml}
+                <a href="account.html" style="color:var(--primary);">Log in</a> to use a saved address — otherwise you'll enter one on the payment page.
+            </div>
+        `;
+    }
+
+    if (!savedAddresses.length) {
+        return `
+            <div style="${wrapStyle}">
+                ${labelHtml}
+                No saved addresses yet. <a href="account.html" style="color:var(--primary);">Add one</a>, or you'll enter one on the payment page.
+            </div>
+        `;
+    }
+
+    const options = savedAddresses.map((a) => `
+        <option value="${a.id}" ${a.id === selectedSelfAddressId ? 'selected' : ''}>${a.label || 'Address'} — ${a.address1}, ${a.postcode}</option>
+    `).join('');
+
+    return `
+        <div style="${wrapStyle}">
+            ${labelHtml}
+            <select id="self-address-select" onchange="selectedSelfAddressId = this.value;" style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px; font-size:13px; box-sizing:border-box; font-family:var(--font-family);">
+                ${options}
+            </select>
+            <a href="account.html" style="font-size:11px; color:var(--primary); display:inline-block; margin-top:6px;">Manage addresses</a>
+        </div>
+    `;
+}
+
 function renderBasket() {
     const items = ccCart.getCart();
     const content = $('basket-content');
@@ -438,6 +509,11 @@ function renderBasket() {
         ? `<div class="free-delivery-nudge">🎁 ${freeDeliveryNudge}</div>`
         : '';
 
+    // A "recipient" item already has its address locked in from the
+    // editor — only a "self" item needs a "deliver to" chosen here.
+    const hasSelfItem = items.some((item) => item.delivery?.type !== 'recipient');
+    const deliverToHtml = hasSelfItem ? renderDeliverToBlock() : '';
+
     content.innerHTML = `
         <div class="basket-layout">
             <div class="basket-items">
@@ -445,6 +521,7 @@ function renderBasket() {
             </div>
             <div class="basket-summary">
                 ${freeDeliveryNudgeHtml}
+                ${deliverToHtml}
                 <div class="summary-row"><span>Items</span><span>${count}</span></div>
                 <div class="summary-row"><span>Subtotal</span><span>${ccCart.formatGBP(rawSubtotal)}</span></div>
                 ${clubSavingsRowHtml}
@@ -671,9 +748,27 @@ async function goToCheckout() {
         const items = await ccCart.getCartWithPdfs();
         const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
 
+        // The address the customer picked in the "Deliver to" block above,
+        // if any — sent once per order (not per item), same as how a
+        // recipient address is already attached per item. Server treats a
+        // missing/null value the same as before (falls back to collecting
+        // it on the Stripe page), so guests and customers with no saved
+        // addresses see no change in behaviour.
+        const chosenAddress = savedAddresses.find((a) => a.id === selectedSelfAddressId) || null;
+
         const checkoutData = {
             customerEmail: loggedIn ? ccGetEmail() : null,
             promoCode: $('promo-code-input')?.value || null,
+            selfAddress: chosenAddress ? {
+                label: chosenAddress.label,
+                name: chosenAddress.name,
+                address1: chosenAddress.address1,
+                address2: chosenAddress.address2,
+                city: chosenAddress.city,
+                county: chosenAddress.county,
+                postcode: chosenAddress.postcode,
+                country: chosenAddress.country,
+            } : null,
             items: items.map((item) => ({
                 kind: item.kind,
                 templateId: item.templateId,
