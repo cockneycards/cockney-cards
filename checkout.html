@@ -260,10 +260,20 @@ async function continueToPayment() {
             },
             body: JSON.stringify({ ...checkoutData, customerEmail: email }),
         });
-        const result = await res.json();
+
+        const rawBody = await res.text();
+        let result = {};
+        if (rawBody) {
+            try {
+                result = JSON.parse(rawBody);
+            } catch (parseErr) {
+                console.error('Non-JSON response from create-payment-intent-basket:', rawBody);
+                throw new Error(`Server returned an unexpected response (status ${res.status}). Please try again or contact support.`);
+            }
+        }
 
         if (!res.ok || !result.clientSecret) {
-            throw new Error(result.error || 'Could not start payment — please try again.');
+            throw new Error(result.error || `Could not start payment (status ${res.status}) — please try again.`);
         }
 
         orderId = result.orderId;
