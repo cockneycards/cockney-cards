@@ -30,7 +30,7 @@
     .basket-items { flex: 1; min-width: 0; }
     .basket-summary { width: 300px; flex-shrink: 0; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; box-sizing: border-box; position: sticky; top: 20px; }
 
-    .basket-item { display: flex; gap: 18px; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 18px; margin-bottom: 15px; align-items: center; }
+    .basket-item { display: flex; flex-wrap: wrap; gap: 18px; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 18px; margin-bottom: 15px; align-items: center; }
     .basket-item img { width: 90px; height: 90px; object-fit: contain; background: #fafafa; border: 1px solid #eee; border-radius: 4px; flex-shrink: 0; -webkit-user-drag: none; user-select: none; -webkit-touch-callout: none; }
     .item-info { flex: 1; min-width: 0; }
     .item-title { font-size: 14px; font-weight: bold; margin: 0 0 4px; color: #111; }
@@ -44,6 +44,16 @@
     .qty-control input::-webkit-outer-spin-button, .qty-control input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .remove-link { font-size: 12px; color: #999; background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
     .remove-link:hover { color: #c0392b; }
+
+    .item-envelope { flex: 1 1 100%; margin-top: 4px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
+    .item-envelope-label { font-size: 12px; font-weight: bold; color: #333; margin: 0 0 8px; }
+    .item-envelope-options { display: flex; gap: 10px; }
+    .envelope-option { flex: 1; text-align: left; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 12px; background: white; cursor: pointer; font-family: var(--font-family); transition: border-color 0.15s, background 0.15s; }
+    .envelope-option strong { display: block; font-size: 12px; margin-bottom: 3px; color: #111; }
+    .envelope-option span { display: block; font-size: 11px; color: #777; line-height: 1.4; }
+    .envelope-option:hover { border-color: var(--primary); }
+    .envelope-option.selected { border-color: var(--primary); background: #f7faff; }
+    @media (max-width: 700px) { .item-envelope-options { flex-direction: column; } }
 
     .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 10px; }
     .summary-row.total { font-size: 16px; font-weight: bold; color: #111; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
@@ -93,6 +103,10 @@
     .recipient-option:hover { border-color: var(--primary); background: #f7faff; }
     .recipient-option strong { display: block; margin-bottom: 3px; }
     .recipient-option span { color: #777; font-size: 12px; line-height: 1.5; }
+    .recipient-option.selected { border-color: var(--primary); background: #f7faff; }
+    .recipient-section-title { font-size: 13px; font-weight: bold; margin: 0 0 2px; color: #111; }
+    .recipient-section-sub { font-size: 12px; color: #777; margin: 0 0 10px; }
+    .recipient-section-divider { border-top: 1px solid var(--border-color); padding-top: 18px; margin-top: 4px; }
     .recipient-form input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; box-sizing: border-box; font-family: var(--font-family); margin-bottom: 10px; }
     .recipient-form label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #555; margin-bottom: 12px; }
 
@@ -551,6 +565,16 @@ function saveGuestSelfAddress() {
     renderBasket();
 }
 
+// The address the customer picked (logged in) or typed in (guest) for
+// their "self" items — shared by renderBasket() (to gate the Checkout
+// button) and goToCheckout() (to actually send it).
+function getChosenSelfAddress() {
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    return loggedIn
+        ? (savedAddresses.find((a) => a.id === selectedSelfAddressId) || null)
+        : guestSelfAddress;
+}
+
 function renderBasket() {
     const items = ccCart.getCart();
     const content = $('basket-content');
@@ -591,6 +615,14 @@ function renderBasket() {
     const hasSelfItem = items.some((item) => item.delivery?.type !== 'recipient');
     const deliverToHtml = hasSelfItem ? renderDeliverToBlock() : '';
 
+    // Checkout is disabled until every "self" item has a resolved
+    // address — avoids the old flow where clicking Checkout was the
+    // first place this got checked, and just bounced back with an error.
+    const needsAddress = hasSelfItem && !getChosenSelfAddress();
+    const missingAddressHtml = needsAddress
+        ? `<p style="font-size:12px; color:#c0392b; margin:8px 0 0;">Please add a delivery address above to continue.</p>`
+        : '';
+
     content.innerHTML = `
         <div class="basket-layout">
             <div class="basket-items">
@@ -613,7 +645,8 @@ function renderBasket() {
                     </div>
                     <p id="promo-feedback" style="font-size:12px; margin:8px 0 0; color:${promoFeedbackColor}; ${promoFeedbackText ? '' : 'display:none;'}">${promoFeedbackText}</p>
                 </div>
-                <button class="btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
+                <button class="btn" id="checkout-btn" onclick="goToCheckout()" ${needsAddress ? 'disabled' : ''}>Checkout</button>
+                ${missingAddressHtml}
                 <button class="btn btn-secondary" onclick="window.location.href='shop-cards.html'">Keep Shopping</button>
                 <p id="checkout-error"></p>
             </div>
@@ -634,6 +667,39 @@ function renderDeliveryLine(item) {
             <button type="button" class="recipient-link" onclick="openRecipientPicker('${item.id}')">${actionText}</button>
         </p>
     `;
+}
+
+// Only relevant once an item has a specific recipient address — asks
+// whether we seal it and post it straight to that address, or send it
+// (with a spare envelope) to the customer's own home so they can pass
+// it on themselves. Defaults to "direct" the same way a new recipient
+// delivery is created (see chooseRecipientSavedAddress/submitRecipientAddress).
+function renderEnvelopeSection(item) {
+    const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+    if (!wantsRecipient) return '';
+    const mode = item.delivery.envelopeMode || 'direct';
+    return `
+        <div class="item-envelope">
+            <p class="item-envelope-label">Envelope</p>
+            <div class="item-envelope-options">
+                <button type="button" class="envelope-option${mode === 'home' ? ' selected' : ''}" onclick="setItemEnvelopeMode('${item.id}', 'home')">
+                    <strong>Send to Home</strong>
+                    <span>We'll send a spare envelope for you to send on.</span>
+                </button>
+                <button type="button" class="envelope-option${mode === 'direct' ? ' selected' : ''}" onclick="setItemEnvelopeMode('${item.id}', 'direct')">
+                    <strong>Send Directly to Recipient</strong>
+                    <span>We'll seal the card and deliver it for you.</span>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function setItemEnvelopeMode(itemId, mode) {
+    const item = ccCart.getCart().find((i) => i.id === itemId);
+    if (!item || !item.delivery) return;
+    ccCart.updateItemDelivery(itemId, Object.assign({}, item.delivery, { envelopeMode: mode }));
+    renderBasket();
 }
 
 function renderItem(item) {
@@ -667,6 +733,7 @@ function renderItem(item) {
                 ${hasPreview ? `<button class="preview-link" onclick="openPreview('${item.id}')">Preview card</button>` : ''}
                 <button class="remove-link" onclick="removeItem('${item.id}')">Remove</button>
             </div>
+            ${renderEnvelopeSection(item)}
         </div>
     `;
 }
@@ -763,22 +830,26 @@ function closePreview() {
 
 // ---------------------------------------------------------------------
 // Per-item recipient picker — "Sending to: ... [Select Recipient]" on
-// each basket line opens this. Three things it can do for the item
-// currently open (recipientPickerItemId):
-//   - "Just for me" -> delivery = { type: 'self' }
-//   - pick a saved address -> delivery = { type: 'recipient', recipient }
-//   - add a brand-new address ad hoc -> same, optionally POSTed to
-//     /api/addresses first (logged-in only) so it's saved for next time.
-// A guest can still add a one-off recipient address here (no login
-// required) — same as the old per-item delivery form in the editor used
-// to allow — they just don't get the "save for next time" option.
+// each basket line opens this. Two sections:
+//   - "Saved Addresses" -> resolves the SHARED self/"deliver to me"
+//     address (delivery = { type: 'self' }), same address used by every
+//     other "self" item and the "Deliver to" block in the sidebar.
+//     Picking one here sets selectedSelfAddressId directly, so the
+//     customer never has to separately visit the sidebar to finish this.
+//   - "Send to someone else" -> a per-item recipient address
+//     (delivery = { type: 'recipient', recipient }).
+// Both sections fall back to "+ Add a new address" if the account has
+// none saved (or the customer is a guest) — optionally POSTed to
+// /api/addresses first (logged-in only) so it's saved for next time.
+// A guest can still add a one-off address here (no login required) —
+// they just don't get the "save for next time" option.
 // ---------------------------------------------------------------------
 let recipientPickerItemId = null;
-let recipientAddNewMode = false;
+let recipientPickerMode = 'menu'; // 'menu' | 'addSelf' | 'addRecipient'
 
 function openRecipientPicker(itemId) {
     recipientPickerItemId = itemId;
-    recipientAddNewMode = false;
+    recipientPickerMode = 'menu';
     $('recipient-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
     renderRecipientPicker();
@@ -788,50 +859,71 @@ function closeRecipientPicker() {
     $('recipient-overlay').classList.remove('open');
     document.body.style.overflow = '';
     recipientPickerItemId = null;
+    recipientPickerMode = 'menu';
 }
 
 function renderRecipientPicker() {
-    if (recipientAddNewMode) {
-        renderRecipientAddForm();
-        return;
-    }
+    if (recipientPickerMode === 'addSelf') { renderAddressForm('addSelf'); return; }
+    if (recipientPickerMode === 'addRecipient') { renderAddressForm('addRecipient'); return; }
 
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
     const item = ccCart.getCart().find((i) => i.id === recipientPickerItemId);
-    const currentIsRecipient = item?.delivery?.type === 'recipient';
+    const currentIsSelf = item?.delivery?.type !== 'recipient';
 
-    const savedOptionsHtml = savedAddresses.map((a) => `
+    // "Saved Addresses" — picking one resolves the shared self address.
+    let selfSectionHtml;
+    if (loggedIn && savedAddresses.length) {
+        selfSectionHtml = savedAddresses.map((a) => `
+            <div class="recipient-option${currentIsSelf && a.id === selectedSelfAddressId ? ' selected' : ''}" onclick="chooseSelfSavedAddress('${a.id}')">
+                <strong>${a.label || 'Address'}</strong>
+                <span>${a.name}<br>${a.address1}, ${a.postcode}</span>
+            </div>
+        `).join('');
+    } else if (!loggedIn && guestSelfAddress) {
+        selfSectionHtml = `
+            <div class="recipient-option${currentIsSelf ? ' selected' : ''}" onclick="chooseSelfGuestAddress()">
+                <strong>${guestSelfAddress.label || 'Your address'}</strong>
+                <span>${guestSelfAddress.name}<br>${guestSelfAddress.address1}, ${guestSelfAddress.postcode}</span>
+            </div>
+        `;
+    } else {
+        selfSectionHtml = `<p style="font-size:12px; color:#888; margin:0 0 10px;">No saved addresses yet.</p>`;
+    }
+
+    // "Send to someone else" — a one-off address baked onto this item.
+    const savedRecipientOptionsHtml = savedAddresses.map((a) => `
         <div class="recipient-option" onclick="chooseRecipientSavedAddress('${a.id}')">
             <strong>${a.label || 'Address'}</strong>
             <span>${a.name}<br>${a.address1}, ${a.postcode}</span>
         </div>
     `).join('');
 
-    const savedSectionHtml = loggedIn
-        ? (savedAddresses.length ? savedOptionsHtml : `<p style="font-size:12px; color:#888; margin:0 0 10px;">No saved addresses yet.</p>`)
+    const savedRecipientSectionHtml = loggedIn
+        ? (savedAddresses.length ? savedRecipientOptionsHtml : `<p style="font-size:12px; color:#888; margin:0 0 10px;">No saved addresses yet.</p>`)
         : `<p style="font-size:12px; color:#888; margin:0 0 10px;"><a href="account.html" style="color:var(--primary);">Log in</a> to pick from saved addresses.</p>`;
 
     $('recipient-modal-body').innerHTML = `
-        <div class="recipient-option${!currentIsRecipient ? ' selected' : ''}" onclick="chooseRecipientSelf()" style="${!currentIsRecipient ? 'border-color:var(--primary); background:#f7faff;' : ''}">
-            <strong>Saved Addresses</strong>
-            <span>Choose from saved addresses.</span>
-        </div>
-        ${savedSectionHtml}
-        <button type="button" class="btn btn-secondary" style="width:100%;" onclick="showRecipientAddForm()">+ Add a new address</button>
+        <p class="recipient-section-title">Saved Addresses</p>
+        <p class="recipient-section-sub">Choose from saved addresses.</p>
+        ${selfSectionHtml}
+        <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0; margin-bottom:20px;" onclick="recipientPickerMode='addSelf'; renderRecipientPicker();">+ Add a new address</button>
+
+        <p class="recipient-section-title recipient-section-divider">Send to someone else</p>
+        <p class="recipient-section-sub">Pick a saved address, or add a new one.</p>
+        ${savedRecipientSectionHtml}
+        <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0;" onclick="recipientPickerMode='addRecipient'; renderRecipientPicker();">+ Add a new address</button>
     `;
 }
 
-function showRecipientAddForm() {
-    recipientAddNewMode = true;
-    renderRecipientPicker();
-}
-
-function renderRecipientAddForm() {
+// Shared add-address form for both sections above — mode picks the
+// wording and which submit handler runs.
+function renderAddressForm(mode) {
+    const isRecipient = mode === 'addRecipient';
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
     $('recipient-modal-body').innerHTML = `
         <div class="recipient-form">
-            <input type="text" id="rcpt-label" placeholder="Label (e.g. Mum's house) — optional">
-            <input type="text" id="rcpt-name" placeholder="Recipient's full name">
+            <input type="text" id="rcpt-label" placeholder="Label (e.g. ${isRecipient ? "Mum's house" : 'Home'}) — optional">
+            <input type="text" id="rcpt-name" placeholder="${isRecipient ? "Recipient's full name" : 'Full name'}">
             <input type="text" id="rcpt-address1" placeholder="Address line 1">
             <input type="text" id="rcpt-address2" placeholder="Address line 2 (optional)">
             <input type="text" id="rcpt-city" placeholder="Town / City">
@@ -843,16 +935,77 @@ function renderRecipientAddForm() {
                 : `<p style="font-size:11px; color:#999; margin:-4px 0 12px;"><a href="account.html" style="color:var(--primary);">Log in</a> to save this address for next time.</p>`}
             <p id="rcpt-status" style="font-size:12px; color:#c0392b; margin:0 0 10px; display:none;"></p>
             <div style="display:flex; gap:10px;">
-                <button type="button" class="btn" style="margin-top:0;" onclick="submitRecipientAddress()">Use this address</button>
-                <button type="button" class="btn btn-secondary" style="margin-top:0;" onclick="recipientAddNewMode = false; renderRecipientPicker();">Cancel</button>
+                <button type="button" class="btn" style="margin-top:0;" onclick="${isRecipient ? 'submitRecipientAddress()' : 'submitSelfAddress()'}">Use this address</button>
+                <button type="button" class="btn btn-secondary" style="margin-top:0;" onclick="recipientPickerMode='menu'; renderRecipientPicker();">Cancel</button>
             </div>
         </div>
     `;
 }
 
-function chooseRecipientSelf() {
+function chooseSelfSavedAddress(addressId) {
+    selectedSelfAddressId = addressId;
     ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
     closeRecipientPicker();
+    renderBasket();
+}
+
+function chooseSelfGuestAddress() {
+    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
+    closeRecipientPicker();
+    renderBasket();
+}
+
+async function submitSelfAddress() {
+    const statusEl = $('rcpt-status');
+    statusEl.style.display = 'none';
+
+    const address = {
+        name: $('rcpt-name').value.trim(),
+        address1: $('rcpt-address1').value.trim(),
+        address2: $('rcpt-address2').value.trim(),
+        city: $('rcpt-city').value.trim(),
+        county: $('rcpt-county').value.trim(),
+        postcode: $('rcpt-postcode').value.trim(),
+        country: $('rcpt-country').value.trim() || 'United Kingdom',
+    };
+
+    if (!address.name || !address.address1 || !address.city || !address.postcode) {
+        statusEl.textContent = 'Please fill in at least name, address, city, and postcode.';
+        statusEl.style.display = 'block';
+        return;
+    }
+
+    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
+
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    if (loggedIn && $('rcpt-save')?.checked) {
+        try {
+            const label = $('rcpt-label').value.trim();
+            const res = await fetch('/api/addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ccGetSession()}` },
+                body: JSON.stringify(Object.assign({ label }, address))
+            });
+            const data = await res.json().catch(() => null);
+            await loadSavedAddresses();
+            // Auto-select the address just added, so the customer doesn't
+            // have to separately choose it in the "Deliver to" block. Falls
+            // back to matching on the fields we just saved if the API
+            // doesn't hand back the new id directly.
+            const newId = data?.address?.id ?? data?.id ?? null;
+            const match = newId
+                ? savedAddresses.find((a) => a.id === newId)
+                : savedAddresses.find((a) => a.name === address.name && a.address1 === address.address1 && a.postcode === address.postcode);
+            if (match) selectedSelfAddressId = match.id;
+        } catch (err) {
+            console.error('Could not save address for next time:', err);
+        }
+    } else {
+        guestSelfAddress = Object.assign({ label: 'Delivery address' }, address);
+    }
+
+    closeRecipientPicker();
+    renderBasket();
 }
 
 function chooseRecipientSavedAddress(addressId) {
@@ -863,7 +1016,8 @@ function chooseRecipientSavedAddress(addressId) {
         recipient: {
             name: a.name, address1: a.address1, address2: a.address2,
             city: a.city, county: a.county, postcode: a.postcode, country: a.country,
-        }
+        },
+        envelopeMode: 'direct'
     });
     closeRecipientPicker();
 }
@@ -888,7 +1042,7 @@ async function submitRecipientAddress() {
         return;
     }
 
-    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'recipient', recipient });
+    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'recipient', recipient, envelopeMode: 'direct' });
 
     // Optionally save it to the account for next time — never blocks
     // using the address on this item, which is already applied above
@@ -991,14 +1145,13 @@ async function goToCheckout() {
         const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
 
         // The address the customer picked (logged in) or typed in (guest)
-        // in the "Deliver to" block above, if any — sent once per order
-        // (not per item), same as how a recipient address is already
-        // attached per item. There's no Stripe-hosted address step left
-        // downstream (see checkout.html) to fall back on, so this is
-        // checked here before leaving the page at all.
-        const chosenAddress = loggedIn
-            ? (savedAddresses.find((a) => a.id === selectedSelfAddressId) || null)
-            : guestSelfAddress;
+        // in the "Deliver to" block or the "Saved Addresses" modal, if
+        // any — sent once per order (not per item), same as how a
+        // recipient address is already attached per item. There's no
+        // Stripe-hosted address step left downstream (see checkout.html)
+        // to fall back on. The Checkout button is disabled by renderBasket()
+        // whenever this is missing, so this is just a defensive re-check.
+        const chosenAddress = getChosenSelfAddress();
 
         const needsCustomerAddress = items.some((item) => item.delivery?.type !== 'recipient');
         if (needsCustomerAddress && !chosenAddress) {
