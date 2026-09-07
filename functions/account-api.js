@@ -45,6 +45,14 @@
 //                       custom_name2, custom_age2, size, amount_total, created_at)
 //  - referrals, reward_codes — see referrals.js and referrals-schema.sql
 //    for the "Refer a Friend" tables this file now also touches.
+//  - addresses        (id, user_id, label, name, address1, address2,
+//                       city, county, postcode, country, is_default,
+//                       created_at) — see addresses-schema.sql. Same
+//                       field shape as the recipient address object
+//                       create-checkout-basket.js/stripe-webhook.js
+//                       already use for gifted items, so a saved address
+//                       can be dropped straight into item.delivery
+//                       elsewhere without reshaping it.
 
 import { generateUniqueReferralCode, recordReferralIfAny, getReferralSummary, newCustomerWelcomeEmailHtml, referralInviteEmailHtml } from './referrals.js';
 
@@ -474,6 +482,112 @@ export async function handleDeleteReminder(request, env, reminderId) {
     await env.DB.prepare(
         'DELETE FROM reminders WHERE id = ? AND user_id = ?'
     ).bind(reminderId, user.id).run();
+
+    return json({ ok: true }, 200, env);
+}
+
+// ---------- Saved Addresses ----------
+//
+// Backs the "Saved Addresses" tab in account.html, and (next) a picker on
+// basket.html for "self" delivery items — the whole point of this table is
+// to stop the customer having to retype (or Stripe having to guess) their
+// own address every time. Needs routing added in _worker.js, same pattern
+// as /api/reminders*:
+//   GET    /api/addresses             -> handleGetAddresses
+//   POST   /api/addresses             -> handleAddAddress
+//   DELETE /api/addresses/:id         -> handleDeleteAddress
+//   POST   /api/addresses/:id/default -> handleSetDefaultAddress
+
+export async function handleGetAddresses(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    const { results } = await env.DB.prepare(
+        `SELECT id, label, name, address1, address2, city, county, postcode, country, is_default
+         FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC`
+    ).bind(user.id).all();
+
+    return json({ addresses: results }, 200, env);
+}
+
+export async function handleAddAddress(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    const body = await request.json();
+    const label = (body.label || '').toString().trim().slice(0, 100) || 'Address';
+    const name = (body.name || '').toString().trim().slice(0, 200);
+    const address1 = (body.address1 || '').toString().trim().slice(0, 200);
+    const address2 = (body.address2 || '').toString().trim().slice(0, 200);
+    const city = (body.city || '').toString().trim().slice(0, 200);
+    const county = (body.county || '').toString().trim().slice(0, 200);
+    const postcode = (body.postcode || '').toString().trim().slice(0, 50);
+    const country = (body.country || 'United Kingdom').toString().trim().slice(0, 100);
+
+    if (!name || !address1 || !city || !postcode) {
+        return json({ error: 'Please fill in at least name, address, city, and postcode.' }, 400, env);
+    }
+
+    const id = uid();
+
+    // A brand-new address becomes the default automatically if it's the
+    // customer's first one, so there's always a default for the basket to
+    // pre-select without them having to visit Account first.
+    const countRow = await env.DB.prepare(
+        'SELECT COUNT(*) as count FROM addresses WHERE user_id = ?'
+    ).bind(user.id).first();
+    const makeDefault = !!body.isDefault || (countRow?.count || 0) === 0;
+
+    if (makeDefault) {
+        await env.DB.prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?').bind(user.id).run();
+    }
+
+    await env.DB.prepare(
+        `INSERT INTO addresses (id, user_id, label, name, address1, address2, city, county, postcode, country, is_default, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(id, user.id, label, name, address1, address2, city, county, postcode, country, makeDefault ? 1 : 0, Date.now()).run();
+
+    return json({ ok: true, id }, 200, env);
+}
+
+export async function handleDeleteAddress(request, env, addressId) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    const addr = await env.DB.prepare(
+        'SELECT is_default FROM addresses WHERE id = ? AND user_id = ?'
+    ).bind(addressId, user.id).first();
+
+    await env.DB.prepare(
+        'DELETE FROM addresses WHERE id = ? AND user_id = ?'
+    ).bind(addressId, user.id).run();
+
+    // If the deleted address was the default, promote the most recently
+    // added of whatever's left, so the basket still has one to fall back
+    // on rather than being left with none.
+    if (addr?.is_default) {
+        const next = await env.DB.prepare(
+            'SELECT id FROM addresses WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+        ).bind(user.id).first();
+        if (next) {
+            await env.DB.prepare('UPDATE addresses SET is_default = 1 WHERE id = ?').bind(next.id).run();
+        }
+    }
+
+    return json({ ok: true }, 200, env);
+}
+
+export async function handleSetDefaultAddress(request, env, addressId) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    const addr = await env.DB.prepare(
+        'SELECT id FROM addresses WHERE id = ? AND user_id = ?'
+    ).bind(addressId, user.id).first();
+    if (!addr) return json({ error: 'Address not found.' }, 404, env);
+
+    await env.DB.prepare('UPDATE addresses SET is_default = 0 WHERE user_id = ?').bind(user.id).run();
+    await env.DB.prepare('UPDATE addresses SET is_default = 1 WHERE id = ?').bind(addressId).run();
 
     return json({ ok: true }, 200, env);
 }
