@@ -13,8 +13,24 @@
     html { overflow-y: scroll; scrollbar-gutter: stable; }
     body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #fcfcfc; color: var(--dark); }
 
-    header { background-color: white; padding: 15px 40px; border-bottom: 1px solid var(--border-color); text-align: center; }
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+    .logo-container { text-align: center; }
     .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
 
     main { max-width: 640px; margin: 0 auto; padding: 30px 20px 60px; }
 
@@ -57,15 +73,57 @@
 <body>
 
 <header>
-    <div class="logo-container" onclick="window.location.href='index.html';">
-        <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+        </div>
     </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="cockney-club.html">Cockney Club</a></li>
+            <li><a href="account.html">My Account</a></li>
+        </ul>
+    </nav>
 </header>
 
 <main>
     <h1>Checkout</h1>
     <div id="checkout-body"></div>
 </main>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="https://www.tiktok.com/@cockneycards" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
 
 <script>
 const $ = (id) => document.getElementById(id);
