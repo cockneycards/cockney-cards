@@ -45,6 +45,10 @@ import {
     handleGetReminders,
     handleAddReminder,
     handleDeleteReminder,
+    handleGetAddresses,
+    handleAddAddress,
+    handleDeleteAddress,
+    handleSetDefaultAddress,
     handleGetOrders,
     runDailyReminderCheck,
 } from './functions/account-api.js';
@@ -64,6 +68,11 @@ const POST_ROUTES = {
 // Matches old-bush's own reminder-id pattern exactly (a crypto.randomUUID()
 // shape) — DELETE /api/reminders/<id>.
 const REMINDER_ID_PATTERN = /^\/api\/reminders\/([a-f0-9-]+)$/;
+
+// Same shape, for the addresses added alongside reminders — DELETE
+// /api/addresses/<id> and POST /api/addresses/<id>/default.
+const ADDRESS_ID_PATTERN = /^\/api\/addresses\/([a-f0-9-]+)$/;
+const ADDRESS_DEFAULT_PATTERN = /^\/api\/addresses\/([a-f0-9-]+)\/default$/;
 
 export default {
     async fetch(request, env, ctx) {
@@ -129,6 +138,20 @@ export default {
         const reminderDeleteMatch = pathname.match(REMINDER_ID_PATTERN);
         if (reminderDeleteMatch && method === 'DELETE') {
             return handleDeleteReminder(request, env, reminderDeleteMatch[1]);
+        }
+        if (pathname === '/api/addresses' && method === 'GET') {
+            return handleGetAddresses(request, env);
+        }
+        if (pathname === '/api/addresses' && method === 'POST') {
+            return handleAddAddress(request, env);
+        }
+        const addressDefaultMatch = pathname.match(ADDRESS_DEFAULT_PATTERN);
+        if (addressDefaultMatch && method === 'POST') {
+            return handleSetDefaultAddress(request, env, addressDefaultMatch[1]);
+        }
+        const addressDeleteMatch = pathname.match(ADDRESS_ID_PATTERN);
+        if (addressDeleteMatch && method === 'DELETE') {
+            return handleDeleteAddress(request, env, addressDeleteMatch[1]);
         }
 
         // Everything else — index.html, editor.html, cart.js, images, etc.
