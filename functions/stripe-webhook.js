@@ -620,7 +620,12 @@ async function sendBasketOrderEmail(env, order) {
                     r.postcode ? `     ${r.postcode}` : null,
                     r.country ? `     ${r.country}` : null,
                 ].filter(Boolean).join('\n')
-                : '   Delivery: to the customer themselves',
+                : [
+                    '   Delivery:',
+                    customerAddressLines
+                        ? customerAddressLines.map((l) => `     ${l}`).join('\n')
+                        : '     ⚠️ No shipping address was collected for this order.',
+                ].join('\n'),
         ];
         return bits.filter(Boolean).join('\n');
     });
@@ -630,14 +635,7 @@ async function sendBasketOrderEmail(env, order) {
         `Customer email: ${order.customerEmail}`,
         order.amountTotal != null ? `Amount paid: £${(order.amountTotal / 100).toFixed(2)}` : null,
         '',
-        hasSelfDeliveryItem
-            ? [
-                'CUSTOMER\'S OWN ADDRESS (for any item(s) below going to the customer themselves):',
-                customerAddressLines ? customerAddressLines.map((l) => `  ${l}`).join('\n') : '  ⚠️ No shipping address was collected for this order.',
-                '',
-            ].join('\n')
-            : null,
-        ...itemLines,
+        itemLines.join('\n\n'),
         missingPdfCount > 0 ? `\n⚠️ ${missingPdfCount} item(s) were missing their PDF — check R2/logs.` : null,
     ]
         .filter((line) => line !== null)
