@@ -103,6 +103,11 @@ export async function onRequestPost(context) {
         let pdfDataUri = null;
         let delivery = { type: 'self' };
         let basketItems = null;
+        // The address the customer picked from their saved addresses on
+        // basket.html, if any (see create-checkout-basket.js) — preferred
+        // below over Stripe's own shipping_details, which is only ever
+        // collected as a fallback now for guests/no saved address.
+        let selfAddress = null;
         if (orderId) {
             const object = await env.ORDER_PDFS.get(orderId);
             const raw = object ? await object.text() : null;
@@ -111,9 +116,11 @@ export async function onRequestPost(context) {
                     const parsed = JSON.parse(raw);
                     if (isBasket) {
                         basketItems = parsed.items || [];
+                        selfAddress = parsed.selfAddress || null;
                     } else {
                         pdfDataUri = parsed.pdfDataUri || null;
                         delivery = parsed.delivery || { type: 'self' };
+                        selfAddress = parsed.selfAddress || null;
                     }
                 } catch (err) {
                     console.error('Stripe webhook: could not parse order payload for order', orderId, err);
@@ -186,6 +193,7 @@ export async function onRequestPost(context) {
                     amountTotal: session.amount_total,
                     items: basketItems,
                     shippingDetails,
+                    selfAddress,
                 });
             } else {
                 await sendOrderEmail(env, {
@@ -200,6 +208,7 @@ export async function onRequestPost(context) {
                     pdfDataUri,
                     delivery,
                     shippingDetails,
+                    selfAddress,
                 });
             }
         } catch (err) {
@@ -479,6 +488,24 @@ async function sendCustomerOrderConfirmationEmail(env, { customerEmail, isBasket
     });
 }
 
+// Same idea as formatCustomerShippingAddress below, but for a saved
+// address the customer picked on basket.html (see create-checkout-basket.js) —
+// this is checked FIRST wherever a "self" delivery address is needed, since
+// it's a confirmed address rather than whatever Stripe's own shipping step
+// (subject to Link autofill) happened to collect.
+function formatSelfAddress(selfAddress) {
+    if (!selfAddress) return null;
+    const lines = [
+        selfAddress.name,
+        selfAddress.address1,
+        selfAddress.address2,
+        [selfAddress.city, selfAddress.county].filter(Boolean).join(', '),
+        selfAddress.postcode,
+        selfAddress.country,
+    ].filter(Boolean);
+    return lines.length ? lines : null;
+}
+
 // Formats Stripe's shipping_details shape ({ name, address: { line1, line2,
 // city, state, postal_code, country } }) into the same plain-text block
 // style used for recipient addresses elsewhere in this file. Returns null
@@ -516,7 +543,7 @@ async function sendOrderEmail(env, order) {
             : `Card order (${order.name || 'N/A'})`;
 
     const r = wantsRecipient ? order.delivery.recipient : null;
-    const customerAddressLines = !wantsRecipient ? formatCustomerShippingAddress(order.shippingDetails) : null;
+    const customerAddressLines = !wantsRecipient ? (formatSelfAddress(order.selfAddress) || formatCustomerShippingAddress(order.shippingDetails)) : null;
 
     const lines = [
         `Product: ${order.productType}`,
@@ -573,7 +600,7 @@ async function sendBasketOrderEmail(env, order) {
 
     const missingPdfCount = order.items.filter((item) => !item.pdfDataUri).length;
     const hasSelfDeliveryItem = order.items.some((item) => item.delivery?.type !== 'recipient');
-    const customerAddressLines = hasSelfDeliveryItem ? formatCustomerShippingAddress(order.shippingDetails) : null;
+    const customerAddressLines = hasSelfDeliveryItem ? (formatSelfAddress(order.selfAddress) || formatCustomerShippingAddress(order.shippingDetails)) : null;
 
     const itemLines = order.items.map((item, i) => {
         const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
