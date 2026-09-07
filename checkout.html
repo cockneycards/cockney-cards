@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | Cockney Cards</title>
+<script src="auth.js"></script>
+<script src="cart.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
+
+<style>
+    :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --gold: #c8a04d; --font-family: 'Helvetica Neue', Arial, sans-serif; }
+    html { overflow-y: scroll; scrollbar-gutter: stable; }
+    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #fcfcfc; color: var(--dark); }
+
+    header { background-color: white; padding: 15px 40px; border-bottom: 1px solid var(--border-color); text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+
+    main { max-width: 640px; margin: 0 auto; padding: 30px 20px 60px; }
+
+    h1 { font-size: 20px; font-weight: bold; margin: 0 0 20px; }
+
+    .section { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .section h2 { font-size: 14px; font-weight: bold; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+    .section h2 .num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--dark); color: white; font-size: 11px; flex: 0 0 auto; }
+
+    .review-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; }
+    .review-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .review-item:first-child { padding-top: 0; }
+    .review-item-title { font-size: 13px; font-weight: bold; margin: 0 0 4px; }
+    .review-item-meta { font-size: 12px; color: #777; margin: 0 0 6px; }
+    .review-item-delivery { font-size: 12px; color: #555; background: #f7f7f7; border-radius: 6px; padding: 8px 10px; line-height: 1.5; }
+    .review-item-delivery strong { display: block; color: #333; margin-bottom: 2px; }
+
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; color: #444; }
+    .summary-row.total { font-weight: bold; font-size: 15px; border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 10px; color: var(--dark); }
+
+    label.field-label { display: block; font-size: 12px; color: #555; margin-bottom: 6px; }
+    input[type="email"] { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; box-sizing: border-box; font-family: var(--font-family); }
+
+    #payment-element { margin-top: 14px; }
+
+    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 14px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 14px; }
+    .btn:disabled { opacity: 0.6; cursor: default; }
+    .btn:hover:not(:disabled) { background-color: #444; }
+    .btn-secondary { background: none; border: 1px solid var(--border-color); color: #555; font-weight: normal; }
+    .btn-secondary:hover { background: #f5f5f5; }
+
+    #checkout-error, #payment-error { color: #c0392b; font-size: 13px; margin-top: 10px; display: none; }
+    #payment-section { display: none; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #777; font-size: 14px; }
+    .empty-state a { color: var(--primary); }
+</style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+<header>
+    <div class="logo-container" onclick="window.location.href='index.html';">
+        <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+    </div>
+</header>
+
+<main>
+    <h1>Checkout</h1>
+    <div id="checkout-body"></div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+let checkoutData = null;   // snapshot handed off from basket.html
+let stripe = null;
+let elements = null;
+let orderId = null;
+
+function loadCheckoutData() {
+    const raw = sessionStorage.getItem('cc_checkout_data');
+    if (!raw) return null;
+    try {
+        return JSON.parse(raw);
+    } catch (err) {
+        console.error('Could not parse stored checkout data:', err);
+        return null;
+    }
+}
+
+// Read-only summary of what's in checkoutData — one block per item, its
+// own delivery address shown inline (recipient address if it's going
+// straight to them, otherwise the customer's own chosen/typed address).
+// Nothing here is editable; "Back to Basket" is the only way to change
+// anything, same as Moonpig only lets you edit a delivery from its own
+// basket/review step, not mid-payment.
+function renderAddressLines(addr) {
+    if (!addr) return '<span style="color:#c0392b;">⚠️ No address on file for this item.</span>';
+    return [addr.name, addr.address1, addr.address2, [addr.city, addr.county].filter(Boolean).join(', '), addr.postcode, addr.country]
+        .filter(Boolean)
+        .map((l) => l.replace(/</g, '&lt;'))
+        .join('<br>');
+}
+
+function renderReviewSection() {
+    const items = checkoutData.items || [];
+    const itemsHtml = items.map((item) => {
+        const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+        const addr = wantsRecipient ? item.delivery.recipient : checkoutData.selfAddress;
+        const deliveryLabel = wantsRecipient ? `Delivering to ${item.delivery.recipient.name || 'recipient'}` : 'Delivering to you';
+        return `
+            <div class="review-item">
+                <p class="review-item-title">${(item.title || 'Personalised item').replace(/</g, '&lt;')} (${item.kind})</p>
+                <p class="review-item-meta">Qty: ${item.quantity}${item.price ? ` · ${item.price} each` : ''}</p>
+                <div class="review-item-delivery">
+                    <strong>${deliveryLabel}</strong>
+                    ${renderAddressLines(addr)}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <div class="section">
+            <h2><span class="num">1</span> Review your order</h2>
+            ${itemsHtml}
+            <a href="basket.html" style="font-size:12px; color:var(--primary); display:inline-block; margin-top:12px;">← Back to Basket to make changes</a>
+        </div>
+    `;
+}
+
+function renderEmailSection() {
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    const email = loggedIn ? ccGetEmail() : (checkoutData.customerEmail || '');
+    return `
+        <div class="section">
+            <h2><span class="num">2</span> Your email</h2>
+            <label class="field-label" for="checkout-email">We'll send your confirmation here</label>
+            <input type="email" id="checkout-email" placeholder="you@example.com" value="${email ? email.replace(/"/g, '&quot;') : ''}" ${loggedIn ? 'readonly style="background:#f5f5f5;"' : ''}>
+        </div>
+    `;
+}
+
+function renderPaymentSection() {
+    return `
+        <div class="section" id="payment-section">
+            <h2><span class="num">3</span> Payment</h2>
+            <div id="payment-element"></div>
+            <button class="btn" id="pay-btn" onclick="submitPayment()">Pay</button>
+            <p id="payment-error"></p>
+        </div>
+    `;
+}
+
+function render() {
+    if (!checkoutData || !checkoutData.items || !checkoutData.items.length) {
+        $('checkout-body').innerHTML = `
+            <div class="empty-state">
+                Your basket is empty. <a href="shop-cards.html">Start shopping</a>.
+            </div>
+        `;
+        return;
+    }
+
+    $('checkout-body').innerHTML = `
+        ${renderReviewSection()}
+        ${renderEmailSection()}
+        ${renderPaymentSection()}
+        <button class="btn" id="continue-btn" onclick="continueToPayment()">Continue to Payment</button>
+        <p id="checkout-error"></p>
+    `;
+}
+
+// Step 2 -> 3: validates the email, asks the server to price the order
+// and open a PaymentIntent (create-payment-intent-basket.js does the
+// same pricing/promo/reward/postage work create-checkout-basket.js used
+// to do for the Stripe-hosted flow), then mounts Stripe's Payment
+// Element with the returned client secret. No address fields appear
+// here at all — every delivery address was already resolved in step 1.
+async function continueToPayment() {
+    const errorEl = $('checkout-error');
+    errorEl.style.display = 'none';
+    const continueBtn = $('continue-btn');
+    const emailInput = $('checkout-email');
+    const email = emailInput.value.trim();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorEl.textContent = 'Please enter a valid email address.';
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    continueBtn.disabled = true;
+    continueBtn.textContent = 'Preparing payment...';
+
+    try {
+        const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+
+        const res = await fetch('/create-payment-intent-basket', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(loggedIn ? { Authorization: `Bearer ${ccGetSession()}` } : {}),
+            },
+            body: JSON.stringify({ ...checkoutData, customerEmail: email }),
+        });
+        const result = await res.json();
+
+        if (!res.ok || !result.clientSecret) {
+            throw new Error(result.error || 'Could not start payment — please try again.');
+        }
+
+        orderId = result.orderId;
+
+        const configRes = await fetch('/stripe-config');
+        const config = await configRes.json();
+        if (!config.publishableKey) {
+            throw new Error('Payments are not configured — please contact support.');
+        }
+
+        stripe = Stripe(config.publishableKey);
+        elements = stripe.elements({ clientSecret: result.clientSecret });
+        const paymentElement = elements.create('payment');
+        paymentElement.mount('#payment-element');
+
+        continueBtn.style.display = 'none';
+        emailInput.setAttribute('readonly', 'readonly');
+        emailInput.style.background = '#f5f5f5';
+        $('payment-section').style.display = 'block';
+    } catch (err) {
+        console.error(err);
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+        continueBtn.disabled = false;
+        continueBtn.textContent = 'Continue to Payment';
+    }
+}
+
+// Step 3: confirms the PaymentIntent client-side via Stripe's own SDK —
+// card details never touch our server. On success Stripe redirects to
+// thankyou.html itself (return_url); this function only needs to surface
+// an error if confirmation fails without redirecting (e.g. a declined
+// card).
+async function submitPayment() {
+    const payBtn = $('pay-btn');
+    const errorEl = $('payment-error');
+    errorEl.style.display = 'none';
+    payBtn.disabled = true;
+    payBtn.textContent = 'Processing...';
+
+    const origin = window.location.origin;
+    const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+            return_url: `${origin}/thankyou.html?order_id=${encodeURIComponent(orderId)}`,
+        },
+    });
+
+    // Only reached if confirmation failed immediately (e.g. validation
+    // error) — a successful payment navigates away via return_url above
+    // and never comes back to this line.
+    if (error) {
+        errorEl.textContent = error.message || 'Payment failed — please check your details and try again.';
+        errorEl.style.display = 'block';
+        payBtn.disabled = false;
+        payBtn.textContent = 'Pay';
+    }
+}
+
+checkoutData = loadCheckoutData();
+render();
+</script>
+</body>
+</html>
