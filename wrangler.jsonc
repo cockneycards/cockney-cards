@@ -12,7 +12,8 @@
     "vars": {
         "ALLOWED_ORIGIN": "https://cockneycards.com",
         "FROM_EMAIL": "reminders@cockneycards.com",
-        "SITE_URL": "https://cockneycards.com"
+        "SITE_URL": "https://cockneycards.com",
+        "STRIPE_PUBLISHABLE_KEY": "pk_test_51Tt3vS3RZlOaCRsA8K9vvdWBmFnHnTv5Dk8PYUNggtjQAWpvnCsiDHmDMSvcx46bQyOHtRZlU3EkstkPFCBvRa2300d8vYupNz"
     },
     "assets": {
         "directory": ".",
