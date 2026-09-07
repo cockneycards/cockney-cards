@@ -360,24 +360,6 @@
 
         <p id="account-nudge" style="font-size: 12px; color: #666; text-align: center; margin: 15px 0 10px 0;"></p>
 
-        <div id="delivery-section" style="display:none; margin: 15px 0; padding-top: 15px; border-top: 1px solid #eee;">
-            <p style="font-size: 12px; font-weight: bold; color: #333; margin: 0 0 8px; letter-spacing: 0.5px; text-transform: uppercase;">Delivery</p>
-            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:8px; cursor:pointer;">
-                <input type="radio" name="delivery-choice" value="self" checked onchange="toggleRecipientFields()"> Send to me.
-            </label>
-            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:10px; cursor:pointer;">
-                <input type="radio" name="delivery-choice" value="recipient" onchange="toggleRecipientFields()"> Send directly to the recipient.
-            </label>
-            <div id="recipient-fields" style="display:none; flex-direction:column; gap:8px;">
-                <input type="text" id="recipient-name" placeholder="Recipient's full name">
-                <input type="text" id="recipient-address1" placeholder="Address line 1">
-                <input type="text" id="recipient-address2" placeholder="Address line 2 (optional)">
-                <input type="text" id="recipient-city" placeholder="Town / City">
-                <input type="text" id="recipient-county" placeholder="County (optional)">
-                <input type="text" id="recipient-postcode" placeholder="Postcode">
-            </div>
-        </div>
-
         <button id="add-to-basket-btn" class="btn" style="display:none; background-color:#1a1a1a;" onclick="addCurrentCardToBasket()" disabled>Add to Basket</button>
 
         <div class="nav-buttons">
@@ -786,7 +768,6 @@ function loadFrontCover(imageUrl) {
         $('toggle-front').disabled = false;
         $('toggle-inside').disabled = false;
         updateAddToBasketAvailability();
-        $('delivery-section').style.display = 'block';
         switchPage('front');
     }, { crossOrigin: 'anonymous' });
 }
@@ -2072,42 +2053,11 @@ async function captureAndBuildPrintPDF() {
     return { doc, previewFront, previewInside };
 }
 
-// Shows/hides the recipient address fields based on which delivery
-// radio is selected.
-function toggleRecipientFields() {
-    const wantsRecipient = document.querySelector('input[name="delivery-choice"]:checked')?.value === 'recipient';
-    $('recipient-fields').style.display = wantsRecipient ? 'flex' : 'none';
-}
-
-// Reads the current delivery choice + (if applicable) recipient address
-// fields into a plain object, and clears them back to the default ("send
-// to me") ready for the next item — since this is a per-item choice, each
-// "Add to Basket" should start fresh rather than carrying the
-// previous item's recipient over.
-function collectAndResetDeliveryInfo() {
-    const wantsRecipient = document.querySelector('input[name="delivery-choice"]:checked')?.value === 'recipient';
-
-    const delivery = wantsRecipient ? {
-        type: 'recipient',
-        recipient: {
-            name: $('recipient-name').value.trim(),
-            address1: $('recipient-address1').value.trim(),
-            address2: $('recipient-address2').value.trim(),
-            city: $('recipient-city').value.trim(),
-            county: $('recipient-county').value.trim(),
-            postcode: $('recipient-postcode').value.trim(),
-            country: 'United Kingdom'
-        }
-    } : { type: 'self' };
-
-    // Reset for the next item.
-    document.querySelector('input[name="delivery-choice"][value="self"]').checked = true;
-    ['recipient-name', 'recipient-address1', 'recipient-address2', 'recipient-city', 'recipient-county', 'recipient-postcode']
-        .forEach((id) => { $(id).value = ''; });
-    toggleRecipientFields();
-
-    return delivery;
-}
+// Delivery (self vs. recipient, and which saved address) used to be
+// chosen right here per-item before "Add to Basket" — that's now handled
+// entirely in the basket itself (a "Sending to" picker per card, sourced
+// from saved addresses), so every item just goes in as 'self' and the
+// basket owns changing that afterward. See basket.html.
 
 // Builds a small, low-quality preview of the actual personalised front
 // page (photo, text, everything) for the basket list — NOT the print-ready
@@ -2183,7 +2133,11 @@ async function addCurrentCardToBasket() {
         const { doc, previewFront, previewInside } = await captureAndBuildPrintPDF();
         const pdfDataUri = doc.output('datauristring');
         const thumbnail = await captureFrontThumbnail();
-        const delivery = collectAndResetDeliveryInfo();
+        // Delivery is now assigned in the basket, not here — see the note
+        // above collectAndResetDeliveryInfo's old location. Every new item
+        // starts as 'self' until the customer picks a recipient for it in
+        // basket.html.
+        const delivery = { type: 'self' };
 
         const optionsParts = [];
         if (activeTemplate.name) optionsParts.push(`${activeTemplate.name.label || 'Name'}: ${$('name-input').value || '—'}`);
@@ -2192,7 +2146,6 @@ async function addCurrentCardToBasket() {
             const val = $(`extra-input-${i}`)?.value;
             if (val) optionsParts.push(`${f.label || f.key || 'Field'}: ${val}`);
         });
-        if (delivery.type === 'recipient') optionsParts.push(`Deliver to: ${delivery.recipient.name || 'recipient'}`);
 
         await ccCart.addToCart({
             kind: 'card',
