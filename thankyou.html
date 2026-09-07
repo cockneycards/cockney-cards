@@ -125,26 +125,55 @@
 </footer>
 
 <script>
-// If Stripe redirects back with a session id (e.g. thankyou.html?session_id=cs_...),
-// show it as a lightweight order reference. Purely cosmetic — no fetch back to Stripe.
+// Two redirect shapes can land here now:
+//  - session_id (e.g. ?session_id=cs_...) — the older Stripe-hosted
+//    Checkout flow (still used by the single-item card/print purchase).
+//  - payment_intent / payment_intent_client_secret / redirect_status,
+//    alongside our own order_id — appended by Stripe.js itself after
+//    stripe.confirmPayment()'s return_url redirect on checkout.html (the
+//    new custom basket checkout). redirect_status must be 'succeeded';
+//    Stripe can also redirect here after a failed/cancelled confirmation
+//    attempt, which shouldn't be shown as a completed order.
 (function showOrderRef() {
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
+    const paymentIntentId = params.get('payment_intent');
+    const redirectStatus = params.get('redirect_status');
+    const orderId = params.get('order_id');
+
+    let shortRef = null;
+    let orderCompleted = false;
+
     if (sessionId) {
         // Stripe's session ids are long, opaque strings (cs_test_a1YCc...) —
         // not something to shorten in storage/lookups, but showing the
         // full thing to a customer is unnecessarily intimidating. The
         // last 8 characters are still enough to quote back to support if
         // they need to search for the exact order, paired with their email.
-        const shortRef = sessionId.slice(-8).toUpperCase();
+        shortRef = sessionId.slice(-8).toUpperCase();
+        orderCompleted = true;
+    } else if (paymentIntentId && redirectStatus === 'succeeded') {
+        // Prefer our own order_id (a plain UUID, no prefix to strip) when
+        // present — it's what stripe-webhook.js and the order emails use
+        // as the order's identity, so it's the more useful reference to
+        // quote back to support. Falls back to the PaymentIntent id if
+        // order_id is ever missing for some reason.
+        shortRef = (orderId || paymentIntentId).slice(-8).toUpperCase();
+        orderCompleted = true;
+    }
+
+    if (orderCompleted) {
         document.getElementById('order-ref').textContent = 'Order reference: ' + shortRef;
         // Every purchase now goes through the basket (there's no single-item
-        // "Buy Now" anymore) — landing here with a real session id means
+        // "Buy Now" anymore) — landing here with a completed order means
         // payment succeeded, so the basket that was just paid for should be
         // emptied rather than sitting there for the customer's next visit.
         if (typeof ccCart !== 'undefined') {
             ccCart.clearCart();
         }
+        // The snapshot handed off from basket.html to checkout.html is no
+        // longer needed once payment has actually gone through.
+        sessionStorage.removeItem('cc_checkout_data');
     }
 })();
 
