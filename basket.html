@@ -248,12 +248,6 @@ let guestSelfAddress = null;
 // unchecked), or /api/addresses is unavailable. Cleared once the address
 // is confirmed saved and selectable from savedAddresses instead.
 let adHocSelfAddress = null;
-function saveCheckoutState() {
-    sessionStorage.setItem('cc_selected_self_address_id', selectedSelfAddressId || '');
-    sessionStorage.setItem('cc_guest_self_address', JSON.stringify(guestSelfAddress || null));
-    sessionStorage.setItem('cc_adhoc_self_address', JSON.stringify(adHocSelfAddress || null));
-}
-
 
 async function loadSavedAddresses() {
     if (!ccIsLoggedIn()) { savedAddresses = []; return; }
@@ -290,17 +284,19 @@ async function refreshMembershipStatus() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    try {
-        selectedSelfAddressId = sessionStorage.getItem('cc_selected_self_address_id') || null;
-        guestSelfAddress = JSON.parse(sessionStorage.getItem('cc_guest_self_address') || 'null');
-        adHocSelfAddress = JSON.parse(sessionStorage.getItem('cc_adhoc_self_address') || 'null');
-    } catch (e) { console.error(e); }
     renderBasket();
     refreshMembershipStatus();
     loadSavedAddresses();
 });
 window.addEventListener('cc-cart-updated', renderBasket);
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closePreview(); closeRecipientPicker(); } });
+window.addEventListener('pageshow', () => {
+    const btn = document.getElementById('checkout-btn');
+    const errorEl = document.getElementById('checkout-error');
+    if (btn) { btn.disabled = false; btn.innerText = 'Checkout'; }
+    if (errorEl) errorEl.style.display = 'none';
+    renderBasket();
+});
 
 // ---------------------------------------------------------------------
 // Postage estimate — mirrors functions/postage.js + the grouping/waiver
@@ -579,7 +575,6 @@ function saveGuestSelfAddress() {
     }
 
     guestSelfAddress = { label: 'Delivery address', name, address1, address2, city, county: '', postcode, country: 'United Kingdom' };
-    saveCheckoutState();
     renderBasket();
 }
 
@@ -677,8 +672,8 @@ function renderBasket() {
 // items as 'self'; see editor.html/editor-prints.html).
 function renderDeliveryLine(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
-    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to: Me';
-    const actionText = wantsRecipient ? 'Change' : 'Select Recipient';
+    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to Home';
+    const actionText = wantsRecipient ? 'Change Recipient' : 'Select Recipient';
     return `
         <p class="item-delivery">
             ${label}
@@ -694,8 +689,8 @@ function renderDeliveryLine(item) {
 // delivery is created (see chooseRecipientSavedAddress/submitRecipientAddress).
 function renderEnvelopeSection(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
-    if (!wantsRecipient) return '';
-    const mode = item.delivery.envelopeMode || 'direct';
+    if (item.kind !== 'card') return '';
+    const mode = item.delivery?.envelopeMode || 'home';
     return `
         <div class="item-envelope">
             <p class="item-envelope-label">Envelope</p>
@@ -962,9 +957,7 @@ function renderAddressForm(mode) {
 
 function chooseSelfSavedAddress(addressId) {
     selectedSelfAddressId = addressId;
-    saveCheckoutState();
     ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
-    saveCheckoutState();
     closeRecipientPicker();
     renderBasket();
 }
@@ -1006,7 +999,6 @@ async function submitSelfAddress() {
         // type but nothing selectable to actually check out with.
         const label = $('rcpt-label').value.trim();
         adHocSelfAddress = Object.assign({ label: label || 'Delivery address' }, address);
-        saveCheckoutState();
 
         if ($('rcpt-save')?.checked) {
             try {
@@ -1027,7 +1019,7 @@ async function submitSelfAddress() {
                     : savedAddresses.find((a) => a.name === address.name && a.address1 === address.address1 && a.postcode === address.postcode);
                 // Once it's confirmed saved and selectable, drop the ad-hoc
                 // copy in favour of the real saved address.
-                if (match) { selectedSelfAddressId = match.id; adHocSelfAddress = null; saveCheckoutState(); }
+                if (match) { selectedSelfAddressId = match.id; adHocSelfAddress = null; }
             } catch (err) {
                 console.error('Could not save address for next time:', err);
                 // adHocSelfAddress (set above) still lets this order proceed.
@@ -1035,7 +1027,6 @@ async function submitSelfAddress() {
         }
     } else {
         guestSelfAddress = Object.assign({ label: 'Delivery address' }, address);
-        saveCheckoutState();
     }
 
     closeRecipientPicker();
