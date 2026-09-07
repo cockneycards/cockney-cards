@@ -134,16 +134,20 @@ export async function onRequestPost(context) {
         const params = new URLSearchParams();
         params.append('payment_method_types[]', 'card');
         params.append('mode', 'payment');
-        // Only ask Stripe to collect a shipping address when the customer
-        // DIDN'T already confirm one via a saved address on basket.html
-        // (see selfAddress above). Previously this ran unconditionally,
-        // which meant Stripe's own field — subject to Link's autofill —
-        // could silently override or duplicate a destination the basket
-        // had already worked out correctly, especially on a basket mixing
-        // a "self" item with a "recipient" item (see the two-address
-        // checkout bug). Guests and anyone without a saved address keep
-        // the exact old behaviour.
-        if (!selfAddress) {
+        // Only ask Stripe to collect a shipping address when the basket
+        // actually has a "self" item (one NOT going straight to a
+        // recipient) AND the customer didn't already confirm one via a
+        // saved address on basket.html (see selfAddress above). A basket
+        // made up entirely of "recipient" items already has every
+        // delivery address it needs — each one collected per item on
+        // basket.html — so asking Stripe for a shipping address on top of
+        // that was both pointless and confusing (an unused, unfilled
+        // field on the Stripe page that looked like the entered address
+        // hadn't carried through, when really it just wasn't needed).
+        // Previously this only checked `!selfAddress`, which meant even
+        // an all-recipient basket triggered Stripe's shipping step.
+        const needsCustomerAddress = items.some((item) => item.delivery?.type !== 'recipient');
+        if (needsCustomerAddress && !selfAddress) {
             params.append('shipping_address_collection[allowed_countries][]', 'GB');
         }
         params.append('success_url', `${origin}/thankyou.html?session_id={CHECKOUT_SESSION_ID}`);
