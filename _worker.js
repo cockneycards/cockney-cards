@@ -32,6 +32,8 @@ import { onRequestPost as createCheckoutPrint } from './functions/create-checkou
 import { onRequestPost as createCheckoutBasket } from './functions/create-checkout-basket.js';
 import { onRequestPost as createMembershipCheckout } from './functions/create-membership-checkout.js';
 import { onRequestPost as stripeWebhook } from './functions/stripe-webhook.js';
+import { onRequestPost as createPaymentIntentBasket } from './functions/create-payment-intent-basket.js';
+import { onRequestGet as stripeConfig } from './functions/stripe-config.js';
 import { handleValidatePromo } from './functions/promo.js';
 import {
     corsHeaders,
@@ -63,6 +65,7 @@ const POST_ROUTES = {
     '/create-checkout-basket': createCheckoutBasket,
     '/create-membership-checkout': createMembershipCheckout,
     '/stripe-webhook': stripeWebhook,
+    '/create-payment-intent-basket': createPaymentIntentBasket,
 };
 
 // Matches old-bush's own reminder-id pattern exactly (a crypto.randomUUID()
@@ -87,6 +90,13 @@ export default {
         // loaded from the custom domain).
         if (method === 'OPTIONS') {
             return new Response(null, { headers: corsHeaders(env) });
+        }
+
+        // GET-based config endpoint used by checkout.html to fetch the
+        // Stripe publishable key. Not part of POST_ROUTES since it's the
+        // only GET handler among the ported functions/*.js files.
+        if (pathname === '/stripe-config' && method === 'GET') {
+            return stripeConfig({ request, env, waitUntil: ctx.waitUntil.bind(ctx) });
         }
 
         const postHandler = POST_ROUTES[pathname];
