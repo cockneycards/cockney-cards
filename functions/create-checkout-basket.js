@@ -20,7 +20,31 @@
 // binding as create-checkout.js / create-checkout-print.js (all three
 // share it).
 
-import { highestTier, POSTAGE_TIERS, groupItemsByDestination } from './postage.js';
+import { POSTAGE_TIERS, POSTAGE_METHODS, groupItemsByDestination, methodsForDestination, postageAmountForMethod } from './postage.js';
+
+// Basket postage is charged as our own fixed line item, not a Stripe
+// shipping_options choice (see the comment on appendShippingOptions in
+// postage.js for why) — so unlike the two single-item checkouts, the
+// customer has to pick their service on basket.html itself, BEFORE this
+// function ever runs. Each item can carry its own item.shippingMethod
+// (one of POSTAGE_METHODS); this resolves a whole destination group down
+// to ONE method (they all ship in the same parcel), preferring the
+// most-tracked choice requested by any item in the group, but only if
+// that service is actually valid for every size present (see
+// methodsForDestination) — otherwise it falls back to the cheapest valid
+// service. NOTE: basket.html doesn't have a service picker yet — until
+// it does, every item.shippingMethod will be undefined and this always
+// falls back to the cheapest option, i.e. today's existing behaviour.
+const METHOD_TRACKED_RANK = { first_class: 0, tracked24: 1, tracked24_signed: 2 };
+function resolveGroupMethod(groupItems) {
+    const valid = methodsForDestination(groupItems);
+    if (!valid.length) return null;
+    const requested = groupItems
+        .map((item) => item.shippingMethod)
+        .filter((m) => valid.includes(m))
+        .sort((a, b) => METHOD_TRACKED_RANK[b] - METHOD_TRACKED_RANK[a])[0];
+    return requested || valid[0];
+}
 import { checkPlusMembership, getUserFromAuth } from './account-api.js';
 import { checkPromoCode } from './promo.js';
 import { getRewardCodeDetails, getActiveWelcomeReward } from './referrals.js';
@@ -95,6 +119,11 @@ export async function onRequestPost(context) {
                 // postage tier calculation below. Cards don't set this;
                 // they're always treated as A5 (see postage.js).
                 size: item.kind === 'print' && POSTAGE_TIERS[item.size] ? item.size : null,
+                // Customer's chosen Royal Mail service for this item, if
+                // basket.html sends one (see resolveGroupMethod above) —
+                // undefined/invalid values are ignored and the cheapest
+                // valid service for the destination is used instead.
+                shippingMethod: Object.values(POSTAGE_METHODS).includes(item.shippingMethod) ? item.shippingMethod : null,
                 // Per-item delivery choice — "self" (customer writes in it
                 // themselves) or "recipient" (goes straight to them; their
                 // address is included in the order email text).
@@ -125,6 +154,20 @@ export async function onRequestPost(context) {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
             });
+        }
+
+        // Resolve each destination group down to the ONE Royal Mail
+        // service its parcel will actually ship under (see
+        // resolveGroupMethod above), and stamp it onto every item in that
+        // group as shippingMethod — done here, before the R2 write below,
+        // so stripe-webhook.js can read the resolved method straight off
+        // each item without having to re-run the grouping/resolution
+        // logic itself. Re-used again further down for pricing this same
+        // checkout, so grouping only happens once.
+        const groups = groupItemsByDestination(items);
+        for (const groupItems of groups.values()) {
+            const resolvedMethod = resolveGroupMethod(groupItems);
+            groupItems.forEach((item) => { item.shippingMethod = resolvedMethod; });
         }
 
         // ORDER_PDFS is an R2 bucket (confirmed via the dashboard's
@@ -218,11 +261,12 @@ export async function onRequestPost(context) {
         // the customer themselves counts as one parcel, and each distinct
         // recipient address counts as its own parcel, each getting its
         // own postage charge (see postage.js's groupItemsByDestination).
+        // `groups` was already computed above (and each item stamped with
+        // its resolved shippingMethod) before the R2 write.
         // Club's discount is a flat 25% off cards regardless of quantity —
         // the old 35% tier for 2+ cards to the same address was dropped in
         // favour of the free-delivery-on-3+-cards perk below, which now
         // does that job (and applies to every customer, not just members).
-        const groups = groupItemsByDestination(items);
         let lineIndex = 0;
         let parcelNumber = 0;
 
@@ -311,13 +355,16 @@ export async function onRequestPost(context) {
             //   3. A valid promo code was entered (cards-only, as before).
             // Club membership itself does NOT waive postage — that's the
             // 25% card discount above instead.
-            const tier = highestTier(groupItems);
             const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
             const allPrintsInGroup = groupItems.length > 0 && groupItems.every((item) => item.kind === 'print');
             const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
             const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
             const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || (allCardsInGroup && isPromoValid);
-            const postageAmount = postageWaived ? 0 : POSTAGE_TIERS[tier];
+            // Method was already resolved onto every item in this group
+            // (see resolveGroupMethod above) — read it straight off the
+            // first item rather than re-deriving it.
+            const groupMethod = groupItems[0]?.shippingMethod || POSTAGE_METHODS.FIRST_CLASS;
+            const postageAmount = postageWaived ? 0 : postageAmountForMethod(groupItems, groupMethod);
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
             let postageName;
             if (qualifiesForFreeCardDelivery) {
