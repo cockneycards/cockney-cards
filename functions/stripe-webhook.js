@@ -31,7 +31,16 @@
 // Requires the same ORDER_PDFS R2 bucket binding as the three create-checkout* functions.
 // Requires a DB (D1) binding pointing at the same cockney-cards-db used by
 // the account/reminders Worker — add it under Settings > Bindings,
-// variable name "DB".
+// variable name "DB". Needs a `tracking_number TEXT` column on `orders`
+// (see migrations/add-tracking-number.sql) for the Royal Mail integration
+// below.
+//
+// Royal Mail Click & Drop integration (see royal-mail.js) — only runs for
+// orders shipped as Tracked24 / Tracked24 (signed); First Class orders
+// stay fully manual. Requires ROYAL_MAIL_API_KEY and the ROYAL_MAIL_SENDER_*
+// vars described in royal-mail.js. If those aren't set yet, shipment
+// creation just fails silently (logged, not thrown) and orders carry on
+// exactly as they did before this integration existed.
 //
 // Setup: in the Stripe Dashboard > Developers > Webhooks, add an endpoint
 // pointing at https://cockneycards.com/stripe-webhook, subscribed to the
@@ -43,6 +52,100 @@
 // below.
 
 import { checkAndQualifyReferral } from './referrals.js';
+import { createShipment } from './royal-mail.js';
+import { methodFromAmount, POSTAGE_METHODS, groupItemsByDestination, highestTier } from './postage.js';
+
+const TRACKED_METHODS = new Set([POSTAGE_METHODS.TRACKED24, POSTAGE_METHODS.TRACKED24_SIGNED]);
+
+// Creates a Royal Mail shipment for a tracked order and returns
+// { trackingNumber, labelBase64 }, or null if the method isn't a tracked
+// one, there's no usable address, or the Royal Mail API call itself
+// fails. A Royal Mail outage should never block the order email/D1 write
+// that already happen regardless — every failure here is caught and
+// logged, never thrown further, same pattern as the email/referral calls
+// elsewhere in this file.
+async function maybeCreateRoyalMailShipment(env, { size, method, orderReference, address }) {
+    if (!TRACKED_METHODS.has(method) || !address) return null;
+    try {
+        return await createShipment(env, { recipient: address, size, method, orderReference });
+    } catch (err) {
+        console.error('Royal Mail shipment creation failed for order', orderReference, err);
+        return null;
+    }
+}
+
+// Turns whichever address shape is actually available (a per-item
+// recipient, a saved selfAddress, or Stripe's own collected
+// shipping_details) into the plain {name,address1,address2,city,county,
+// postcode,country} shape royal-mail.js needs — same priority order
+// already used by formatSelfAddress/formatCustomerShippingAddress below
+// for the human-readable fulfilment email. Returns null if nothing
+// usable was collected (e.g. the customer closed Stripe's address step).
+function resolveShipToAddress({ wantsRecipient, recipient, selfAddress, shippingDetails }) {
+    if (wantsRecipient && recipient) return recipient;
+    if (selfAddress) return selfAddress;
+    if (shippingDetails?.address) {
+        const a = shippingDetails.address;
+        return {
+            name: shippingDetails.name,
+            address1: a.line1,
+            address2: a.line2,
+            city: a.city,
+            county: a.state,
+            postcode: a.postal_code,
+            country: a.country,
+        };
+    }
+    return null;
+}
+
+// One shipment per destination group in a basket order — each group
+// already carries its resolved shippingMethod (see
+// create-checkout-basket.js's resolveGroupMethod), stamped onto every
+// item in it. Returns a Map of item index -> { trackingNumber,
+// labelBase64 } so callers can look up a given item's result (or skip it
+// if its group wasn't tracked / the call failed).
+async function createBasketShipments(env, { orderId, basketItems, selfAddress, shippingDetails }) {
+    const tracking = new Map();
+    const groups = groupItemsByDestination(basketItems);
+    for (const groupItems of groups.values()) {
+        const method = groupItems[0]?.shippingMethod;
+        if (!TRACKED_METHODS.has(method)) continue;
+        const first = groupItems[0];
+        const wantsRecipient = first.delivery?.type === 'recipient' && first.delivery?.recipient;
+        const address = resolveShipToAddress({
+            wantsRecipient,
+            recipient: wantsRecipient ? first.delivery.recipient : null,
+            selfAddress,
+            shippingDetails,
+        });
+        const size = highestTier(groupItems);
+        const result = await maybeCreateRoyalMailShipment(env, {
+            size,
+            method,
+            orderReference: `${orderId}-${first.index}`,
+            address,
+        });
+        if (result) groupItems.forEach((item) => tracking.set(item.index, result));
+    }
+    return tracking;
+}
+
+// Single-item (card/print) equivalent — the customer picked their
+// service on Stripe's own Checkout page, so the method has to be
+// reverse-derived from the shipping amount actually charged (Stripe
+// reports the cost, not which shipping_options entry was clicked).
+async function createSingleShipment(env, { orderId, size, delivery, selfAddress, shippingDetails, shippingAmount }) {
+    const wantsRecipient = delivery?.type === 'recipient' && delivery?.recipient;
+    const method = shippingAmount != null ? methodFromAmount(size, shippingAmount) : null;
+    const address = resolveShipToAddress({
+        wantsRecipient,
+        recipient: wantsRecipient ? delivery.recipient : null,
+        selfAddress,
+        shippingDetails,
+    });
+    return maybeCreateRoyalMailShipment(env, { size, method, orderReference: orderId, address });
+}
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -128,6 +231,32 @@ export async function onRequestPost(context) {
             }
         }
 
+        // Royal Mail shipment(s) — only for orders shipping under a
+        // tracked service (First Class stays fully manual — see
+        // royal-mail.js). Done before the D1 write below so the tracking
+        // number can go straight into the same INSERT rather than a
+        // separate UPDATE afterwards.
+        let trackingNumber = null;
+        let labelBase64 = null;
+        let basketTracking = new Map();
+        if (isBasket && basketItems) {
+            basketTracking = await createBasketShipments(env, { orderId: orderId || session.id, basketItems, selfAddress, shippingDetails });
+        } else if (orderId) {
+            const singleSize = meta.product_type === 'print' ? (meta.size || 'A5') : 'A5';
+            const result = await createSingleShipment(env, {
+                orderId,
+                size: singleSize,
+                delivery,
+                selfAddress,
+                shippingDetails,
+                shippingAmount: session.shipping_cost?.amount_total,
+            });
+            if (result) {
+                trackingNumber = result.trackingNumber;
+                labelBase64 = result.labelBase64;
+            }
+        }
+
         // Record the order in D1 first — this is what powers "My Orders",
         // and we want it saved even if the email send below fails.
         try {
@@ -146,8 +275,8 @@ export async function onRequestPost(context) {
                     for (const item of basketItems) {
                         await env.DB.prepare(
                             `INSERT OR IGNORE INTO orders
-                                (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, created_at)
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                                (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, tracking_number, created_at)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
                         ).bind(
                             `${session.id}-${item.index}`,
                             customerEmail.toLowerCase(),
@@ -158,14 +287,15 @@ export async function onRequestPost(context) {
                             null,
                             item.price || null,
                             item.priceValue != null ? Math.round(item.priceValue * 100) * item.quantity : null,
+                            basketTracking.get(item.index)?.trackingNumber || null,
                             session.created ? session.created * 1000 : Date.now()
                         ).run();
                     }
                 } else {
                     await env.DB.prepare(
                         `INSERT OR IGNORE INTO orders
-                            (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, created_at)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                            (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, tracking_number, created_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
                     ).bind(
                         session.id,
                         customerEmail.toLowerCase(),
@@ -176,6 +306,7 @@ export async function onRequestPost(context) {
                         meta.custom_age2 || null,
                         meta.size || null,
                         session.amount_total ?? null,
+                        trackingNumber,
                         session.created ? session.created * 1000 : Date.now()
                     ).run();
                 }
@@ -194,6 +325,7 @@ export async function onRequestPost(context) {
                     items: basketItems,
                     shippingDetails,
                     selfAddress,
+                    tracking: basketTracking,
                 });
             } else {
                 await sendOrderEmail(env, {
@@ -209,6 +341,8 @@ export async function onRequestPost(context) {
                     delivery,
                     shippingDetails,
                     selfAddress,
+                    trackingNumber,
+                    labelBase64,
                 });
             }
         } catch (err) {
@@ -229,7 +363,11 @@ export async function onRequestPost(context) {
                 customerEmail,
                 isBasket: !!(isBasket && basketItems),
                 order: isBasket && basketItems
-                    ? { items: basketItems, amountTotal: session.amount_total }
+                    ? {
+                        items: basketItems,
+                        amountTotal: session.amount_total,
+                        trackingNumbers: [...new Set([...basketTracking.values()].map((t) => t.trackingNumber).filter(Boolean))],
+                    }
                     : {
                         productType: meta.product_type || 'unknown',
                         name: meta.custom_name,
@@ -238,6 +376,7 @@ export async function onRequestPost(context) {
                         age2: meta.custom_age2,
                         size: meta.size,
                         amountTotal: session.amount_total,
+                        trackingNumbers: trackingNumber ? [trackingNumber] : [],
                     },
             });
         } catch (err) {
@@ -284,6 +423,7 @@ export async function onRequestPost(context) {
         let selfAddress = null;
         let customerEmail = null;
         let amountTotal = paymentIntent.amount;
+        let membershipUserId = null;
         const object = await env.ORDER_PDFS.get(orderId);
         const raw = object ? await object.text() : null;
         if (raw) {
@@ -293,6 +433,7 @@ export async function onRequestPost(context) {
                 selfAddress = parsed.selfAddress || null;
                 customerEmail = parsed.customerEmail || null;
                 amountTotal = parsed.amountTotal ?? paymentIntent.amount;
+                membershipUserId = parsed.membershipUserId || null;
             } catch (err) {
                 console.error('Stripe webhook: could not parse order payload for order', orderId, err);
             }
@@ -300,13 +441,52 @@ export async function onRequestPost(context) {
             console.error('Stripe webhook: no R2 order payload found for order', orderId);
         }
 
+        // Cockney Cards Club membership added via basket.html's Join Now
+        // banner (see create-payment-intent-basket.js) — a one-time
+        // charge, not a real Stripe Subscription, so this is the only
+        // place it gets activated (no customer.subscription.updated
+        // event will ever fire for it). Sets the same
+        // plus_current_period_end shape a real subscription would, so
+        // checkPlusMembership()'s existing expiry check in
+        // account-api.js is what turns it back off a year from now.
+        if (membershipUserId) {
+            try {
+                await activateOneOffMembership(env, membershipUserId);
+            } catch (err) {
+                console.error('Failed to activate one-off Club membership for order', orderId, err);
+            }
+        }
+
+        // Club membership isn't a physical, PDF-bearing basketItems entry
+        // (it never goes through the missingPdf/postage pipeline in
+        // create-payment-intent-basket.js) — folded in here as one extra
+        // synthetic line, purely so "My Orders" and the fulfilment/
+        // confirmation emails show it the same way any other purchase
+        // shows up, instead of a basket order silently vanishing when
+        // membership is the only thing bought.
+        const orderItems = membershipUserId
+            ? [...basketItems, {
+                index: basketItems.length,
+                kind: 'membership',
+                title: 'Cockney Cards Club — Annual Membership',
+                optionsSummary: 'Membership valid for 1 year from today',
+                price: '£9.99',
+                priceValue: 9.99,
+                quantity: 1,
+                pdfDataUri: null,
+                delivery: { type: 'self' },
+            }]
+            : basketItems;
+
+        const basketTracking = await createBasketShipments(env, { orderId, basketItems, selfAddress, shippingDetails: null });
+
         try {
-            if (customerEmail && basketItems.length) {
-                for (const item of basketItems) {
+            if (customerEmail && orderItems.length) {
+                for (const item of orderItems) {
                     await env.DB.prepare(
                         `INSERT OR IGNORE INTO orders
-                            (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, created_at)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                            (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, tracking_number, created_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
                     ).bind(
                         `${orderId}-${item.index}`,
                         customerEmail.toLowerCase(),
@@ -317,6 +497,7 @@ export async function onRequestPost(context) {
                         null,
                         item.price || null,
                         item.priceValue != null ? Math.round(item.priceValue * 100) * item.quantity : null,
+                        basketTracking.get(item.index)?.trackingNumber || null,
                         paymentIntent.created ? paymentIntent.created * 1000 : Date.now()
                     ).run();
                 }
@@ -331,9 +512,10 @@ export async function onRequestPost(context) {
             await sendBasketOrderEmail(env, {
                 customerEmail: customerEmail || 'N/A',
                 amountTotal,
-                items: basketItems,
+                items: orderItems,
                 shippingDetails: null,
                 selfAddress,
+                tracking: basketTracking,
             });
         } catch (err) {
             console.error('Failed to send order email:', err);
@@ -343,7 +525,11 @@ export async function onRequestPost(context) {
             await sendCustomerOrderConfirmationEmail(env, {
                 customerEmail,
                 isBasket: true,
-                order: { items: basketItems, amountTotal },
+                order: {
+                    items: orderItems,
+                    amountTotal,
+                    trackingNumbers: [...new Set([...basketTracking.values()].map((t) => t.trackingNumber).filter(Boolean))],
+                },
             });
         } catch (err) {
             console.error('Failed to send customer confirmation email:', err);
@@ -392,6 +578,25 @@ async function activatePlusMembership(env, session) {
     await env.DB.prepare(
         `UPDATE users SET plus_active = 1, stripe_customer_id = ?, plus_subscription_id = ?, plus_cancel_at_period_end = 0 WHERE id = ?`
     ).bind(customerId || null, subscriptionId || null, userId).run();
+}
+
+// Same idea as activatePlusMembership() above, but for a Cockney Cards
+// Club membership bought as a one-time basket charge (see
+// create-payment-intent-basket.js/joinClubFromBasket in basket.html)
+// rather than through the separate Stripe Subscription checkout — no
+// plus_subscription_id is set here, since there's no Stripe Subscription
+// object behind it, which also means handleCancelMembership/
+// handleResumeMembership (account-api.js) correctly won't offer to
+// "cancel" it — it's not a recurring thing, it just lapses on its own,
+// which is exactly the "cancel anytime" behaviour this flow is meant to
+// have. plus_current_period_end is set the same way a real subscription
+// would set it, so checkPlusMembership()'s existing expiry check is what
+// actually turns it off again — nothing else needs to run to expire it.
+async function activateOneOffMembership(env, userId) {
+    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+    await env.DB.prepare(
+        `UPDATE users SET plus_active = 1, plus_current_period_end = ?, plus_cancel_at_period_end = 0 WHERE id = ?`
+    ).bind(Date.now() + oneYearMs, userId).run();
 }
 
 // Called on customer.subscription.updated/deleted — keeps plus_active,
@@ -560,6 +765,10 @@ async function sendCustomerOrderConfirmationEmail(env, { customerEmail, isBasket
 
     const amount = order.amountTotal != null ? `£${(order.amountTotal / 100).toFixed(2)}` : '';
     const siteUrl = env.SITE_URL || '';
+    const trackingNumbers = order.trackingNumbers || [];
+    const trackingHtml = trackingNumbers.length
+        ? `<p style="font-size: 14px; margin: 14px 0 0;"><strong>Tracking number${trackingNumbers.length > 1 ? 's' : ''}:</strong> ${trackingNumbers.join(', ')}</p>`
+        : '';
 
     const html = `
         <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 520px; margin: 0 auto; color: #1e1e24;">
@@ -571,6 +780,7 @@ async function sendCustomerOrderConfirmationEmail(env, { customerEmail, isBasket
                 <p style="font-size: 14px; color: #555; line-height: 1.6; margin: 0 0 20px;">We've got it and we're already getting your card${items.length > 1 ? 's' : ''} ready.</p>
                 <table style="width: 100%; border-collapse: collapse;">${itemsHtml}</table>
                 ${amount ? `<p style="font-size: 14px; margin: 18px 0 0;"><strong>Total paid:</strong> ${amount}</p>` : ''}
+                ${trackingHtml}
                 <p style="color: #888; font-size: 12px; margin: 22px 0 0;">You can track this order any time in <a href="${siteUrl}/account.html" style="color: #1a73e8;">My Account</a>.</p>
             </div>
             <div style="text-align: center; padding: 20px 10px 0; font-size: 11px; color: #aaa;">
@@ -632,6 +842,12 @@ async function sendOrderEmail(env, order) {
             content: base64,
         });
     }
+    if (order.labelBase64) {
+        attachments.push({
+            filename: `postage-label-${order.productType}.pdf`,
+            content: order.labelBase64,
+        });
+    }
 
     const wantsRecipient = order.delivery?.type === 'recipient' && order.delivery?.recipient;
 
@@ -652,6 +868,7 @@ async function sendOrderEmail(env, order) {
         order.name2 && order.name2 !== 'N/A' ? `Name 2: ${order.name2}` : null,
         order.age2 && order.age2 !== 'N/A' ? `Age 2: ${order.age2}` : null,
         order.size ? `Size: ${order.size}` : null,
+        order.trackingNumber ? `Royal Mail tracking number: ${order.trackingNumber}${order.labelBase64 ? ' (label attached)' : ' — ⚠️ label not returned, check Click & Drop dashboard'}` : null,
         !order.pdfDataUri ? '\n⚠️ No PDF was found in storage for this order — check R2/logs.' : null,
         '',
         wantsRecipient
@@ -687,13 +904,26 @@ async function sendOrderEmail(env, order) {
 // with its options and quantity, rather than the single set of
 // name/age/size fields the single-item version uses.
 async function sendBasketOrderEmail(env, order) {
+    const tracking = order.tracking || new Map();
     const attachments = [];
+    const attachedTrackingNumbers = new Set();
     order.items.forEach((item) => {
         const safeTitle = (item.title || 'item').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         if (item.pdfDataUri) {
             attachments.push({
                 filename: `order-item-${item.index + 1}-${item.kind}-${safeTitle}.pdf`,
                 content: item.pdfDataUri.split(',')[1] || item.pdfDataUri,
+            });
+        }
+        // One label per destination parcel, not per item — a group of
+        // several items sharing one parcel also shares one tracking
+        // number/label, so only attach it the first time it's seen.
+        const shipment = tracking.get(item.index);
+        if (shipment?.labelBase64 && !attachedTrackingNumbers.has(shipment.trackingNumber)) {
+            attachedTrackingNumbers.add(shipment.trackingNumber);
+            attachments.push({
+                filename: `postage-label-${shipment.trackingNumber}.pdf`,
+                content: shipment.labelBase64,
             });
         }
     });
@@ -710,6 +940,9 @@ async function sendBasketOrderEmail(env, order) {
             item.optionsSummary ? `   ${item.optionsSummary}` : null,
             `   Qty: ${item.quantity}${item.price ? ` · ${item.price} each` : ''}`,
             !item.pdfDataUri ? '   ⚠️ No PDF found in storage for this item.' : null,
+            tracking.get(item.index)?.trackingNumber
+                ? `   Royal Mail tracking number: ${tracking.get(item.index).trackingNumber}${tracking.get(item.index).labelBase64 ? ' (label attached)' : ' — ⚠️ label not returned, check Click & Drop dashboard'}`
+                : null,
             wantsRecipient
                 ? [
                     item.delivery.envelopeMode === 'home'
