@@ -433,7 +433,7 @@ function renderGrid(productsToRender) {
     $('product-grid').innerHTML = productsToRender.map((p) => `
         <div class="product-card">
             <div class="image-wrapper" onclick="goToEditor('${p.id}')">
-                <img src="${p.image}" alt="${p.title}" loading="lazy">
+                <img src="${p.image}" alt="${p.title}" loading="lazy" oncontextmenu="return false;" draggable="false">
             </div>
             <div class="product-info">
                 <h3 class="product-title" onclick="goToEditor('${p.id}')">${p.title}</h3>
@@ -456,7 +456,7 @@ function renderTeamGallery(leagueKey) {
 
     $('team-gallery').innerHTML = teams.map((t) => `
         <div class="team-tile" data-team="${t.key}">
-            <div class="team-image-wrapper"><img src="${t.image}" alt="${t.label}" loading="lazy"></div>
+            <div class="team-image-wrapper"><img src="${t.image}" alt="${t.label}" loading="lazy" oncontextmenu="return false;" draggable="false"></div>
             <h3 class="team-name">${t.label}</h3>
             <p class="team-count">${t.count} card${t.count === 1 ? '' : 's'}</p>
         </div>
