@@ -58,6 +58,23 @@ export async function onRequestPost(context) {
             });
         }
 
+        // Cockney Cards Club membership (added via basket.html's Join Now
+        // banner) isn't a physical, PDF-bearing product — it's split out
+        // here so it never touches the missingPdf check, postage
+        // grouping, or the card discount/reward logic below, all of
+        // which only ever look at rawProductItems. See the membership
+        // pricing block further down for how it's actually charged.
+        const rawMembershipItems = rawItems.filter((item) => item.kind === 'membership');
+        const rawProductItems = rawItems.filter((item) => item.kind !== 'membership');
+        if (rawMembershipItems.length > 1) {
+            return new Response(JSON.stringify({ error: 'Only one Cockney Cards Club membership can be added at a time.' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+        const wantsMembership = rawMembershipItems.length === 1;
+
+
         // Unlike create-checkout-basket.js, there's no Stripe-hosted page
         // left to collect an email on — checkout.html collects it
         // directly (prefilled for logged-in customers, typed in by
@@ -85,7 +102,7 @@ export async function onRequestPost(context) {
             country: (rawSelfAddress.country || 'United Kingdom').toString().slice(0, 100),
         } : null;
 
-        const items = rawItems.map((item, i) => {
+        const items = rawProductItems.map((item, i) => {
             const quantity = Math.max(1, Math.min(20, Math.round(item.quantity) || 1));
             const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
             const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
@@ -143,6 +160,27 @@ export async function onRequestPost(context) {
         const authedUser = await getUserFromAuth(request, env);
         const isClubMember = await checkPlusMembership(request, env);
         const isPromoValid = await checkPromoCode(data.promoCode, env);
+
+        // Membership has to attach to an account, and buying it again
+        // while already a member would just waste the customer's money
+        // (checkPlusMembership already accounts for a lapsed/expired
+        // one-off membership — see account-api.js — so a genuinely
+        // lapsed member can still rejoin here).
+        if (wantsMembership) {
+            if (!authedUser) {
+                return new Response(JSON.stringify({ error: 'Please log in to add Cockney Cards Club membership to your basket.' }), {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+            if (isClubMember) {
+                return new Response(JSON.stringify({ error: "You're already a Cockney Cards Club member." }), {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        }
+
 
         const rewardCodeEntered = (data.rewardCode || '').toString().trim();
         let rewardCode = rewardCodeEntered;
@@ -239,6 +277,21 @@ export async function onRequestPost(context) {
             breakdown.push({ name: postageName, unitAmount: postageAmount, quantity: 1 });
         }
 
+        // Cockney Cards Club membership — a one-time £9.99 charge, not a
+        // real Stripe Subscription (a PaymentIntent can't create one).
+        // On payment, stripe-webhook.js sets a 1-year
+        // plus_current_period_end; checkPlusMembership() in
+        // account-api.js already treats a past one as "not a member"
+        // regardless of how it got set, so this naturally lapses on its
+        // own a year from now — no renewal job needed, the Join Now
+        // banner on basket.html just reappears once clubIsMember goes
+        // false again.
+        const MEMBERSHIP_PRICE_PENCE = 999; // £9.99
+        if (wantsMembership) {
+            totalAmountPence += MEMBERSHIP_PRICE_PENCE;
+            breakdown.push({ name: 'Cockney Cards Club — Annual Membership', unitAmount: MEMBERSHIP_PRICE_PENCE, quantity: 1 });
+        }
+
         // Stripe rejects PaymentIntents below 30p — guard against a
         // £0.00 basket (e.g. every item zeroed by a reward, no postage
         // ever being genuinely free of a paid item) reaching the API as
@@ -261,6 +314,7 @@ export async function onRequestPost(context) {
             customerEmail,
             amountTotal: totalAmountPence,
             breakdown,
+            membershipUserId: wantsMembership ? authedUser.id : null,
         }));
 
         const params = new URLSearchParams();
@@ -271,6 +325,7 @@ export async function onRequestPost(context) {
         params.append('metadata[order_id]', orderId);
         params.append('metadata[product_type]', 'basket');
         params.append('metadata[item_count]', String(items.length));
+        params.append('metadata[has_membership]', wantsMembership ? '1' : '0');
         if (rewardApplied) {
             params.append('metadata[reward_code]', rewardCode.toUpperCase());
         }
