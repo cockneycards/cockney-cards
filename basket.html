@@ -241,6 +241,18 @@ let promoFeedbackColor = '#c0392b';
 // itself server-side regardless.
 let clubIsMember = false;
 
+// True if cards in this basket should show/get the 25% Club price — either
+// because the customer is already a confirmed member (clubIsMember), or
+// because they've just added the Annual Membership to this basket (so
+// they'll be a member by the time this order is charged). Recomputed at
+// the top of every renderBasket() call; displayUnitPrice() and renderItem()
+// both read it instead of clubIsMember directly, so the discount preview
+// (and the strikethrough price) appears the moment membership is added and
+// disappears the moment it's removed. The membership line itself is never
+// discounted — see create-payment-intent-basket.js's matching
+// membershipActive logic, which is what actually applies this at charge time.
+let clubDiscountActive = false;
+
 // Saved addresses for "self" delivery items (see account-api.js's
 // /api/addresses) — lets a logged-in customer pick a confirmed address
 // here instead of Stripe's own shipping_address_collection field, which
@@ -490,7 +502,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
 function displayUnitPrice(item) {
     const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
     if (!hasPrice) return null;
-    if (item.kind === 'card' && clubIsMember) return item.priceValue * 0.75;
+    if (item.kind === 'card' && clubDiscountActive) return item.priceValue * 0.75;
     return item.priceValue;
 }
 
@@ -691,6 +703,10 @@ function renderBasket() {
     const items = ccCart.getCart();
     const content = $('basket-content');
 
+    // See clubDiscountActive's declaration above — this must run before
+    // basketSubtotal()/renderItem() below read it.
+    clubDiscountActive = clubIsMember || items.some((i) => i.kind === 'membership');
+
     if (!items.length) {
         content.innerHTML = `
             ${renderClubBanner()}
@@ -857,7 +873,7 @@ function renderItem(item) {
     }
 
     const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
-    const isDiscountedCard = item.kind === 'card' && clubIsMember && hasPrice;
+    const isDiscountedCard = item.kind === 'card' && clubDiscountActive && hasPrice;
     const priceHtml = isDiscountedCard
         ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.75)} <span style="color:#1a7a3c; font-weight:normal;">(Club price)</span>`
         : (item.price || ccCart.formatGBP(item.priceValue));
