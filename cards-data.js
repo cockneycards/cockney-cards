@@ -29,7 +29,7 @@ const CARD_CATALOGUE = {
   "birthday-flowers": { title: "Birthday Flowers", categories: ["all", "birthdays"], preview: "birthday-flowers-preview.png", full: "birthday-flowers.png" },
   "birthday-vintagegolf": { title: "Vintage Golfer", categories: ["all", "birthdays", "golf", "sports"], preview: "birthday-vintagegolf-preview.png", full: "birthday-vintagegolf.png" },
   "birthday-vintagefootball": { title: "Vintage Footballer", categories: ["all", "birthdays", "football", "sports"], preview: "birthday-vintagefootball-preview.png", full: "birthday-vintagefootball.png" },
-  "birthday-vintagefishing": { title: "Vintage Fisher", categories: ["all", "birthdays", "sports"], preview: "birthday-vintagefishing-preview.png", full: "birthday-vintagefishing.png" },
+  "birthday-fishingfriends": { title: "Fishing Friends", categories: ["all", "birthdays", "sports"], preview: "fishingfriends-preview.png", full: "fishingfriends.png" },
   "birthday-lavenderfield": { title: "Lavender Fields", categories: ["all", "birthdays"], preview: "birthday-lavenderfield-preview.png", full: "birthday-lavenderfield.png" },
   "birthday-bikers": { title: "Biker Boy", categories: ["all", "birthdays"], preview: "birthday-bikers-preview.png", full: "birthday-bikers.png" },
   "birthday-cupcakes": { title: "Birthday Cupcakes", categories: ["all", "birthdays"], preview: "birthdaycupcakes-preview.png", full: "birthdaycupcakes.png" },
