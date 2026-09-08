@@ -98,6 +98,26 @@ export function postageAmountForMethod(items, method) {
     return rates[method] ?? rates.tracked24 ?? Object.values(rates)[0];
 }
 
+// Reverse lookup: given a parcel size and the amount actually charged
+// (pence), returns which service that was. Used by the webhook to work
+// out which service a customer picked on Stripe's own Checkout page for
+// a single-item order — Stripe reports the shipping amount, not our
+// method key. Amounts are unique per service within a size, so this is
+// unambiguous PROVIDED the amount is non-zero — the two single-item
+// checkouts (create-checkout.js / create-checkout-print.js) never offer
+// free shipping, so that's safe there. Don't use this for basket orders:
+// their postage is a flat per-destination line item computed server-side
+// before Stripe is involved, with no per-service Stripe amount to read
+// back — basket.html needs to send the chosen method explicitly instead
+// (see appendShippingOptions' basket note).
+export function methodFromAmount(size, amountPence) {
+    const rates = POSTAGE_RATES[size] || POSTAGE_RATES.A5;
+    for (const [method, amount] of Object.entries(rates)) {
+        if (amount === amountPence) return method;
+    }
+    return null;
+}
+
 // FREE DELIVERY PROMOS — checked per destination (see
 // groupItemsByDestination), so these are "same address", not just
 // "anywhere in the basket". Quantity counts, not just line-item counts —
