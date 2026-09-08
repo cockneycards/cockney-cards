@@ -33,7 +33,7 @@
     .price-card { display: inline-block; background: white; border: 1px solid var(--border-color); border-radius: 10px; padding: 28px 50px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
     .price-card .amount { font-size: 40px; font-weight: 700; color: var(--dark); }
     .price-card .period { font-size: 14px; color: #888; margin-left: 4px; }
-    .price-card .join-btn { display: block; margin-top: 18px; background-color: #1a1a1a; color: white; border: none; padding: 14px 30px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; }
+    .price-card .join-btn { display: block; width: 100%; margin-top: 18px; background-color: #1a1a1a; color: white; border: none; padding: 14px 30px; font-size: 13px; font-weight: bold; font-family: var(--font-family); border-radius: 6px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; box-sizing: border-box; }
     .price-card .join-btn:hover { background-color: #444; }
     .price-card .fine-print { font-size: 11px; color: #999; margin-top: 12px; }
 
@@ -113,8 +113,8 @@
 
         <div class="price-card" id="price-card">
             <span class="amount">£9.99</span><span class="period">/ year</span>
-            <a href="account.html#plus" class="join-btn">Join The Club</a>
-            <p class="fine-print">Log in or create an account to join — takes about 30 seconds.</p>
+            <button type="button" id="join-btn" class="join-btn" onclick="addMembershipToBasket()">Add To Basket</button>
+            <p class="fine-print" id="join-fine-print">Log in or create an account to join — takes about 30 seconds.</p>
         </div>
     </div>
 
@@ -282,7 +282,63 @@ async function checkMembershipStatus() {
 window.addEventListener('DOMContentLoaded', () => {
     highlightActiveNavLink();
     checkMembershipStatus();
+    renderJoinButton();
 });
+
+// Keeps the price-card button in sync with the basket: "Add To Basket"
+// while membership isn't in the cart, "Shop Now" once it is, flipping
+// back the moment it's removed (e.g. from basket.html). No-ops once
+// checkMembershipStatus() has already replaced the whole price-card with
+// the "already a member" view — #join-btn won't exist any more at that
+// point, which is what the `if (!btn) return;` guard below is for.
+function membershipInCart() {
+    return typeof ccCart !== 'undefined' && ccCart.getCart().some((i) => i.kind === 'membership');
+}
+
+function renderJoinButton() {
+    const btn = document.getElementById('join-btn');
+    const finePrint = document.getElementById('join-fine-print');
+    if (!btn) return;
+
+    if (membershipInCart()) {
+        btn.textContent = 'Shop Now';
+        btn.onclick = () => { window.location.href = 'shop-cards.html'; };
+        if (finePrint) finePrint.textContent = "It's in your basket — head to Shop to keep browsing, or go straight to Checkout when you're ready.";
+    } else {
+        btn.textContent = 'Add To Basket';
+        btn.onclick = addMembershipToBasket;
+        if (finePrint) finePrint.textContent = 'Log in or create an account to join — takes about 30 seconds.';
+    }
+}
+
+// Same membership item shape as joinClubFromBasket() in basket.html —
+// kept in sync with that if the price/title ever changes there.
+// Requires being logged in, since membership has to attach to an
+// account; sends a guest to account.html to log in or sign up first,
+// same as the page's original "Join The Club" link did.
+async function addMembershipToBasket() {
+    if (typeof ccIsLoggedIn !== 'function' || !ccIsLoggedIn()) {
+        window.location.href = 'account.html#plus';
+        return;
+    }
+    if (membershipInCart()) return;
+    await ccCart.addToCart({
+        kind: 'membership',
+        title: 'Cockney Cards Club — Annual Membership',
+        optionsSummary: 'Valid for 1 year from purchase',
+        price: '£9.99',
+        priceValue: 9.99,
+    });
+    renderJoinButton();
+}
+
+// cart.js dispatches this on every cart mutation, in this tab or (via
+// storage events, if cart.js wires that up) another one — covers
+// removing the membership from basket.html while this page is still
+// open. pageshow covers the bfcache case (back/forward navigation),
+// where DOMContentLoaded won't fire again.
+window.addEventListener('cc-cart-updated', renderJoinButton);
+window.addEventListener('pageshow', renderJoinButton);
 </script>
 </body>
 </html>
