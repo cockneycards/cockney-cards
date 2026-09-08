@@ -111,7 +111,12 @@ export async function onRequestPost(context) {
                         county: (item.delivery.recipient.county || '').toString().slice(0, 200),
                         postcode: (item.delivery.recipient.postcode || '').toString().slice(0, 50),
                         country: (item.delivery.recipient.country || 'United Kingdom').toString().slice(0, 100),
-                    }
+                    },
+                    // 'direct' = we seal it and post it straight to them;
+                    // 'home' = it comes back to the customer (unsealed, with
+                    // a spare envelope) instead — the order email needs this
+                    // to say which one is actually happening.
+                    envelopeMode: item.delivery.envelopeMode === 'home' ? 'home' : 'direct',
                 } : { type: 'self' },
             };
         });
