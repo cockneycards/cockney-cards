@@ -57,6 +57,10 @@
 
     .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 10px; }
     .summary-row.total { font-size: 16px; font-weight: bold; color: #111; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
+    .shipping-method-options { display: flex; flex-direction: column; gap: 6px; margin: -4px 0 14px; }
+    .shipping-method-option { display: flex; justify-content: space-between; align-items: center; text-align: left; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; background: white; cursor: pointer; font-family: var(--font-family); font-size: 12px; color: #555; transition: border-color 0.15s, background 0.15s; }
+    .shipping-method-option:hover { border-color: var(--primary); }
+    .shipping-method-option.selected { border-color: var(--primary); background: #f7faff; color: #111; font-weight: bold; }
     .free-delivery-nudge { background: #fff8e6; border: 1px solid var(--gold, #c8a04d); color: #7a5c1e; font-size: 13px; font-weight: bold; text-align: center; padding: 10px 12px; border-radius: 6px; margin-bottom: 15px; }
 
     .club-banner { display: flex; align-items: center; gap: 18px; background: #0e2a4d; border-radius: 8px; padding: 16px 22px; margin-bottom: 24px; flex-wrap: wrap; }
@@ -290,6 +294,7 @@ function persistSelfAddressState() {
             selectedSelfAddressId,
             adHocSelfAddress,
             guestAddresses,
+            shippingMethodByDestination,
         }));
     } catch (err) {
         console.error('Could not persist delivery address:', err);
@@ -305,6 +310,7 @@ function restoreSelfAddressState() {
         selectedSelfAddressId = saved.selectedSelfAddressId || null;
         adHocSelfAddress = saved.adHocSelfAddress || null;
         guestAddresses = saved.guestAddresses || [];
+        shippingMethodByDestination = saved.shippingMethodByDestination || {};
     } catch (err) {
         console.error('Could not restore delivery address:', err);
     }
@@ -391,8 +397,26 @@ window.addEventListener('pageshow', () => {
 // Stripe Checkout Session created server-side is what actually charges
 // the customer.
 // ---------------------------------------------------------------------
-const POSTAGE_TIERS = { A5: 199, A4: 299, A3: 499 }; // pence
+const POSTAGE_TIERS = { A5: 199, A4: 349, A3: 499 }; // pence — First Class only, kept for tierForItem/highestTier below
 const TIER_RANK = { A5: 0, A4: 1, A3: 2 };
+
+// Full per-service rates — mirrors functions/postage.js's POSTAGE_RATES/
+// METHOD_LABELS exactly. A3 has no first_class entry (it ships as a
+// small parcel, not a letter) — same reasoning as postage.js.
+const POSTAGE_RATES = {
+    A5: { first_class: 199, tracked24: 399, tracked24_signed: 599 },
+    A4: { first_class: 349, tracked24: 399, tracked24_signed: 599 },
+    A3: { tracked24: 499, tracked24_signed: 699 },
+};
+const METHOD_LABELS = {
+    first_class: 'Royal Mail 1st Class',
+    tracked24: 'Tracked24 (photo)',
+    tracked24_signed: 'Tracked24 (signature)',
+};
+// Fixed display order, cheapest/least-tracked first — used both for
+// rendering the picker and for picking a sane default (index 0) when
+// nothing's been chosen yet.
+const METHOD_ORDER = ['first_class', 'tracked24', 'tracked24_signed'];
 
 function tierForItem(item) {
     if (item.kind === 'print' && item.size && POSTAGE_TIERS[item.size]) return item.size;
@@ -406,6 +430,25 @@ function highestTier(items) {
         if (TIER_RANK[t] > TIER_RANK[best]) best = t;
     }
     return best;
+}
+
+// Services valid for one parcel size, in fixed display order.
+function methodsForSize(size) {
+    const rates = POSTAGE_RATES[size] || POSTAGE_RATES.A5;
+    return METHOD_ORDER.filter((m) => rates[m] !== undefined);
+}
+
+// Services valid for a WHOLE destination group — the intersection across
+// every size present, since they all ship in one parcel (e.g. mixing an
+// A3 print in with cards drops First Class off the list for that group).
+function methodsForDestination(groupItems) {
+    const sizes = new Set(groupItems.map(tierForItem));
+    let methods = null;
+    for (const size of sizes) {
+        const available = new Set(methodsForSize(size));
+        methods = methods ? new Set([...methods].filter((m) => available.has(m))) : available;
+    }
+    return METHOD_ORDER.filter((m) => methods && methods.has(m));
 }
 
 function normalise(value) {
@@ -427,6 +470,28 @@ function groupItemsByDestination(items) {
         groups.get(key).push(item);
     }
     return groups;
+}
+
+// The customer's chosen Royal Mail service per destination, keyed by
+// destinationKey() — e.g. { self: 'tracked24', 'recipient|jane|...': 'first_class' }.
+// Persisted alongside the self-address state below so it survives the
+// round trip to checkout.html and back. Falls back to the cheapest valid
+// service for a group (METHOD_ORDER[0] within methodsForDestination) so
+// there's always a sensible default before the customer touches anything.
+let shippingMethodByDestination = {};
+
+function resolvedMethodForGroup(groupItems) {
+    const valid = methodsForDestination(groupItems);
+    if (!valid.length) return null;
+    const key = destinationKey(groupItems[0]);
+    const chosen = shippingMethodByDestination[key];
+    return valid.includes(chosen) ? chosen : valid[0];
+}
+
+function selectShippingMethod(key, method) {
+    shippingMethodByDestination[key] = method;
+    persistSelfAddressState();
+    renderBasket();
 }
 
 // Returns { parcels: [{ label, amountPence }], totalPence }.
@@ -473,8 +538,10 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         const qualifiesForFreeLargePrintDelivery = cardUnitsInGroup >= 1 && largePrintUnitsInGroup >= 2;
         const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || qualifiesForFreeEnvelopeDelivery || qualifiesForFreeLargePrintDelivery || (allCardsInGroup && isPromoValid);
 
-        const tier = highestTier(groupItems);
-        const amountPence = postageWaived ? 0 : POSTAGE_TIERS[tier];
+        const size = highestTier(groupItems);
+        const validMethods = methodsForDestination(groupItems);
+        const selectedMethod = resolvedMethodForGroup(groupItems);
+        const amountPence = postageWaived ? 0 : (POSTAGE_RATES[size]?.[selectedMethod] ?? 0);
         totalPence += amountPence;
 
         const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
@@ -486,7 +553,15 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         else if (postageWaived) label = `Free Postage — Promo Code${parcelLabel}`;
         else label = `Postage${parcelLabel}`;
 
-        parcels.push({ label, amountPence });
+        parcels.push({
+            label,
+            amountPence,
+            destinationKey: destinationKey(groupItems[0]),
+            size,
+            validMethods,
+            selectedMethod,
+            waived: postageWaived,
+        });
     }
 
     return { parcels, totalPence };
@@ -732,9 +807,32 @@ function renderBasket() {
     const grandTotal = subtotal + postagePounds;
     const freeDeliveryNudge = basketFreeDeliveryNudge(physicalItems);
 
-    const postageRowsHtml = postage.parcels.map((p) => `
-        <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
-    `).join('');
+    // Each parcel gets its own service picker — small pill buttons for
+    // every method valid for that destination's items (see
+    // methodsForDestination), so the customer sees exactly what it'll
+    // cost to upgrade. Choosing a service is independent of whether
+    // postage is currently waived: the parcel still ships under whichever
+    // service is selected (matters for tracking, even at £0).
+    const postageRowsHtml = postage.parcels.map((p) => {
+        const optionsHtml = p.validMethods.length > 1 ? `
+            <div class="shipping-method-options">
+                ${p.validMethods.map((m) => {
+                    const price = POSTAGE_RATES[p.size]?.[m];
+                    const priceLabel = p.waived ? 'FREE' : ccCart.formatGBP((price || 0) / 100);
+                    return `
+                        <button type="button" class="shipping-method-option${m === p.selectedMethod ? ' selected' : ''}" onclick="selectShippingMethod('${p.destinationKey}', '${m}')">
+                            <span>${METHOD_LABELS[m]}</span>
+                            <span>${priceLabel}</span>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+        ` : '';
+        return `
+            <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
+            ${optionsHtml}
+        `;
+    }).join('');
 
     const clubSavingsRowHtml = clubSavings > 0.001
         ? `<div class="summary-row" style="color:#1a7a3c;"><span>Cockney Cards Club discount (25% off cards)</span><span>−${ccCart.formatGBP(clubSavings)}</span></div>`
@@ -1253,6 +1351,16 @@ async function goToCheckout() {
             throw new Error('Please add a delivery address for the item(s) going to you.');
         }
 
+        // Resolve each destination's chosen Royal Mail service (picked in
+        // the postage breakdown above) back onto its items, the same way
+        // renderBasket()/estimatePostage() derive it — membership isn't a
+        // physical parcel, so it's excluded here too and just sends null.
+        const physicalItemsForCheckout = items.filter((item) => item.kind !== 'membership');
+        const methodByKey = new Map();
+        for (const groupItems of groupItemsByDestination(physicalItemsForCheckout).values()) {
+            methodByKey.set(destinationKey(groupItems[0]), resolvedMethodForGroup(groupItems));
+        }
+
         const checkoutData = {
             customerEmail: loggedIn ? ccGetEmail() : null,
             promoCode: $('promo-code-input')?.value || null,
@@ -1277,7 +1385,8 @@ async function goToCheckout() {
                 quantity: item.quantity,
                 pdfDataUri: item.pdfDataUri,
                 size: item.size || null,
-                delivery: item.delivery || { type: 'self' }
+                delivery: item.delivery || { type: 'self' },
+                shippingMethod: item.kind === 'membership' ? null : (methodByKey.get(destinationKey(item)) || null),
             }))
         };
 
