@@ -699,6 +699,34 @@
             return crumbs.join('<span class="crumb-sep">/</span>');
         }
 
+        // Session-scoped cache for the "Featured" shuffle order (see
+        // sortItems below) — an array of every product id in shuffled
+        // order, generated once per browser session and reused after
+        // that, so switching categories, sorting, or navigating back to
+        // this page never reshuffles what's already on screen.
+        const FEATURED_ORDER_KEY = 'shopPrintsFeaturedOrder';
+        let featuredOrderIds = null;
+
+        function getFeaturedOrderIds() {
+            if (featuredOrderIds) return featuredOrderIds;
+            try {
+                const raw = sessionStorage.getItem(FEATURED_ORDER_KEY);
+                if (raw) {
+                    featuredOrderIds = JSON.parse(raw);
+                    return featuredOrderIds;
+                }
+            } catch (e) { /* sessionStorage unavailable -- fall through and shuffle fresh */ }
+
+            const ids = PRODUCTS.map((p) => p.id);
+            for (let i = ids.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [ids[i], ids[j]] = [ids[j], ids[i]];
+            }
+            featuredOrderIds = ids;
+            try { sessionStorage.setItem(FEATURED_ORDER_KEY, JSON.stringify(ids)); } catch (e) { /* ignore */ }
+            return ids;
+        }
+
         function sortItems(items) {
             const sorted = [...items];
             switch (currentSort) {
@@ -706,14 +734,19 @@
                 case 'price-desc': sorted.sort((a, b) => b.priceValue - a.priceValue); break;
                 case 'name-asc': sorted.sort((a, b) => a.title.localeCompare(b.title)); break;
                 case 'name-desc': sorted.sort((a, b) => b.title.localeCompare(a.title)); break;
-                case 'featured':
-                    // Shuffle (Fisher-Yates) every time Featured is chosen/rendered,
-                    // so the "featured" order looks fresh on each visit/selection.
-                    for (let i = sorted.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
-                    }
+                case 'featured': {
+                    // Shuffled once per browser session (so "featured" still
+                    // looks fresh on a genuinely new visit), then cached —
+                    // sorting against that cached order instead of
+                    // re-shuffling on every render is what stops the grid
+                    // reordering itself if the customer clicks into a card
+                    // and hits Back (restoreShopState re-runs this same
+                    // render pipeline).
+                    const order = getFeaturedOrderIds();
+                    const rank = new Map(order.map((id, idx) => [id, idx]));
+                    sorted.sort((a, b) => (rank.has(a.id) ? rank.get(a.id) : order.length) - (rank.has(b.id) ? rank.get(b.id) : order.length));
                     break;
+                }
                 // 'best-selling' (default): no real sales data wired in yet -- falls back to
                 // catalogue order for now.
             }
