@@ -47,13 +47,8 @@
 
     .item-envelope { flex: 1 1 100%; margin-top: 4px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
     .item-envelope-label { font-size: 12px; font-weight: bold; color: #333; margin: 0 0 8px; }
-    .item-envelope-options { display: flex; gap: 10px; }
-    .envelope-option { flex: 1; text-align: left; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 12px; background: white; cursor: pointer; font-family: var(--font-family); transition: border-color 0.15s, background 0.15s; }
-    .envelope-option strong { display: block; font-size: 12px; margin-bottom: 3px; color: #111; }
-    .envelope-option span { display: block; font-size: 11px; color: #777; line-height: 1.4; }
-    .envelope-option:hover { border-color: var(--primary); }
-    .envelope-option.selected { border-color: var(--primary); background: #f7faff; }
-    @media (max-width: 700px) { .item-envelope-options { flex-direction: column; } }
+    .item-envelope-line { font-size: 11px; color: #777; line-height: 1.4; margin: 0 0 6px; }
+    .item-envelope-line strong { color: #111; }
 
     .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 10px; }
     .summary-row.total { font-size: 16px; font-weight: bold; color: #111; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
@@ -734,37 +729,19 @@ function renderRecipientAddressBlock(recipient) {
     return `<p class="item-delivery-address">${lines}</p>`;
 }
 
-// Only relevant once an item has a specific recipient address — asks
-// whether we seal it and post it straight to that address, or send it
-// (with a spare envelope) to the customer's own home so they can pass
-// it on themselves. Defaults to "direct" the same way a new recipient
-// delivery is created (see chooseAddress/submitAddress).
+// Static explainer of what happens to a card, shown once it has a
+// specific recipient address — no longer a toggle the customer can
+// change here (see envelopeMode, still set to 'direct' when a recipient
+// address is chosen; see chooseAddress/submitAddress).
 function renderEnvelopeSection(item) {
-    const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
     if (item.kind !== 'card') return '';
-    const mode = item.delivery?.envelopeMode || 'home';
     return `
         <div class="item-envelope">
             <p class="item-envelope-label">Envelope</p>
-            <div class="item-envelope-options">
-                <button type="button" class="envelope-option${mode === 'home' ? ' selected' : ''}" onclick="setItemEnvelopeMode('${item.id}', 'home')">
-                    <strong>Send to Home</strong>
-                    <span>We'll send a spare envelope for you to send on.</span>
-                </button>
-                <button type="button" class="envelope-option${mode === 'direct' ? ' selected' : ''}" onclick="setItemEnvelopeMode('${item.id}', 'direct')">
-                    <strong>Send Directly to Recipient</strong>
-                    <span>We'll seal the card and deliver it for you.</span>
-                </button>
-            </div>
+            <p class="item-envelope-line"><strong>Sending Home:</strong> We will send a spare envelope for you to seal and send on.</p>
+            <p class="item-envelope-line"><strong>Sending to Recipient:</strong> We'll seal the card and post it for you.</p>
         </div>
     `;
-}
-
-function setItemEnvelopeMode(itemId, mode) {
-    const item = ccCart.getCart().find((i) => i.id === itemId);
-    if (!item || !item.delivery) return;
-    ccCart.updateItemDelivery(itemId, Object.assign({}, item.delivery, { envelopeMode: mode }));
-    renderBasket();
 }
 
 function renderItem(item) {
