@@ -8,7 +8,7 @@
 // Requires the same STRIPE_SECRET_KEY env var and ORDER_PDFS R2 bucket
 // binding as create-checkout.js (they can share both).
 
-import { POSTAGE_TIERS } from './postage.js';
+import { appendShippingOptions } from './postage.js';
 
 export async function onRequestPost(context) {
     const { request, env } = context;
@@ -83,11 +83,12 @@ export async function onRequestPost(context) {
 
         // Prints don't get the Cockney Cards Club free-postage waiver
         // (that's specifically for A5 cards, see postage.js/checkPlusMembership
-        // usage in create-checkout-basket.js) — just the size-appropriate rate.
-        params.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
-        params.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', String(POSTAGE_TIERS[data.size] || POSTAGE_TIERS.A5));
-        params.append('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'gbp');
-        params.append('shipping_options[0][shipping_rate_data][display_name]', 'Postage');
+        // usage in create-checkout-basket.js) — just the size-appropriate
+        // rate. Offers every service valid for this size (A3 has no First
+        // Class — see postage.js) as separate selectable options on
+        // Stripe's own page; the webhook works out which one was picked
+        // from the amount charged (see postage.js's methodFromAmount).
+        appendShippingOptions(params, [{ kind: 'print', size: data.size }], { free: false });
 
         params.append('metadata[order_id]', orderId);
         params.append('metadata[product_type]', 'print');
