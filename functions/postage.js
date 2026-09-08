@@ -7,12 +7,42 @@
 // Tiers are based on parcel size, not product type: a basket ships in one
 // package sized for whatever's biggest inside it, so postage is the
 // highest tier present across all items, not summed per item.
+//
+// Each size also offers one or more Royal Mail SERVICES (First Class /
+// Tracked24 / Tracked24 with signature) — see POSTAGE_RATES below. A3
+// parcels don't fit a First Class envelope, so only the two Tracked24
+// services are offered for that size.
 
 // Pence, matching Stripe's unit_amount convention.
+export const POSTAGE_METHODS = {
+    FIRST_CLASS: 'first_class',
+    TRACKED24: 'tracked24',
+    TRACKED24_SIGNED: 'tracked24_signed',
+};
+
+const METHOD_LABELS = {
+    first_class: 'Royal Mail 1st Class',
+    tracked24: 'Royal Mail Tracked 24 (photo)',
+    tracked24_signed: 'Royal Mail Tracked 24 (photo & signature)',
+};
+
+// Royal Mail's own charge for Tracked24 is £3.80 (A5/A4) / £4.65 (A3) and
+// £5.80 (A5/A4 signed) / £5.80 (A3 signed) — we round these up to £3.99 /
+// £4.99 / £5.99 / £6.99 when charging customers. A3 goes as a small
+// parcel rather than a letter, so it has no First Class option.
+export const POSTAGE_RATES = {
+    A5: { first_class: 199, tracked24: 399, tracked24_signed: 599 },
+    A4: { first_class: 349, tracked24: 399, tracked24_signed: 599 },
+    A3: { tracked24: 499, tracked24_signed: 699 }, // sent as a small parcel, no first_class
+};
+
+// Legacy flat-tier map, kept for any code still importing POSTAGE_TIERS
+// directly. Uses each size's First Class rate where one exists, and A3's
+// Tracked24 rate (its cheapest available service) otherwise.
 export const POSTAGE_TIERS = {
-    A5: 199, // cards (always this folded format) + A5 prints
-    A4: 299,
-    A3: 499,
+    A5: POSTAGE_RATES.A5.first_class,
+    A4: POSTAGE_RATES.A4.first_class,
+    A3: POSTAGE_RATES.A3.tracked24,
 };
 
 const TIER_RANK = { A5: 0, A4: 1, A3: 2 };
@@ -37,6 +67,35 @@ export function highestTier(items) {
         if (TIER_RANK[t] > TIER_RANK[best]) best = t;
     }
     return best;
+}
+
+// Services available for a given parcel size, in a fixed display order.
+export function methodsForSize(size) {
+    const rates = POSTAGE_RATES[size] || POSTAGE_RATES.A5;
+    return Object.keys(METHOD_LABELS).filter((m) => rates[m] !== undefined);
+}
+
+// Services that can be offered for a whole destination's items: the
+// intersection across every parcel size present. Mixing an A3 print in
+// with cards, for instance, drops First Class off the list, since the A3
+// can't travel that way — the customer only sees services every item in
+// the parcel can actually use.
+export function methodsForDestination(items) {
+    const sizes = new Set(items.map(tierForItem));
+    let methods = null;
+    for (const size of sizes) {
+        const available = new Set(methodsForSize(size));
+        methods = methods ? new Set([...methods].filter((m) => available.has(m))) : available;
+    }
+    return Object.keys(METHOD_LABELS).filter((m) => methods && methods.has(m));
+}
+
+// Amount for a destination's items under a given service, charged by the
+// biggest parcel present (same "biggest parcel wins" rule as before).
+export function postageAmountForMethod(items, method) {
+    const size = highestTier(items);
+    const rates = POSTAGE_RATES[size] || POSTAGE_RATES.A5;
+    return rates[method] ?? rates.tracked24 ?? Object.values(rates)[0];
 }
 
 // FREE DELIVERY PROMOS — checked per destination (see
@@ -92,21 +151,30 @@ export function qualifiesForFreeLargePrintDelivery(items) {
     return unitCount(items, 'card') >= 1 && largePrintUnits >= 2;
 }
 
-// Single entry point for what to actually charge a given destination's
-// items: free if any of the promos above apply, or the customer is a
-// Cockney Cards Club member (isClubMember) — any one reason is enough.
-// Otherwise, the normal tier-based amount from POSTAGE_TIERS/highestTier.
-export function postageForDestination(items, { isClubMember = false } = {}) {
-    if (
+// Whether a destination's postage is free, regardless of which service
+// they'd otherwise pick — any one of the promo rules below is enough, as
+// is Cockney Cards Club membership.
+export function isFreeDelivery(items, { isClubMember = false } = {}) {
+    return (
         isClubMember ||
         qualifiesForFreeCardDelivery(items) ||
         qualifiesForFreePrintDelivery(items) ||
         qualifiesForFreeDelivery(items) ||
         qualifiesForFreeLargePrintDelivery(items)
-    ) {
-        return 0;
-    }
-    return POSTAGE_TIERS[highestTier(items)];
+    );
+}
+
+// Single entry point for what to actually charge a given destination's
+// items under the given (or default) service: free if any promo applies
+// or the customer is a Cockney Cards Club member, otherwise the rate for
+// that service/size. Defaults to the cheapest available service (First
+// Class where offered, otherwise Tracked24) when no method is passed —
+// useful for anywhere that still just wants "the" postage amount rather
+// than a customer-selectable list.
+export function postageForDestination(items, { isClubMember = false, method } = {}) {
+    if (isFreeDelivery(items, { isClubMember })) return 0;
+    const chosenMethod = method || methodsForDestination(items)[0];
+    return postageAmountForMethod(items, chosenMethod);
 }
 
 // Groups basket items by where they're actually going, for the basket
@@ -142,13 +210,37 @@ function normalise(value) {
 
 // Builds the Stripe shipping_options[] params for a Checkout Session
 // (payment mode only — Stripe doesn't support shipping_options in
-// subscription mode). Used by the two single-item checkout functions only
-// — the basket checkout charges postage as per-destination line items
-// instead, since shipping_options only supports one selectable rate per
-// session, not several simultaneous ones for multiple parcels.
+// subscription mode) for a SINGLE fixed rate. Kept for any existing call
+// sites that just want one rate charged with no customer choice of
+// service. Used by the two single-item checkout functions only — the
+// basket checkout charges postage as per-destination line items instead,
+// since shipping_options only supports one selectable rate per session
+// per call to this function (see appendShippingOptions below for
+// offering several services at once).
 export function appendShippingOption(params, amountPence, { free = false } = {}) {
     params.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
     params.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', String(free ? 0 : amountPence));
     params.append('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'gbp');
     params.append('shipping_options[0][shipping_rate_data][display_name]', free ? 'Free Postage (Cockney Cards Club)' : 'Postage');
+}
+
+// Builds Stripe shipping_options[] params offering EVERY service valid
+// for this destination's items (First Class / Tracked24 / Tracked24
+// signed, whichever apply — see methodsForDestination), so the customer
+// picks their preferred service in Stripe Checkout itself. Stripe
+// supports multiple selectable shipping_options per session, indexed
+// 0, 1, 2… — that's what this does. Pass `free: true` to zero out every
+// rate (promo / Cockney Cards Club) while still showing the same list of
+// service names.
+export function appendShippingOptions(params, items, { free = false } = {}) {
+    const methods = methodsForDestination(items);
+    const list = methods.length ? methods : [POSTAGE_METHODS.TRACKED24];
+    list.forEach((method, index) => {
+        const amount = free ? 0 : postageAmountForMethod(items, method);
+        const label = free ? 'Free Postage (Cockney Cards Club)' : METHOD_LABELS[method];
+        params.append(`shipping_options[${index}][shipping_rate_data][type]`, 'fixed_amount');
+        params.append(`shipping_options[${index}][shipping_rate_data][fixed_amount][amount]`, String(amount));
+        params.append(`shipping_options[${index}][shipping_rate_data][fixed_amount][currency]`, 'gbp');
+        params.append(`shipping_options[${index}][shipping_rate_data][display_name]`, label);
+    });
 }
