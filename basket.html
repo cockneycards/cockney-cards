@@ -332,14 +332,27 @@ async function refreshMembershipStatus() {
     }
 }
 
-// NOTE: this sends the customer to the Cockney Club sign-up page rather
-// than adding a subscription line straight into ccCart, on purpose —
-// the cards in this basket are a one-off Stripe "payment" checkout,
-// while Club membership is a recurring subscription; Stripe can't mix
-// the two in a single session without the checkout backend explicitly
-// switching modes, which isn't wired up yet (see chat for details).
-function joinClubFromBasket() {
-    window.location.href = 'cockney-club.html';
+// Adds Cockney Cards Club membership to the basket, Moonpig-style — a
+// one-time £9.99 charge (not a Stripe Subscription; see
+// create-payment-intent-basket.js/stripe-webhook.js), valid for 1 year
+// from checkout. checkPlusMembership() already treats a past
+// plus_current_period_end as "not a member" regardless of how it got
+// set, so this banner naturally reappears on its own once the year's
+// up — nothing here needs to actively expire it. Requires being logged
+// in, since membership has to attach to an account.
+async function joinClubFromBasket() {
+    if (!ccIsLoggedIn()) {
+        window.location.href = 'account.html';
+        return;
+    }
+    if (ccCart.getCart().some((i) => i.kind === 'membership')) return;
+    await ccCart.addToCart({
+        kind: 'membership',
+        title: 'Cockney Cards Club — Annual Membership',
+        optionsSummary: 'Valid for 1 year from purchase',
+        price: '£9.99',
+        priceValue: 9.99,
+    });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -652,6 +665,7 @@ function getChosenSelfAddress() {
 // non-member is just told to join (they're already logged in).
 function renderClubBanner() {
     if (clubIsMember) return '';
+    if (ccCart.getCart().some((i) => i.kind === 'membership')) return '';
 
     const loggedIn = ccIsLoggedIn();
     const message = loggedIn
@@ -692,10 +706,15 @@ function renderBasket() {
     const subtotal = basketSubtotal(items);
     const clubSavings = rawSubtotal - subtotal;
     const count = ccCart.getCartCount();
-    const postage = estimatePostage(items, { isPromoValid: promoIsValid });
+    // Club membership isn't a physical parcel — it never affects postage
+    // tiers/grouping or the free-delivery promos, so it's excluded from
+    // everything postage.js touches (estimatePostage, the free-delivery
+    // nudge, and whether a delivery address is even required).
+    const physicalItems = items.filter((item) => item.kind !== 'membership');
+    const postage = estimatePostage(physicalItems, { isPromoValid: promoIsValid });
     const postagePounds = postage.totalPence / 100;
     const grandTotal = subtotal + postagePounds;
-    const freeDeliveryNudge = basketFreeDeliveryNudge(items);
+    const freeDeliveryNudge = basketFreeDeliveryNudge(physicalItems);
 
     const postageRowsHtml = postage.parcels.map((p) => `
         <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
@@ -711,7 +730,8 @@ function renderBasket() {
 
     // A "recipient" item already has its address locked in from the
     // editor — only a "self" item needs a "deliver to" chosen here.
-    const hasSelfItem = items.some((item) => item.delivery?.type !== 'recipient');
+    // Club membership never needs one either way.
+    const hasSelfItem = physicalItems.some((item) => item.delivery?.type !== 'recipient');
     const deliverToHtml = hasSelfItem ? renderDeliverToBlock() : '';
 
     // Checkout is disabled until every "self" item has a resolved
@@ -818,6 +838,24 @@ function setItemEnvelopeMode(itemId, mode) {
 }
 
 function renderItem(item) {
+    // Club membership is a basket line, not a physical product — no
+    // quantity stepper, envelope, or delivery/recipient picker apply to
+    // it (see joinClubFromBasket/postage exclusions in renderBasket).
+    if (item.kind === 'membership') {
+        return `
+            <div class="basket-item" data-id="${item.id}">
+                <div class="item-info">
+                    <p class="item-title">${item.title}</p>
+                    <p class="item-options">${item.optionsSummary || ''}</p>
+                    <p class="item-price">${item.price}</p>
+                </div>
+                <div class="item-actions">
+                    <button class="remove-link" onclick="removeItem('${item.id}')">Remove</button>
+                </div>
+            </div>
+        `;
+    }
+
     const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
     const isDiscountedCard = item.kind === 'card' && clubIsMember && hasPrice;
     const priceHtml = isDiscountedCard
@@ -1194,7 +1232,7 @@ async function goToCheckout() {
         // whenever this is missing, so this is just a defensive re-check.
         const chosenAddress = getChosenSelfAddress();
 
-        const needsCustomerAddress = items.some((item) => item.delivery?.type !== 'recipient');
+        const needsCustomerAddress = items.some((item) => item.kind !== 'membership' && item.delivery?.type !== 'recipient');
         if (needsCustomerAddress && !chosenAddress) {
             throw new Error('Please add a delivery address for the item(s) going to you.');
         }
