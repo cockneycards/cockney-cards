@@ -58,6 +58,18 @@
     .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 10px; }
     .summary-row.total { font-size: 16px; font-weight: bold; color: #111; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
     .free-delivery-nudge { background: #fff8e6; border: 1px solid var(--gold, #c8a04d); color: #7a5c1e; font-size: 13px; font-weight: bold; text-align: center; padding: 10px 12px; border-radius: 6px; margin-bottom: 15px; }
+
+    .club-banner { display: flex; align-items: center; gap: 18px; background: #0e2a4d; border-radius: 8px; padding: 16px 22px; margin-bottom: 24px; flex-wrap: wrap; }
+    .club-banner-text { flex: 1; min-width: 220px; }
+    .club-banner-text p { margin: 0; font-size: 13px; line-height: 1.5; color: #eef2f8; }
+    .club-banner-text strong { color: #f4bc2c; }
+    .club-banner-actions { display: flex; gap: 10px; flex-shrink: 0; }
+    .club-banner-btn { border: none; border-radius: 20px; padding: 9px 18px; font-size: 12px; font-weight: bold; letter-spacing: 0.3px; cursor: pointer; white-space: nowrap; font-family: var(--font-family); }
+    .club-banner-btn.gold { background: #f4bc2c; color: #0e2a4d; }
+    .club-banner-btn.gold:hover { background: #ffc93f; }
+    .club-banner-btn.outline { background: transparent; color: #eef2f8; border: 1px solid rgba(255,255,255,0.55); }
+    .club-banner-btn.outline:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+    @media (max-width: 700px) { .club-banner { flex-direction: column; align-items: flex-start; } .club-banner-actions { width: 100%; } .club-banner-btn { flex: 1; } }
     .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 15px; letter-spacing: 1px; text-transform: uppercase; box-sizing: border-box; }
     .btn:hover { background-color: #444; }
     .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
@@ -318,6 +330,16 @@ async function refreshMembershipStatus() {
     } catch (err) {
         console.error('Could not check Cockney Cards Club status:', err);
     }
+}
+
+// NOTE: this sends the customer to the Cockney Club sign-up page rather
+// than adding a subscription line straight into ccCart, on purpose —
+// the cards in this basket are a one-off Stripe "payment" checkout,
+// while Club membership is a recurring subscription; Stripe can't mix
+// the two in a single session without the checkout backend explicitly
+// switching modes, which isn't wired up yet (see chat for details).
+function joinClubFromBasket() {
+    window.location.href = 'cockney-club.html';
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -624,6 +646,32 @@ function getChosenSelfAddress() {
         : guestSelfAddress;
 }
 
+// Nudges a guest or non-member towards the discount they're missing —
+// hidden entirely once clubIsMember is confirmed true. Text/buttons
+// adapt to login state: a guest is told to log in OR join, a logged-in
+// non-member is just told to join (they're already logged in).
+function renderClubBanner() {
+    if (clubIsMember) return '';
+
+    const loggedIn = ccIsLoggedIn();
+    const message = loggedIn
+        ? `You're not a <strong>Cockney Cards Club</strong> member yet — join today and save 25% on every card.`
+        : `Remember to log in to your <strong>Cockney Cards Club</strong> account to get your member discount. Don't have one? Why not join?`;
+    const loginBtnHtml = loggedIn
+        ? ''
+        : `<button type="button" class="club-banner-btn outline" onclick="window.location.href='account.html'">Log In</button>`;
+
+    return `
+        <div class="club-banner">
+            <div class="club-banner-text"><p>${message}</p></div>
+            <div class="club-banner-actions">
+                ${loginBtnHtml}
+                <button type="button" class="club-banner-btn gold" onclick="joinClubFromBasket()">Join Now</button>
+            </div>
+        </div>
+    `;
+}
+
 function renderBasket() {
     persistSelfAddressState();
     const items = ccCart.getCart();
@@ -631,6 +679,7 @@ function renderBasket() {
 
     if (!items.length) {
         content.innerHTML = `
+            ${renderClubBanner()}
             <div class="empty-basket">
                 <p class="empty-title">Your basket is empty</p>
                 <a href="shop-cards.html">Browse cards</a> &nbsp;·&nbsp; <a href="shop-prints.html">Browse prints</a>
@@ -674,6 +723,7 @@ function renderBasket() {
         : '';
 
     content.innerHTML = `
+        ${renderClubBanner()}
         <div class="basket-layout">
             <div class="basket-items">
                 ${items.map(renderItem).join('')}
