@@ -98,6 +98,11 @@ export async function onRequestPost(context) {
                 // Per-item delivery choice — "self" (customer writes in it
                 // themselves) or "recipient" (goes straight to them; their
                 // address is included in the order email text).
+                // envelopeMode only matters for a "recipient" item: 'direct'
+                // means we seal it and post it straight to them, 'home'
+                // means we send it (unsealed, with a spare envelope) back to
+                // the customer's own address instead — the order email needs
+                // this to say which one is actually happening.
                 delivery: wantsRecipient ? {
                     type: 'recipient',
                     recipient: {
@@ -108,7 +113,8 @@ export async function onRequestPost(context) {
                         county: (item.delivery.recipient.county || '').toString().slice(0, 200),
                         postcode: (item.delivery.recipient.postcode || '').toString().slice(0, 50),
                         country: (item.delivery.recipient.country || 'United Kingdom').toString().slice(0, 100),
-                    }
+                    },
+                    envelopeMode: item.delivery.envelopeMode === 'home' ? 'home' : 'direct',
                 } : { type: 'self' },
             };
         });
