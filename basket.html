@@ -265,6 +265,7 @@ function persistSelfAddressState() {
             guestSelfAddress,
             selectedSelfAddressId,
             adHocSelfAddress,
+            guestAddresses,
         }));
     } catch (err) {
         console.error('Could not persist delivery address:', err);
@@ -279,6 +280,7 @@ function restoreSelfAddressState() {
         guestSelfAddress = saved.guestSelfAddress || null;
         selectedSelfAddressId = saved.selectedSelfAddressId || null;
         adHocSelfAddress = saved.adHocSelfAddress || null;
+        guestAddresses = saved.guestAddresses || [];
     } catch (err) {
         console.error('Could not restore delivery address:', err);
     }
@@ -707,7 +709,7 @@ function renderBasket() {
 // items as 'self'; see editor.html/editor-prints.html).
 function renderDeliveryLine(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
-    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to Home';
+    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to';
     const actionText = wantsRecipient ? 'Change Recipient' : 'Select Recipient';
     const addressHtml = wantsRecipient ? renderRecipientAddressBlock(item.delivery.recipient) : '';
     return `
@@ -721,7 +723,7 @@ function renderDeliveryLine(item) {
 
 // The address lines shown under "Sending to: <name>" for a card sent to
 // a specific recipient — same fields entered in the recipient form
-// (submitRecipientAddress), each item keeping its own since delivery is
+// (submitAddress), each item keeping its own since delivery is
 // per-item, not per-basket.
 function renderRecipientAddressBlock(recipient) {
     if (!recipient) return '';
@@ -736,7 +738,7 @@ function renderRecipientAddressBlock(recipient) {
 // whether we seal it and post it straight to that address, or send it
 // (with a spare envelope) to the customer's own home so they can pass
 // it on themselves. Defaults to "direct" the same way a new recipient
-// delivery is created (see chooseRecipientSavedAddress/submitRecipientAddress).
+// delivery is created (see chooseAddress/submitAddress).
 function renderEnvelopeSection(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
     if (item.kind !== 'card') return '';
@@ -893,22 +895,29 @@ function closePreview() {
 
 // ---------------------------------------------------------------------
 // Per-item recipient picker — "Sending to: ... [Select Recipient]" on
-// each basket line opens this. Two sections:
-//   - "Saved Addresses" -> resolves the SHARED self/"deliver to me"
-//     address (delivery = { type: 'self' }), same address used by every
-//     other "self" item and the "Deliver to" block in the sidebar.
-//     Picking one here sets selectedSelfAddressId directly, so the
-//     customer never has to separately visit the sidebar to finish this.
-//   - "Send to someone else" -> a per-item recipient address
-//     (delivery = { type: 'recipient', recipient }).
-// Both sections fall back to "+ Add a new address" if the account has
-// none saved (or the customer is a guest) — optionally POSTed to
-// /api/addresses first (logged-in only) so it's saved for next time.
-// A guest can still add a one-off address here (no login required) —
-// they just don't get the "save for next time" option.
+// each basket line opens this. One merged list, "Saved Addresses",
+// pulled from the customer's account (or, for a guest, addresses
+// they've entered so far this session) — no separate "send to home" vs
+// "send to someone else" sections, since a saved "Home" address is just
+// another entry in the same list. Picking any address (or adding a new
+// one) bakes it onto this item as its delivery address
+// (delivery = { type: 'recipient', recipient }).
+// Falls back to "+ Add a new address" if there's nothing saved yet —
+// optionally POSTed to /api/addresses first (logged-in only) so it's
+// saved for next time. A guest can still add a one-off address here (no
+// login required); it's kept for the rest of this session (see
+// guestAddresses below) so it can be picked again for another item
+// without retyping, but it isn't saved to an account.
 // ---------------------------------------------------------------------
 let recipientPickerItemId = null;
-let recipientPickerMode = 'menu'; // 'menu' | 'addSelf' | 'addRecipient'
+let recipientPickerMode = 'menu'; // 'menu' | 'add'
+
+// Session-only address book for guests, mirroring the account's
+// savedAddresses so a guest can reuse an address across items without
+// retyping it, without requiring login. Persisted the same way as the
+// other delivery state (see persistSelfAddressState) so it survives a
+// round trip to checkout.html and back.
+let guestAddresses = [];
 
 function openRecipientPicker(itemId) {
     recipientPickerItemId = itemId;
@@ -926,67 +935,41 @@ function closeRecipientPicker() {
 }
 
 function renderRecipientPicker() {
-    if (recipientPickerMode === 'addSelf') { renderAddressForm('addSelf'); return; }
-    if (recipientPickerMode === 'addRecipient') { renderAddressForm('addRecipient'); return; }
+    if (recipientPickerMode === 'add') { renderAddressForm(); return; }
 
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
     const item = ccCart.getCart().find((i) => i.id === recipientPickerItemId);
-    const currentIsSelf = item?.delivery?.type !== 'recipient';
+    const currentRecipient = item?.delivery?.type === 'recipient' ? item.delivery.recipient : null;
+    const addressList = loggedIn ? savedAddresses : guestAddresses;
 
-    // "Saved Addresses" — picking one resolves the shared self address.
-    let selfSectionHtml;
-    if (loggedIn && savedAddresses.length) {
-        selfSectionHtml = savedAddresses.map((a) => `
-            <div class="recipient-option${currentIsSelf && a.id === selectedSelfAddressId ? ' selected' : ''}" onclick="chooseSelfSavedAddress('${a.id}')">
-                <strong>${a.label || 'Address'}</strong>
-                <span>${a.name}<br>${a.address1}, ${a.postcode}</span>
-            </div>
-        `).join('');
-    } else if (!loggedIn && guestSelfAddress) {
-        selfSectionHtml = `
-            <div class="recipient-option${currentIsSelf ? ' selected' : ''}" onclick="chooseSelfGuestAddress()">
-                <strong>${guestSelfAddress.label || 'Your address'}</strong>
-                <span>${guestSelfAddress.name}<br>${guestSelfAddress.address1}, ${guestSelfAddress.postcode}</span>
-            </div>
-        `;
-    } else {
-        selfSectionHtml = `<p style="font-size:12px; color:#888; margin:0 0 10px;">No saved addresses yet.</p>`;
-    }
-
-    // "Send to someone else" — a one-off address baked onto this item.
-    const savedRecipientOptionsHtml = savedAddresses.map((a) => `
-        <div class="recipient-option" onclick="chooseRecipientSavedAddress('${a.id}')">
+    const optionsHtml = addressList.map((a) => `
+        <div class="recipient-option${currentRecipient && currentRecipient.address1 === a.address1 && currentRecipient.postcode === a.postcode && currentRecipient.name === a.name ? ' selected' : ''}" onclick="chooseAddress('${a.id}')">
             <strong>${a.label || 'Address'}</strong>
             <span>${a.name}<br>${a.address1}, ${a.postcode}</span>
         </div>
     `).join('');
 
-    const savedRecipientSectionHtml = loggedIn
-        ? (savedAddresses.length ? savedRecipientOptionsHtml : `<p style="font-size:12px; color:#888; margin:0 0 10px;">No saved addresses yet.</p>`)
-        : `<p style="font-size:12px; color:#888; margin:0 0 10px;"><a href="account.html" style="color:var(--primary);">Log in</a> to pick from saved addresses.</p>`;
+    const listHtml = addressList.length
+        ? optionsHtml
+        : `<p style="font-size:12px; color:#888; margin:0 0 10px;">No saved addresses yet.</p>`;
 
     $('recipient-modal-body').innerHTML = `
         <p class="recipient-section-title">Saved Addresses</p>
-        <p class="recipient-section-sub">Choose from saved addresses.</p>
-        ${selfSectionHtml}
-        <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0; margin-bottom:20px;" onclick="recipientPickerMode='addSelf'; renderRecipientPicker();">+ Add a new address</button>
-
-        <p class="recipient-section-title recipient-section-divider">Send to someone else</p>
-        <p class="recipient-section-sub">Pick a saved address, or add a new one.</p>
-        ${savedRecipientSectionHtml}
-        <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0;" onclick="recipientPickerMode='addRecipient'; renderRecipientPicker();">+ Add a new address</button>
+        <p class="recipient-section-sub">Choose a saved address, or add a new one.</p>
+        ${listHtml}
+        <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0;" onclick="recipientPickerMode='add'; renderRecipientPicker();">+ Add a new address</button>
     `;
 }
 
-// Shared add-address form for both sections above — mode picks the
-// wording and which submit handler runs.
-function renderAddressForm(mode) {
-    const isRecipient = mode === 'addRecipient';
+// Single add-address form used for any destination — home or someone
+// else's — since there's no longer a separate "self" vs "recipient"
+// flow here.
+function renderAddressForm() {
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
     $('recipient-modal-body').innerHTML = `
         <div class="recipient-form">
-            <input type="text" id="rcpt-label" placeholder="Label (e.g. ${isRecipient ? "Mum's house" : 'Home'}) — optional">
-            <input type="text" id="rcpt-name" placeholder="${isRecipient ? "Recipient's full name" : 'Full name'}">
+            <input type="text" id="rcpt-label" placeholder="Label (e.g. Home, Mum's house) — optional">
+            <input type="text" id="rcpt-name" placeholder="Full name">
             <input type="text" id="rcpt-address1" placeholder="Address line 1">
             <input type="text" id="rcpt-address2" placeholder="Address line 2 (optional)">
             <input type="text" id="rcpt-city" placeholder="Town / City">
@@ -995,96 +978,22 @@ function renderAddressForm(mode) {
             <input type="text" id="rcpt-country" placeholder="Country" value="United Kingdom">
             ${loggedIn
                 ? `<label><input type="checkbox" id="rcpt-save" checked> Save this address for next time</label>`
-                : `<p style="font-size:11px; color:#999; margin:-4px 0 12px;"><a href="account.html" style="color:var(--primary);">Log in</a> to save this address for next time.</p>`}
+                : `<p style="font-size:11px; color:#999; margin:-4px 0 12px;">Kept for this order — <a href="account.html" style="color:var(--primary);">log in</a> to save it to your account for next time.</p>`}
             <p id="rcpt-status" style="font-size:12px; color:#c0392b; margin:0 0 10px; display:none;"></p>
             <div style="display:flex; gap:10px;">
-                <button type="button" class="btn" style="margin-top:0;" onclick="${isRecipient ? 'submitRecipientAddress()' : 'submitSelfAddress()'}">Use this address</button>
+                <button type="button" class="btn" style="margin-top:0;" onclick="submitAddress()">Use this address</button>
                 <button type="button" class="btn btn-secondary" style="margin-top:0;" onclick="recipientPickerMode='menu'; renderRecipientPicker();">Cancel</button>
             </div>
         </div>
     `;
 }
 
-function chooseSelfSavedAddress(addressId) {
-    selectedSelfAddressId = addressId;
-    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
-    closeRecipientPicker();
-    renderBasket();
-}
-
-function chooseSelfGuestAddress() {
-    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
-    closeRecipientPicker();
-    renderBasket();
-}
-
-async function submitSelfAddress() {
-    const statusEl = $('rcpt-status');
-    statusEl.style.display = 'none';
-
-    const address = {
-        name: $('rcpt-name').value.trim(),
-        address1: $('rcpt-address1').value.trim(),
-        address2: $('rcpt-address2').value.trim(),
-        city: $('rcpt-city').value.trim(),
-        county: $('rcpt-county').value.trim(),
-        postcode: $('rcpt-postcode').value.trim(),
-        country: $('rcpt-country').value.trim() || 'United Kingdom',
-    };
-
-    if (!address.name || !address.address1 || !address.city || !address.postcode) {
-        statusEl.textContent = 'Please fill in at least name, address, city, and postcode.';
-        statusEl.style.display = 'block';
-        return;
-    }
-
-    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'self' });
-
+// Picking any saved address (home or otherwise) bakes it onto this item
+// as its delivery address — there's no separate "self" resolution step
+// anymore, so a "Home" address is applied the same way as any other.
+function chooseAddress(addressId) {
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
-    if (loggedIn) {
-        // Use it for this order right away — independent of whether saving
-        // it to the account below succeeds. Otherwise a failed or slow
-        // /api/addresses call (or the box being left unchecked) would leave
-        // the customer with an address that's saved on the item's delivery
-        // type but nothing selectable to actually check out with.
-        const label = $('rcpt-label').value.trim();
-        adHocSelfAddress = Object.assign({ label: label || 'Delivery address' }, address);
-
-        if ($('rcpt-save')?.checked) {
-            try {
-                const res = await fetch('/api/addresses', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ccGetSession()}` },
-                    body: JSON.stringify(Object.assign({ label }, address))
-                });
-                const data = await res.json().catch(() => null);
-                await loadSavedAddresses();
-                // Auto-select the address just added, so the customer doesn't
-                // have to separately choose it in the "Deliver to" block. Falls
-                // back to matching on the fields we just saved if the API
-                // doesn't hand back the new id directly.
-                const newId = data?.address?.id ?? data?.id ?? null;
-                const match = newId
-                    ? savedAddresses.find((a) => a.id === newId)
-                    : savedAddresses.find((a) => a.name === address.name && a.address1 === address.address1 && a.postcode === address.postcode);
-                // Once it's confirmed saved and selectable, drop the ad-hoc
-                // copy in favour of the real saved address.
-                if (match) { selectedSelfAddressId = match.id; adHocSelfAddress = null; }
-            } catch (err) {
-                console.error('Could not save address for next time:', err);
-                // adHocSelfAddress (set above) still lets this order proceed.
-            }
-        }
-    } else {
-        guestSelfAddress = Object.assign({ label: 'Delivery address' }, address);
-    }
-
-    closeRecipientPicker();
-    renderBasket();
-}
-
-function chooseRecipientSavedAddress(addressId) {
-    const a = savedAddresses.find((x) => x.id === addressId);
+    const a = (loggedIn ? savedAddresses : guestAddresses).find((x) => x.id === addressId);
     if (!a) return;
     ccCart.updateItemDelivery(recipientPickerItemId, {
         type: 'recipient',
@@ -1098,7 +1007,7 @@ function chooseRecipientSavedAddress(addressId) {
     renderBasket();
 }
 
-async function submitRecipientAddress() {
+async function submitAddress() {
     const statusEl = $('rcpt-status');
     statusEl.style.display = 'none';
 
@@ -1120,21 +1029,26 @@ async function submitRecipientAddress() {
 
     ccCart.updateItemDelivery(recipientPickerItemId, { type: 'recipient', recipient, envelopeMode: 'direct' });
 
-    // Optionally save it to the account for next time — never blocks
-    // using the address on this item, which is already applied above
-    // regardless of whether this save succeeds.
+    const label = $('rcpt-label').value.trim();
     const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
     if (loggedIn && $('rcpt-save')?.checked) {
+        // Never blocks using the address on this item, which is already
+        // applied above regardless of whether this save succeeds.
         try {
             await fetch('/api/addresses', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ccGetSession()}` },
-                body: JSON.stringify(Object.assign({ label: $('rcpt-label').value.trim() }, recipient))
+                body: JSON.stringify(Object.assign({ label }, recipient))
             });
             loadSavedAddresses();
         } catch (err) {
             console.error('Could not save address for next time:', err);
         }
+    } else if (!loggedIn) {
+        // Guests don't get an account to save to — keep it in the
+        // session-only address book instead, so it can be picked again
+        // for another item without retyping.
+        guestAddresses.push(Object.assign({ id: `guest-${Date.now()}`, label: label || 'Address' }, recipient));
     }
 
     closeRecipientPicker();
