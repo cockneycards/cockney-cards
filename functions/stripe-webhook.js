@@ -656,7 +656,9 @@ async function sendOrderEmail(env, order) {
         '',
         wantsRecipient
             ? [
-                'DELIVERY: send directly to the recipient',
+                order.delivery.envelopeMode === 'home'
+                    ? 'DELIVERY: send home to the customer (spare envelope, they\'ll seal and send it on)'
+                    : 'DELIVERY: send directly to the recipient',
                 `  ${r.name}`,
                 r.address1 ? `  ${r.address1}` : null,
                 r.address2 ? `  ${r.address2}` : null,
@@ -710,7 +712,9 @@ async function sendBasketOrderEmail(env, order) {
             !item.pdfDataUri ? '   ⚠️ No PDF found in storage for this item.' : null,
             wantsRecipient
                 ? [
-                    '   Delivery: send directly to the recipient',
+                    item.delivery.envelopeMode === 'home'
+                        ? '   Delivery: send home to the customer (spare envelope, they\'ll seal and send it on)'
+                        : '   Delivery: send directly to the recipient',
                     `     ${r.name}`,
                     r.address1 ? `     ${r.address1}` : null,
                     r.address2 ? `     ${r.address2}` : null,
