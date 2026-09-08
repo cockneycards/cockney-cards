@@ -62,7 +62,7 @@ const CARD_CATALOGUE = {
   
   "birthday-coolcat": { title: "Cool Cat", categories: ["all", "birthdays"], preview: "coolcat-preview.png", full: "coolcat.png" },
   "birthday-cooldog": { title: "Cool Dog", categories: ["all", "birthdays"], preview: "cooldog-preview.png", full: "cooldog.png" },
-  "birthday-springflowers": { title: "Spring Flowers", categories: ["all", "birthdays"], preview: "springflowers-preview.png", full: "springflowers.png" },
+  "birthday-springflowers": { title: "Spring Flowers", categories: ["all", "birthdays"], preview: "springflowers-previews.png", full: "springflowers.png" },
   "birthday-doughnuts": { title: "Doughnuts", categories: ["all", "birthdays"], preview: "doughnuts-preview.png", full: "doughnuts.png" },
   "birthday-smilechimp": { title: "Happy Chimp", categories: ["all", "birthdays"], preview: "smilechimp-preview.png", full: "smilechimp.png" },
   "birthday-frenchieflowers": { title: "Frenchie Flowers", categories: ["all", "birthdays"], preview: "frenchieflowers-preview.png", full: "frenchieflowers.png" },
