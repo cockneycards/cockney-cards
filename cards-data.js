@@ -41,6 +41,7 @@ const CARD_CATALOGUE = {
   "birthday-grandad-fishing-boy": { title: "Grandad & Grandson Fishing", categories: ["birthdays", "grandad"], preview: "birthday-grandad-fishing-preview.png", full: "birthday-grandad-fishing.png" },
   "birthday-grandads-caravan": { title: "Grandads Caravan", categories: ["all", "birthdays", "grandad"], preview: "grandads-caravan-preview.png", full: "grandads-caravan.png" },
   
+  "birthday-mumsteaparty": { title: "Mums Tea Party", categories: ["all", "mum", "birthdays"], preview: "mumsteaparty-preview.png", full: "mumsteaparty.png" },
   "birthday-greatestmum": { title: "Greatest Mums Birthday", categories: ["all", "mum", "birthdays"], preview: "greatestmum-preview.png", full: "greatestmum.png" },
   "birthday-super-mum": { title: "Super Mum", categories: ["all", "mum", "birthdays"], preview: "super-mum-preview.png", full: "my-super-mum.png" },
   "birthday-best-mum-ever": { title: "Best Mum Ever", categories: ["all", "mum", "birthdays"], preview: "best-mum-ever-preview.png", full: "best-mum-ever.png" },
@@ -59,6 +60,12 @@ const CARD_CATALOGUE = {
   "birthday-nans-garden": { title: "Nans Garden", categories: ["all", "nan", "birthdays"], preview: "nansgarden-preview.png", full: "nansgarden.png" },
   "birthday-nan1": { title: "Nans Country Garden", categories: ["nan", "birthdays"], preview: "birthday-nan1-preview.png", full: "birthday-nan1.png" },
   
+  "birthday-coolcat": { title: "Cool Cat", categories: ["all", "birthdays"], preview: "coolcat-preview.png", full: "coolcat.png" },
+  "birthday-cooldog": { title: "Cool Dog", categories: ["all", "birthdays"], preview: "cooldog-preview.png", full: "cooldog.png" },
+  "birthday-springflowers": { title: "Spring Flowers", categories: ["all", "birthdays"], preview: "springflowers-preview.png", full: "springflowers.png" },
+  "birthday-doughnuts": { title: "Doughnuts", categories: ["all", "birthdays"], preview: "doughnuts-preview.png", full: "doughnuts.png" },
+  "birthday-smilechimp": { title: "Happy Chimp", categories: ["all", "birthdays"], preview: "smilechimp-preview.png", full: "smilechimp.png" },
+  "birthday-frenchieflowers": { title: "Frenchie Flowers", categories: ["all", "birthdays"], preview: "frenchieflowers-preview.png", full: "frenchieflowers.png" },
   "birthday-butterflies": { title: "Great Mum", categories: ["all", "birthdays"], preview: "birthdaybutterflies-preview.png", full: "birthdaybutterflies.png" },
   "birthday-bbqboss": { title: "BBQ Boss Birthday", categories: ["all", "birthdays"], preview: "bbqboss-preview.png", full: "bbqboss.png", name: { left: 894, top: 287, startSize: 68, minSize: 68, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#feeec6", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 700, tiltAngle: 0, label: "Name", maxChars: 9 } },
   "birthday-djboy": { title: "DJ Boy", categories: ["all", "birthdays"], preview: "dj-boy-preview.png", full: "dj-boy.png" },
@@ -73,6 +80,7 @@ const CARD_CATALOGUE = {
   "jaws-smile": { title: "JAWS Smile You Son of..", categories: ["all", "tv-movies", "birthdays"], preview: "jaws-smile-preview.png", full: "jaws-smile.png" },
   "jaws-cake": { title: "JAWS Your Gonna Need a Bigger...", categories: ["all", "tv-movies", "birthdays"], preview: "jaws-biggercake-preview.png", full: "jaws-biggercake.png" },
   "birthday-ofah": { title: "OFAH, You Plonker!!", categories: ["all", "birthdays", "tv-movies"], preview: "birthday-ofah_preview.png", full: "birthday-ofah.png" },
+  "birthday-bwilliant": { title: "OFAH, Bwilliant Birthday", categories: ["all", "birthdays", "tv-movies"], preview: "ofah-bwilliant-preview.png", full: "ofah-bwilliant.png" },
   "birthday-mod": { title: "Quadrophenia Birthday", categories: ["all", "birthdays", "tv-movies"], preview: "mod-birthday-preview.png", full: "mod-birthday.png" },
   "birthday-youngones": { title: "The Young Ones", categories: ["all", "birthdays", "tv-movies"], preview: "birthday-youngones-preview.png", full: "birthday-youngones.png" },
   "birthday-charlie-says": { title: "Charlie Says..", categories: ["all", "birthdays"], preview: "charlie-says-preview.png", full: "charlie-says.png" },
@@ -120,6 +128,8 @@ const CARD_CATALOGUE = {
   
   "leaving-boy": { title: "Sorry You're Leaving Boy", categories: ["all", "work-related"], preview: "leaving-boy-preview.png", full: "leaving-boy.png" },
   "leaving-girl": { title: "Sorry You're Leaving Girl", categories: ["all", "work-related"], preview: "leaving-girl-preview.png", full: "leaving-girl.png" },
+  "leaving-sorryleaving": { title: "Sorry You're Leaving", categories: ["all", "work-related"], preview: "sorryleaving-preview.png", full: "sorryleaving.png" },
+  
   
   "new-home": { title: "Home Sweet Home", categories: ["all", "home"], preview: "newhome-preview.png", full: "newhome.png" }, 
   "new-home-happy": { title: "Happy Home", categories: ["all", "home"], preview: "newhome-happyhome-preview.png", full: "newhome-happyhome.png", name: { left: 894, top: 453, startSize: 74, minSize: 20, maxSize: 30, fontFamily: "CaacupeOne-Regular", fontWeight: "normal", color: "#FFFFFF", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 150, tiltAngle: 0, label: "Name", maxChars: 10 } },
@@ -270,13 +280,16 @@ const CARD_CATALOGUE = {
   "lcl-photo": { title: "London City Lionesses No.1 Supporter", price: "£3.49", categories: ["sports", "football", "wsl", "london-cityw", "photo-upload"], preview: "lcl-photo-preview.png", full: "lcl-photo.png", name: { left: 893, top: 248, startSize: 48, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#18788e", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 }, age: { left: 891, top: 672, startSize: 110, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#18788e", canChangeSize: true, canChangeColor: true, label: "Age", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     photo: { left: 895, top: 460, width: 480, height: 370 } },
   
+  "lioncheers": { title: "Cheers", categories: ["birthday", "sports", "football", "championship", "millwall", "milddlesbrough"], preview: "nolulions-preview.png", full: "nolulions.png" },
   
   "mfc-christmas": { title: "Millwall Christmas Card", categories: ["sports", "football", "championship", "millwall"], preview: "mfc-christmas-preview.png", full: "mfc-christmas.png" },
-
+  "mfc-nolulions": { title: "NOLU Lions", categories: ["sports", "football", "championship", "millwall"], preview: "nolulions-preview.png", full: "nolulions.png" },
   
   "birthday-mfc-photo1": { title: "Lions Birthday", price: "£3.49", categories: ["sports", "football", "championship", "millwall", "photo-upload"], preview: "lions-birthday-preview.png", full: "lions-birthday.png", name: { left: 898, top: 752, startSize: 63, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 580, tiltAngle: -0, label: "Name", maxChars: 9 },
     photo: { left: 1008, top: 180, width: 310, height: 310 } },
   
+  "boxingchamp": { title: "Boxing Champs Birthday", categories: ["sports", "boxing"], preview: "birthdayboxingchamp-preview.png", full: "birthdayboxingchamp.png" },
+  "boxingrocky": { title: "Rockys Birthday Bash", categories: ["sports", "boxing"], preview: "rockychamp-preview.png", full: "rockychamp.png" },
   
   "discodarts": { title: "Disco Darts", categories: ["sports", "darts"], preview: "discodarts-preview.png", full: "discodarts.png", name: { left: 894, top: 244, startSize: 43, minSize: 40, maxSize: 43, fontFamily: "Anton", fontWeight: "normal", color: "#001591", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 500, tiltAngle: 0, label: "Name", maxChars: 9 } },
   "anyoneforcricket": { title: "Anyone for Cricket", categories: ["sports", "cricket"], preview: "anyoneforcricket-preview.png", full: "anyoneforcricket.png", name: { left: 900, top: 309, startSize: 38, minSize: 37, maxSize: 40, fontFamily: "Anton", fontWeight: "normal", color: "#01316e", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 520, tiltAngle: 0, label: "Name", maxChars: 8 } },
