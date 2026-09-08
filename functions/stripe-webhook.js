@@ -1,4 +1,4 @@
-// functions/stripe-webhook.jsscsc
+// functions/stripe-webhook.js
 //
 // Cloudflare Pages Function — receives Stripe's `checkout.session.completed`
 // webhook once a customer has actually paid, pulls the matching print-ready
