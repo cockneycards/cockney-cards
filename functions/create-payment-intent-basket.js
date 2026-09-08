@@ -161,6 +161,16 @@ export async function onRequestPost(context) {
         const isClubMember = await checkPlusMembership(request, env);
         const isPromoValid = await checkPromoCode(data.promoCode, env);
 
+        // Matches basket.html's clubDiscountActive: a non-member adding the
+        // Annual Membership to this same basket gets the 25% card discount
+        // applied to THIS order too (not just future ones), since they'll
+        // be a member by the time it's charged — see the membership block
+        // further down for the (separate, un-discounted) £9.99 charge for
+        // the membership itself. wantsMembership and isClubMember can never
+        // both be true here — the "already a member" check above already
+        // rejects that combination — so this never double-applies.
+        const membershipActive = isClubMember || wantsMembership;
+
         // Membership has to attach to an account, and buying it again
         // while already a member would just waste the customer's money
         // (checkPlusMembership already accounts for a lapsed/expired
@@ -195,7 +205,7 @@ export async function onRequestPost(context) {
         }
         const rewardIsUsable = !!(rewardDetails && (
             rewardDetails.rewardType === 'free_card' ||
-            (rewardDetails.rewardType === 'new_customer_25' && rewardDetails.discountPercent && !isClubMember)
+            (rewardDetails.rewardType === 'new_customer_25' && rewardDetails.discountPercent && !membershipActive)
         ));
         let rewardApplied = false;
 
@@ -217,7 +227,7 @@ export async function onRequestPost(context) {
             const printItemsInGroup = groupItems.filter((item) => item.kind === 'print');
             const printUnitsInGroup = printItemsInGroup.reduce((sum, item) => sum + item.quantity, 0);
             const printSizesInGroup = new Set(printItemsInGroup.map((item) => item.size));
-            const discountRate = isClubMember ? 0.25 : 0;
+            const discountRate = membershipActive ? 0.25 : 0;
 
             groupItems.forEach((item) => {
                 const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
