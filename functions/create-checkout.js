@@ -10,7 +10,7 @@
 // Requires (set in Cloudflare Pages > Settings > Functions > R2 bindings):
 //   ORDER_PDFS           - an R2 bucket, variable name "ORDER_PDFS"
 
-import { POSTAGE_TIERS, appendShippingOption } from './postage.js';
+import { appendShippingOptions } from './postage.js';
 import { checkPlusMembership } from './account-api.js';
 
 export async function onRequestPost(context) {
@@ -92,8 +92,12 @@ export async function onRequestPost(context) {
 
         // A card is always the A5 tier (see postage.js) — always charged
         // in full here (see comment above); free delivery for 3+ cards to
-        // the same address only applies via the basket checkout.
-        appendShippingOption(params, POSTAGE_TIERS.A5, { free: false });
+        // the same address only applies via the basket checkout. Offers
+        // every service valid for A5 (First Class / Tracked24 / Tracked24
+        // signed) as separate selectable options on Stripe's own page —
+        // the webhook works out which one was picked from the amount
+        // charged (see postage.js's methodFromAmount).
+        appendShippingOptions(params, [{ kind: 'card' }], { free: false });
 
         // Metadata — kept under Stripe's 500-char-per-value limit. The PDF
         // itself lives in R2, referenced by order_id, not in metadata.
