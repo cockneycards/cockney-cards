@@ -46,6 +46,7 @@ import {
     qualifiesForFreePrintDelivery,
     qualifiesForFreeLargePrintDelivery,
     qualifiesForFreeA3BundleDelivery,
+    qualifiesForFreeA3TrackedDelivery,
 } from './postage.js';
 import { checkPlusMembership, getUserFromAuth, findOrCreateUserByEmail } from './account-api.js';
 import { checkPromoCode } from './promo.js';
@@ -288,6 +289,7 @@ export async function onRequestPost(context) {
             const qualifiesPrintDelivery = qualifiesForFreePrintDelivery(groupItems);
             const qualifiesLargePrintDelivery = qualifiesForFreeLargePrintDelivery(groupItems);
             const qualifiesA3BundleDelivery = qualifiesForFreeA3BundleDelivery(groupItems);
+            const qualifiesA3TrackedDelivery = qualifiesForFreeA3TrackedDelivery(groupItems);
 
             // Which service this parcel actually ships under — resolved
             // from whatever each item requested on basket.html, same as
@@ -313,6 +315,8 @@ export async function onRequestPost(context) {
                 postageName = `Free Postage (2+ A4/A3 prints + a card to this address)${parcelLabel}`;
             } else if (postageWaived && qualifiesA3BundleDelivery) {
                 postageName = `Free Postage (2+ A3 prints + a card/A4/A5 to this address)${parcelLabel}`;
+            } else if (postageWaived && qualifiesA3TrackedDelivery) {
+                postageName = `Free Postage (2+ A3 prints to this address)${parcelLabel}`;
             } else if (postageWaived && promoWaivesThisMethod) {
                 postageName = `Free Postage (Promo Code)${parcelLabel}`;
             } else {
