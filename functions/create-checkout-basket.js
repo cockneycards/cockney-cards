@@ -31,6 +31,7 @@ import {
     qualifiesForFreePrintDelivery,
     qualifiesForFreeLargePrintDelivery,
     qualifiesForFreeA3BundleDelivery,
+    qualifiesForFreeA3TrackedDelivery,
 } from './postage.js';
 
 // Basket postage is charged as our own fixed line item, not a Stripe
@@ -340,7 +341,10 @@ export async function onRequestPost(context) {
             //   3. 2+ A4/A3 prints plus a card, or 2+ A3 prints plus a
             //      card/A4/A5 print, to this same address — every
             //      service on offer is free.
-            //   4. A valid promo code was entered (cards-only) — First
+            //   4. 2+ A3 prints on their own, no companion needed, to
+            //      this same address — both Tracked24 services are free
+            //      (A3 never offers First Class anyway).
+            //   5. A valid promo code was entered (cards-only) — First
             //      Class only, same as (1).
             // In every case, a customer who upgrades to a service the
             // promo doesn't cover still pays the difference for it.
@@ -352,6 +356,7 @@ export async function onRequestPost(context) {
             const qualifiesPrintDelivery = qualifiesForFreePrintDelivery(groupItems);
             const qualifiesLargePrintDelivery = qualifiesForFreeLargePrintDelivery(groupItems);
             const qualifiesA3BundleDelivery = qualifiesForFreeA3BundleDelivery(groupItems);
+            const qualifiesA3TrackedDelivery = qualifiesForFreeA3TrackedDelivery(groupItems);
             // Method was already resolved onto every item in this group
             // (see resolveGroupMethod above) — read it straight off the
             // first item rather than re-deriving it.
@@ -370,6 +375,8 @@ export async function onRequestPost(context) {
                 postageName = `Free Postage (2+ A4/A3 prints + a card to this address)${parcelLabel}`;
             } else if (postageWaived && qualifiesA3BundleDelivery) {
                 postageName = `Free Postage (2+ A3 prints + a card/A4/A5 to this address)${parcelLabel}`;
+            } else if (postageWaived && qualifiesA3TrackedDelivery) {
+                postageName = `Free Postage (2+ A3 prints to this address)${parcelLabel}`;
             } else if (postageWaived && promoWaivesThisMethod) {
                 postageName = `Free Postage (Promo Code)${parcelLabel}`;
             } else {
