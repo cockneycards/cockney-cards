@@ -191,6 +191,24 @@ export function qualifiesForFreeLargePrintDelivery(items) {
     return unitCount(items, 'card') >= 1 && largePrintUnits >= 2;
 }
 
+// 2 or more A3 prints specifically, plus at least one card, A4 print, or
+// A5 print, going to the same address. Overlaps with the large-print
+// bundle above whenever the companion item is a card (both waive
+// everything in that case), but this one also covers 2+ A3s travelling
+// with an A4 or A5 print and no card at all — a case the large-print
+// bundle doesn't reach since it requires a card specifically.
+export function qualifiesForFreeA3BundleDelivery(items) {
+    const a3Units = items
+        .filter((item) => item.kind === 'print' && item.size === 'A3')
+        .reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const hasCompanionItem = items.some(
+        (item) =>
+            item.kind === 'card' ||
+            (item.kind === 'print' && (item.size === 'A4' || item.size === 'A5'))
+    );
+    return a3Units >= 2 && hasCompanionItem;
+}
+
 // Which shipping SERVICES a given promo waives — not every promo waives
 // every service:
 //   - 3+ cards (qualifiesForFreeCardDelivery) and the 3+ cards/A5-prints
@@ -201,13 +219,18 @@ export function qualifiesForFreeLargePrintDelivery(items) {
 //   - 2+ same-size prints (qualifiesForFreePrintDelivery) waives First
 //     Class AND Tracked24 (photo), but NOT Tracked24 (signed) — the
 //     signature add-on always costs on this promo.
-//   - 2+ large prints + a card (qualifiesForFreeLargePrintDelivery) and
+//   - 2+ large prints + a card (qualifiesForFreeLargePrintDelivery), 2+
+//     A3 prints + a card/A4/A5 (qualifiesForFreeA3BundleDelivery), and
 //     Cockney Cards Club membership are unchanged from before: every
 //     service on offer for the destination is free.
 export function freeMethodsForItems(items, { isClubMember = false } = {}) {
     const free = new Set();
 
-    if (isClubMember || qualifiesForFreeLargePrintDelivery(items)) {
+    if (
+        isClubMember ||
+        qualifiesForFreeLargePrintDelivery(items) ||
+        qualifiesForFreeA3BundleDelivery(items)
+    ) {
         methodsForDestination(items).forEach((m) => free.add(m));
         return free;
     }
