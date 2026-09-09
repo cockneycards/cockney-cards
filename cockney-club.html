@@ -125,7 +125,7 @@
 
     <div class="club-columns">
         <div class="club-image-col">
-            <img src="https://images.cockneycards.com/logo-join-club.png" alt="Join The Cockney Cards Club">
+            <img id="club-logo-img" src="https://images.cockneycards.com/logo-join-club.png" alt="Join The Cockney Cards Club">
         </div>
         <div class="club-main-col">
 
@@ -279,6 +279,18 @@ async function checkMembershipStatus() {
         });
         if (!res.ok) return; // not logged in (401) or a transient error — leave the default card as-is
         const account = await res.json();
+
+        // Swap the mascot logo to the "joined" version while membership is
+        // active. Once the year is up and plusActive flips back to false
+        // (whether it lapsed or was cancelled), the img's src is simply
+        // never touched here again — it's left at whatever the page
+        // shipped with, which is already the default "Join The Club" logo,
+        // so no explicit swap-back is needed.
+        const logoImg = document.getElementById("club-logo-img");
+        if (logoImg && account.plusActive) {
+            logoImg.src = "https://images.cockneycards.com/logo-joined-club.png";
+        }
+
         if (!account.plusActive) return;
 
         const priceCard = document.getElementById("price-card");
