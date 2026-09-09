@@ -456,10 +456,11 @@ function methodsForDestination(groupItems) {
 // the 3+ cards and cards+A5-prints promos, and a valid all-cards promo
 // code, only ever waive First Class; the 2+ same-size prints promo also
 // waives Tracked24 (photo), but never Tracked24 (signed); the 2+
-// large-prints-plus-a-card bundle waives every service on offer.
-function freeMethodsForGroup(groupItems, { qualifiesCard, qualifiesPrint, qualifiesEnvelope, qualifiesLargePrint, allCardsInGroup, isPromoValid, validMethods }) {
+// large-prints-plus-a-card bundle and the 2+ A3s-plus-a-card/A4/A5
+// bundle both waive every service on offer.
+function freeMethodsForGroup(groupItems, { qualifiesCard, qualifiesPrint, qualifiesEnvelope, qualifiesLargePrint, qualifiesA3Bundle, allCardsInGroup, isPromoValid, validMethods }) {
     const free = new Set();
-    if (qualifiesLargePrint) {
+    if (qualifiesLargePrint || qualifiesA3Bundle) {
         validMethods.forEach((m) => free.add(m));
         return free;
     }
@@ -547,6 +548,12 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         const largePrintUnitsInGroup = printItemsInGroup
             .filter((i) => i.size === 'A4' || i.size === 'A3')
             .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        // A3-specific count for the A3 bundle promo below — a subset of
+        // largePrintUnitsInGroup above.
+        const a3UnitsInGroup = printItemsInGroup
+            .filter((i) => i.size === 'A3')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const hasCompanionItemInGroup = cardUnitsInGroup >= 1 || printItemsInGroup.some((i) => i.size === 'A4' || i.size === 'A5');
 
         const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
         const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
@@ -558,6 +565,10 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         // 2+ A4/A3 prints (either size, mixed is fine) plus at least one
         // card, same address.
         const qualifiesForFreeLargePrintDelivery = cardUnitsInGroup >= 1 && largePrintUnitsInGroup >= 2;
+        // 2+ A3 prints specifically, plus at least one card, A4 print, or
+        // A5 print, same address. Also reaches the "2+ A3s + an A4/A5
+        // print, no card" case that the large-print bundle above doesn't.
+        const qualifiesForFreeA3BundleDelivery = a3UnitsInGroup >= 2 && hasCompanionItemInGroup;
 
         const size = highestTier(groupItems);
         const validMethods = methodsForDestination(groupItems);
@@ -571,6 +582,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
             qualifiesPrint: qualifiesForFreePrintDelivery,
             qualifiesEnvelope: qualifiesForFreeEnvelopeDelivery,
             qualifiesLargePrint: qualifiesForFreeLargePrintDelivery,
+            qualifiesA3Bundle: qualifiesForFreeA3BundleDelivery,
             allCardsInGroup,
             isPromoValid,
             validMethods,
@@ -585,6 +597,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         else if (methodIsFree && qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address${parcelLabel}`;
         else if (methodIsFree && qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address${parcelLabel}`;
         else if (methodIsFree && qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreeA3BundleDelivery) label = `Free Postage — 2+ A3 prints + a card/A4/A5, same address${parcelLabel}`;
         else if (methodIsFree && allCardsInGroup && isPromoValid) label = `Free Postage — Promo Code${parcelLabel}`;
         else label = `Postage${parcelLabel}`;
 
