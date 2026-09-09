@@ -24,13 +24,18 @@
     .nav-links a:hover { color: #888; }
     .nav-links a.active { font-weight: bold; }
 
-    .club-page { max-width: 1100px; margin: 0 auto; padding: 50px 40px 90px; }
+    .club-page { max-width: 1800px; margin: 0 auto; padding: 50px 40px 90px; }
 
-    /* Two-column layout: mascot image on the left, sticky while scrolling */
-    .club-columns { display: flex; gap: 40px; align-items: flex-start; }
-    .club-image-col { flex: 0 0 200px; position: sticky; top: 30px; }
+    /* Two-column layout: mascot image on the left, sticky while scrolling.
+       A hidden spacer on the right mirrors the image column's width so the
+       row is centered as a whole — keeping the main content column's
+       center lined up with the nav above, exactly where it sat before the
+       image was added. */
+    .club-columns { display: flex; gap: 40px; align-items: flex-start; justify-content: center; }
+    .club-image-col { flex: 0 1 460px; min-width: 0; position: sticky; top: 30px; }
     .club-image-col img { width: 100%; height: auto; display: block; }
-    .club-main-col { flex: 1; min-width: 0; }
+    .club-main-col { flex: 1 1 800px; max-width: 800px; min-width: 0; }
+    .club-spacer { flex: 0 1 460px; min-width: 0; }
 
     /* Pricing hero */
     .club-hero { text-align: center; margin-bottom: 50px; }
@@ -86,6 +91,7 @@
     @media (max-width: 768px) {
         .club-columns { flex-direction: column; }
         .club-image-col { position: static; flex: 0 0 auto; max-width: 200px; margin: 0 auto 30px; }
+        .club-spacer { display: none; }
     }
 </style>
     <link rel="stylesheet" href="mobile.css">
@@ -121,7 +127,7 @@
 
     <div class="club-columns">
         <div class="club-image-col">
-            <img src="https://images.cockneycards.com/logo-joinclub.png" alt="Join The Cockney Cards Club">
+            <img src="logo-joinclub.png" alt="Join The Cockney Cards Club">
         </div>
         <div class="club-main-col">
 
@@ -212,6 +218,7 @@
     </div>
 
         </div>
+        <div class="club-spacer" aria-hidden="true"></div>
     </div>
 
 </div>
