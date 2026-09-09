@@ -451,6 +451,28 @@ function methodsForDestination(groupItems) {
     return METHOD_ORDER.filter((m) => methods && methods.has(m));
 }
 
+// Which shipping SERVICES a promo waives — mirrors functions/postage.js's
+// freeMethodsForItems exactly (see that file for the full reasoning):
+// the 3+ cards and cards+A5-prints promos, and a valid all-cards promo
+// code, only ever waive First Class; the 2+ same-size prints promo also
+// waives Tracked24 (photo), but never Tracked24 (signed); the 2+
+// large-prints-plus-a-card bundle waives every service on offer.
+function freeMethodsForGroup(groupItems, { qualifiesCard, qualifiesPrint, qualifiesEnvelope, qualifiesLargePrint, allCardsInGroup, isPromoValid, validMethods }) {
+    const free = new Set();
+    if (qualifiesLargePrint) {
+        validMethods.forEach((m) => free.add(m));
+        return free;
+    }
+    if (qualifiesCard || qualifiesEnvelope || (allCardsInGroup && isPromoValid)) {
+        free.add('first_class');
+    }
+    if (qualifiesPrint) {
+        free.add('first_class');
+        free.add('tracked24');
+    }
+    return free;
+}
+
 function normalise(value) {
     return (value || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
 }
@@ -536,21 +558,34 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         // 2+ A4/A3 prints (either size, mixed is fine) plus at least one
         // card, same address.
         const qualifiesForFreeLargePrintDelivery = cardUnitsInGroup >= 1 && largePrintUnitsInGroup >= 2;
-        const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || qualifiesForFreeEnvelopeDelivery || qualifiesForFreeLargePrintDelivery || (allCardsInGroup && isPromoValid);
 
         const size = highestTier(groupItems);
         const validMethods = methodsForDestination(groupItems);
         const selectedMethod = resolvedMethodForGroup(groupItems);
-        const amountPence = postageWaived ? 0 : (POSTAGE_RATES[size]?.[selectedMethod] ?? 0);
+        // Which services THIS parcel's promo(s) actually waive — not
+        // every promo waives every service (see freeMethodsForGroup
+        // above), so a customer who's upgraded to a paid service still
+        // pays for it even though the destination otherwise qualifies.
+        const freeMethods = freeMethodsForGroup(groupItems, {
+            qualifiesCard: qualifiesForFreeCardDelivery,
+            qualifiesPrint: qualifiesForFreePrintDelivery,
+            qualifiesEnvelope: qualifiesForFreeEnvelopeDelivery,
+            qualifiesLargePrint: qualifiesForFreeLargePrintDelivery,
+            allCardsInGroup,
+            isPromoValid,
+            validMethods,
+        });
+        const methodIsFree = freeMethods.has(selectedMethod);
+        const amountPence = methodIsFree ? 0 : (POSTAGE_RATES[size]?.[selectedMethod] ?? 0);
         totalPence += amountPence;
 
         const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
         let label;
-        if (qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address${parcelLabel}`;
-        else if (qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address${parcelLabel}`;
-        else if (qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address${parcelLabel}`;
-        else if (qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address${parcelLabel}`;
-        else if (postageWaived) label = `Free Postage — Promo Code${parcelLabel}`;
+        if (methodIsFree && qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address${parcelLabel}`;
+        else if (methodIsFree && allCardsInGroup && isPromoValid) label = `Free Postage — Promo Code${parcelLabel}`;
         else label = `Postage${parcelLabel}`;
 
         parcels.push({
@@ -560,7 +595,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
             size,
             validMethods,
             selectedMethod,
-            waived: postageWaived,
+            freeMethods,
         });
     }
 
@@ -818,7 +853,7 @@ function renderBasket() {
             <div class="shipping-method-options">
                 ${p.validMethods.map((m) => {
                     const price = POSTAGE_RATES[p.size]?.[m];
-                    const priceLabel = p.waived ? 'FREE' : ccCart.formatGBP((price || 0) / 100);
+                    const priceLabel = p.freeMethods.has(m) ? 'FREE' : ccCart.formatGBP((price || 0) / 100);
                     return `
                         <button type="button" class="shipping-method-option${m === p.selectedMethod ? ' selected' : ''}" onclick="selectShippingMethod('${p.destinationKey}', '${m}')">
                             <span>${METHOD_LABELS[m]}</span>
