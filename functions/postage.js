@@ -209,6 +209,23 @@ export function qualifiesForFreeA3BundleDelivery(items) {
     return a3Units >= 2 && hasCompanionItem;
 }
 
+// 2 or more A3 prints, full stop — no companion item required, and
+// doesn't matter what else (if anything) is in the same parcel. Waives
+// BOTH Tracked24 services (photo and signed) — unlike
+// qualifiesForFreePrintDelivery below, which also covers a 2+-same-size
+// order but only waives the unsigned Tracked24. A3 never offers First
+// Class (see POSTAGE_RATES), so Tracked24 + Tracked24 signed is already
+// every service on offer whenever the parcel is A3-only; this rule's
+// real effect is extending that freebie to parcels where A3 prints are
+// travelling alongside other stuff too (cards, A4s, A5s) that wouldn't
+// otherwise have qualified for anything.
+export function qualifiesForFreeA3TrackedDelivery(items) {
+    const a3Units = items
+        .filter((item) => item.kind === 'print' && item.size === 'A3')
+        .reduce((sum, item) => sum + (item.quantity || 1), 0);
+    return a3Units >= 2;
+}
+
 // Which shipping SERVICES a given promo waives — not every promo waives
 // every service:
 //   - 3+ cards (qualifiesForFreeCardDelivery) and the 3+ cards/A5-prints
@@ -219,6 +236,11 @@ export function qualifiesForFreeA3BundleDelivery(items) {
 //   - 2+ same-size prints (qualifiesForFreePrintDelivery) waives First
 //     Class AND Tracked24 (photo), but NOT Tracked24 (signed) — the
 //     signature add-on always costs on this promo.
+//   - 2+ A3 prints, no matter what else is in the parcel
+//     (qualifiesForFreeA3TrackedDelivery), waives BOTH Tracked24
+//     services (photo and signed) — this one's unsigned-only sibling
+//     above, but broader in what it applies to and narrower in what it
+//     requires (A3 specifically, nothing else needed).
 //   - 2+ large prints + a card (qualifiesForFreeLargePrintDelivery), 2+
 //     A3 prints + a card/A4/A5 (qualifiesForFreeA3BundleDelivery), and
 //     Cockney Cards Club membership are unchanged from before: every
@@ -242,6 +264,11 @@ export function freeMethodsForItems(items, { isClubMember = false } = {}) {
     if (qualifiesForFreePrintDelivery(items)) {
         free.add(POSTAGE_METHODS.FIRST_CLASS);
         free.add(POSTAGE_METHODS.TRACKED24);
+    }
+
+    if (qualifiesForFreeA3TrackedDelivery(items)) {
+        free.add(POSTAGE_METHODS.TRACKED24);
+        free.add(POSTAGE_METHODS.TRACKED24_SIGNED);
     }
 
     return free;
