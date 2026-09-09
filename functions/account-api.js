@@ -2,7 +2,7 @@
 //
 // Cockney Cards — Account API. Handles email+password signup/login,
 // password reset, sessions, and birthday reminder CRUD, plus a daily
-// cron job that emails customers 2 weeks before a saved date.
+// cron job that emails customers 10 days before a saved date.
 //
 // Ported directly from old-bush-4d25cockney-cards-api's standalone Worker
 // script (the only copy of this logic that ever existed — old-bush was
@@ -755,11 +755,11 @@ export async function handleSetDefaultAddress(request, env, addressId) {
     return json({ ok: true }, 200, env);
 }
 
-// ---------- Daily cron: send reminders 14 days ahead ----------
+// ---------- Daily cron: send reminders 10 days ahead ----------
 
 export async function runDailyReminderCheck(env) {
     const target = new Date();
-    target.setUTCDate(target.getUTCDate() + 14);
+    target.setUTCDate(target.getUTCDate() + 10);
     const targetMonth = target.getUTCMonth() + 1;
     const targetDay = target.getUTCDate();
 
@@ -781,9 +781,9 @@ export async function runDailyReminderCheck(env) {
         const whatsComingUp = row.relationship ? `${who}’s ${occasion}` : who;
         await sendEmail(env, {
             to: row.email,
-            subject: `${whatsComingUp} is coming up in 2 weeks!`,
+            subject: `${whatsComingUp} is coming up in 10 days!`,
             html: `
-                <p>Just a friendly reminder — <strong>${whatsComingUp}</strong> is coming up in 2 weeks.</p>
+                <p>Just a friendly reminder — <strong>${whatsComingUp}</strong> is coming up in 10 days.</p>
                 <p>Plenty of time to pick out the perfect card for ${who}.</p>
                 <p><a href="${env.SITE_URL}/shop-cards.html" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 20px;text-decoration:none;">Shop Cards</a></p>
             `,
