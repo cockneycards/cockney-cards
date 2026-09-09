@@ -30,7 +30,6 @@
 import { onRequestPost as createCheckout } from './functions/create-checkout.js';
 import { onRequestPost as createCheckoutPrint } from './functions/create-checkout-print.js';
 import { onRequestPost as createCheckoutBasket } from './functions/create-checkout-basket.js';
-import { onRequestPost as createMembershipCheckout } from './functions/create-membership-checkout.js';
 import { onRequestPost as stripeWebhook } from './functions/stripe-webhook.js';
 import { onRequestPost as createPaymentIntentBasket } from './functions/create-payment-intent-basket.js';
 import { onRequestGet as stripeConfig } from './functions/stripe-config.js';
@@ -66,7 +65,6 @@ const POST_ROUTES = {
     '/create-checkout': createCheckout,
     '/create-checkout-print': createCheckoutPrint,
     '/create-checkout-basket': createCheckoutBasket,
-    '/create-membership-checkout': createMembershipCheckout,
     '/stripe-webhook': stripeWebhook,
     '/create-payment-intent-basket': createPaymentIntentBasket,
 };
