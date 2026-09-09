@@ -20,31 +20,25 @@
 // binding as create-checkout.js / create-checkout-print.js (all three
 // share it).
 
-import { POSTAGE_TIERS, POSTAGE_METHODS, groupItemsByDestination, methodsForDestination, postageAmountForMethod } from './postage.js';
+import {
+    POSTAGE_TIERS,
+    POSTAGE_METHODS,
+    groupItemsByDestination,
+    postageAmountForMethod,
+    resolveGroupMethod,
+    freeMethodsForItems,
+    qualifiesForFreeCardDelivery,
+    qualifiesForFreePrintDelivery,
+} from './postage.js';
 
 // Basket postage is charged as our own fixed line item, not a Stripe
 // shipping_options choice (see the comment on appendShippingOptions in
 // postage.js for why) — so unlike the two single-item checkouts, the
 // customer has to pick their service on basket.html itself, BEFORE this
 // function ever runs. Each item can carry its own item.shippingMethod
-// (one of POSTAGE_METHODS); this resolves a whole destination group down
-// to ONE method (they all ship in the same parcel), preferring the
-// most-tracked choice requested by any item in the group, but only if
-// that service is actually valid for every size present (see
-// methodsForDestination) — otherwise it falls back to the cheapest valid
-// service. NOTE: basket.html doesn't have a service picker yet — until
-// it does, every item.shippingMethod will be undefined and this always
-// falls back to the cheapest option, i.e. today's existing behaviour.
-const METHOD_TRACKED_RANK = { first_class: 0, tracked24: 1, tracked24_signed: 2 };
-function resolveGroupMethod(groupItems) {
-    const valid = methodsForDestination(groupItems);
-    if (!valid.length) return null;
-    const requested = groupItems
-        .map((item) => item.shippingMethod)
-        .filter((m) => valid.includes(m))
-        .sort((a, b) => METHOD_TRACKED_RANK[b] - METHOD_TRACKED_RANK[a])[0];
-    return requested || valid[0];
-}
+// (one of POSTAGE_METHODS); resolveGroupMethod (from postage.js) resolves
+// a whole destination group down to ONE method, since they all ship in
+// the same parcel.
 import { checkPlusMembership, getUserFromAuth } from './account-api.js';
 import { checkPromoCode } from './promo.js';
 import { getRewardCodeDetails, getActiveWelcomeReward } from './referrals.js';
@@ -272,12 +266,6 @@ export async function onRequestPost(context) {
 
         for (const groupItems of groups.values()) {
             parcelNumber++;
-            const cardUnitsInGroup = groupItems
-                .filter((item) => item.kind === 'card')
-                .reduce((sum, item) => sum + item.quantity, 0);
-            const printItemsInGroup = groupItems.filter((item) => item.kind === 'print');
-            const printUnitsInGroup = printItemsInGroup.reduce((sum, item) => sum + item.quantity, 0);
-            const printSizesInGroup = new Set(printItemsInGroup.map((item) => item.size));
             const discountRate = isClubMember ? 0.25 : 0;
 
             groupItems.forEach((item) => {
@@ -338,40 +326,40 @@ export async function onRequestPost(context) {
             });
 
             // Postage for this parcel — a group ships in one package
-            // sized for its biggest item, so this is the highest tier
-            // present within the group, not summed per item. Waived
-            // (free) in three independent cases — never waived if a
-            // group mixes cards and prints together, since each case
-            // below requires the group to be one kind or the other:
-            //   1. 3+ cards are going to this same address. Applies to
-            //      every customer, not just Club members — that's the
-            //      whole point of it (it replaces the old 35% discount
-            //      tier as the "buy several, save on delivery" perk).
-            //   2. 2+ prints of the SAME size are going to this same
-            //      address — e.g. two A4 prints qualifies, but one A4 +
-            //      one A3 doesn't (different parcel/postage tiers), and
-            //      neither does a single print of any size. Also applies
-            //      to every customer, mirroring the cards rule above.
-            //   3. A valid promo code was entered (cards-only, as before).
+            // sized for its biggest item, so pricing is based on the
+            // highest tier present within the group, not summed per item.
+            // Which SERVICES are free depends on which promo qualifies —
+            // see freeMethodsForItems in postage.js:
+            //   1. 3+ cards to this same address — First Class only.
+            //      Applies to every customer, not just Club members.
+            //   2. 2+ prints of the SAME size to this same address —
+            //      First Class AND Tracked24 (photo); Tracked24 (signed)
+            //      still costs. Also applies to every customer.
+            //   3. A valid promo code was entered (cards-only) — First
+            //      Class only, same as (1).
+            // In every case, a customer who upgrades to a service the
+            // promo doesn't cover still pays the difference for it.
             // Club membership itself does NOT waive postage — that's the
-            // 25% card discount above instead.
+            // 25% card discount above instead, so isClubMember is
+            // deliberately not passed to freeMethodsForItems here.
             const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
-            const allPrintsInGroup = groupItems.length > 0 && groupItems.every((item) => item.kind === 'print');
-            const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
-            const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
-            const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || (allCardsInGroup && isPromoValid);
+            const qualifiesCardDelivery = qualifiesForFreeCardDelivery(groupItems);
+            const qualifiesPrintDelivery = qualifiesForFreePrintDelivery(groupItems);
             // Method was already resolved onto every item in this group
             // (see resolveGroupMethod above) — read it straight off the
             // first item rather than re-deriving it.
             const groupMethod = groupItems[0]?.shippingMethod || POSTAGE_METHODS.FIRST_CLASS;
+            const freeMethods = freeMethodsForItems(groupItems);
+            const promoWaivesThisMethod = allCardsInGroup && isPromoValid && groupMethod === POSTAGE_METHODS.FIRST_CLASS;
+            const postageWaived = freeMethods.has(groupMethod) || promoWaivesThisMethod;
             const postageAmount = postageWaived ? 0 : postageAmountForMethod(groupItems, groupMethod);
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
             let postageName;
-            if (qualifiesForFreeCardDelivery) {
+            if (postageWaived && qualifiesCardDelivery) {
                 postageName = `Free Postage (3+ cards to this address)${parcelLabel}`;
-            } else if (qualifiesForFreePrintDelivery) {
+            } else if (postageWaived && qualifiesPrintDelivery) {
                 postageName = `Free Postage (2+ same-size prints to this address)${parcelLabel}`;
-            } else if (postageWaived) {
+            } else if (postageWaived && promoWaivesThisMethod) {
                 postageName = `Free Postage (Promo Code)${parcelLabel}`;
             } else {
                 postageName = `Postage${parcelLabel}`;
