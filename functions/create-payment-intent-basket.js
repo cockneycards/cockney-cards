@@ -30,9 +30,13 @@
 // Requires the same STRIPE_SECRET_KEY env var and ORDER_PDFS R2 bucket
 // binding as create-checkout-basket.js (all the checkout functions share
 // them).
+//
+// Membership purchases work for guests too, not just logged-in
+// customers — see findOrCreateUserByEmail in account-api.js, used below
+// instead of rejecting a guest outright.
 
 import { groupItemsByDestination, highestTier, POSTAGE_TIERS } from './postage.js';
-import { checkPlusMembership, getUserFromAuth } from './account-api.js';
+import { checkPlusMembership, getUserFromAuth, findOrCreateUserByEmail } from './account-api.js';
 import { checkPromoCode } from './promo.js';
 import { getRewardCodeDetails, getActiveWelcomeReward } from './referrals.js';
 
@@ -157,7 +161,7 @@ export async function onRequestPost(context) {
             });
         }
 
-        const authedUser = await getUserFromAuth(request, env);
+        let authedUser = await getUserFromAuth(request, env);
         const isClubMember = await checkPlusMembership(request, env);
         const isPromoValid = await checkPromoCode(data.promoCode, env);
 
@@ -175,19 +179,21 @@ export async function onRequestPost(context) {
         // while already a member would just waste the customer's money
         // (checkPlusMembership already accounts for a lapsed/expired
         // one-off membership — see account-api.js — so a genuinely
-        // lapsed member can still rejoin here).
+        // lapsed member can still rejoin here). A guest (no authedUser)
+        // isn't turned away any more — findOrCreateUserByEmail attaches
+        // membership to their existing account if customerEmail matches
+        // one, or creates a fresh one otherwise, same as clicking a
+        // magic-link login would, just skipping the click-through since
+        // completing payment is itself a strong enough verification.
         if (wantsMembership) {
-            if (!authedUser) {
-                return new Response(JSON.stringify({ error: 'Please log in to add Cockney Cards Club membership to your basket.' }), {
-                    status: 400,
-                    headers: { 'Content-Type': 'application/json' },
-                });
-            }
             if (isClubMember) {
                 return new Response(JSON.stringify({ error: "You're already a Cockney Cards Club member." }), {
                     status: 400,
                     headers: { 'Content-Type': 'application/json' },
                 });
+            }
+            if (!authedUser) {
+                authedUser = await findOrCreateUserByEmail(customerEmail, env);
             }
         }
 
