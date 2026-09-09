@@ -535,6 +535,58 @@ export async function handleResumeMembership(request, env) {
     }
 }
 
+// Permanently deletes the caller's own account — the "Danger Zone" button
+// on account.html. Needs routing added in _worker.js: DELETE /api/account,
+// same pattern as the other /api/account* routes already wired there.
+//
+// If they have an active Club subscription, that's cancelled immediately
+// in Stripe first (not cancel_at_period_end like handleCancelMembership —
+// there's no account left afterwards to keep benefiting from the current
+// period). A failed Stripe call is logged but doesn't block the deletion;
+// worst case is an orphaned subscription still billing a deleted account,
+// which is far worse than a merely-unlisted one, so this always proceeds.
+//
+// Clears out the rows this file knows the exact schema for — sessions
+// (logs out every device, not just this one), reminders, addresses — then
+// the user row itself. Deliberately leaves `orders` alone: past purchases
+// are financial/accounting records, not account data, and sites normally
+// keep those after a deletion. Also leaves the referrals/reward_codes
+// tables untouched — their schema lives in referrals.js/
+// referrals-schema.sql, not this file, so precise cleanup for those is
+// better handled there than guessed at here.
+export async function handleDeleteAccount(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    if (user.plus_active && user.plus_subscription_id) {
+        try {
+            const res = await fetch(`https://api.stripe.com/v1/subscriptions/${user.plus_subscription_id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
+            });
+            if (!res.ok) {
+                const errBody = await res.json().catch(() => ({}));
+                console.error('Stripe subscription cancel failed during account deletion:', res.status, errBody);
+            }
+        } catch (err) {
+            console.error('Stripe subscription cancel threw during account deletion:', err);
+        }
+    }
+
+    try {
+        await env.DB.batch([
+            env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(user.id),
+            env.DB.prepare('DELETE FROM reminders WHERE user_id = ?').bind(user.id),
+            env.DB.prepare('DELETE FROM addresses WHERE user_id = ?').bind(user.id),
+            env.DB.prepare('DELETE FROM users WHERE id = ?').bind(user.id),
+        ]);
+        return json({ ok: true }, 200, env);
+    } catch (err) {
+        console.error('handleDeleteAccount failed:', err);
+        return json({ error: 'Could not delete your account — please try again or contact us.' }, 500, env);
+    }
+}
+
 // Powers the "Refer a Friend" account tab — the user's own referral
 // code/link, who they've referred so far and whether each has qualified,
 // and any free-card reward codes they've earned (redeemed or not).
