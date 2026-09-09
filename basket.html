@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Basket | Cockney Cards</title>
+<script src="auth.js"></script>
+<script src="cart.js"></script>
+
+<style>
+    :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --font-family: 'Helvetica Neue', Arial, sans-serif; }
+    html { overflow-y: scroll; scrollbar-gutter: stable; }
+    body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #fcfcfc; color: var(--dark); }
+
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
+    .logo-container { text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+
+    .basket-page { max-width: 1000px; margin: 40px auto 80px; padding: 0 40px; box-sizing: border-box; }
+    .basket-page h1 { font-size: 26px; font-weight: 300; margin: 0 0 30px; letter-spacing: 0.5px; }
+
+    .basket-layout { display: flex; gap: 40px; align-items: flex-start; }
+    .basket-items { flex: 1; min-width: 0; }
+    .basket-summary { width: 300px; flex-shrink: 0; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 25px; box-sizing: border-box; position: sticky; top: 20px; }
+
+    .basket-item { display: flex; flex-wrap: wrap; gap: 18px; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 18px; margin-bottom: 15px; align-items: center; }
+    .basket-item img { width: 90px; height: 90px; object-fit: contain; background: #fafafa; border: 1px solid #eee; border-radius: 4px; flex-shrink: 0; -webkit-user-drag: none; user-select: none; -webkit-touch-callout: none; }
+    .item-info { flex: 1; min-width: 0; }
+    .item-title { font-size: 14px; font-weight: bold; margin: 0 0 4px; color: #111; }
+    .item-options { font-size: 12px; color: #777; margin: 0 0 8px; }
+    .item-price { font-size: 13px; color: #444; font-weight: bold; margin: 0; }
+    .item-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+    .qty-control { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
+    .qty-control button { width: 28px; height: 28px; border: none; background: #f5f5f5; cursor: pointer; font-size: 14px; }
+    .qty-control button:hover { background: #eaeaea; }
+    .qty-control input { width: 34px; height: 28px; border: none; text-align: center; font-size: 13px; -moz-appearance: textfield; }
+    .qty-control input::-webkit-outer-spin-button, .qty-control input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .remove-link { font-size: 12px; color: #999; background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+    .remove-link:hover { color: #c0392b; }
+
+    .item-envelope { flex: 1 1 100%; margin-top: 4px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
+    .item-envelope-label { font-size: 12px; font-weight: bold; color: #333; margin: 0 0 8px; }
+    .item-envelope-options { display: flex; gap: 10px; }
+    .envelope-option { flex: 1; text-align: left; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 12px; background: white; cursor: pointer; font-family: var(--font-family); transition: border-color 0.15s, background 0.15s; }
+    .envelope-option strong { display: block; font-size: 12px; margin-bottom: 3px; color: #111; }
+    .envelope-option span { display: block; font-size: 11px; color: #777; line-height: 1.4; }
+    .envelope-option:hover { border-color: var(--primary); }
+    .envelope-option.selected { border-color: var(--primary); background: #f7faff; }
+    @media (max-width: 700px) { .item-envelope-options { flex-direction: column; } }
+
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 10px; }
+    .summary-row.total { font-size: 16px; font-weight: bold; color: #111; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
+    .shipping-method-options { display: flex; flex-direction: column; gap: 6px; margin: -4px 0 14px; }
+    .shipping-method-option { display: flex; justify-content: space-between; align-items: center; text-align: left; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; background: white; cursor: pointer; font-family: var(--font-family); font-size: 12px; color: #555; transition: border-color 0.15s, background 0.15s; }
+    .shipping-method-option:hover { border-color: var(--primary); }
+    .shipping-method-option.selected { border-color: var(--primary); background: #f7faff; color: #111; font-weight: bold; }
+    .free-delivery-nudge { background: #fff8e6; border: 1px solid var(--gold, #c8a04d); color: #7a5c1e; font-size: 13px; font-weight: bold; text-align: center; padding: 10px 12px; border-radius: 6px; margin-bottom: 15px; }
+
+    .club-banner { display: flex; align-items: center; gap: 18px; background: #0e2a4d; border-radius: 8px; padding: 16px 22px; margin-bottom: 24px; flex-wrap: wrap; }
+    .club-banner-text { flex: 1; min-width: 220px; }
+    .club-banner-text p { margin: 0; font-size: 13px; line-height: 1.5; color: #eef2f8; }
+    .club-banner-text strong { color: #f4bc2c; }
+    .club-banner-actions { display: flex; gap: 10px; flex-shrink: 0; }
+    .club-banner-btn { border: none; border-radius: 20px; padding: 9px 18px; font-size: 12px; font-weight: bold; letter-spacing: 0.3px; cursor: pointer; white-space: nowrap; font-family: var(--font-family); }
+    .club-banner-btn.gold { background: #f4bc2c; color: #0e2a4d; }
+    .club-banner-btn.gold:hover { background: #ffc93f; }
+    .club-banner-btn.outline { background: transparent; color: #eef2f8; border: 1px solid rgba(255,255,255,0.55); }
+    .club-banner-btn.outline:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+    @media (max-width: 700px) { .club-banner { flex-direction: column; align-items: flex-start; } .club-banner-actions { width: 100%; } .club-banner-btn { flex: 1; } }
+    .btn { width: 100%; background-color: #1a1a1a; color: white; border: none; padding: 15px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 15px; letter-spacing: 1px; text-transform: uppercase; box-sizing: border-box; }
+    .btn:hover { background-color: #444; }
+    .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+    .btn-secondary { background: none; border: 1px solid var(--border-color); color: #555; text-transform: none; letter-spacing: normal; font-weight: normal; }
+    .btn-secondary:hover { background: #f5f5f5; color: #111; }
+
+    .empty-basket { text-align: center; padding: 80px 20px; color: #888; }
+    .empty-basket .empty-title { font-size: 18px; color: #333; margin-bottom: 10px; }
+    .empty-basket a { color: var(--primary); text-decoration: none; font-size: 13px; }
+    .empty-basket a:hover { text-decoration: underline; }
+
+    #checkout-error { font-size: 12px; color: #c0392b; margin-top: 10px; display: none; }
+
+    .preview-link { font-size: 12px; color: var(--primary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; text-align: right; }
+    .preview-link:hover { color: #0d5bc4; }
+
+    .preview-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    .preview-overlay.open { display: flex; }
+    .preview-modal { background: white; border-radius: 10px; max-width: 520px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+    .preview-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+    .preview-modal-header h3 { margin: 0; font-size: 15px; font-weight: bold; }
+    .preview-close { background: none; border: none; font-size: 20px; line-height: 1; cursor: pointer; color: #888; padding: 4px; }
+    .preview-close:hover { color: #111; }
+    .preview-tabs { display: flex; gap: 8px; padding: 12px 20px 0; }
+    .preview-tab { flex: 1; padding: 8px; border: 1px solid var(--border-color); background: #f5f5f5; border-radius: 6px; font-size: 12px; font-weight: bold; letter-spacing: 0.5px; cursor: pointer; color: #666; text-transform: uppercase; }
+    .preview-tab.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+    .preview-image-wrap { padding: 20px; text-align: center; overflow: auto; flex: 1; }
+    .preview-image-wrap img { max-width: 100%; max-height: 60vh; object-fit: contain; border: 1px solid #eee; border-radius: 4px; -webkit-user-drag: none; user-select: none; -webkit-touch-callout: none; }
+    .preview-unavailable { font-size: 13px; color: #999; padding: 40px 20px; }
+    .preview-modal-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); font-size: 11px; color: #999; text-align: center; }
+
+    .item-delivery { font-size: 12px; color: #666; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .item-delivery-address { font-size: 11px; color: #888; line-height: 1.5; margin: 0 0 8px; }
+    .recipient-link { font-size: 12px; color: var(--primary); background: none; border: none; cursor: pointer; text-decoration: underline; padding: 0; }
+    .recipient-link:hover { color: #0d5bc4; }
+
+    .recipient-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+    .recipient-overlay.open { display: flex; }
+    .recipient-modal { background: white; border-radius: 10px; max-width: 440px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+    .recipient-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+    .recipient-modal-header h3 { margin: 0; font-size: 15px; font-weight: bold; }
+    .recipient-modal-body { padding: 16px 20px 20px; overflow-y: auto; }
+    .recipient-option { border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; font-size: 13px; transition: border-color 0.15s, background 0.15s; }
+    .recipient-option:hover { border-color: var(--primary); background: #f7faff; }
+    .recipient-option strong { display: block; margin-bottom: 3px; }
+    .recipient-option span { color: #777; font-size: 12px; line-height: 1.5; }
+    .recipient-option.selected { border-color: var(--primary); background: #f7faff; }
+    .recipient-section-title { font-size: 13px; font-weight: bold; margin: 0 0 2px; color: #111; }
+    .recipient-section-sub { font-size: 12px; color: #777; margin: 0 0 10px; }
+    .recipient-section-divider { border-top: 1px solid var(--border-color); padding-top: 18px; margin-top: 4px; }
+    .recipient-form input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; box-sizing: border-box; font-family: var(--font-family); margin-bottom: 10px; }
+    .recipient-form label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #555; margin-bottom: 12px; }
+
+    footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
+    .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; overflow-x: auto; }
+    .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
+    .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
+    .footer-col p { margin: 0 0 15px 0; }
+    .footer-col a { color: #111; text-decoration: underline; }
+    .footer-bottom { max-width: 1200px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+
+    @media (max-width: 700px) {
+        .basket-layout { flex-direction: column; }
+        .basket-summary { width: 100%; position: static; }
+        .basket-item { flex-wrap: wrap; }
+    }
+</style>
+    <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo-container" onclick="window.location.href='index.html';">
+            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+        </div>
+        <div class="header-right">
+            <div class="cart-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="cockney-club.html">Cockney Club</a></li>
+            <li><a href="account.html">My Account</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="basket-page">
+    <h1>Your Basket</h1>
+    <div id="basket-content"></div>
+</div>
+
+<div class="preview-overlay" id="preview-overlay" onclick="if(event.target===this) closePreview();">
+    <div class="preview-modal">
+        <div class="preview-modal-header">
+            <h3 id="preview-title">Proof your card</h3>
+            <button class="preview-close" onclick="closePreview()">&times;</button>
+        </div>
+        <div class="preview-tabs" id="preview-tabs"></div>
+        <div class="preview-image-wrap" id="preview-image-wrap"></div>
+        <div class="preview-modal-footer">Please check spelling and layout carefully — this is exactly how your card will print.</div>
+    </div>
+</div>
+
+<div class="recipient-overlay" id="recipient-overlay" onclick="if(event.target===this) closeRecipientPicker();">
+    <div class="recipient-modal">
+        <div class="recipient-modal-header">
+            <h3>Who's this for?</h3>
+            <button class="preview-close" onclick="closeRecipientPicker()">&times;</button>
+        </div>
+        <div class="recipient-modal-body" id="recipient-modal-body"></div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h4>Our Store Policies</h4>
+            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
+            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
+            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
+            <p><strong>TikTok:</strong><br><a href="https://www.tiktok.com/@cockneycards" target="_blank">@cockneycards</a></p>
+        </div>
+        <div class="footer-col">
+            <h4>Business Hours</h4>
+            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
+            <p><strong>Saturday:</strong><br>10am - 4pm</p>
+            <p><strong>Sunday:</strong><br>Closed</p>
+        </div>
+    </div>
+    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+// Promo-code state, kept here (rather than just left in the input) so it
+// survives the re-render triggered by applying a code — see
+// applyPromoCode(). Only affects the postage ESTIMATE below (free
+// postage for an all-card destination on a valid code, matching
+// functions/postage.js's rule) — checkout re-validates the code itself
+// regardless of what's shown here.
+let promoCodeValue = '';
+let promoIsValid = false;
+let promoFeedbackText = '';
+let promoFeedbackColor = '#c0392b';
+
+// Cockney Cards Club membership — fetched from GET /api/account (needs
+// the logged-in session token; see auth.js) so the basket can show the
+// same 25%-off-cards price that create-checkout-basket.js actually
+// charges a member. Starts false (standard pricing) until this resolves,
+// so a guest or not-yet-checked visitor is never shown a discount that
+// might not apply — it only ever corrects upward into a lower price, not
+// the other way round. Never trust this client-side for anything that
+// affects what's actually charged — checkout re-verifies membership
+// itself server-side regardless.
+let clubIsMember = false;
+
+// True if cards in this basket should show/get the 25% Club price — either
+// because the customer is already a confirmed member (clubIsMember), or
+// because they've just added the Annual Membership to this basket (so
+// they'll be a member by the time this order is charged). Recomputed at
+// the top of every renderBasket() call; displayUnitPrice() and renderItem()
+// both read it instead of clubIsMember directly, so the discount preview
+// (and the strikethrough price) appears the moment membership is added and
+// disappears the moment it's removed. The membership line itself is never
+// discounted — see create-payment-intent-basket.js's matching
+// membershipActive logic, which is what actually applies this at charge time.
+let clubDiscountActive = false;
+
+// Saved addresses for "self" delivery items (see account-api.js's
+// /api/addresses) — lets a logged-in customer pick a confirmed address
+// here instead of Stripe's own shipping_address_collection field, which
+// is what was letting Stripe/Link silently autofill the wrong address on
+// a basket with mixed self/recipient destinations. Empty for guests, or
+// before this has resolved.
+let savedAddresses = [];
+let selectedSelfAddressId = null;
+// Ad-hoc "self" delivery address for guests, typed directly into the
+// "Deliver to" block below — needed now that checkout.html/Stripe's
+// Payment Element collects card details only, with no address step of
+// its own for a guest to fall back on the way Stripe's hosted Checkout
+// page used to provide.
+let guestSelfAddress = null;
+// A self address just entered in the "Who's this for?" form for a
+// LOGGED-IN customer — set immediately so this order can use it even if
+// saving it to the account (below) fails, is skipped (box left
+// unchecked), or /api/addresses is unavailable. Cleared once the address
+// is confirmed saved and selectable from savedAddresses instead.
+let adHocSelfAddress = null;
+
+// guestSelfAddress/selectedSelfAddressId/adHocSelfAddress above are plain
+// in-memory variables, so a full page navigation (e.g. going to
+// checkout.html and back via the basket icon) used to wipe them and
+// leave the "Deliver to" block empty again. Persisting them to
+// sessionStorage — restored on load, saved every time renderBasket()
+// runs — makes them survive that round trip for the rest of the tab's
+// session, the same way the cart items themselves already do via cart.js.
+const SELF_ADDRESS_STORAGE_KEY = 'cc_self_address_state';
+
+function persistSelfAddressState() {
+    try {
+        sessionStorage.setItem(SELF_ADDRESS_STORAGE_KEY, JSON.stringify({
+            guestSelfAddress,
+            selectedSelfAddressId,
+            adHocSelfAddress,
+            guestAddresses,
+            shippingMethodByDestination,
+        }));
+    } catch (err) {
+        console.error('Could not persist delivery address:', err);
+    }
+}
+
+function restoreSelfAddressState() {
+    try {
+        const raw = sessionStorage.getItem(SELF_ADDRESS_STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        guestSelfAddress = saved.guestSelfAddress || null;
+        selectedSelfAddressId = saved.selectedSelfAddressId || null;
+        adHocSelfAddress = saved.adHocSelfAddress || null;
+        guestAddresses = saved.guestAddresses || [];
+        shippingMethodByDestination = saved.shippingMethodByDestination || {};
+    } catch (err) {
+        console.error('Could not restore delivery address:', err);
+    }
+}
+
+async function loadSavedAddresses() {
+    if (!ccIsLoggedIn()) { savedAddresses = []; return; }
+    try {
+        const res = await fetch('/api/addresses', {
+            headers: { Authorization: `Bearer ${ccGetSession()}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            savedAddresses = data.addresses || [];
+            const preselect = savedAddresses.find((a) => a.is_default) || savedAddresses[0];
+            if (preselect && !selectedSelfAddressId) selectedSelfAddressId = preselect.id;
+            renderBasket();
+        }
+    } catch (err) {
+        console.error('Could not load saved addresses:', err);
+    }
+}
+
+async function refreshMembershipStatus() {
+    if (!ccIsLoggedIn()) return;
+    try {
+        const res = await fetch('/api/account', {
+            headers: { Authorization: `Bearer ${ccGetSession()}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            clubIsMember = !!data.plusActive;
+            renderBasket();
+        }
+    } catch (err) {
+        console.error('Could not check Cockney Cards Club status:', err);
+    }
+}
+
+// Adds Cockney Cards Club membership to the basket, Moonpig-style — a
+// one-time £9.99 charge (not a Stripe Subscription; see
+// create-payment-intent-basket.js/stripe-webhook.js), valid for 1 year
+// from checkout. checkPlusMembership() already treats a past
+// plus_current_period_end as "not a member" regardless of how it got
+// set, so this banner naturally reappears on its own once the year's
+// up — nothing here needs to actively expire it. Requires being logged
+// in, since membership has to attach to an account.
+async function joinClubFromBasket() {
+    if (!ccIsLoggedIn()) {
+        window.location.href = 'account.html';
+        return;
+    }
+    if (ccCart.getCart().some((i) => i.kind === 'membership')) return;
+    await ccCart.addToCart({
+        kind: 'membership',
+        title: 'Cockney Cards Club — Annual Membership',
+        optionsSummary: 'Valid for 1 year from purchase',
+        price: '£9.99',
+        priceValue: 9.99,
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    restoreSelfAddressState();
+    renderBasket();
+    refreshMembershipStatus();
+    loadSavedAddresses();
+});
+window.addEventListener('cc-cart-updated', renderBasket);
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closePreview(); closeRecipientPicker(); } });
+window.addEventListener('pageshow', () => {
+    const btn = document.getElementById('checkout-btn');
+    const errorEl = document.getElementById('checkout-error');
+    if (btn) { btn.disabled = false; btn.innerText = 'Checkout'; }
+    if (errorEl) errorEl.style.display = 'none';
+    renderBasket();
+});
+
+// ---------------------------------------------------------------------
+// Postage estimate — mirrors functions/postage.js + the grouping/waiver
+// logic in functions/create-checkout-basket.js, so the basket shows the
+// same parcels/prices the Stripe session will actually charge. Keep in
+// sync if those files change. This is a display estimate only; the
+// Stripe Checkout Session created server-side is what actually charges
+// the customer.
+// ---------------------------------------------------------------------
+const POSTAGE_TIERS = { A5: 199, A4: 349, A3: 499 }; // pence — First Class only, kept for tierForItem/highestTier below
+const TIER_RANK = { A5: 0, A4: 1, A3: 2 };
+
+// Full per-service rates — mirrors functions/postage.js's POSTAGE_RATES/
+// METHOD_LABELS exactly. A3 has no first_class entry (it ships as a
+// small parcel, not a letter) — same reasoning as postage.js.
+const POSTAGE_RATES = {
+    A5: { first_class: 199, tracked24: 399, tracked24_signed: 599 },
+    A4: { first_class: 349, tracked24: 399, tracked24_signed: 599 },
+    A3: { tracked24: 499, tracked24_signed: 699 },
+};
+const METHOD_LABELS = {
+    first_class: 'Royal Mail 1st Class',
+    tracked24: 'Tracked24 (photo)',
+    tracked24_signed: 'Tracked24 (signature)',
+};
+// Fixed display order, cheapest/least-tracked first — used both for
+// rendering the picker and for picking a sane default (index 0) when
+// nothing's been chosen yet.
+const METHOD_ORDER = ['first_class', 'tracked24', 'tracked24_signed'];
+
+function tierForItem(item) {
+    if (item.kind === 'print' && item.size && POSTAGE_TIERS[item.size]) return item.size;
+    return 'A5';
+}
+
+function highestTier(items) {
+    let best = 'A5';
+    for (const item of items) {
+        const t = tierForItem(item);
+        if (TIER_RANK[t] > TIER_RANK[best]) best = t;
+    }
+    return best;
+}
+
+// Services valid for one parcel size, in fixed display order.
+function methodsForSize(size) {
+    const rates = POSTAGE_RATES[size] || POSTAGE_RATES.A5;
+    return METHOD_ORDER.filter((m) => rates[m] !== undefined);
+}
+
+// Services valid for a WHOLE destination group — the intersection across
+// every size present, since they all ship in one parcel (e.g. mixing an
+// A3 print in with cards drops First Class off the list for that group).
+function methodsForDestination(groupItems) {
+    const sizes = new Set(groupItems.map(tierForItem));
+    let methods = null;
+    for (const size of sizes) {
+        const available = new Set(methodsForSize(size));
+        methods = methods ? new Set([...methods].filter((m) => available.has(m))) : available;
+    }
+    return METHOD_ORDER.filter((m) => methods && methods.has(m));
+}
+
+// Which shipping SERVICES a promo waives — mirrors functions/postage.js's
+// freeMethodsForItems exactly (see that file for the full reasoning):
+// the 3+ cards and cards+A5-prints promos, and a valid all-cards promo
+// code, only ever waive First Class; the 2+ same-size prints promo also
+// waives Tracked24 (photo), but never Tracked24 (signed); 2+ A3 prints
+// on their own (no companion needed) waives BOTH Tracked24 services; the
+// 2+ large-prints-plus-a-card bundle and the 2+ A3s-plus-a-card/A4/A5
+// bundle both waive every service on offer.
+function freeMethodsForGroup(groupItems, { qualifiesCard, qualifiesPrint, qualifiesEnvelope, qualifiesLargePrint, qualifiesA3Bundle, qualifiesA3Tracked, allCardsInGroup, isPromoValid, validMethods }) {
+    const free = new Set();
+    if (qualifiesLargePrint || qualifiesA3Bundle) {
+        validMethods.forEach((m) => free.add(m));
+        return free;
+    }
+    if (qualifiesCard || qualifiesEnvelope || (allCardsInGroup && isPromoValid)) {
+        free.add('first_class');
+    }
+    if (qualifiesPrint) {
+        free.add('first_class');
+        free.add('tracked24');
+    }
+    if (qualifiesA3Tracked) {
+        free.add('tracked24');
+        free.add('tracked24_signed');
+    }
+    return free;
+}
+
+function normalise(value) {
+    return (value || '').toString().trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function destinationKey(item) {
+    const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+    if (!wantsRecipient) return 'self';
+    const r = item.delivery.recipient;
+    return ['recipient', normalise(r.name), normalise(r.address1), normalise(r.postcode)].join('|');
+}
+
+function groupItemsByDestination(items) {
+    const groups = new Map();
+    for (const item of items) {
+        const key = destinationKey(item);
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(item);
+    }
+    return groups;
+}
+
+// The customer's chosen Royal Mail service per destination, keyed by
+// destinationKey() — e.g. { self: 'tracked24', 'recipient|jane|...': 'first_class' }.
+// Persisted alongside the self-address state below so it survives the
+// round trip to checkout.html and back. Falls back to the cheapest valid
+// service for a group (METHOD_ORDER[0] within methodsForDestination) so
+// there's always a sensible default before the customer touches anything.
+let shippingMethodByDestination = {};
+
+function resolvedMethodForGroup(groupItems) {
+    const valid = methodsForDestination(groupItems);
+    if (!valid.length) return null;
+    const key = destinationKey(groupItems[0]);
+    const chosen = shippingMethodByDestination[key];
+    return valid.includes(chosen) ? chosen : valid[0];
+}
+
+function selectShippingMethod(key, method) {
+    shippingMethodByDestination[key] = method;
+    persistSelfAddressState();
+    renderBasket();
+}
+
+// Returns { parcels: [{ label, amountPence }], totalPence }.
+function estimatePostage(items, { isPromoValid = false } = {}) {
+    const groups = groupItemsByDestination(items);
+    const parcels = [];
+    let totalPence = 0;
+    let parcelNumber = 0;
+
+    for (const groupItems of groups.values()) {
+        parcelNumber++;
+
+        const allCardsInGroup = groupItems.every((i) => i.kind === 'card');
+        const allPrintsInGroup = groupItems.length > 0 && groupItems.every((i) => i.kind === 'print');
+        const cardUnitsInGroup = groupItems
+            .filter((i) => i.kind === 'card')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const printItemsInGroup = groupItems.filter((i) => i.kind === 'print');
+        const printUnitsInGroup = printItemsInGroup.reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const printSizesInGroup = new Set(printItemsInGroup.map((i) => i.size || null));
+        // A5 prints fold down to the same envelope size as a card, so they
+        // can travel in the same envelope — A4/A3 prints can't, so they're
+        // excluded from this specific promo (see qualifiesForFreeEnvelopeDelivery).
+        const a5PrintUnitsInGroup = printItemsInGroup
+            .filter((i) => (i.size || null) === 'A5')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const hasNonA5PrintInGroup = printItemsInGroup.some((i) => (i.size || null) !== 'A5');
+        // A4/A3 prints don't fit in an envelope with a card (see the A5
+        // rule above), but they still get their own free-delivery bundle:
+        // 2+ of them, either size or mixed, plus a card, same address.
+        const largePrintUnitsInGroup = printItemsInGroup
+            .filter((i) => i.size === 'A4' || i.size === 'A3')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        // A3-specific count for the A3 bundle promo below — a subset of
+        // largePrintUnitsInGroup above.
+        const a3UnitsInGroup = printItemsInGroup
+            .filter((i) => i.size === 'A3')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const hasCompanionItemInGroup = cardUnitsInGroup >= 1 || printItemsInGroup.some((i) => i.size === 'A4' || i.size === 'A5');
+
+        const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
+        const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
+        // 3+ combined units of cards + A5 prints, mixed is fine (e.g. 2
+        // cards + 1 A5 print, or 1 card + 2 A5 prints) — as long as
+        // nothing bigger than A5 is in the same parcel, since an A4/A3
+        // print wouldn't fit in the envelope alongside the cards anyway.
+        const qualifiesForFreeEnvelopeDelivery = !hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) >= 3;
+        // 2+ A4/A3 prints (either size, mixed is fine) plus at least one
+        // card, same address.
+        const qualifiesForFreeLargePrintDelivery = cardUnitsInGroup >= 1 && largePrintUnitsInGroup >= 2;
+        // 2+ A3 prints specifically, plus at least one card, A4 print, or
+        // A5 print, same address. Also reaches the "2+ A3s + an A4/A5
+        // print, no card" case that the large-print bundle above doesn't.
+        const qualifiesForFreeA3BundleDelivery = a3UnitsInGroup >= 2 && hasCompanionItemInGroup;
+        // 2+ A3 prints, full stop — no companion required, whatever else
+        // (if anything) is in the parcel. Waives both Tracked24 services.
+        const qualifiesForFreeA3TrackedDelivery = a3UnitsInGroup >= 2;
+
+        const size = highestTier(groupItems);
+        const validMethods = methodsForDestination(groupItems);
+        const selectedMethod = resolvedMethodForGroup(groupItems);
+        // Which services THIS parcel's promo(s) actually waive — not
+        // every promo waives every service (see freeMethodsForGroup
+        // above), so a customer who's upgraded to a paid service still
+        // pays for it even though the destination otherwise qualifies.
+        const freeMethods = freeMethodsForGroup(groupItems, {
+            qualifiesCard: qualifiesForFreeCardDelivery,
+            qualifiesPrint: qualifiesForFreePrintDelivery,
+            qualifiesEnvelope: qualifiesForFreeEnvelopeDelivery,
+            qualifiesLargePrint: qualifiesForFreeLargePrintDelivery,
+            qualifiesA3Bundle: qualifiesForFreeA3BundleDelivery,
+            qualifiesA3Tracked: qualifiesForFreeA3TrackedDelivery,
+            allCardsInGroup,
+            isPromoValid,
+            validMethods,
+        });
+        const methodIsFree = freeMethods.has(selectedMethod);
+        const amountPence = methodIsFree ? 0 : (POSTAGE_RATES[size]?.[selectedMethod] ?? 0);
+        totalPence += amountPence;
+
+        const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
+        let label;
+        if (methodIsFree && qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreeA3BundleDelivery) label = `Free Postage — 2+ A3 prints + a card/A4/A5, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreeA3TrackedDelivery) label = `Free Postage — 2+ A3 prints, same address${parcelLabel}`;
+        else if (methodIsFree && allCardsInGroup && isPromoValid) label = `Free Postage — Promo Code${parcelLabel}`;
+        else label = `Postage${parcelLabel}`;
+
+        parcels.push({
+            label,
+            amountPence,
+            destinationKey: destinationKey(groupItems[0]),
+            size,
+            validMethods,
+            selectedMethod,
+            freeMethods,
+        });
+    }
+
+    return { parcels, totalPence };
+}
+
+// Returns this line's per-unit price with the Club discount applied if
+// it qualifies — 25% off cards only, matching create-checkout-basket.js
+// (`item.kind === 'card' && discountRate > 0`; prints and reward/promo
+// discounts aren't factored in here, those are checkout-only). Returns
+// null if this item has no usable price (matches the server's own
+// hasPrice check, so a missing price shows as missing here too rather
+// than silently becoming £0).
+function displayUnitPrice(item) {
+    const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
+    if (!hasPrice) return null;
+    if (item.kind === 'card' && clubDiscountActive) return item.priceValue * 0.75;
+    return item.priceValue;
+}
+
+function basketSubtotal(items) {
+    return items.reduce((sum, item) => sum + (displayUnitPrice(item) || 0) * (item.quantity || 1), 0);
+}
+
+// If any destination's parcel is exactly ONE item short of a free-delivery
+// promo (see estimatePostage above — this mirrors the same rules), returns
+// the friendliest nudge for the cheapest thing they could add. Checked
+// across every destination group, but only ever the single cheapest
+// candidate is returned, so the basket never shows or flickers between two
+// equally-true nudges at once. Returns null if nothing is one-away, or the
+// customer already has free delivery everywhere.
+function basketFreeDeliveryNudge(items) {
+    const groups = groupItemsByDestination(items);
+    let best = null;
+
+    for (const groupItems of groups.values()) {
+        const allCardsInGroup = groupItems.every((i) => i.kind === 'card');
+        const allPrintsInGroup = groupItems.length > 0 && groupItems.every((i) => i.kind === 'print');
+        const cardUnitsInGroup = groupItems
+            .filter((i) => i.kind === 'card')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const printItemsInGroup = groupItems.filter((i) => i.kind === 'print');
+        const printUnitsInGroup = printItemsInGroup.reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const printSizesInGroup = new Set(printItemsInGroup.map((i) => i.size || null));
+        const a5PrintUnitsInGroup = printItemsInGroup
+            .filter((i) => (i.size || null) === 'A5')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+        const hasNonA5PrintInGroup = printItemsInGroup.some((i) => (i.size || null) !== 'A5');
+        const largePrintUnitsInGroup = printItemsInGroup
+            .filter((i) => i.size === 'A4' || i.size === 'A3')
+            .reduce((sum, i) => sum + (i.quantity || 1), 0);
+
+        const alreadyFree =
+            (allCardsInGroup && cardUnitsInGroup >= 3) ||
+            (allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2) ||
+            (!hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) >= 3) ||
+            (cardUnitsInGroup >= 1 && largePrintUnitsInGroup >= 2);
+        if (alreadyFree) continue;
+
+        // Lower priority = cheaper to add = wins when more than one nudge
+        // applies to the same group. Cards are the cheapest add, then A5
+        // prints, then A4/A3 prints.
+        const candidates = [];
+        if (allCardsInGroup && cardUnitsInGroup >= 1 && cardUnitsInGroup < 3) {
+            const needed = 3 - cardUnitsInGroup;
+            candidates.push({ priority: 0, message: `Add ${needed} more card${needed > 1 ? 's' : ''} to the same address for free delivery!` });
+        }
+        if (allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup === 1) {
+            const size = [...printSizesInGroup][0];
+            candidates.push({ priority: size === 'A5' ? 1 : size === 'A4' ? 2 : 3, message: `Add 1 more ${size} print to the same address for free delivery!` });
+        }
+        if (!hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) >= 1 && (cardUnitsInGroup + a5PrintUnitsInGroup) < 3) {
+            const needed = 3 - (cardUnitsInGroup + a5PrintUnitsInGroup);
+            candidates.push({ priority: 0, message: `Add ${needed} more card${needed > 1 ? 's' : ''} or 1 more print to the same address for free delivery!` });
+        }
+        if (cardUnitsInGroup >= 1 && largePrintUnitsInGroup === 1) {
+            candidates.push({ priority: 2, message: 'Add 1 more A4/A3 print to the same address for free delivery!' });
+        }
+        if (cardUnitsInGroup === 0 && largePrintUnitsInGroup >= 2) {
+            candidates.push({ priority: 0, message: 'Add a card to the same address for free delivery!' });
+        }
+
+        for (const candidate of candidates) {
+            if (!best || candidate.priority < best.priority) best = candidate;
+        }
+    }
+
+    return best ? best.message : null;
+}
+
+// "Deliver to" picker — only shown when the basket has at least one
+// "self" delivery item (a "recipient" item already carries its own
+// address, set in the editor, and doesn't need this). Three states:
+// not logged in, logged in with no saved addresses, logged in with some.
+// The chosen id is read back out in goToCheckout().
+function renderDeliverToBlock() {
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    const wrapStyle = 'margin-bottom:15px; padding:12px; border:1px solid var(--border-color); border-radius:6px; font-size:12px; color:#666;';
+    const labelHtml = '';
+    const inputStyle = 'width:100%; padding:8px; margin-bottom:6px; border:1px solid var(--border-color); border-radius:6px; font-size:13px; box-sizing:border-box; font-family:var(--font-family);';
+
+    if (!loggedIn) {
+        // Guests can't pick a saved address, but every "self" item still
+        // needs one before checkout.html can take payment — there's no
+        // Stripe-hosted address step left to fall back on now, so it's
+        // collected right here instead.
+        if (guestSelfAddress) {
+            return `
+                <div style="${wrapStyle}">
+                    ${labelHtml}
+                    <div style="font-size:12px; color:#333; line-height:1.5; margin-bottom:8px;">
+                        ${guestSelfAddress.name}<br>
+                        ${guestSelfAddress.address1}${guestSelfAddress.address2 ? ', ' + guestSelfAddress.address2 : ''}<br>
+                        ${guestSelfAddress.city}, ${guestSelfAddress.postcode}<br>
+                        ${guestSelfAddress.country}
+                    </div>
+                    <button type="button" class="recipient-link" onclick="guestSelfAddress = null; renderBasket();">Change address</button>
+                </div>
+            `;
+        }
+        return `
+            <div style="${wrapStyle}">
+                ${labelHtml}
+                <p style="margin:0 0 8px;">Where should we deliver? <a href="account.html" style="color:var(--primary);">Log in</a> to use a saved address, or enter one below.</p>
+                <input type="text" id="guest-self-name" placeholder="Full name" style="${inputStyle}">
+                <input type="text" id="guest-self-address1" placeholder="Address line 1" style="${inputStyle}">
+                <input type="text" id="guest-self-address2" placeholder="Address line 2 (optional)" style="${inputStyle}">
+                <input type="text" id="guest-self-city" placeholder="Town / City" style="${inputStyle}">
+                <input type="text" id="guest-self-postcode" placeholder="Postcode" style="${inputStyle}">
+                <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0;" onclick="saveGuestSelfAddress()">Use this address</button>
+            </div>
+        `;
+    }
+
+    if (!savedAddresses.length) {
+        // Nothing to show here — addresses are added via "Select
+        // Recipient" on a basket item (see openRecipientPicker), on the
+        // left, not from this sidebar.
+        return '';
+    }
+
+    const options = savedAddresses.map((a) => `
+        <option value="${a.id}" ${a.id === selectedSelfAddressId ? 'selected' : ''}>${a.label || 'Address'} — ${a.address1}, ${a.postcode}</option>
+    `).join('');
+
+    return `
+        <div style="${wrapStyle}">
+            ${labelHtml}
+            <select id="self-address-select" onchange="selectedSelfAddressId = this.value; persistSelfAddressState();" style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px; font-size:13px; box-sizing:border-box; font-family:var(--font-family);">
+                ${options}
+            </select>
+            <a href="account.html" style="font-size:11px; color:var(--primary); display:inline-block; margin-top:6px;">Manage addresses</a>
+        </div>
+    `;
+}
+
+// Reads the ad-hoc guest address form above and stores it — validated
+// the same way handleAddAddress (account-api.js) validates a saved
+// address, so a guest can't reach checkout.html with an incomplete one.
+function saveGuestSelfAddress() {
+    const name = $('guest-self-name').value.trim();
+    const address1 = $('guest-self-address1').value.trim();
+    const address2 = $('guest-self-address2').value.trim();
+    const city = $('guest-self-city').value.trim();
+    const postcode = $('guest-self-postcode').value.trim();
+
+    if (!name || !address1 || !city || !postcode) {
+        alert('Please fill in at least name, address, city, and postcode.');
+        return;
+    }
+
+    guestSelfAddress = { label: 'Delivery address', name, address1, address2, city, county: '', postcode, country: 'United Kingdom' };
+    renderBasket();
+}
+
+// The address the customer picked (logged in) or typed in (guest) for
+// their "self" items — shared by renderBasket() (to gate the Checkout
+// button) and goToCheckout() (to actually send it).
+function getChosenSelfAddress() {
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    return loggedIn
+        ? (savedAddresses.find((a) => a.id === selectedSelfAddressId) || adHocSelfAddress)
+        : guestSelfAddress;
+}
+
+// Nudges a guest or non-member towards the discount they're missing —
+// hidden entirely once clubIsMember is confirmed true. Text/buttons
+// adapt to login state: a guest is told to log in OR join, a logged-in
+// non-member is just told to join (they're already logged in).
+function renderClubBanner() {
+    if (clubIsMember) return '';
+    if (ccCart.getCart().some((i) => i.kind === 'membership')) return '';
+
+    const loggedIn = ccIsLoggedIn();
+    const message = loggedIn
+        ? `You're not a <strong>Cockney Cards Club</strong> member yet — join today and save 25% on every card.`
+        : `Remember to log in to your <strong>Cockney Cards Club</strong> account to get your member discount. Don't have one? Why not join?`;
+    const loginBtnHtml = loggedIn
+        ? ''
+        : `<button type="button" class="club-banner-btn outline" onclick="window.location.href='account.html'">Log In</button>`;
+
+    return `
+        <div class="club-banner">
+            <div class="club-banner-text"><p>${message}</p></div>
+            <div class="club-banner-actions">
+                ${loginBtnHtml}
+                <button type="button" class="club-banner-btn gold" onclick="joinClubFromBasket()">Join Now</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderBasket() {
+    persistSelfAddressState();
+    const items = ccCart.getCart();
+    const content = $('basket-content');
+
+    // See clubDiscountActive's declaration above — this must run before
+    // basketSubtotal()/renderItem() below read it.
+    clubDiscountActive = clubIsMember || items.some((i) => i.kind === 'membership');
+
+    if (!items.length) {
+        content.innerHTML = `
+            ${renderClubBanner()}
+            <div class="empty-basket">
+                <p class="empty-title">Your basket is empty</p>
+                <a href="shop-cards.html">Browse cards</a> &nbsp;·&nbsp; <a href="shop-prints.html">Browse prints</a>
+            </div>
+        `;
+        return;
+    }
+
+    const rawSubtotal = ccCart.getCartTotal();
+    const subtotal = basketSubtotal(items);
+    const clubSavings = rawSubtotal - subtotal;
+    const count = ccCart.getCartCount();
+    // Club membership isn't a physical parcel — it never affects postage
+    // tiers/grouping or the free-delivery promos, so it's excluded from
+    // everything postage.js touches (estimatePostage, the free-delivery
+    // nudge, and whether a delivery address is even required).
+    const physicalItems = items.filter((item) => item.kind !== 'membership');
+    const postage = estimatePostage(physicalItems, { isPromoValid: promoIsValid });
+    const postagePounds = postage.totalPence / 100;
+    const grandTotal = subtotal + postagePounds;
+    const freeDeliveryNudge = basketFreeDeliveryNudge(physicalItems);
+
+    // Each parcel gets its own service picker — small pill buttons for
+    // every method valid for that destination's items (see
+    // methodsForDestination), so the customer sees exactly what it'll
+    // cost to upgrade. Choosing a service is independent of whether
+    // postage is currently waived: the parcel still ships under whichever
+    // service is selected (matters for tracking, even at £0).
+    const postageRowsHtml = postage.parcels.map((p) => {
+        const optionsHtml = p.validMethods.length > 1 ? `
+            <div class="shipping-method-options">
+                ${p.validMethods.map((m) => {
+                    const price = POSTAGE_RATES[p.size]?.[m];
+                    const priceLabel = p.freeMethods.has(m) ? 'FREE' : ccCart.formatGBP((price || 0) / 100);
+                    return `
+                        <button type="button" class="shipping-method-option${m === p.selectedMethod ? ' selected' : ''}" onclick="selectShippingMethod('${p.destinationKey}', '${m}')">
+                            <span>${METHOD_LABELS[m]}</span>
+                            <span>${priceLabel}</span>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+        ` : '';
+        return `
+            <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
+            ${optionsHtml}
+        `;
+    }).join('');
+
+    const clubSavingsRowHtml = clubSavings > 0.001
+        ? `<div class="summary-row" style="color:#1a7a3c;"><span>Cockney Cards Club discount (25% off cards)</span><span>−${ccCart.formatGBP(clubSavings)}</span></div>`
+        : '';
+
+    const freeDeliveryNudgeHtml = freeDeliveryNudge
+        ? `<div class="free-delivery-nudge">🎁 ${freeDeliveryNudge}</div>`
+        : '';
+
+    // A "recipient" item already has its address locked in from the
+    // editor — only a "self" item needs a "deliver to" chosen here.
+    // Club membership never needs one either way.
+    const hasSelfItem = physicalItems.some((item) => item.delivery?.type !== 'recipient');
+    const deliverToHtml = hasSelfItem ? renderDeliverToBlock() : '';
+
+    // Checkout is disabled until every "self" item has a resolved
+    // address — avoids the old flow where clicking Checkout was the
+    // first place this got checked, and just bounced back with an error.
+    const needsAddress = hasSelfItem && !getChosenSelfAddress();
+    const missingAddressHtml = needsAddress
+        ? `<p style="font-size:12px; color:#c0392b; margin:8px 0 0;">Please add a delivery address to continue — use Select Recipient on your card, on the left.</p>`
+        : '';
+
+    content.innerHTML = `
+        ${renderClubBanner()}
+        <div class="basket-layout">
+            <div class="basket-items">
+                ${items.map(renderItem).join('')}
+            </div>
+            <div class="basket-summary">
+                ${freeDeliveryNudgeHtml}
+                ${deliverToHtml}
+                <div class="summary-row"><span>Items</span><span>${count}</span></div>
+                <div class="summary-row"><span>Subtotal</span><span>${ccCart.formatGBP(rawSubtotal)}</span></div>
+                ${clubSavingsRowHtml}
+                ${postageRowsHtml}
+                <div class="summary-row total"><span>Total</span><span>${ccCart.formatGBP(grandTotal)}</span></div>
+                <p style="font-size:11px; color:#999; margin:8px 0 0;">Any promo code or referral reward is confirmed at checkout.</p>
+                <div style="margin: 15px 0;">
+                    <label for="promo-code-input" style="font-size:12px; color:#666; display:block; margin-bottom:6px;">Promo code (optional)</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="promo-code-input" placeholder="e.g. WELCOME10" value="${promoCodeValue}" style="flex:1; min-width:0; padding:10px; border:1px solid var(--border-color); border-radius:6px; box-sizing:border-box; font-size:13px; text-transform:uppercase;">
+                        <button type="button" class="btn btn-secondary" style="width:auto; flex:0 0 auto; margin-top:0; padding:10px 16px; white-space:nowrap;" id="apply-promo-btn" onclick="applyPromoCode()">Apply</button>
+                    </div>
+                    <p id="promo-feedback" style="font-size:12px; margin:8px 0 0; color:${promoFeedbackColor}; ${promoFeedbackText ? '' : 'display:none;'}">${promoFeedbackText}</p>
+                </div>
+                <button class="btn" id="checkout-btn" onclick="goToCheckout()" ${needsAddress ? 'disabled' : ''}>Checkout</button>
+                ${missingAddressHtml}
+                <button class="btn btn-secondary" onclick="window.location.href='shop-cards.html'">Keep Shopping</button>
+                <p id="checkout-error"></p>
+            </div>
+        </div>
+    `;
+}
+
+// Per-item "Sending to" line, shown under the title in the basket list —
+// this is the only place delivery is set now (the editor always adds
+// items as 'self'; see editor.html/editor-prints.html).
+function renderDeliveryLine(item) {
+    const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+    const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to';
+    const actionText = wantsRecipient ? 'Change Recipient' : 'Select Recipient';
+    const addressHtml = wantsRecipient ? renderRecipientAddressBlock(item.delivery.recipient) : '';
+    return `
+        <p class="item-delivery">
+            ${label}
+            <button type="button" class="recipient-link" onclick="openRecipientPicker('${item.id}')">${actionText}</button>
+        </p>
+        ${addressHtml}
+    `;
+}
+
+// The address lines shown under "Sending to: <name>" for a card sent to
+// a specific recipient — same fields entered in the recipient form
+// (submitAddress), each item keeping its own since delivery is
+// per-item, not per-basket.
+function renderRecipientAddressBlock(recipient) {
+    if (!recipient) return '';
+    const lines = [recipient.address1, recipient.address2, [recipient.city, recipient.county].filter(Boolean).join(', '), recipient.postcode, recipient.country]
+        .filter(Boolean)
+        .map((l) => l.replace(/</g, '&lt;'))
+        .join('<br>');
+    return `<p class="item-delivery-address">${lines}</p>`;
+}
+
+// Only relevant once an item has a specific recipient address — asks
+// whether we seal it and post it straight to that address, or send it
+// (with a spare envelope) to the customer's own home so they can pass
+// it on themselves. Defaults to "direct" the same way a new recipient
+// delivery is created (see chooseAddress/submitAddress).
+function renderEnvelopeSection(item) {
+    const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
+    if (item.kind !== 'card') return '';
+    const mode = item.delivery?.envelopeMode || 'home';
+    return `
+        <div class="item-envelope">
+            <p class="item-envelope-label">Envelope</p>
+            <div class="item-envelope-options">
+                <button type="button" class="envelope-option${mode === 'home' ? ' selected' : ''}" onclick="setItemEnvelopeMode('${item.id}', 'home')">
+                    <strong>Send to Home</strong>
+                    <span>We'll send a spare envelope for you to send on.</span>
+                </button>
+                <button type="button" class="envelope-option${mode === 'direct' ? ' selected' : ''}" onclick="setItemEnvelopeMode('${item.id}', 'direct')">
+                    <strong>Send Directly to Recipient</strong>
+                    <span>We'll seal the card and deliver it for you.</span>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function setItemEnvelopeMode(itemId, mode) {
+    const item = ccCart.getCart().find((i) => i.id === itemId);
+    if (!item || !item.delivery) return;
+    ccCart.updateItemDelivery(itemId, Object.assign({}, item.delivery, { envelopeMode: mode }));
+    renderBasket();
+}
+
+function renderItem(item) {
+    // Club membership is a basket line, not a physical product — no
+    // quantity stepper, envelope, or delivery/recipient picker apply to
+    // it (see joinClubFromBasket/postage exclusions in renderBasket).
+    if (item.kind === 'membership') {
+        return `
+            <div class="basket-item" data-id="${item.id}">
+                <div class="item-info">
+                    <p class="item-title">${item.title}</p>
+                    <p class="item-options">${item.optionsSummary || ''}</p>
+                    <p class="item-price">${item.price}</p>
+                </div>
+                <div class="item-actions">
+                    <button class="remove-link" onclick="removeItem('${item.id}')">Remove</button>
+                </div>
+            </div>
+        `;
+    }
+
+    const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
+    const isDiscountedCard = item.kind === 'card' && clubDiscountActive && hasPrice;
+    const priceHtml = isDiscountedCard
+        ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.75)} <span style="color:#1a7a3c; font-weight:normal;">(Club price)</span>`
+        : (item.price || ccCart.formatGBP(item.priceValue));
+
+    // previewFront/previewInside are fetched on demand from IndexedDB when
+    // the modal opens (see openPreview), so we can't check for them here
+    // synchronously — show the trigger whenever there's at least a
+    // thumbnail to fall back on, which is true for every real item.
+    const hasPreview = !!item.thumbnail;
+
+    return `
+        <div class="basket-item" data-id="${item.id}">
+            <img src="${item.thumbnail || ''}" alt="${item.title || ''}" oncontextmenu="return false;" draggable="false" ${hasPreview ? `style="cursor:pointer;" onclick="openPreview('${item.id}')"` : ''}>
+            <div class="item-info">
+                <p class="item-title">${item.title || 'Personalised item'}</p>
+                <p class="item-options">${item.optionsSummary || ''}</p>
+                ${renderDeliveryLine(item)}
+                <p class="item-price">${priceHtml} each</p>
+            </div>
+            <div class="item-actions">
+                <div class="qty-control">
+                    <button type="button" onclick="changeQty('${item.id}', ${item.quantity - 1})">−</button>
+                    <input type="number" min="1" max="20" value="${item.quantity}" onchange="changeQty('${item.id}', this.value)">
+                    <button type="button" onclick="changeQty('${item.id}', ${item.quantity + 1})">+</button>
+                </div>
+                ${hasPreview ? `<button class="preview-link" onclick="openPreview('${item.id}')">Preview card</button>` : ''}
+                <button class="remove-link" onclick="removeItem('${item.id}')">Remove</button>
+            </div>
+            ${renderEnvelopeSection(item)}
+        </div>
+    `;
+}
+
+// ---------------------------------------------------------------------
+// Card proofing preview — lets the customer double-check the front
+// design and/or inside message of a card already in the basket before
+// they pay. Reads item.previewFront / item.previewInside if present
+// (these don't exist in the cart schema yet — see note below), falling
+// back to item.thumbnail as a "front" image so the button still does
+// something useful today. Purely a viewer: doesn't touch pdfDataUri or
+// anything that affects checkout.
+// ---------------------------------------------------------------------
+let previewActiveTab = 'front';
+let previewImagesCache = { front: null, inside: null };
+let previewActiveKind = null;
+
+async function openPreview(id) {
+    const item = ccCart.getCart().find((i) => i.id === id);
+    if (!item) return;
+
+    const overlay = $('preview-overlay');
+    overlay.dataset.itemId = id;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    $('preview-title').textContent = item.title || 'Proof your card';
+    $('preview-tabs').style.display = 'none';
+    $('preview-image-wrap').innerHTML = `<p class="preview-unavailable">Loading preview...</p>`;
+
+    // previewFront/previewInside live in IndexedDB (see cart.js), not on
+    // the item object itself, so they're fetched on demand rather than
+    // being loaded for every item up front.
+    let stored;
+    try {
+        stored = await ccCart.getItemPreviews(id);
+    } catch (err) {
+        stored = { front: null, inside: null };
+    }
+
+    // Bail out quietly if the modal was closed (or a different item was
+    // opened) while this was loading.
+    if (!overlay.classList.contains('open') || overlay.dataset.itemId !== id) return;
+
+    previewImagesCache = {
+        front: stored.front || item.thumbnail || null,
+        inside: stored.inside || null
+    };
+    previewActiveTab = previewImagesCache.front ? 'front' : 'inside';
+    previewActiveKind = item.kind;
+
+    renderPreviewTabs(previewImagesCache);
+    renderPreviewImage(previewImagesCache);
+}
+
+function renderPreviewTabs(images) {
+    const hasBoth = images.front && images.inside;
+    const tabsEl = $('preview-tabs');
+    if (!hasBoth) {
+        tabsEl.innerHTML = '';
+        tabsEl.style.display = 'none';
+        return;
+    }
+    // Cards bundle a Front + Inside Message; multi-page prints (dino duo's
+    // base + variant, eat-sleep's main image + boy/girl, etc — see
+    // getOrderVariantKeys() in editor-prints.html) bundle two separate
+    // front designs instead, so "Inside Message" would be misleading there.
+    const secondLabel = previewActiveKind === 'print' ? 'Second Design' : 'Inside Message';
+    tabsEl.style.display = 'flex';
+    tabsEl.innerHTML = `
+        <button type="button" class="preview-tab ${previewActiveTab === 'front' ? 'active' : ''}" onclick="switchPreviewTab('front')">Front</button>
+        <button type="button" class="preview-tab ${previewActiveTab === 'inside' ? 'active' : ''}" onclick="switchPreviewTab('inside')">${secondLabel}</button>
+    `;
+}
+
+function switchPreviewTab(tab) {
+    previewActiveTab = tab;
+    renderPreviewTabs(previewImagesCache);
+    renderPreviewImage(previewImagesCache);
+}
+
+function renderPreviewImage(images) {
+    const wrap = $('preview-image-wrap');
+    const src = previewActiveTab === 'inside' ? images.inside : images.front;
+    wrap.innerHTML = src
+        ? `<img src="${src}" alt="Card ${previewActiveTab} preview" oncontextmenu="return false;" draggable="false">`
+        : `<p class="preview-unavailable">No ${previewActiveTab} preview available for this item.</p>`;
+}
+
+function closePreview() {
+    $('preview-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+// ---------------------------------------------------------------------
+// Per-item recipient picker — "Sending to: ... [Select Recipient]" on
+// each basket line opens this. One merged list, "Saved Addresses",
+// pulled from the customer's account (or, for a guest, addresses
+// they've entered so far this session) — no separate "send to home" vs
+// "send to someone else" sections, since a saved "Home" address is just
+// another entry in the same list. Picking any address (or adding a new
+// one) bakes it onto this item as its delivery address
+// (delivery = { type: 'recipient', recipient }).
+// Falls back to "+ Add a new address" if there's nothing saved yet —
+// optionally POSTed to /api/addresses first (logged-in only) so it's
+// saved for next time. A guest can still add a one-off address here (no
+// login required); it's kept for the rest of this session (see
+// guestAddresses below) so it can be picked again for another item
+// without retyping, but it isn't saved to an account.
+// ---------------------------------------------------------------------
+let recipientPickerItemId = null;
+let recipientPickerMode = 'menu'; // 'menu' | 'add'
+
+// Session-only address book for guests, mirroring the account's
+// savedAddresses so a guest can reuse an address across items without
+// retyping it, without requiring login. Persisted the same way as the
+// other delivery state (see persistSelfAddressState) so it survives a
+// round trip to checkout.html and back.
+let guestAddresses = [];
+
+function openRecipientPicker(itemId) {
+    recipientPickerItemId = itemId;
+    recipientPickerMode = 'menu';
+    $('recipient-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderRecipientPicker();
+}
+
+function closeRecipientPicker() {
+    $('recipient-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    recipientPickerItemId = null;
+    recipientPickerMode = 'menu';
+}
+
+function renderRecipientPicker() {
+    if (recipientPickerMode === 'add') { renderAddressForm(); return; }
+
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    const item = ccCart.getCart().find((i) => i.id === recipientPickerItemId);
+    const currentRecipient = item?.delivery?.type === 'recipient' ? item.delivery.recipient : null;
+    const addressList = loggedIn ? savedAddresses : guestAddresses;
+
+    const optionsHtml = addressList.map((a) => `
+        <div class="recipient-option${currentRecipient && currentRecipient.address1 === a.address1 && currentRecipient.postcode === a.postcode && currentRecipient.name === a.name ? ' selected' : ''}" onclick="chooseAddress('${a.id}')">
+            <strong>${a.label || 'Address'}</strong>
+            <span>${a.name}<br>${a.address1}, ${a.postcode}</span>
+        </div>
+    `).join('');
+
+    const listHtml = addressList.length
+        ? optionsHtml
+        : `<p style="font-size:12px; color:#888; margin:0 0 10px;">No saved addresses yet.</p>`;
+
+    $('recipient-modal-body').innerHTML = `
+        <p class="recipient-section-title">Saved Addresses</p>
+        <p class="recipient-section-sub">Choose a saved address, or add a new one.</p>
+        ${listHtml}
+        <button type="button" class="btn btn-secondary" style="width:100%; margin-top:0;" onclick="recipientPickerMode='add'; renderRecipientPicker();">+ Add a new address</button>
+    `;
+}
+
+// Single add-address form used for any destination — home or someone
+// else's — since there's no longer a separate "self" vs "recipient"
+// flow here.
+function renderAddressForm() {
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    $('recipient-modal-body').innerHTML = `
+        <div class="recipient-form">
+            <input type="text" id="rcpt-label" placeholder="Label (e.g. Home, Mum's house) — optional">
+            <input type="text" id="rcpt-name" placeholder="Full name">
+            <input type="text" id="rcpt-address1" placeholder="Address line 1">
+            <input type="text" id="rcpt-address2" placeholder="Address line 2 (optional)">
+            <input type="text" id="rcpt-city" placeholder="Town / City">
+            <input type="text" id="rcpt-county" placeholder="County (optional)">
+            <input type="text" id="rcpt-postcode" placeholder="Postcode">
+            <input type="text" id="rcpt-country" placeholder="Country" value="United Kingdom">
+            ${loggedIn
+                ? `<label><input type="checkbox" id="rcpt-save" checked> Save this address for next time</label>`
+                : `<p style="font-size:11px; color:#999; margin:-4px 0 12px;">Kept for this order — <a href="account.html" style="color:var(--primary);">log in</a> to save it to your account for next time.</p>`}
+            <p id="rcpt-status" style="font-size:12px; color:#c0392b; margin:0 0 10px; display:none;"></p>
+            <div style="display:flex; gap:10px;">
+                <button type="button" class="btn" style="margin-top:0;" onclick="submitAddress()">Use this address</button>
+                <button type="button" class="btn btn-secondary" style="margin-top:0;" onclick="recipientPickerMode='menu'; renderRecipientPicker();">Cancel</button>
+            </div>
+        </div>
+    `;
+}
+
+// Picking any saved address (home or otherwise) bakes it onto this item
+// as its delivery address — there's no separate "self" resolution step
+// anymore, so a "Home" address is applied the same way as any other.
+function chooseAddress(addressId) {
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    const a = (loggedIn ? savedAddresses : guestAddresses).find((x) => x.id === addressId);
+    if (!a) return;
+    ccCart.updateItemDelivery(recipientPickerItemId, {
+        type: 'recipient',
+        recipient: {
+            name: a.name, address1: a.address1, address2: a.address2,
+            city: a.city, county: a.county, postcode: a.postcode, country: a.country,
+        },
+        envelopeMode: 'direct'
+    });
+    closeRecipientPicker();
+    renderBasket();
+}
+
+async function submitAddress() {
+    const statusEl = $('rcpt-status');
+    statusEl.style.display = 'none';
+
+    const recipient = {
+        name: $('rcpt-name').value.trim(),
+        address1: $('rcpt-address1').value.trim(),
+        address2: $('rcpt-address2').value.trim(),
+        city: $('rcpt-city').value.trim(),
+        county: $('rcpt-county').value.trim(),
+        postcode: $('rcpt-postcode').value.trim(),
+        country: $('rcpt-country').value.trim() || 'United Kingdom',
+    };
+
+    if (!recipient.name || !recipient.address1 || !recipient.city || !recipient.postcode) {
+        statusEl.textContent = 'Please fill in at least name, address, city, and postcode.';
+        statusEl.style.display = 'block';
+        return;
+    }
+
+    ccCart.updateItemDelivery(recipientPickerItemId, { type: 'recipient', recipient, envelopeMode: 'direct' });
+
+    const label = $('rcpt-label').value.trim();
+    const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+    if (loggedIn && $('rcpt-save')?.checked) {
+        // Never blocks using the address on this item, which is already
+        // applied above regardless of whether this save succeeds.
+        try {
+            await fetch('/api/addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ccGetSession()}` },
+                body: JSON.stringify(Object.assign({ label }, recipient))
+            });
+            loadSavedAddresses();
+        } catch (err) {
+            console.error('Could not save address for next time:', err);
+        }
+    } else if (!loggedIn) {
+        // Guests don't get an account to save to — keep it in the
+        // session-only address book instead, so it can be picked again
+        // for another item without retyping.
+        guestAddresses.push(Object.assign({ id: `guest-${Date.now()}`, label: label || 'Address' }, recipient));
+    }
+
+    closeRecipientPicker();
+    renderBasket();
+}
+
+function changeQty(id, value) {
+    ccCart.updateCartQuantity(id, parseInt(value, 10));
+    renderBasket();
+}
+
+async function removeItem(id) {
+    await ccCart.removeFromCart(id);
+    renderBasket();
+}
+
+// Sends every basket line (each already carrying its own print-ready PDF
+// and quantity) to the backend in one go, and expects the same shape of
+// response as the existing single-item checkouts: { url } to redirect to,
+// or { error } to show.
+//
+// NOTE: this posts to a NEW endpoint, /create-checkout-basket, which
+// doesn't exist yet server-side — the existing /create-checkout and
+// /create-checkout-print endpoints (used by editor.html and
+// editor-prints.html) only ever handled a single item. That backend work
+// (building a multi-item Stripe session, and having stripe-webhook.js
+// email every item's PDF once payment succeeds) needs to be added
+// alongside this page before real checkout will work end-to-end.
+// Checks the entered code against /api/validate-promo and shows
+// Invalid/Accepted feedback right away — checkout still re-validates
+// independently regardless of whether this was clicked, so this is
+// purely for earlier, clearer feedback rather than a required step.
+async function applyPromoCode() {
+    const input = $('promo-code-input');
+    const btn = $('apply-promo-btn');
+    const code = input.value.trim();
+
+    promoCodeValue = code;
+
+    if (!code) {
+        promoIsValid = false;
+        promoFeedbackText = 'Enter a code first.';
+        promoFeedbackColor = '#c0392b';
+        renderBasket();
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = 'Checking...';
+
+    try {
+        const res = await fetch('/api/validate-promo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        const result = await res.json();
+
+        // Drives the postage estimate above (a valid promo waives postage
+        // for an all-card destination) — re-render so that updates
+        // immediately, without waiting for checkout.
+        promoIsValid = !!result.valid;
+        promoFeedbackText = promoIsValid ? '✓ Code Accepted' : '✗ Invalid Code';
+        promoFeedbackColor = promoIsValid ? '#1a7a3c' : '#c0392b';
+    } catch (err) {
+        promoIsValid = false;
+        promoFeedbackText = 'Could not check code — try again.';
+        promoFeedbackColor = '#c0392b';
+    }
+
+    renderBasket();
+    const applyBtn = $('apply-promo-btn');
+    if (applyBtn) { applyBtn.disabled = false; applyBtn.innerText = 'Apply'; }
+}
+
+async function goToCheckout() {
+    const btn = $('checkout-btn');
+    const errorEl = $('checkout-error');
+    errorEl.style.display = 'none';
+    btn.disabled = true;
+    btn.innerText = 'Preparing checkout...';
+
+    try {
+        const items = await ccCart.getCartWithPdfs();
+        const loggedIn = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
+
+        // The address the customer picked (logged in) or typed in (guest)
+        // in the "Deliver to" block or the "Saved Addresses" modal, if
+        // any — sent once per order (not per item), same as how a
+        // recipient address is already attached per item. There's no
+        // Stripe-hosted address step left downstream (see checkout.html)
+        // to fall back on. The Checkout button is disabled by renderBasket()
+        // whenever this is missing, so this is just a defensive re-check.
+        const chosenAddress = getChosenSelfAddress();
+
+        const needsCustomerAddress = items.some((item) => item.kind !== 'membership' && item.delivery?.type !== 'recipient');
+        if (needsCustomerAddress && !chosenAddress) {
+            throw new Error('Please add a delivery address for the item(s) going to you.');
+        }
+
+        // Resolve each destination's chosen Royal Mail service (picked in
+        // the postage breakdown above) back onto its items, the same way
+        // renderBasket()/estimatePostage() derive it — membership isn't a
+        // physical parcel, so it's excluded here too and just sends null.
+        const physicalItemsForCheckout = items.filter((item) => item.kind !== 'membership');
+        const methodByKey = new Map();
+        for (const groupItems of groupItemsByDestination(physicalItemsForCheckout).values()) {
+            methodByKey.set(destinationKey(groupItems[0]), resolvedMethodForGroup(groupItems));
+        }
+
+        const checkoutData = {
+            customerEmail: loggedIn ? ccGetEmail() : null,
+            promoCode: $('promo-code-input')?.value || null,
+            selfAddress: chosenAddress ? {
+                label: chosenAddress.label,
+                name: chosenAddress.name,
+                address1: chosenAddress.address1,
+                address2: chosenAddress.address2,
+                city: chosenAddress.city,
+                county: chosenAddress.county,
+                postcode: chosenAddress.postcode,
+                country: chosenAddress.country,
+            } : null,
+            items: items.map((item) => ({
+                kind: item.kind,
+                templateId: item.templateId,
+                variantId: item.variantId,
+                title: item.title,
+                optionsSummary: item.optionsSummary,
+                price: item.price,
+                priceValue: item.priceValue,
+                quantity: item.quantity,
+                pdfDataUri: item.pdfDataUri,
+                size: item.size || null,
+                delivery: item.delivery || { type: 'self' },
+                shippingMethod: item.kind === 'membership' ? null : (methodByKey.get(destinationKey(item)) || null),
+            }))
+        };
+
+        // Hand off to checkout.html, which shows a full review of every
+        // item's delivery address and takes payment on our own page
+        // (Stripe's embedded Payment Element, card entry only) instead of
+        // redirecting to Stripe's hosted Checkout — see checkout.html and
+        // create-payment-intent-basket.js.
+        sessionStorage.setItem('cc_checkout_data', JSON.stringify(checkoutData));
+        window.location.href = 'checkout.html';
+    } catch (err) {
+        console.error(err);
+        errorEl.textContent = 'Checkout Error: ' + err.message;
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.innerText = 'Checkout';
+    }
+}
+</script>
+</body>
+</html>
