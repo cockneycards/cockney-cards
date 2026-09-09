@@ -28,10 +28,9 @@
 
     /* Two-column layout: mascot image on the left, sticky while scrolling */
     .club-columns { display: flex; gap: 40px; align-items: flex-start; }
-    .club-image-col { flex: 0 0 260px; position: sticky; top: 30px; }
-    .club-image-col img { width: 100%; height: auto; display: block; }
+    .club-image-col { flex: 0 1 auto; min-width: 0; position: sticky; top: 30px; }
+    .club-image-col img { display: block; max-width: 100%; height: auto; }
     .club-main-col { flex: 1; min-width: 0; }
-    .club-terms-wrap { max-width: 800px; margin: 0 auto; }
 
     /* Pricing hero */
     .club-hero { text-align: center; margin-bottom: 50px; }
@@ -122,7 +121,7 @@
 
     <div class="club-columns">
         <div class="club-image-col">
-            <img src="https://images.cockneycards.com/logo-joinclub.png" alt="Join The Cockney Cards Club">
+            <img src="logo-joinclub.png" alt="Join The Cockney Cards Club">
         </div>
         <div class="club-main-col">
 
@@ -175,10 +174,6 @@
         </li>
     </ul>
 
-        </div>
-    </div>
-
-    <div class="club-terms-wrap">
     <div class="terms-box">
         <h2 class="section-title">Cockney Cards Club Terms &amp; Conditions</h2>
         <p class="updated">Last updated: August 2026</p>
@@ -215,6 +210,8 @@
         <h3>9. Contact &amp; Governing Law</h3>
         <p>Questions about your membership can go to <a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a>. These terms are governed by the laws of England and Wales, without affecting any statutory rights you have as a consumer.</p>
     </div>
+
+        </div>
     </div>
 
 </div>
