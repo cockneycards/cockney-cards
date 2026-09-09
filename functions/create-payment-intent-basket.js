@@ -44,6 +44,8 @@ import {
     postageAmountForMethod,
     qualifiesForFreeCardDelivery,
     qualifiesForFreePrintDelivery,
+    qualifiesForFreeLargePrintDelivery,
+    qualifiesForFreeA3BundleDelivery,
 } from './postage.js';
 import { checkPlusMembership, getUserFromAuth, findOrCreateUserByEmail } from './account-api.js';
 import { checkPromoCode } from './promo.js';
@@ -284,6 +286,8 @@ export async function onRequestPost(context) {
             const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
             const qualifiesCardDelivery = qualifiesForFreeCardDelivery(groupItems);
             const qualifiesPrintDelivery = qualifiesForFreePrintDelivery(groupItems);
+            const qualifiesLargePrintDelivery = qualifiesForFreeLargePrintDelivery(groupItems);
+            const qualifiesA3BundleDelivery = qualifiesForFreeA3BundleDelivery(groupItems);
 
             // Which service this parcel actually ships under — resolved
             // from whatever each item requested on basket.html, same as
@@ -305,6 +309,10 @@ export async function onRequestPost(context) {
                 postageName = `Free Postage (3+ cards to this address)${parcelLabel}`;
             } else if (postageWaived && qualifiesPrintDelivery) {
                 postageName = `Free Postage (2+ same-size prints to this address)${parcelLabel}`;
+            } else if (postageWaived && qualifiesLargePrintDelivery) {
+                postageName = `Free Postage (2+ A4/A3 prints + a card to this address)${parcelLabel}`;
+            } else if (postageWaived && qualifiesA3BundleDelivery) {
+                postageName = `Free Postage (2+ A3 prints + a card/A4/A5 to this address)${parcelLabel}`;
             } else if (postageWaived && promoWaivesThisMethod) {
                 postageName = `Free Postage (Promo Code)${parcelLabel}`;
             } else {
