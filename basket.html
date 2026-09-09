@@ -62,6 +62,10 @@
     .shipping-method-option:hover { border-color: var(--primary); }
     .shipping-method-option.selected { border-color: var(--primary); background: #f7faff; color: #111; font-weight: bold; }
     .free-delivery-nudge { background: #fff8e6; border: 1px solid var(--gold, #c8a04d); color: #7a5c1e; font-size: 13px; font-weight: bold; text-align: center; padding: 10px 12px; border-radius: 6px; margin-bottom: 15px; }
+    .postage-parcel { border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; margin-bottom: 12px; background: #fafafa; }
+    .postage-parcel .summary-row:last-of-type { margin-bottom: 0; }
+    .postage-parcel .shipping-method-options { margin-bottom: 0; }
+    .postage-parcel-heading { font-size: 12px; font-weight: bold; color: #333; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 10px; }
 
     .club-banner { display: flex; align-items: center; gap: 18px; background: #0e2a4d; border-radius: 8px; padding: 16px 22px; margin-bottom: 24px; flex-wrap: wrap; }
     .club-banner-text { flex: 1; min-width: 220px; }
@@ -600,21 +604,33 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         const amountPence = methodIsFree ? 0 : (POSTAGE_RATES[size]?.[selectedMethod] ?? 0);
         totalPence += amountPence;
 
-        const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
         let label;
-        if (methodIsFree && qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address${parcelLabel}`;
-        else if (methodIsFree && qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address${parcelLabel}`;
-        else if (methodIsFree && qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address${parcelLabel}`;
-        else if (methodIsFree && qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address${parcelLabel}`;
-        else if (methodIsFree && qualifiesForFreeA3BundleDelivery) label = `Free Postage — 2+ A3 prints + a card/A4/A5, same address${parcelLabel}`;
-        else if (methodIsFree && qualifiesForFreeA3TrackedDelivery) label = `Free Postage — 2+ A3 prints, same address${parcelLabel}`;
-        else if (methodIsFree && allCardsInGroup && isPromoValid) label = `Free Postage — Promo Code${parcelLabel}`;
-        else label = `Postage${parcelLabel}`;
+        if (methodIsFree && qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address`;
+        else if (methodIsFree && qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address`;
+        else if (methodIsFree && qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address`;
+        else if (methodIsFree && qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address`;
+        else if (methodIsFree && qualifiesForFreeA3BundleDelivery) label = `Free Postage — 2+ A3 prints + a card/A4/A5, same address`;
+        else if (methodIsFree && qualifiesForFreeA3TrackedDelivery) label = `Free Postage — 2+ A3 prints, same address`;
+        else if (methodIsFree && allCardsInGroup && isPromoValid) label = `Free Postage — Promo Code`;
+        else label = `Postage`;
+
+        // Friendly heading for this parcel's own box on the summary —
+        // "recipient" items already carry the nickname the customer gave
+        // that address (e.g. "home", "away", a person's name); "self"
+        // items ship to whichever address the customer picks at
+        // checkout, so there's no name to show yet.
+        const firstItem = groupItems[0];
+        const wantsRecipient = firstItem.delivery?.type === 'recipient' && firstItem.delivery?.recipient;
+        const destinationLabel = wantsRecipient
+            ? `Sending to ${firstItem.delivery.recipient.name || 'recipient'}`
+            : 'Sending to your address';
 
         parcels.push({
             label,
             amountPence,
             destinationKey: destinationKey(groupItems[0]),
+            destinationLabel,
+            parcelNumber,
             size,
             validMethods,
             selectedMethod,
@@ -871,6 +887,13 @@ function renderBasket() {
     // cost to upgrade. Choosing a service is independent of whether
     // postage is currently waived: the parcel still ships under whichever
     // service is selected (matters for tracking, even at £0).
+    // More than one destination in the basket means more than one parcel
+    // shipping separately — each gets its own bordered box with a
+    // "Parcel N of M — sending to X" heading, so it's visually obvious
+    // which postage line and service picker belong to which address.
+    // A single-parcel basket skips the box; there's nothing to tell it
+    // apart from.
+    const multipleParcels = postage.parcels.length > 1;
     const postageRowsHtml = postage.parcels.map((p) => {
         const optionsHtml = p.validMethods.length > 1 ? `
             <div class="shipping-method-options">
@@ -886,9 +909,16 @@ function renderBasket() {
                 }).join('')}
             </div>
         ` : '';
-        return `
+        const rowsHtml = `
             <div class="summary-row"><span>${p.label}</span><span>${p.amountPence === 0 ? 'FREE' : ccCart.formatGBP(p.amountPence / 100)}</span></div>
             ${optionsHtml}
+        `;
+        if (!multipleParcels) return rowsHtml;
+        return `
+            <div class="postage-parcel">
+                <div class="postage-parcel-heading">Parcel ${p.parcelNumber} of ${postage.parcels.length} — ${p.destinationLabel}</div>
+                ${rowsHtml}
+            </div>
         `;
     }).join('');
 
