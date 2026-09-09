@@ -417,18 +417,25 @@ export async function handleAddReminder(request, env) {
     const user = await getUserFromAuth(request, env);
     if (!user) return json({ error: 'Not logged in.' }, 401, env);
 
+    // occasion_name holds who the reminder is for (account.html's
+    // "Reminder For" field, e.g. "Mum"); relationship holds the occasion
+    // itself (account.html's "Occasion" field, e.g. "Birthday") — an odd
+    // pairing of column names to what they now store, kept as-is to
+    // avoid a schema migration, but both are required from here on (used
+    // to just be occasion_name) — see runDailyReminderCheck below for
+    // where this reads back out into an email.
     const { occasion_name, relationship, month, day } = await request.json();
     const m = parseInt(month, 10);
     const d = parseInt(day, 10);
 
-    if (!occasion_name || !m || !d || m < 1 || m > 12 || d < 1 || d > 31) {
-        return json({ error: 'Please provide a name, month, and day.' }, 400, env);
+    if (!occasion_name || !relationship || !m || !d || m < 1 || m > 12 || d < 1 || d > 31) {
+        return json({ error: 'Please provide who it\'s for, the occasion, month, and day.' }, 400, env);
     }
 
     const id = uid();
     await env.DB.prepare(
         'INSERT INTO reminders (id, user_id, occasion_name, relationship, month, day, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).bind(id, user.id, occasion_name.trim(), (relationship || '').trim(), m, d, Date.now()).run();
+    ).bind(id, user.id, occasion_name.trim(), relationship.trim(), m, d, Date.now()).run();
 
     return json({ ok: true, id }, 200, env);
 }
@@ -763,12 +770,20 @@ export async function runDailyReminderCheck(env) {
     ).bind(targetMonth, targetDay).all();
 
     for (const row of results) {
-        const who = row.relationship || row.occasion_name;
+        // row.occasion_name = who it's for (e.g. "Mum"), row.relationship
+        // = the occasion (e.g. "Birthday") — see the comment on
+        // handleAddReminder above for why the column names don't match
+        // what they hold. Older reminders saved before that field became
+        // required can still have a blank relationship, hence the
+        // fallback wording.
+        const who = row.occasion_name;
+        const occasion = row.relationship || 'special day';
+        const whatsComingUp = row.relationship ? `${who}’s ${occasion}` : who;
         await sendEmail(env, {
             to: row.email,
-            subject: `${row.occasion_name} is coming up in 2 weeks!`,
+            subject: `${whatsComingUp} is coming up in 2 weeks!`,
             html: `
-                <p>Just a friendly reminder — <strong>${row.occasion_name}</strong> is coming up in 2 weeks.</p>
+                <p>Just a friendly reminder — <strong>${whatsComingUp}</strong> is coming up in 2 weeks.</p>
                 <p>Plenty of time to pick out the perfect card for ${who}.</p>
                 <p><a href="${env.SITE_URL}/shop-cards.html" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 20px;text-decoration:none;">Shop Cards</a></p>
             `,
