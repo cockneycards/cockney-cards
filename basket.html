@@ -455,10 +455,11 @@ function methodsForDestination(groupItems) {
 // freeMethodsForItems exactly (see that file for the full reasoning):
 // the 3+ cards and cards+A5-prints promos, and a valid all-cards promo
 // code, only ever waive First Class; the 2+ same-size prints promo also
-// waives Tracked24 (photo), but never Tracked24 (signed); the 2+
-// large-prints-plus-a-card bundle and the 2+ A3s-plus-a-card/A4/A5
+// waives Tracked24 (photo), but never Tracked24 (signed); 2+ A3 prints
+// on their own (no companion needed) waives BOTH Tracked24 services; the
+// 2+ large-prints-plus-a-card bundle and the 2+ A3s-plus-a-card/A4/A5
 // bundle both waive every service on offer.
-function freeMethodsForGroup(groupItems, { qualifiesCard, qualifiesPrint, qualifiesEnvelope, qualifiesLargePrint, qualifiesA3Bundle, allCardsInGroup, isPromoValid, validMethods }) {
+function freeMethodsForGroup(groupItems, { qualifiesCard, qualifiesPrint, qualifiesEnvelope, qualifiesLargePrint, qualifiesA3Bundle, qualifiesA3Tracked, allCardsInGroup, isPromoValid, validMethods }) {
     const free = new Set();
     if (qualifiesLargePrint || qualifiesA3Bundle) {
         validMethods.forEach((m) => free.add(m));
@@ -470,6 +471,10 @@ function freeMethodsForGroup(groupItems, { qualifiesCard, qualifiesPrint, qualif
     if (qualifiesPrint) {
         free.add('first_class');
         free.add('tracked24');
+    }
+    if (qualifiesA3Tracked) {
+        free.add('tracked24');
+        free.add('tracked24_signed');
     }
     return free;
 }
@@ -569,6 +574,9 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         // A5 print, same address. Also reaches the "2+ A3s + an A4/A5
         // print, no card" case that the large-print bundle above doesn't.
         const qualifiesForFreeA3BundleDelivery = a3UnitsInGroup >= 2 && hasCompanionItemInGroup;
+        // 2+ A3 prints, full stop — no companion required, whatever else
+        // (if anything) is in the parcel. Waives both Tracked24 services.
+        const qualifiesForFreeA3TrackedDelivery = a3UnitsInGroup >= 2;
 
         const size = highestTier(groupItems);
         const validMethods = methodsForDestination(groupItems);
@@ -583,6 +591,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
             qualifiesEnvelope: qualifiesForFreeEnvelopeDelivery,
             qualifiesLargePrint: qualifiesForFreeLargePrintDelivery,
             qualifiesA3Bundle: qualifiesForFreeA3BundleDelivery,
+            qualifiesA3Tracked: qualifiesForFreeA3TrackedDelivery,
             allCardsInGroup,
             isPromoValid,
             validMethods,
@@ -598,6 +607,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         else if (methodIsFree && qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address${parcelLabel}`;
         else if (methodIsFree && qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address${parcelLabel}`;
         else if (methodIsFree && qualifiesForFreeA3BundleDelivery) label = `Free Postage — 2+ A3 prints + a card/A4/A5, same address${parcelLabel}`;
+        else if (methodIsFree && qualifiesForFreeA3TrackedDelivery) label = `Free Postage — 2+ A3 prints, same address${parcelLabel}`;
         else if (methodIsFree && allCardsInGroup && isPromoValid) label = `Free Postage — Promo Code${parcelLabel}`;
         else label = `Postage${parcelLabel}`;
 
