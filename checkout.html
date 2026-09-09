@@ -133,6 +133,31 @@ let stripe = null;
 let elements = null;
 let orderId = null;
 
+// Same rule basket.html uses: 25% off cards while the Club discount is
+// active — either the customer is already a confirmed member
+// (clubIsMember, via /api/account) or the annual membership is sitting
+// in this same basket (items.some kind==='membership'). Starts false so
+// there's no flash of a discount before refreshMembershipStatus() below
+// has had a chance to check — items.some() alone still catches the
+// membership-in-basket case on the very first render.
+let clubIsMember = false;
+
+async function refreshMembershipStatus() {
+    if (typeof ccIsLoggedIn !== 'function' || !ccIsLoggedIn()) return;
+    try {
+        const res = await fetch('/api/account', {
+            headers: { Authorization: `Bearer ${ccGetSession()}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            clubIsMember = !!data.plusActive;
+            render();
+        }
+    } catch (err) {
+        console.error('Could not check Cockney Cards Club status:', err);
+    }
+}
+
 function loadCheckoutData() {
     const raw = sessionStorage.getItem('cc_checkout_data');
     if (!raw) return null;
@@ -160,18 +185,34 @@ function renderAddressLines(addr) {
 
 function renderReviewSection() {
     const items = checkoutData.items || [];
+    // Mirrors basket.html's clubDiscountActive exactly — see the
+    // comment on clubIsMember above.
+    const clubDiscountActive = clubIsMember || items.some((i) => i.kind === 'membership');
+
     const itemsHtml = items.map((item) => {
+        const isMembership = item.kind === 'membership';
         const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
         const addr = wantsRecipient ? item.delivery.recipient : checkoutData.selfAddress;
         const deliveryLabel = wantsRecipient ? `Delivering to ${item.delivery.recipient.name || 'recipient'}` : 'Delivering to you';
-        return `
-            <div class="review-item">
-                <p class="review-item-title">${(item.title || 'Personalised item').replace(/</g, '&lt;')} (${item.kind})</p>
-                <p class="review-item-meta">Qty: ${item.quantity}${item.price ? ` · ${item.price} each` : ''}</p>
+
+        const priceHtml = item.kind === 'card' && clubDiscountActive && item.priceValue
+            ? `<span style="text-decoration:line-through; color:#999; margin-right:6px;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.75)} each <span style="color:#1a7a3c;">(Club price)</span>`
+            : (item.price ? `${item.price} each` : '');
+
+        const deliveryBlockHtml = isMembership
+            ? `<div class="review-item-delivery"><strong>Membership</strong>Valid for 1 year from membership</div>`
+            : `
                 <div class="review-item-delivery">
                     <strong>${deliveryLabel}</strong>
                     ${renderAddressLines(addr)}
                 </div>
+            `;
+
+        return `
+            <div class="review-item">
+                <p class="review-item-title">${(item.title || 'Personalised item').replace(/</g, '&lt;')} (${item.kind})</p>
+                <p class="review-item-meta">Qty: ${item.quantity}${priceHtml ? ` · ${priceHtml}` : ''}</p>
+                ${deliveryBlockHtml}
             </div>
         `;
     }).join('');
@@ -335,6 +376,7 @@ async function submitPayment() {
 
 checkoutData = loadCheckoutData();
 render();
+refreshMembershipStatus();
 </script>
 </body>
 </html>
