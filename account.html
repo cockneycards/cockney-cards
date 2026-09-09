@@ -381,7 +381,8 @@
                         <div class="settings-group" style="margin-bottom: 0;">
                             <h3>Danger Zone</h3>
                             <p style="font-size:13px; color:#666; margin-bottom:12px;">Permanently delete your account and all saved data, including reminders and addresses.</p>
-                            <button class="btn btn-danger">Delete Account</button>
+                            <button class="btn btn-danger" id="delete-account-btn" onclick="deleteAccount()">Delete Account</button>
+                            <div id="delete-account-status" class="status-msg"></div>
                         </div>
                     </div>
                 </div>
@@ -813,6 +814,32 @@
             statusEl.textContent = err.message;
             statusEl.classList.add("error");
             if (btn) { btn.disabled = false; btn.innerText = "Turn Auto-Renewal Back On"; }
+        }
+    }
+
+    async function deleteAccount() {
+        if (!confirm("Permanently delete your Cockney Cards account? This removes your saved reminders and addresses and can't be undone.")) return;
+        if (!confirm("Are you sure? There's no way to get your account back once it's deleted.")) return;
+
+        const btn = $("delete-account-btn");
+        const statusEl = $("delete-account-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+        if (btn) { btn.disabled = true; btn.innerText = "Deleting..."; }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/account`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${getSessionToken()}` }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            clearSessionToken();
+            window.location.href = "index.html";
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+            if (btn) { btn.disabled = false; btn.innerText = "Delete Account"; }
         }
     }
 
