@@ -123,7 +123,9 @@ export function methodFromAmount(size, amountPence) {
 // "anywhere in the basket". Quantity counts, not just line-item counts —
 // e.g. one print line with quantity 2 counts as 2 prints. Any ONE of
 // these being true is enough to waive postage for that destination; they
-// don't need to combine with each other.
+// don't need to combine with each other. Which SERVICES each one waives
+// differs though — see freeMethodsForItems below, right after they're
+// all defined.
 function unitCount(items, kind) {
     return items
         .filter((item) => item.kind === kind)
@@ -171,29 +173,67 @@ export function qualifiesForFreeLargePrintDelivery(items) {
     return unitCount(items, 'card') >= 1 && largePrintUnits >= 2;
 }
 
-// Whether a destination's postage is free, regardless of which service
-// they'd otherwise pick — any one of the promo rules below is enough, as
-// is Cockney Cards Club membership.
-export function isFreeDelivery(items, { isClubMember = false } = {}) {
-    return (
-        isClubMember ||
-        qualifiesForFreeCardDelivery(items) ||
-        qualifiesForFreePrintDelivery(items) ||
-        qualifiesForFreeDelivery(items) ||
-        qualifiesForFreeLargePrintDelivery(items)
-    );
+// Which shipping SERVICES a given promo waives — not every promo waives
+// every service:
+//   - 3+ cards (qualifiesForFreeCardDelivery) and the 3+ cards/A5-prints
+//     mix (qualifiesForFreeDelivery, e.g. 2 cards + 1 A5 print) are
+//     First Class only. Tracked24 and Tracked24 (signed) are never free
+//     under these two — a customer who upgrades to tracked shipping
+//     pays the normal rate for it even though their order qualifies.
+//   - 2+ same-size prints (qualifiesForFreePrintDelivery) waives First
+//     Class AND Tracked24 (photo), but NOT Tracked24 (signed) — the
+//     signature add-on always costs on this promo.
+//   - 2+ large prints + a card (qualifiesForFreeLargePrintDelivery) and
+//     Cockney Cards Club membership are unchanged from before: every
+//     service on offer for the destination is free.
+function freeMethodsForItems(items, { isClubMember = false } = {}) {
+    const free = new Set();
+
+    if (isClubMember || qualifiesForFreeLargePrintDelivery(items)) {
+        methodsForDestination(items).forEach((m) => free.add(m));
+        return free;
+    }
+
+    if (qualifiesForFreeCardDelivery(items) || qualifiesForFreeDelivery(items)) {
+        free.add(POSTAGE_METHODS.FIRST_CLASS);
+    }
+
+    if (qualifiesForFreePrintDelivery(items)) {
+        free.add(POSTAGE_METHODS.FIRST_CLASS);
+        free.add(POSTAGE_METHODS.TRACKED24);
+    }
+
+    return free;
+}
+
+// Whether a destination's postage is free FOR THE GIVEN SERVICE — unlike
+// before, this can now depend on which service they'd pick, since not
+// every promo waives every service (see freeMethodsForItems above). With
+// no method passed, checks the cheapest service offered for these items
+// (methodsForDestination(items)[0]), which matches the old "is this
+// destination free at all" use — First Class is the cheapest wherever
+// it's offered, and it's the one service every qualifying promo waives.
+export function isFreeDelivery(items, { isClubMember = false, method } = {}) {
+    const free = freeMethodsForItems(items, { isClubMember });
+    if (!free.size) return false;
+    const chosenMethod = method || methodsForDestination(items)[0];
+    return free.has(chosenMethod);
 }
 
 // Single entry point for what to actually charge a given destination's
-// items under the given (or default) service: free if any promo applies
-// or the customer is a Cockney Cards Club member, otherwise the rate for
-// that service/size. Defaults to the cheapest available service (First
-// Class where offered, otherwise Tracked24) when no method is passed —
-// useful for anywhere that still just wants "the" postage amount rather
-// than a customer-selectable list.
+// items under the given (or default) service: free if that specific
+// service is waived by an applicable promo, or the customer is a
+// Cockney Cards Club member, otherwise the rate for that service/size.
+// Defaults to the cheapest available service (First Class where
+// offered, otherwise Tracked24) when no method is passed — useful for
+// anywhere that still just wants "the" postage amount rather than a
+// customer-selectable list. Note this can now return a non-zero amount
+// even when the destination qualifies for a promo, if the chosen
+// service isn't one that promo waives (e.g. Tracked24 signed on a 3+
+// cards order) — see freeMethodsForItems.
 export function postageForDestination(items, { isClubMember = false, method } = {}) {
-    if (isFreeDelivery(items, { isClubMember })) return 0;
     const chosenMethod = method || methodsForDestination(items)[0];
+    if (isFreeDelivery(items, { isClubMember, method: chosenMethod })) return 0;
     return postageAmountForMethod(items, chosenMethod);
 }
 
@@ -249,15 +289,26 @@ export function appendShippingOption(params, amountPence, { free = false } = {})
 // signed, whichever apply — see methodsForDestination), so the customer
 // picks their preferred service in Stripe Checkout itself. Stripe
 // supports multiple selectable shipping_options per session, indexed
-// 0, 1, 2… — that's what this does. Pass `free: true` to zero out every
-// rate (promo / Cockney Cards Club) while still showing the same list of
-// service names.
-export function appendShippingOptions(params, items, { free = false } = {}) {
+// 0, 1, 2… — that's what this does.
+//
+// Freeness is now decided PER SERVICE via freeMethodsForItems, not as an
+// all-or-nothing flag: a 3+ cards order shows free First Class alongside
+// paid Tracked24/Tracked24 signed upgrades; a 2+ same-size prints order
+// shows free First Class and free Tracked24, with only Tracked24 signed
+// still paid; Cockney Cards Club members and the large-print+card bundle
+// still get every service free. Pass `isClubMember` (not a precomputed
+// `free` bool — this replaces that old param) so this can work out the
+// right set itself.
+export function appendShippingOptions(params, items, { isClubMember = false } = {}) {
     const methods = methodsForDestination(items);
     const list = methods.length ? methods : [POSTAGE_METHODS.TRACKED24];
+    const freeMethods = freeMethodsForItems(items, { isClubMember });
     list.forEach((method, index) => {
-        const amount = free ? 0 : postageAmountForMethod(items, method);
-        const label = free ? 'Free Postage (Cockney Cards Club)' : METHOD_LABELS[method];
+        const isFree = freeMethods.has(method);
+        const amount = isFree ? 0 : postageAmountForMethod(items, method);
+        const label = isFree
+            ? `${METHOD_LABELS[method]} (Free)`
+            : METHOD_LABELS[method];
         params.append(`shipping_options[${index}][shipping_rate_data][type]`, 'fixed_amount');
         params.append(`shipping_options[${index}][shipping_rate_data][fixed_amount][amount]`, String(amount));
         params.append(`shipping_options[${index}][shipping_rate_data][fixed_amount][currency]`, 'gbp');
