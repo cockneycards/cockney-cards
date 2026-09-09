@@ -46,6 +46,7 @@ import {
     handleSendReferralInvite,
     handleCancelMembership,
     handleResumeMembership,
+    handleDeleteAccount,
     handleGetReminders,
     handleAddReminder,
     handleDeleteReminder,
@@ -134,6 +135,9 @@ export default {
         if (pathname === '/api/account' && method === 'GET') {
             return handleGetAccount(request, env);
         }
+        if (pathname === '/api/account' && method === 'DELETE') {
+            return handleDeleteAccount(request, env);
+        }
         if (pathname === '/api/referrals' && method === 'GET') {
             return handleGetReferralInfo(request, env);
         }
@@ -179,7 +183,7 @@ export default {
         return env.ASSETS.fetch(request);
     },
 
-    // Daily cron — emails customers 2 weeks ahead of a saved reminder date.
+    // Daily cron — emails customers 10 days ahead of a saved reminder date.
     // The actual schedule (what time, how often) is set in wrangler.jsonc's
     // triggers.crons, not here.
     async scheduled(event, env, ctx) {
