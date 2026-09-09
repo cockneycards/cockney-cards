@@ -153,18 +153,54 @@
     </nav>
 </header>
 
-    <!-- LOGGED OUT: request magic link -->
+    <!-- LOGGED OUT: email + password login / sign up / reset -->
     <div id="logged-out-view">
         <div class="login-container">
             <div id="referral-banner" style="display:none; background:#fff8ec; border:1px solid #f0dfb0; border-radius:6px; padding:14px 16px; margin-bottom:22px; font-size:13px; color:#665c3d; line-height:1.5;">
                 🎉 You've been invited to Cockney Cards — sign up below and get <strong>15% off your first order</strong>, automatically.
             </div>
-            <h1>My Account</h1>
-            <p class="lead">Log in to view orders, manage your details, and set reminders.</p>
-            <div class="card login-form">
-                <input type="email" id="email-input" placeholder="you@example.com" autocomplete="email">
-                <button class="btn" onclick="requestLink()">Email Me a Login Link</button>
+            <h1 id="auth-heading">My Account</h1>
+            <p class="lead" id="auth-lead">Log in to view orders, manage your details, and set reminders.</p>
+
+            <!-- Log In -->
+            <div class="card login-form" id="login-form-view">
+                <input type="email" id="login-email-input" placeholder="you@example.com" autocomplete="email">
+                <input type="password" id="login-password-input" placeholder="Password" autocomplete="current-password">
+                <button class="btn" onclick="login()">Log In</button>
                 <div id="login-status" class="status-msg"></div>
+                <p style="font-size:12px; margin-top:14px;">
+                    <a href="#" onclick="showForgotPassword(); return false;">Forgot password?</a>
+                    &nbsp;·&nbsp;
+                    <a href="#" onclick="showSignup(); return false;">Create an account</a>
+                </p>
+            </div>
+
+            <!-- Sign Up -->
+            <div class="card login-form" id="signup-form-view" style="display:none;">
+                <input type="email" id="signup-email-input" placeholder="you@example.com" autocomplete="email">
+                <input type="password" id="signup-password-input" placeholder="Password (min. 8 characters)" autocomplete="new-password">
+                <button class="btn" onclick="signup()">Sign Up</button>
+                <div id="signup-status" class="status-msg"></div>
+                <p style="font-size:12px; margin-top:14px;">
+                    <a href="#" onclick="showLogin(); return false;">Already have an account? Log in</a>
+                </p>
+            </div>
+
+            <!-- Forgot Password -->
+            <div class="card login-form" id="forgot-form-view" style="display:none;">
+                <input type="email" id="forgot-email-input" placeholder="you@example.com" autocomplete="email">
+                <button class="btn" onclick="requestPasswordReset()">Email Me a Reset Link</button>
+                <div id="forgot-status" class="status-msg"></div>
+                <p style="font-size:12px; margin-top:14px;">
+                    <a href="#" onclick="showLogin(); return false;">← Back to Log In</a>
+                </p>
+            </div>
+
+            <!-- Reset Password (only shown via a ?resetToken= link) -->
+            <div class="card login-form" id="reset-form-view" style="display:none;">
+                <input type="password" id="reset-password-input" placeholder="New password (min. 8 characters)" autocomplete="new-password">
+                <button class="btn" onclick="resetPassword()">Set New Password</button>
+                <div id="reset-status" class="status-msg"></div>
             </div>
         </div>
     </div>
@@ -349,8 +385,11 @@
 
                         <div class="settings-group">
                             <h3>Security</h3>
-                            <p style="font-size:13px; color:#666; margin-bottom:12px;">We use passwordless login — a fresh link is emailed to you each time, so there's no password to manage.</p>
-                            <button class="btn btn-secondary" disabled>Save Changes</button>
+                            <p style="font-size:13px; color:#666; margin-bottom:12px;" id="change-password-intro">Change your password below.</p>
+                            <input type="password" id="current-password-input" placeholder="Current password" autocomplete="current-password" style="width:100%; box-sizing:border-box; padding:12px; font-size:14px; border:1px solid var(--border-color); border-radius:4px; margin-bottom:12px;">
+                            <input type="password" id="new-password-input" placeholder="New password (min. 8 characters)" autocomplete="new-password" style="width:100%; box-sizing:border-box; padding:12px; font-size:14px; border:1px solid var(--border-color); border-radius:4px; margin-bottom:12px;">
+                            <button class="btn btn-secondary" onclick="changePassword()">Save Changes</button>
+                            <div id="change-password-status" class="status-msg"></div>
                         </div>
 
                         <div class="settings-group" style="margin-bottom: 0;">
@@ -455,9 +494,112 @@
         }
     }
 
-    async function requestLink() {
-        const email = $("email-input").value.trim();
+    // ---------- Login / Sign Up / Forgot Password / Reset Password ----------
+
+    function showLogin() {
+        $("login-form-view").style.display = "block";
+        $("signup-form-view").style.display = "none";
+        $("forgot-form-view").style.display = "none";
+        $("reset-form-view").style.display = "none";
+        $("auth-heading").textContent = "My Account";
+        $("auth-lead").textContent = "Log in to view orders, manage your details, and set reminders.";
+    }
+
+    function showSignup() {
+        $("login-form-view").style.display = "none";
+        $("signup-form-view").style.display = "block";
+        $("forgot-form-view").style.display = "none";
+        $("reset-form-view").style.display = "none";
+        $("auth-heading").textContent = "Create Your Account";
+        $("auth-lead").textContent = "Sign up to save addresses, track orders, and join Cockney Cards Club.";
+    }
+
+    function showForgotPassword() {
+        $("login-form-view").style.display = "none";
+        $("signup-form-view").style.display = "none";
+        $("forgot-form-view").style.display = "block";
+        $("reset-form-view").style.display = "none";
+        $("auth-heading").textContent = "Reset Your Password";
+        $("auth-lead").textContent = "Enter your email and we'll send you a link to set a new password.";
+    }
+
+    function showResetPassword() {
+        $("login-form-view").style.display = "none";
+        $("signup-form-view").style.display = "none";
+        $("forgot-form-view").style.display = "none";
+        $("reset-form-view").style.display = "block";
+        $("auth-heading").textContent = "Set a New Password";
+        $("auth-lead").textContent = "Choose a new password for your account.";
+    }
+
+    async function login() {
+        const email = $("login-email-input").value.trim();
+        const password = $("login-password-input").value;
         const statusEl = $("login-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+
+        if (!email || !password) {
+            statusEl.textContent = "Please enter your email and password.";
+            statusEl.classList.add("error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            setSessionToken(data.sessionToken);
+            localStorage.setItem("cc_email", data.email);
+            showLoggedIn();
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+        }
+    }
+
+    async function signup() {
+        const email = $("signup-email-input").value.trim();
+        const password = $("signup-password-input").value;
+        const statusEl = $("signup-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+
+        if (!email || !password) {
+            statusEl.textContent = "Please enter an email and password.";
+            statusEl.classList.add("error");
+            return;
+        }
+        if (password.length < 8) {
+            statusEl.textContent = "Password must be at least 8 characters.";
+            statusEl.classList.add("error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/signup`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password, ref: captureReferralCode() })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            setSessionToken(data.sessionToken);
+            localStorage.setItem("cc_email", data.email);
+            showLoggedIn();
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+        }
+    }
+
+    async function requestPasswordReset() {
+        const email = $("forgot-email-input").value.trim();
+        const statusEl = $("forgot-status");
         statusEl.textContent = "";
         statusEl.className = "status-msg";
 
@@ -468,14 +610,14 @@
         }
 
         try {
-            const res = await fetch(`${API_BASE}/api/auth/request-link`, {
+            const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, ref: captureReferralCode() })
+                body: JSON.stringify({ email })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Something went wrong.");
-            statusEl.textContent = "Check your email for a login link!";
+            statusEl.textContent = "Check your email for a reset link!";
             statusEl.classList.add("success");
         } catch (err) {
             statusEl.textContent = err.message;
@@ -483,27 +625,77 @@
         }
     }
 
-    async function verifyTokenFromUrl() {
+    // Reads ?resetToken= from the URL and, if present, switches straight
+    // to the "set a new password" view — the token itself is only sent
+    // to the server once resetPassword() below actually submits it.
+    let pendingResetToken = null;
+    function checkForResetToken() {
         const params = new URLSearchParams(window.location.search);
-        const token = params.get("token");
+        const token = params.get("resetToken");
         if (!token) return false;
+        pendingResetToken = token;
+        showResetPassword();
+        return true;
+    }
+
+    async function resetPassword() {
+        const password = $("reset-password-input").value;
+        const statusEl = $("reset-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+
+        if (!password || password.length < 8) {
+            statusEl.textContent = "Password must be at least 8 characters.";
+            statusEl.classList.add("error");
+            return;
+        }
 
         try {
-            const res = await fetch(`${API_BASE}/api/auth/verify`, {
+            const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token })
+                body: JSON.stringify({ token: pendingResetToken, password })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
             setSessionToken(data.sessionToken);
             localStorage.setItem("cc_email", data.email);
             window.history.replaceState({}, document.title, "account.html");
-            return true;
+            showLoggedIn();
         } catch (err) {
-            $("login-status").textContent = err.message;
-            $("login-status").classList.add("error");
-            return false;
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
+        }
+    }
+
+    async function changePassword() {
+        const currentPassword = $("current-password-input").value;
+        const newPassword = $("new-password-input").value;
+        const statusEl = $("change-password-status");
+        statusEl.textContent = "";
+        statusEl.className = "status-msg";
+
+        if (!newPassword || newPassword.length < 8) {
+            statusEl.textContent = "New password must be at least 8 characters.";
+            statusEl.classList.add("error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/account/change-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${getSessionToken()}` },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Something went wrong.");
+            statusEl.textContent = "Password updated.";
+            statusEl.classList.add("success");
+            $("current-password-input").value = "";
+            $("new-password-input").value = "";
+        } catch (err) {
+            statusEl.textContent = err.message;
+            statusEl.classList.add("error");
         }
     }
 
@@ -978,6 +1170,7 @@
         $("logged-in-view").style.display = "none";
         if (captureReferralCode()) {
             $("referral-banner").style.display = "block";
+            showSignup();
         }
     }
 
@@ -1000,11 +1193,11 @@
         captureReferralCode();
         populateDateSelects();
         initTabs();
-        const justLoggedIn = await verifyTokenFromUrl();
-        if (justLoggedIn || getSessionToken()) {
+        if (getSessionToken()) {
             showLoggedIn();
         } else {
             showLoggedOut();
+            checkForResetToken();
         }
     });
 </script>
