@@ -35,7 +35,16 @@
 // customers — see findOrCreateUserByEmail in account-api.js, used below
 // instead of rejecting a guest outright.
 
-import { groupItemsByDestination, highestTier, POSTAGE_TIERS } from './postage.js';
+import {
+    groupItemsByDestination,
+    POSTAGE_TIERS,
+    POSTAGE_METHODS,
+    resolveGroupMethod,
+    freeMethodsForItems,
+    postageAmountForMethod,
+    qualifiesForFreeCardDelivery,
+    qualifiesForFreePrintDelivery,
+} from './postage.js';
 import { checkPlusMembership, getUserFromAuth, findOrCreateUserByEmail } from './account-api.js';
 import { checkPromoCode } from './promo.js';
 import { getRewardCodeDetails, getActiveWelcomeReward } from './referrals.js';
@@ -122,6 +131,14 @@ export async function onRequestPost(context) {
                 quantity,
                 pdfDataUri: item.pdfDataUri || null,
                 size: item.kind === 'print' && POSTAGE_TIERS[item.size] ? item.size : null,
+                // Customer's chosen Royal Mail service for this item, as
+                // picked on basket.html's per-destination service picker
+                // (see resolveGroupMethod) — undefined/invalid values are
+                // ignored and the cheapest valid service is used instead.
+                // This was previously dropped on the floor here, which is
+                // why postage was always charged at the flat First Class
+                // rate no matter which service the customer picked.
+                shippingMethod: Object.values(POSTAGE_METHODS).includes(item.shippingMethod) ? item.shippingMethod : null,
                 delivery: wantsRecipient ? {
                     type: 'recipient',
                     recipient: {
@@ -227,12 +244,6 @@ export async function onRequestPost(context) {
 
         for (const groupItems of groups.values()) {
             parcelNumber++;
-            const cardUnitsInGroup = groupItems
-                .filter((item) => item.kind === 'card')
-                .reduce((sum, item) => sum + item.quantity, 0);
-            const printItemsInGroup = groupItems.filter((item) => item.kind === 'print');
-            const printUnitsInGroup = printItemsInGroup.reduce((sum, item) => sum + item.quantity, 0);
-            const printSizesInGroup = new Set(printItemsInGroup.map((item) => item.size));
             const discountRate = membershipActive ? 0.25 : 0;
 
             groupItems.forEach((item) => {
@@ -270,20 +281,31 @@ export async function onRequestPost(context) {
                 breakdown.push({ name, unitAmount, quantity: item.quantity });
             });
 
-            const tier = highestTier(groupItems);
             const allCardsInGroup = groupItems.every((item) => item.kind === 'card');
-            const allPrintsInGroup = groupItems.length > 0 && groupItems.every((item) => item.kind === 'print');
-            const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
-            const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
-            const postageWaived = qualifiesForFreeCardDelivery || qualifiesForFreePrintDelivery || (allCardsInGroup && isPromoValid);
-            const postageAmount = postageWaived ? 0 : POSTAGE_TIERS[tier];
+            const qualifiesCardDelivery = qualifiesForFreeCardDelivery(groupItems);
+            const qualifiesPrintDelivery = qualifiesForFreePrintDelivery(groupItems);
+
+            // Which service this parcel actually ships under — resolved
+            // from whatever each item requested on basket.html, same as
+            // create-checkout-basket.js. Note membership does NOT waive
+            // postage (that's the 25% card discount above instead), so
+            // isClubMember is deliberately not passed to
+            // freeMethodsForItems here.
+            const chosenMethod = resolveGroupMethod(groupItems) || POSTAGE_METHODS.FIRST_CLASS;
+            const freeMethods = freeMethodsForItems(groupItems);
+            // The promo-code waiver is cards-only and, like the quantity
+            // promos above, only ever covers First Class — a customer who
+            // upgrades to a tracked service still pays for that upgrade.
+            const promoWaivesThisMethod = allCardsInGroup && isPromoValid && chosenMethod === POSTAGE_METHODS.FIRST_CLASS;
+            const postageWaived = freeMethods.has(chosenMethod) || promoWaivesThisMethod;
+            const postageAmount = postageWaived ? 0 : postageAmountForMethod(groupItems, chosenMethod);
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
             let postageName;
-            if (qualifiesForFreeCardDelivery) {
+            if (postageWaived && qualifiesCardDelivery) {
                 postageName = `Free Postage (3+ cards to this address)${parcelLabel}`;
-            } else if (qualifiesForFreePrintDelivery) {
+            } else if (postageWaived && qualifiesPrintDelivery) {
                 postageName = `Free Postage (2+ same-size prints to this address)${parcelLabel}`;
-            } else if (postageWaived) {
+            } else if (postageWaived && promoWaivesThisMethod) {
                 postageName = `Free Postage (Promo Code)${parcelLabel}`;
             } else {
                 postageName = `Postage${parcelLabel}`;
