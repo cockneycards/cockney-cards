@@ -118,6 +118,24 @@ export function methodFromAmount(size, amountPence) {
     return null;
 }
 
+// Resolves a whole destination group down to ONE Royal Mail service: the
+// most-tracked service any item in the group explicitly requested
+// (item.shippingMethod, one of POSTAGE_METHODS), provided it's actually
+// valid for every size present in the group (see methodsForDestination)
+// — otherwise falls back to the cheapest valid service. A destination
+// ships in one parcel, so its items can only travel under one shared
+// service regardless of what each individually asked for.
+const METHOD_TRACKED_RANK = { first_class: 0, tracked24: 1, tracked24_signed: 2 };
+export function resolveGroupMethod(groupItems) {
+    const valid = methodsForDestination(groupItems);
+    if (!valid.length) return null;
+    const requested = groupItems
+        .map((item) => item.shippingMethod)
+        .filter((m) => valid.includes(m))
+        .sort((a, b) => METHOD_TRACKED_RANK[b] - METHOD_TRACKED_RANK[a])[0];
+    return requested || valid[0];
+}
+
 // FREE DELIVERY PROMOS — checked per destination (see
 // groupItemsByDestination), so these are "same address", not just
 // "anywhere in the basket". Quantity counts, not just line-item counts —
@@ -186,7 +204,7 @@ export function qualifiesForFreeLargePrintDelivery(items) {
 //   - 2+ large prints + a card (qualifiesForFreeLargePrintDelivery) and
 //     Cockney Cards Club membership are unchanged from before: every
 //     service on offer for the destination is free.
-function freeMethodsForItems(items, { isClubMember = false } = {}) {
+export function freeMethodsForItems(items, { isClubMember = false } = {}) {
     const free = new Set();
 
     if (isClubMember || qualifiesForFreeLargePrintDelivery(items)) {
