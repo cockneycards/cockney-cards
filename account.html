@@ -216,7 +216,6 @@
                     <li><a href="#" class="tab-link" data-tab="plus">Cockney Cards Club</a></li>
                     <li><a href="#" class="tab-link" data-tab="referrals">Refer a Friend</a></li>
                     <li><a href="#" class="tab-link" data-tab="addresses">Saved Addresses</a></li>
-                    <li><a href="#" class="tab-link" data-tab="payment">Payment Methods</a></li>
                     <li><a href="#" class="tab-link" data-tab="reminders">Calendar Reminders</a></li>
                     <li><a href="#" class="tab-link" data-tab="settings">Account Settings</a></li>
                     <li class="logout-link"><a href="#" onclick="logout(); return false;">Log Out</a></li>
@@ -305,19 +304,6 @@
                     </div>
                 </div>
 
-                <!-- Payment Methods -->
-                <div class="tab-panel" id="tab-payment">
-                    <h1>Payment Methods</h1>
-                    <p class="lead">Manage the cards saved to your account.</p>
-                    <div class="card" id="payment-list">
-                        <div class="empty-state">
-                            <div class="empty-title">No payment methods saved</div>
-                            Add a card to check out faster next time.
-                        </div>
-                        <a href="#" class="add-new-link">+ Add a payment method</a>
-                    </div>
-                </div>
-
                 <!-- Calendar Reminders (existing functionality) -->
                 <div class="tab-panel" id="tab-reminders">
                     <h1>Calendar Reminders</h1>
@@ -328,12 +314,12 @@
 
                         <div class="add-form">
                             <div>
-                                <label>Who / What</label>
-                                <input type="text" id="new-name" placeholder="e.g. Mum's Birthday">
+                                <label>Reminder For</label>
+                                <input type="text" id="new-name" placeholder="e.g. Mum" required>
                             </div>
                             <div>
-                                <label>Relationship (optional)</label>
-                                <input type="text" id="new-relationship" placeholder="e.g. Mum">
+                                <label>Occasion</label>
+                                <input type="text" id="new-relationship" placeholder="e.g. Birthday" required>
                             </div>
                             <div>
                                 <label>Month</label>
@@ -394,7 +380,7 @@
 
                         <div class="settings-group" style="margin-bottom: 0;">
                             <h3>Danger Zone</h3>
-                            <p style="font-size:13px; color:#666; margin-bottom:12px;">Permanently delete your account and all saved data, including reminders, addresses and payment methods.</p>
+                            <p style="font-size:13px; color:#666; margin-bottom:12px;">Permanently delete your account and all saved data, including reminders and addresses.</p>
                             <button class="btn btn-danger">Delete Account</button>
                         </div>
                     </div>
@@ -741,10 +727,11 @@
                     </div>
                 `;
             } else {
+                const inCart = membershipInCart();
                 el.innerHTML = `
                     <div style="padding: 10px 0;">
                         <p style="font-size: 13px; color: #666; margin: 0 0 15px;">Join for £9.99/year and get 25% off every card. (Everyone — member or not — also gets free delivery on 3+ cards, or 2+ same-size prints, to the same address.)</p>
-                        <button class="btn" id="join-plus-btn" onclick="joinPlusMembership()">Join Cockney Cards Club — £9.99/year</button>
+                        <button class="btn" id="join-plus-btn" onclick="addMembershipFromAccount()">${inCart ? "It's in your basket — go to Basket" : 'Join Cockney Cards Club — £9.99/year'}</button>
                         <p id="plus-error" style="color:#c0392b; font-size:12px; margin-top:10px; display:none;"></p>
                     </div>
                 `;
@@ -754,30 +741,33 @@
         }
     }
 
-    async function joinPlusMembership() {
-        const btn = $("join-plus-btn");
-        const errorEl = $("plus-error");
-        btn.disabled = true;
-        btn.innerText = "Redirecting to checkout...";
-        errorEl.style.display = "none";
+    // Same membership item shape used by cockney-club.html's
+    // addMembershipToBasket() / basket.html's joinClubFromBasket() — kept
+    // in sync with those if the price/title ever changes. Adds it to the
+    // basket (the same one-time-charge item create-payment-intent-basket.js
+    // already knows how to price and activate — see stripe-webhook.js's
+    // activateOneOffMembership) and sends the customer to basket.html to
+    // pay, instead of the old Stripe-hosted subscription checkout.
+    function membershipInCart() {
+        return typeof ccCart !== 'undefined' && ccCart.getCart().some((i) => i.kind === 'membership');
+    }
 
-        try {
-            const res = await fetch(`${API_BASE}/create-membership-checkout`, {
-                method: "POST",
-                headers: { Authorization: `Bearer ${getSessionToken()}` }
-            });
-            const session = await res.json();
-            if (session.url) {
-                window.location.href = session.url;
-            } else {
-                throw new Error(session.error || "Please try again.");
-            }
-        } catch (err) {
-            errorEl.textContent = err.message;
-            errorEl.style.display = "block";
-            btn.disabled = false;
-            btn.innerText = "Join Cockney Cards Club — £9.99/year";
+    async function addMembershipFromAccount() {
+        if (membershipInCart()) {
+            window.location.href = 'basket.html';
+            return;
         }
+        const btn = $("join-plus-btn");
+        btn.disabled = true;
+        btn.innerText = "Adding to basket...";
+        await ccCart.addToCart({
+            kind: 'membership',
+            title: 'Cockney Cards Club — Annual Membership',
+            optionsSummary: 'Valid for 1 year from purchase',
+            price: '£9.99',
+            priceValue: 9.99,
+        });
+        window.location.href = 'basket.html';
     }
 
     async function cancelMembership() {
@@ -1007,8 +997,8 @@
             listEl.innerHTML = data.reminders.map(r => `
                 <div class="reminder-row">
                     <div class="reminder-info">
-                        <strong>${r.occasion_name}</strong>
-                        <span>${MONTHS[r.month - 1]} ${r.day}${r.relationship ? " · " + r.relationship : ""}</span>
+                        <strong>${r.occasion_name}${r.relationship ? "’s " + r.relationship : ""}</strong>
+                        <span>${MONTHS[r.month - 1]} ${r.day}</span>
                     </div>
                     <button class="delete-btn" onclick="deleteReminder('${r.id}')">Remove</button>
                 </div>
@@ -1028,8 +1018,8 @@
         const month = $("new-month").value;
         const day = $("new-day").value;
 
-        if (!occasion_name) {
-            statusEl.textContent = "Please give it a name.";
+        if (!occasion_name || !relationship) {
+            statusEl.textContent = "Please fill in who it's for and the occasion.";
             statusEl.classList.add("error");
             return;
         }
