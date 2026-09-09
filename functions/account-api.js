@@ -1,8 +1,8 @@
 // functions/account-api.js
 //
-// Cockney Cards — Account API. Handles magic-link login, sessions, and
-// birthday reminder CRUD, plus a daily cron job that emails customers 2
-// weeks before a saved date.
+// Cockney Cards — Account API. Handles email+password signup/login,
+// password reset, sessions, and birthday reminder CRUD, plus a daily
+// cron job that emails customers 2 weeks before a saved date.
 //
 // Ported directly from old-bush-4d25cockney-cards-api's standalone Worker
 // script (the only copy of this logic that ever existed — old-bush was
@@ -29,17 +29,28 @@
 //
 // D1 schema this expects (already exists — old-bush was writing to the
 // same cockney-cards-db this project now also uses):
-//  - users            (id, email, created_at, referral_code, plus_active,
-//                       plus_current_period_end, plus_subscription_id,
-//                       plus_cancel_at_period_end, stripe_customer_id) —
-//                       plus_cancel_at_period_end is a newer column (see
-//                       club-schema-update.sql) that mirrors Stripe's own
+//  - users            (id, email, created_at, referral_code, password_hash,
+//                       plus_active, plus_current_period_end,
+//                       plus_subscription_id, plus_cancel_at_period_end,
+//                       stripe_customer_id) — password_hash is a newer
+//                       column (see password-schema-update.sql), NULL for
+//                       any account that hasn't set one yet (e.g. one
+//                       created by guest-checkout membership purchase —
+//                       see findOrCreateUserByEmail — until they Sign Up
+//                       or Reset Password with that same email).
+//                       plus_cancel_at_period_end mirrors Stripe's own
 //                       subscription.cancel_at_period_end flag, so the
 //                       account page can show "renews on X" vs "ends on X,
 //                       won't renew" without an extra Stripe API call on
 //                       every page load.
 //  - sessions         (token, user_id, expires_at)
-//  - magic_tokens     (token, email, expires_at, used, ref)
+//  - magic_tokens     (token, email, expires_at, used, ref) — originally
+//                       for magic-link login (now removed in favour of
+//                       password auth); repurposed as a generic
+//                       short-lived email-verification token for password
+//                       reset (handleRequestPasswordReset/
+//                       handleResetPassword below), `ref` just stays NULL
+//                       for those rows.
 //  - reminders        (id, user_id, occasion_name, relationship, month, day, created_at)
 //  - orders           (id, email, product_type, custom_name, custom_age,
 //                       custom_name2, custom_age2, size, amount_total, created_at)
@@ -57,7 +68,56 @@
 import { generateUniqueReferralCode, recordReferralIfAny, getReferralSummary, newCustomerWelcomeEmailHtml, referralInviteEmailHtml } from './referrals.js';
 
 const SESSION_DAYS = 30;
-const MAGIC_LINK_MINUTES = 15;
+const RESET_TOKEN_MINUTES = 15;
+const PBKDF2_ITERATIONS = 100000;
+
+// ---------- Password hashing (Web Crypto's PBKDF2 — no external deps,
+// works in the Workers runtime as-is) ----------
+
+function bufToHex(buf) {
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function hexToBuf(hex) {
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return bytes;
+}
+
+async function pbkdf2(password, salt, iterations) {
+    const keyMaterial = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, keyMaterial, 256);
+    return new Uint8Array(bits);
+}
+
+// Stored as "pbkdf2$<iterations>$<salt hex>$<hash hex>" — the iteration
+// count travels with the hash so it can be raised later without
+// invalidating passwords hashed under the old count.
+async function hashPassword(password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const hash = await pbkdf2(password, salt, PBKDF2_ITERATIONS);
+    return `pbkdf2$${PBKDF2_ITERATIONS}$${bufToHex(salt)}$${bufToHex(hash)}`;
+}
+
+// Constant-time-ish compare (loops over every byte regardless of an
+// early mismatch) so a failed login can't be timed to leak how many
+// leading hash bytes were correct.
+function hashesMatch(a, b) {
+    if (a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+}
+
+async function verifyPassword(password, stored) {
+    if (!stored) return false;
+    const [scheme, iterStr, saltHex, hashHex] = stored.split('$');
+    if (scheme !== 'pbkdf2' || !saltHex || !hashHex) return false;
+    const hash = await pbkdf2(password, hexToBuf(saltHex), parseInt(iterStr, 10));
+    return hashesMatch(bufToHex(hash), hashHex);
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function corsHeaders(env) {
     return {
@@ -124,7 +184,7 @@ export async function getUserFromAuth(request, env) {
     if (!session || session.expires_at < now) return null;
 
     const user = await env.DB.prepare(
-        'SELECT id, email, plus_active, plus_current_period_end, plus_subscription_id, plus_cancel_at_period_end, referral_code FROM users WHERE id = ?'
+        'SELECT id, email, plus_active, plus_current_period_end, plus_subscription_id, plus_cancel_at_period_end, referral_code, password_hash FROM users WHERE id = ?'
     ).bind(session.user_id).first();
 
     return user || null;
@@ -176,97 +236,170 @@ export async function findOrCreateUserByEmail(email, env) {
     return { id: newId, email: normalizedEmail, referral_code: referralCode, plus_active: 0 };
 }
 
-// ---------- Route handlers ----------
-
-export async function handleRequestLink(request, env) {
-    const { email, ref } = await request.json();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return json({ error: 'Please enter a valid email address.' }, 400, env);
-    }
-    const normalizedEmail = email.trim().toLowerCase();
-
-    const token = uid();
-    const expiresAt = Date.now() + MAGIC_LINK_MINUTES * 60 * 1000;
-    // `ref` is whatever referral code (if any) the visitor's browser had
-    // stashed from a ?ref= link — carried here so it survives the round
-    // trip through the login email and is still available at handleVerify
-    // time, when we actually know whether this is a brand-new signup.
-    const refCode = (ref || '').toString().trim().toUpperCase().slice(0, 20) || null;
-
-    await env.DB.prepare(
-        'INSERT INTO magic_tokens (token, email, expires_at, used, ref) VALUES (?, ?, ?, 0, ?)'
-    ).bind(token, normalizedEmail, expiresAt, refCode).run();
-
-    const loginUrl = `${env.SITE_URL}/account.html?token=${token}`;
-
-    await sendEmail(env, {
-        to: normalizedEmail,
-        subject: 'Your Cockney Cards login link',
-        html: `
-            <p>Hi there,</p>
-            <p>Click below to log in to your Cockney Cards account. This link expires in ${MAGIC_LINK_MINUTES} minutes.</p>
-            <p><a href="${loginUrl}" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 20px;text-decoration:none;">Log In</a></p>
-            <p>If you didn't request this, you can ignore this email.</p>
-        `,
-    });
-
-    return json({ ok: true, message: 'Check your email for a login link.' }, 200, env);
-}
-
-export async function handleVerify(request, env) {
-    const { token } = await request.json();
-    if (!token) return json({ error: 'Missing token.' }, 400, env);
-
-    const record = await env.DB.prepare(
-        'SELECT * FROM magic_tokens WHERE token = ?'
-    ).bind(token).first();
-
-    if (!record || record.used || record.expires_at < Date.now()) {
-        return json({ error: 'This login link is invalid or has expired.' }, 400, env);
-    }
-
-    await env.DB.prepare('UPDATE magic_tokens SET used = 1 WHERE token = ?').bind(token).run();
-
-    let user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(record.email).first();
-    if (!user) {
-        const newId = uid();
-        const referralCode = await generateUniqueReferralCode(env);
-        await env.DB.prepare(
-            'INSERT INTO users (id, email, created_at, referral_code) VALUES (?, ?, ?, ?)'
-        ).bind(newId, record.email, Date.now(), referralCode).run();
-        user = { id: newId, email: record.email, referral_code: referralCode };
-
-        // Only ever recorded for brand-new accounts — an existing user
-        // clicking someone else's referral link to log back in shouldn't
-        // retroactively create a referral for an account that already
-        // existed before that link was clicked. When it does create one,
-        // it also issues this new user a 15%-off-one-card welcome reward
-        // and hands back its code so we can email them about it here —
-        // referrals.js only touches D1, it doesn't send mail itself.
-        const referralResult = await recordReferralIfAny(env, record.ref, newId, record.email);
-        if (referralResult?.rewardCode) {
-            try {
-                await sendEmail(env, {
-                    to: record.email,
-                    subject: "You've got 15% off your first Cockney Cards order!",
-                    html: newCustomerWelcomeEmailHtml(env, referralResult.rewardCode),
-                });
-            } catch (err) {
-                // A failed welcome email shouldn't block account creation —
-                // the reward code is already saved and still redeemable,
-                // they just won't have gotten the email announcing it.
-                console.error('Failed to send welcome discount email:', err);
-            }
-        }
-    }
-
+// Shared by handleSignup/handleResetPassword — creates a session and
+// returns the same { ok, sessionToken, email } shape the old magic-link
+// handleVerify used to, so account.html's existing setSessionToken(...)
+// call site needs no changes.
+async function createSessionResponse(env, user) {
     const sessionToken = uid();
     const expiresAt = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
     await env.DB.prepare(
         'INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)'
     ).bind(sessionToken, user.id, expiresAt).run();
-
     return json({ ok: true, sessionToken, email: user.email }, 200, env);
+}
+
+export async function handleSignup(request, env) {
+    const { email, password, ref } = await request.json();
+    if (!email || !EMAIL_RE.test(email)) {
+        return json({ error: 'Please enter a valid email address.' }, 400, env);
+    }
+    if (!password || password.length < 8) {
+        return json({ error: 'Password must be at least 8 characters.' }, 400, env);
+    }
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // findOrCreateUserByEmail (used by guest checkout — see
+    // create-payment-intent-basket.js) can already have created a
+    // password-less account under this email; that's not a duplicate
+    // signup, it's this same person setting their first password. Any
+    // account that already HAS a password is a genuine duplicate.
+    const existing = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(normalizedEmail).first();
+    if (existing && existing.password_hash) {
+        return json({ error: 'An account with this email already exists — please log in instead.' }, 400, env);
+    }
+
+    const passwordHash = await hashPassword(password);
+    let user;
+    if (existing) {
+        await env.DB.prepare('UPDATE users SET password_hash = ? WHERE id = ?').bind(passwordHash, existing.id).run();
+        user = existing;
+    } else {
+        const newId = uid();
+        const referralCode = await generateUniqueReferralCode(env);
+        await env.DB.prepare(
+            'INSERT INTO users (id, email, created_at, referral_code, password_hash) VALUES (?, ?, ?, ?, ?)'
+        ).bind(newId, normalizedEmail, Date.now(), referralCode, passwordHash).run();
+        user = { id: newId, email: normalizedEmail, referral_code: referralCode };
+
+        // Only ever recorded for a genuinely brand-new account — see the
+        // comment this had at the old handleVerify call site.
+        const refCode = (ref || '').toString().trim().toUpperCase().slice(0, 20) || null;
+        const referralResult = await recordReferralIfAny(env, refCode, newId, normalizedEmail);
+        if (referralResult?.rewardCode) {
+            try {
+                await sendEmail(env, {
+                    to: normalizedEmail,
+                    subject: "You've got 15% off your first Cockney Cards order!",
+                    html: newCustomerWelcomeEmailHtml(env, referralResult.rewardCode),
+                });
+            } catch (err) {
+                console.error('Failed to send welcome discount email:', err);
+            }
+        }
+    }
+
+    return createSessionResponse(env, user);
+}
+
+export async function handleLogin(request, env) {
+    const { email, password } = await request.json();
+    if (!email || !password) {
+        return json({ error: 'Please enter your email and password.' }, 400, env);
+    }
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(normalizedEmail).first();
+
+    // Same generic error whether the account doesn't exist, has no
+    // password yet (e.g. created via guest checkout — see
+    // findOrCreateUserByEmail — and never claimed via Sign Up or Reset
+    // Password), or the password's simply wrong. Never reveal which —
+    // that's an account-enumeration leak.
+    if (!user || !(await verifyPassword(password, user.password_hash))) {
+        return json({ error: 'Incorrect email or password.' }, 400, env);
+    }
+
+    return createSessionResponse(env, user);
+}
+
+// Re-uses the magic_tokens table (token/email/expires_at/used) as a
+// generic short-lived email-verification token, now for password reset
+// instead of login itself — same shape, `ref` just stays NULL here.
+export async function handleRequestPasswordReset(request, env) {
+    const { email } = await request.json();
+    if (!email || !EMAIL_RE.test(email)) {
+        return json({ error: 'Please enter a valid email address.' }, 400, env);
+    }
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Identical response whether or not an account exists, so this can't
+    // be used to check which emails have accounts.
+    const user = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(normalizedEmail).first();
+    if (user) {
+        const token = uid();
+        const expiresAt = Date.now() + RESET_TOKEN_MINUTES * 60 * 1000;
+        await env.DB.prepare(
+            'INSERT INTO magic_tokens (token, email, expires_at, used, ref) VALUES (?, ?, ?, 0, NULL)'
+        ).bind(token, normalizedEmail, expiresAt).run();
+
+        const resetUrl = `${env.SITE_URL}/account.html?resetToken=${token}`;
+        await sendEmail(env, {
+            to: normalizedEmail,
+            subject: 'Reset your Cockney Cards password',
+            html: `
+                <p>Hi there,</p>
+                <p>Click below to set a new password for your Cockney Cards account. This link expires in ${RESET_TOKEN_MINUTES} minutes.</p>
+                <p><a href="${resetUrl}" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 20px;text-decoration:none;">Reset Password</a></p>
+                <p>If you didn't request this, you can ignore this email.</p>
+            `,
+        });
+    }
+
+    return json({ ok: true, message: 'If that email has an account, a reset link is on its way.' }, 200, env);
+}
+
+export async function handleResetPassword(request, env) {
+    const { token, password } = await request.json();
+    if (!token) return json({ error: 'Missing token.' }, 400, env);
+    if (!password || password.length < 8) {
+        return json({ error: 'Password must be at least 8 characters.' }, 400, env);
+    }
+
+    const record = await env.DB.prepare('SELECT * FROM magic_tokens WHERE token = ?').bind(token).first();
+    if (!record || record.used || record.expires_at < Date.now()) {
+        return json({ error: 'This reset link is invalid or has expired.' }, 400, env);
+    }
+    await env.DB.prepare('UPDATE magic_tokens SET used = 1 WHERE token = ?').bind(token).run();
+
+    const user = await env.DB.prepare('SELECT id, email FROM users WHERE email = ?').bind(record.email).first();
+    if (!user) return json({ error: 'No account found for this link.' }, 400, env);
+
+    const passwordHash = await hashPassword(password);
+    await env.DB.prepare('UPDATE users SET password_hash = ? WHERE id = ?').bind(passwordHash, user.id).run();
+
+    return createSessionResponse(env, user);
+}
+
+// Authenticated — for the Security tab in account.html. A user with no
+// password yet (guest-checkout account, or a reset link never used) has
+// nothing to check against, so an active session alone is enough to set
+// one directly; once a password exists, changing it requires the
+// current one.
+export async function handleChangePassword(request, env) {
+    const user = await getUserFromAuth(request, env);
+    if (!user) return json({ error: 'Not logged in.' }, 401, env);
+
+    const { currentPassword, newPassword } = await request.json();
+    if (!newPassword || newPassword.length < 8) {
+        return json({ error: 'New password must be at least 8 characters.' }, 400, env);
+    }
+    if (user.password_hash && !(await verifyPassword(currentPassword || '', user.password_hash))) {
+        return json({ error: 'Current password is incorrect.' }, 400, env);
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+    await env.DB.prepare('UPDATE users SET password_hash = ? WHERE id = ?').bind(passwordHash, user.id).run();
+    return json({ ok: true }, 200, env);
 }
 
 export async function handleGetReminders(request, env) {
