@@ -153,6 +153,29 @@ export async function checkPlusMembership(request, env) {
     }
 }
 
+// Used by create-payment-intent-basket.js so a guest can buy Cockney
+// Cards Club membership without logging in first — membership has to
+// attach to a user id (see the users table's plus_* columns), so this
+// finds their account by the email they typed at checkout, or creates
+// one on the spot if it doesn't exist yet. Same account-creation shape
+// handleVerify() uses for a magic-link login (id, referral code), just
+// without the click-through first — completing payment is the
+// verification here instead. Never issues a session token, so the guest
+// stays "logged out" for the rest of this visit; they can log in
+// normally afterwards with this same email via the usual magic link.
+export async function findOrCreateUserByEmail(email, env) {
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(normalizedEmail).first();
+    if (existing) return existing;
+
+    const newId = uid();
+    const referralCode = await generateUniqueReferralCode(env);
+    await env.DB.prepare(
+        'INSERT INTO users (id, email, created_at, referral_code) VALUES (?, ?, ?, ?)'
+    ).bind(newId, normalizedEmail, Date.now(), referralCode).run();
+    return { id: newId, email: normalizedEmail, referral_code: referralCode, plus_active: 0 };
+}
+
 // ---------- Route handlers ----------
 
 export async function handleRequestLink(request, env) {
