@@ -300,7 +300,7 @@ function renderJoinButton() {
     if (!btn) return;
 
     if (membershipInCart()) {
-        btn.textContent = "It's in your basket — let's look at some cards";
+        btn.textContent = "It's in your basket — Shop Cards";
         btn.classList.add('sentence-case');
         btn.onclick = () => { window.location.href = 'shop-cards.html'; };
     } else {
