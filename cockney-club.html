@@ -24,7 +24,14 @@
     .nav-links a:hover { color: #888; }
     .nav-links a.active { font-weight: bold; }
 
-    .club-page { max-width: 800px; margin: 0 auto; padding: 50px 40px 90px; }
+    .club-page { max-width: 1100px; margin: 0 auto; padding: 50px 40px 90px; }
+
+    /* Two-column layout: mascot image on the left, sticky while scrolling */
+    .club-columns { display: flex; gap: 40px; align-items: flex-start; }
+    .club-image-col { flex: 0 0 260px; position: sticky; top: 30px; }
+    .club-image-col img { width: 100%; height: auto; display: block; }
+    .club-main-col { flex: 1; min-width: 0; }
+    .club-terms-wrap { max-width: 800px; margin: 0 auto; }
 
     /* Pricing hero */
     .club-hero { text-align: center; margin-bottom: 50px; }
@@ -76,6 +83,11 @@
         .price-card { padding: 24px 30px; width: 100%; box-sizing: border-box; }
         .terms-box { padding: 24px 20px; }
     }
+
+    @media (max-width: 768px) {
+        .club-columns { flex-direction: column; }
+        .club-image-col { position: static; flex: 0 0 auto; max-width: 200px; margin: 0 auto 30px; }
+    }
 </style>
     <link rel="stylesheet" href="mobile.css">
 </head>
@@ -107,6 +119,12 @@
 </header>
 
 <div class="club-page">
+
+    <div class="club-columns">
+        <div class="club-image-col">
+            <img src="https://images.cockneycards.com/logo-joinclub.png" alt="Join The Cockney Cards Club">
+        </div>
+        <div class="club-main-col">
 
     <div class="club-hero">
         <h1>Join The Cockney Cards Club</h1>
@@ -157,6 +175,10 @@
         </li>
     </ul>
 
+        </div>
+    </div>
+
+    <div class="club-terms-wrap">
     <div class="terms-box">
         <h2 class="section-title">Cockney Cards Club Terms &amp; Conditions</h2>
         <p class="updated">Last updated: August 2026</p>
@@ -192,6 +214,7 @@
 
         <h3>9. Contact &amp; Governing Law</h3>
         <p>Questions about your membership can go to <a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a>. These terms are governed by the laws of England and Wales, without affecting any statutory rights you have as a consumer.</p>
+    </div>
     </div>
 
 </div>
