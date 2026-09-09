@@ -37,8 +37,11 @@ import { onRequestGet as stripeConfig } from './functions/stripe-config.js';
 import { handleValidatePromo } from './functions/promo.js';
 import {
     corsHeaders,
-    handleRequestLink,
-    handleVerify,
+    handleSignup,
+    handleLogin,
+    handleRequestPasswordReset,
+    handleResetPassword,
+    handleChangePassword,
     handleGetAccount,
     handleGetReferralInfo,
     handleSendReferralInvite,
@@ -112,11 +115,20 @@ export default {
         // Account API — auth, reminders, order history. Plain
         // (request, env) handlers, ported from old-bush (see
         // functions/account-api.js for the full history on this).
-        if (pathname === '/api/auth/request-link' && method === 'POST') {
-            return handleRequestLink(request, env);
+        if (pathname === '/api/auth/signup' && method === 'POST') {
+            return handleSignup(request, env);
         }
-        if (pathname === '/api/auth/verify' && method === 'POST') {
-            return handleVerify(request, env);
+        if (pathname === '/api/auth/login' && method === 'POST') {
+            return handleLogin(request, env);
+        }
+        if (pathname === '/api/auth/forgot-password' && method === 'POST') {
+            return handleRequestPasswordReset(request, env);
+        }
+        if (pathname === '/api/auth/reset-password' && method === 'POST') {
+            return handleResetPassword(request, env);
+        }
+        if (pathname === '/api/account/change-password' && method === 'POST') {
+            return handleChangePassword(request, env);
         }
         if (pathname === '/api/orders' && method === 'GET') {
             return handleGetOrders(request, env);
