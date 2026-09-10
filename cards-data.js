@@ -283,7 +283,7 @@ const CARD_CATALOGUE = {
   "lioncheers": { title: "Cheers", categories: ["birthday", "sports", "football", "championship", "millwall", "milddlesbrough"], preview: "lioncheers-preview.png", full: "lioncheers.png" },
   
   "mfc-christmas": { title: "Millwall Christmas Card", categories: ["sports", "football", "championship", "millwall"], preview: "mfc-christmas-preview.png", full: "mfc-christmas.png" },
-  "mfc-nolulions": { title: "NOLU Lions", categories: ["sports", "football", "championship", "millwall"], preview: "nolulions-preview.png", full: "nolulions.png" },
+  "mfc-nolulions": { title: "NOLU Lion", categories: ["sports", "football", "championship", "millwall"], preview: "nolulions-preview.png", full: "nolulions.png" },
   
   "birthday-mfc-photo1": { title: "Lions Birthday", price: "£3.49", categories: ["sports", "football", "championship", "millwall", "photo-upload"], preview: "lions-birthday-preview.png", full: "lions-birthday.png", name: { left: 898, top: 752, startSize: 63, minSize: 60, maxSize: 70, fontFamily: "Anton", fontWeight: "normal", color: "#0F214B", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: true, curveRadius: 580, tiltAngle: -0, label: "Name", maxChars: 9 },
     photo: { left: 1008, top: 180, width: 310, height: 310 } },
