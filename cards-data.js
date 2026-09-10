@@ -280,7 +280,7 @@ const CARD_CATALOGUE = {
   "lcl-photo": { title: "London City Lionesses No.1 Supporter", price: "£3.49", categories: ["sports", "football", "wsl", "london-cityw", "photo-upload"], preview: "lcl-photo-preview.png", full: "lcl-photo.png", name: { left: 893, top: 248, startSize: 48, minSize: 34, maxSize: 34, maxSize: 34, fontFamily: "Anton", fontWeight: "normal", color: "#18788e", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 }, age: { left: 891, top: 672, startSize: 110, minSize: 20, maxSize: 120, fontFamily: "Anton", fontWeight: "normal", color: "#18788e", canChangeSize: true, canChangeColor: true, label: "Age", maxChars: 2, numericOnly: true, lettersOnly: false, forceUppercase: false, defaultText: "10" },
     photo: { left: 895, top: 460, width: 480, height: 370 } },
   
-  "lioncheers": { title: "Cheers", categories: ["birthday", "sports", "football", "championship", "millwall", "milddlesbrough"], preview: "nolulions-preview.png", full: "nolulions.png" },
+  "lioncheers": { title: "Cheers", categories: ["birthday", "sports", "football", "championship", "millwall", "milddlesbrough"], preview: "lioncheers-preview.png", full: "lioncheers.png" },
   
   "mfc-christmas": { title: "Millwall Christmas Card", categories: ["sports", "football", "championship", "millwall"], preview: "mfc-christmas-preview.png", full: "mfc-christmas.png" },
   "mfc-nolulions": { title: "NOLU Lions", categories: ["sports", "football", "championship", "millwall"], preview: "nolulions-preview.png", full: "nolulions.png" },
