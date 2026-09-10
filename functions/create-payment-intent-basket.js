@@ -48,9 +48,13 @@ import {
     qualifiesForFreeA3BundleDelivery,
     qualifiesForFreeA3TrackedDelivery,
 } from './postage.js';
-import { checkPlusMembership, getUserFromAuth, findOrCreateUserByEmail } from './account-api.js';
+import { checkPlusMembership, getUserFromAuth, findOrCreateUserByEmail, activateOneOffMembership } from './account-api.js';
 import { getPromoDetails, promoAppliesToAddress } from './promo.js';
 import { getRewardCodeDetails, getActiveWelcomeReward } from './referrals.js';
+// Reused (not reimplemented) for the Family13 free-membership path below,
+// so the fulfilment email/D1-order shape stays identical to what a paid
+// order gets — no separate template to drift out of sync with.
+import { sendBasketOrderEmail, sendCustomerOrderConfirmationEmail } from './stripe-webhook.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -182,8 +186,24 @@ export async function onRequestPost(context) {
         }
 
         let authedUser = await getUserFromAuth(request, env);
+        // Captured before findOrCreateUserByEmail (below) can create an
+        // account on the spot for a guest — Family13 is only meant for
+        // people who already have an account, not a fresh one spun up by
+        // this same checkout.
+        const hadExistingAccount = !!authedUser;
         const isClubMember = await checkPlusMembership(request, env);
         const promoDetails = await getPromoDetails(data.promoCode, env);
+
+        // Family13 — a free-membership code for people we know
+        // personally, not advertised anywhere on the site. Reuses the
+        // same single promo-code box as the postage-waiver promo above
+        // (promo.js) rather than adding a second field; it just checks
+        // for this one specific code separately, and only ever waives
+        // the £9.99 membership charge itself below — never postage or
+        // card prices.
+        const FAMILY_MEMBERSHIP_PROMO_CODE = 'FAMILY13';
+        const membershipPromoEntered = (data.promoCode || '').toString().trim().toUpperCase() === FAMILY_MEMBERSHIP_PROMO_CODE;
+        const familyMembershipFree = wantsMembership && membershipPromoEntered && hadExistingAccount;
 
         // Matches basket.html's clubDiscountActive: a non-member adding the
         // Annual Membership to this same basket gets the 25% card discount
@@ -347,8 +367,96 @@ export async function onRequestPost(context) {
         // false again.
         const MEMBERSHIP_PRICE_PENCE = 999; // £9.99
         if (wantsMembership) {
-            totalAmountPence += MEMBERSHIP_PRICE_PENCE;
-            breakdown.push({ name: 'Cockney Cards Club — Annual Membership', unitAmount: MEMBERSHIP_PRICE_PENCE, quantity: 1 });
+            const membershipPrice = familyMembershipFree ? 0 : MEMBERSHIP_PRICE_PENCE;
+            totalAmountPence += membershipPrice;
+            breakdown.push({
+                name: familyMembershipFree
+                    ? 'Cockney Cards Club — Annual Membership (Free — Family13 promo)'
+                    : 'Cockney Cards Club — Annual Membership',
+                unitAmount: membershipPrice,
+                quantity: 1,
+            });
+        }
+
+        // Family13, membership-only basket: there's nothing left to
+        // charge, so there's no PaymentIntent to create at all (Stripe
+        // rejects anything under 30p — see the check just below), and
+        // therefore no payment_intent.succeeded webhook that would ever
+        // activate the membership. Short-circuit Stripe entirely here
+        // instead: activate the membership directly, record + email the
+        // order the same way stripe-webhook.js normally would (reusing
+        // its own functions so the templates/attachments never drift out
+        // of sync), and tell the front end there's no payment step to
+        // complete — this all runs before the ORDER_PDFS.put below, so
+        // there's no R2 stub to clean up either. A basket that also has
+        // cards/prints in it skips this — it still goes through Stripe as
+        // normal below, just with the membership line priced at £0.
+        if (familyMembershipFree && rawProductItems.length === 0) {
+            await activateOneOffMembership(env, authedUser.id);
+
+            const membershipItem = {
+                index: 0,
+                kind: 'membership',
+                title: 'Cockney Cards Club — Annual Membership',
+                optionsSummary: 'Membership valid for 1 year from today (Family13 promo — free)',
+                price: 'Free',
+                priceValue: 0,
+                quantity: 1,
+                pdfDataUri: null,
+                delivery: { type: 'self' },
+            };
+
+            try {
+                await env.DB.prepare(
+                    `INSERT OR IGNORE INTO orders
+                        (id, email, product_type, custom_name, custom_age, custom_name2, custom_age2, size, amount_total, tracking_number, created_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                ).bind(
+                    `${orderId}-0`,
+                    customerEmail.toLowerCase(),
+                    'membership',
+                    membershipItem.title,
+                    membershipItem.optionsSummary,
+                    null,
+                    null,
+                    null,
+                    0,
+                    null,
+                    Date.now()
+                ).run();
+            } catch (err) {
+                console.error('Failed to write free membership order to D1:', err);
+            }
+
+            try {
+                await sendBasketOrderEmail(env, {
+                    customerEmail,
+                    amountTotal: 0,
+                    items: [membershipItem],
+                    selfAddress: null,
+                    tracking: new Map(),
+                });
+            } catch (err) {
+                console.error('Failed to send free membership fulfilment email:', err);
+            }
+
+            try {
+                await sendCustomerOrderConfirmationEmail(env, {
+                    customerEmail,
+                    isBasket: true,
+                    order: { items: [membershipItem], amountTotal: 0, trackingNumbers: [] },
+                });
+            } catch (err) {
+                console.error('Failed to send free membership confirmation email:', err);
+            }
+
+            return new Response(JSON.stringify({
+                needsPayment: false,
+                orderId,
+            }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
         }
 
         // Stripe rejects PaymentIntents below 30p — guard against a
