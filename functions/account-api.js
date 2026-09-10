@@ -253,6 +253,25 @@ export async function findOrCreateUserByEmail(email, env) {
     return { id: newId, email: normalizedEmail, referral_code: referralCode, plus_active: 0 };
 }
 
+// Activates a one-off (non-subscription) Cockney Cards Club membership —
+// used both by stripe-webhook.js once a paid one-off membership's
+// payment_intent.succeeded fires, and by create-payment-intent-basket.js
+// for the Family13 free-membership promo, which never goes through
+// Stripe at all. Sets the same plus_current_period_end shape a real
+// subscription would, so checkPlusMembership()'s existing expiry check
+// above is what actually turns it back off a year from now — nothing
+// else needs to run to expire it. No plus_subscription_id is set, since
+// there's no Stripe Subscription object behind either path, which also
+// means handleCancelMembership/handleResumeMembership below correctly
+// won't offer to "cancel" it — it's not a recurring thing, it just
+// lapses on its own.
+export async function activateOneOffMembership(env, userId) {
+    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+    await env.DB.prepare(
+        `UPDATE users SET plus_active = 1, plus_current_period_end = ?, plus_cancel_at_period_end = 0 WHERE id = ?`
+    ).bind(Date.now() + oneYearMs, userId).run();
+}
+
 // Shared by handleSignup/handleResetPassword — creates a session and
 // returns the same { ok, sessionToken, email } shape the old magic-link
 // handleVerify used to, so account.html's existing setSessionToken(...)
