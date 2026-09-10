@@ -173,8 +173,8 @@ const CARD_CATEGORIES = [
     ["work-related", "Work Related Cards"],
     ["achievements", "Personal Achievement Cards"],
     ["tv-movies", "TV / Movie Cards"],
-    ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
-    ["valentines", "Valentines"],
+   // ["mothersday-fathersday", "Mothers & Fathers Day Cards "],
+   // ["valentines", "Valentines"],
     ["christmas", "Christmas"],
     SPORTS_TREE,
 ];
