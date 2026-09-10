@@ -425,6 +425,7 @@ export async function onRequestPost(context) {
         let customerEmail = null;
         let amountTotal = paymentIntent.amount;
         let membershipUserId = null;
+        let membershipFree = false;
         const object = await env.ORDER_PDFS.get(orderId);
         const raw = object ? await object.text() : null;
         if (raw) {
@@ -435,6 +436,7 @@ export async function onRequestPost(context) {
                 customerEmail = parsed.customerEmail || null;
                 amountTotal = parsed.amountTotal ?? paymentIntent.amount;
                 membershipUserId = parsed.membershipUserId || null;
+                membershipFree = !!parsed.membershipFree;
             } catch (err) {
                 console.error('Stripe webhook: could not parse order payload for order', orderId, err);
             }
@@ -464,15 +466,20 @@ export async function onRequestPost(context) {
         // synthetic line, purely so "My Orders" and the fulfilment/
         // confirmation emails show it the same way any other purchase
         // shows up, instead of a basket order silently vanishing when
-        // membership is the only thing bought.
+        // membership is the only thing bought. Priced off membershipFree
+        // (set above from the R2 payload) rather than assumed — a
+        // Family13 order paid nothing for this line even though a card
+        // in the same basket paid Stripe as normal.
         const orderItems = membershipUserId
             ? [...basketItems, {
                 index: basketItems.length,
                 kind: 'membership',
                 title: 'Cockney Cards Club — Annual Membership',
-                optionsSummary: 'Membership valid for 1 year from today',
-                price: '£9.99',
-                priceValue: 9.99,
+                optionsSummary: membershipFree
+                    ? 'Membership valid for 1 year from today (Free — Family13 promo)'
+                    : 'Membership valid for 1 year from today',
+                price: membershipFree ? 'Free' : '£9.99',
+                priceValue: membershipFree ? 0 : 9.99,
                 quantity: 1,
                 pdfDataUri: null,
                 delivery: { type: 'self' },
