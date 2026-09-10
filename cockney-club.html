@@ -84,6 +84,9 @@
     @media (max-width: 768px) {
         .club-columns { flex-direction: column; }
         .club-image-col { position: static; flex: 0 0 auto; max-width: clamp(280px, 65vw, 480px); margin: 0 auto 30px; }
+        .club-main-col { order: 1; }
+        .club-image-join { order: 2; margin-top: 10px; }
+        .club-image-25 { display: none; }
     }
 
     @media (max-width: 600px) {
@@ -125,7 +128,7 @@
 <div class="club-page">
 
     <div class="club-columns">
-        <div class="club-image-col">
+        <div class="club-image-col club-image-join">
             <img id="club-logo-img" src="https://images.cockneycards.com/logo-join-club.png" alt="Join The Cockney Cards Club">
         </div>
         <div class="club-main-col">
@@ -221,7 +224,7 @@
     </div>
 
         </div>
-        <div class="club-image-col">
+        <div class="club-image-col club-image-25">
             <img src="https://images.cockneycards.com/logo25.png" alt="25% off all cards, all year round">
         </div>
     </div>
