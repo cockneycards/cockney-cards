@@ -81,16 +81,16 @@
         .footer-grid { grid-template-columns: 1fr; gap: 30px; }
     }
 
+    @media (max-width: 768px) {
+        .club-columns { flex-direction: column; }
+        .club-image-col { position: static; flex: 0 0 auto; max-width: clamp(180px, 45vw, 320px); margin: 0 auto 30px; }
+    }
+
     @media (max-width: 600px) {
         .club-page { padding: 40px 20px 70px; }
         .price-card { padding: 24px 30px; width: 100%; box-sizing: border-box; }
         .terms-box { padding: 24px 20px; }
-        .club-image-col { max-width: clamp(140px, 55vw, 220px); margin: 0 auto 20px; }
-    }
-
-    @media (max-width: 768px) {
-        .club-columns { flex-direction: column; }
-        .club-image-col { position: static; flex: 0 0 auto; max-width: clamp(180px, 45vw, 320px); margin: 0 auto 30px; }
+        .club-image-col { max-width: clamp(160px, 55vw, 260px); margin: 0 auto 20px; }
     }
 </style>
     <link rel="stylesheet" href="mobile.css">
