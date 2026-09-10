@@ -171,6 +171,23 @@ async function sendEmail(env, { to, toName, subject, html, attachments }) {
     return res.ok;
 }
 
+// Plain welcome email for a brand-new account created WITHOUT a referral
+// code — see handleSignup below. Referred signups get
+// newCustomerWelcomeEmailHtml (referrals.js) instead, which covers the
+// same "welcome" ground but leads with their discount code.
+function welcomeEmailHtml(env) {
+    const shopUrl = `${env.SITE_URL}/shop-cards.html`;
+    const clubUrl = `${env.SITE_URL}/cockney-club.html`;
+    return `
+        <p style="text-align:center; margin:0 0 24px;"><img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards" style="max-width:160px; height:auto;"></p>
+        <p>Hi there,</p>
+        <p>Welcome to Cockney Cards! Your account's all set up.</p>
+        <p>From here you can build a personalised card or photo print, keep an eye on your orders, and save addresses for next time.</p>
+        <p><a href="${shopUrl}" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 20px;text-decoration:none;">Start Browsing</a></p>
+        <p>One more thing — if you send cards often, <a href="${clubUrl}">Cockney Cards Club</a> gets you 25% off every card for £9.99 a year. Worth a look if you're planning on more than a couple of orders.</p>
+    `;
+}
+
 export async function getUserFromAuth(request, env) {
     const authHeader = request.headers.get('Authorization') || '';
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
@@ -295,6 +312,18 @@ export async function handleSignup(request, env) {
                 });
             } catch (err) {
                 console.error('Failed to send welcome discount email:', err);
+            }
+        } else {
+            // Every other brand-new signup (i.e. not via a referral link)
+            // still gets a welcome — just without a discount code to show.
+            try {
+                await sendEmail(env, {
+                    to: normalizedEmail,
+                    subject: 'Welcome to Cockney Cards!',
+                    html: welcomeEmailHtml(env),
+                });
+            } catch (err) {
+                console.error('Failed to send welcome email:', err);
             }
         }
     }
