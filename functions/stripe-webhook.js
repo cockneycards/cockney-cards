@@ -54,6 +54,7 @@
 import { checkAndQualifyReferral } from './referrals.js';
 import { createShipment } from './royal-mail.js';
 import { methodFromAmount, POSTAGE_METHODS, groupItemsByDestination, highestTier } from './postage.js';
+import { activateOneOffMembership } from './account-api.js';
 
 const TRACKED_METHODS = new Set([POSTAGE_METHODS.TRACKED24, POSTAGE_METHODS.TRACKED24_SIGNED]);
 
@@ -580,25 +581,6 @@ async function activatePlusMembership(env, session) {
     ).bind(customerId || null, subscriptionId || null, userId).run();
 }
 
-// Same idea as activatePlusMembership() above, but for a Cockney Cards
-// Club membership bought as a one-time basket charge (see
-// create-payment-intent-basket.js/joinClubFromBasket in basket.html)
-// rather than through the separate Stripe Subscription checkout — no
-// plus_subscription_id is set here, since there's no Stripe Subscription
-// object behind it, which also means handleCancelMembership/
-// handleResumeMembership (account-api.js) correctly won't offer to
-// "cancel" it — it's not a recurring thing, it just lapses on its own,
-// which is exactly the "cancel anytime" behaviour this flow is meant to
-// have. plus_current_period_end is set the same way a real subscription
-// would set it, so checkPlusMembership()'s existing expiry check is what
-// actually turns it off again — nothing else needs to run to expire it.
-async function activateOneOffMembership(env, userId) {
-    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
-    await env.DB.prepare(
-        `UPDATE users SET plus_active = 1, plus_current_period_end = ?, plus_cancel_at_period_end = 0 WHERE id = ?`
-    ).bind(Date.now() + oneYearMs, userId).run();
-}
-
 // Called on customer.subscription.updated/deleted — keeps plus_active,
 // plus_current_period_end, and plus_cancel_at_period_end all matching
 // whatever Stripe actually has on file. This is the authoritative sync:
@@ -749,7 +731,7 @@ function buildCustomerItemsSummary(isBasket, order) {
 // fixes the "did my order actually go through?" problem, sent right
 // after payment is confirmed, independent of the internal fulfilment
 // email above.
-async function sendCustomerOrderConfirmationEmail(env, { customerEmail, isBasket, order }) {
+export async function sendCustomerOrderConfirmationEmail(env, { customerEmail, isBasket, order }) {
     if (!customerEmail || customerEmail === 'N/A') return;
 
     const items = buildCustomerItemsSummary(isBasket, order);
@@ -903,7 +885,7 @@ async function sendOrderEmail(env, order) {
 // order can print each one directly) and the email body lists every line
 // with its options and quantity, rather than the single set of
 // name/age/size fields the single-item version uses.
-async function sendBasketOrderEmail(env, order) {
+export async function sendBasketOrderEmail(env, order) {
     const tracking = order.tracking || new Map();
     const attachments = [];
     const attachedTrackingNumbers = new Set();
