@@ -313,11 +313,25 @@ async function continueToPayment() {
             }
         }
 
-        if (!res.ok || !result.clientSecret) {
+        if (!res.ok) {
             throw new Error(result.error || `Could not start payment (status ${res.status}) — please try again.`);
         }
 
         orderId = result.orderId;
+
+        // Family13 zeroed the whole order (membership only, nothing left
+        // to charge) — create-payment-intent-basket.js already activated
+        // it directly rather than going through Stripe, so there's no
+        // payment step here at all. Go straight to the same thank-you
+        // page a paid order lands on.
+        if (result.needsPayment === false) {
+            window.location.href = `thankyou.html?order_id=${encodeURIComponent(orderId)}`;
+            return;
+        }
+
+        if (!result.clientSecret) {
+            throw new Error(`Could not start payment (status ${res.status}) — please try again.`);
+        }
 
         const configRes = await fetch('/stripe-config');
         const config = await configRes.json();
