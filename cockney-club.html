@@ -35,6 +35,7 @@
     .club-image-col { flex: 0 1 460px; min-width: 0; position: sticky; top: 30px; }
     .club-image-col img { width: 100%; height: auto; display: block; }
     .club-main-col { flex: 1 1 800px; max-width: 800px; min-width: 0; }
+    .club-image-mobile-join { display: none; }
 
     /* Pricing hero */
     .club-hero { text-align: center; margin-bottom: 50px; }
@@ -83,17 +84,16 @@
 
     @media (max-width: 768px) {
         .club-columns { flex-direction: column; }
-        .club-image-col { position: static; flex: 0 0 auto; max-width: clamp(280px, 65vw, 480px); margin: 0 auto 30px; }
-        .club-main-col { order: 1; }
-        .club-image-join { order: 2; margin-top: 10px; }
-        .club-image-25 { display: none; }
+        .club-image-join, .club-image-25 { display: none; }
+        .club-image-mobile-join { display: block; max-width: clamp(280px, 65vw, 480px); margin: 30px auto; }
+        .club-image-mobile-join img { width: 100%; height: auto; display: block; }
     }
 
     @media (max-width: 600px) {
         .club-page { padding: 40px 20px 70px; }
         .price-card { padding: 24px 30px; width: 100%; box-sizing: border-box; }
         .terms-box { padding: 24px 20px; }
-        .club-image-col { max-width: clamp(240px, 80vw, 400px); margin: 0 auto 20px; }
+        .club-image-mobile-join { max-width: clamp(240px, 80vw, 400px); margin: 20px auto; }
     }
 </style>
     <link rel="stylesheet" href="mobile.css">
@@ -129,7 +129,7 @@
 
     <div class="club-columns">
         <div class="club-image-col club-image-join">
-            <img id="club-logo-img" src="https://images.cockneycards.com/logo-join-club.png" alt="Join The Cockney Cards Club">
+            <img id="club-logo-img" class="club-logo-img" src="https://images.cockneycards.com/logo-join-club.png" alt="Join The Cockney Cards Club">
         </div>
         <div class="club-main-col">
 
@@ -185,6 +185,10 @@
             </div>
         </li>
     </ul>
+
+    <div class="club-image-mobile-join">
+        <img class="club-logo-img" src="https://images.cockneycards.com/logo-join-club.png" alt="Join The Cockney Cards Club">
+    </div>
 
     <div class="terms-box">
         <h2 class="section-title">Cockney Cards Club Terms &amp; Conditions</h2>
@@ -294,9 +298,9 @@ async function checkMembershipStatus() {
         // never touched here again — it's left at whatever the page
         // shipped with, which is already the default "Join The Club" logo,
         // so no explicit swap-back is needed.
-        const logoImg = document.getElementById("club-logo-img");
-        if (logoImg && account.plusActive) {
-            logoImg.src = "https://images.cockneycards.com/logo-joined-club.png";
+        const logoImgs = document.querySelectorAll(".club-logo-img");
+        if (logoImgs.length && account.plusActive) {
+            logoImgs.forEach((img) => { img.src = "https://images.cockneycards.com/logo-joined-club.png"; });
         }
 
         if (!account.plusActive) return;
