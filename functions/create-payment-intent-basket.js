@@ -482,6 +482,11 @@ export async function onRequestPost(context) {
             amountTotal: totalAmountPence,
             breakdown,
             membershipUserId: wantsMembership ? authedUser.id : null,
+            // Lets stripe-webhook.js build an accurate order line/email
+            // for the membership — it otherwise has no way to know this
+            // particular order's membership was a Family13 freebie
+            // rather than the usual £9.99 charge.
+            membershipFree: wantsMembership ? familyMembershipFree : false,
         }));
 
         const params = new URLSearchParams();
