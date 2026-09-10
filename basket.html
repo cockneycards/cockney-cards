@@ -237,6 +237,12 @@ let promoCodeValue = '';
 let promoIsValid = false;
 let promoFeedbackText = '';
 let promoFeedbackColor = '#c0392b';
+// Set when the applied code is restricted to one specific delivery
+// address (see promo.js's promo_codes.required_address1/required_postcode)
+// — null/null for an unrestricted code. Passed into estimatePostage so
+// the free-postage preview only applies to a parcel actually going there.
+let promoRequiredAddress1 = null;
+let promoRequiredPostcode = null;
 
 // Cockney Cards Club membership — fetched from GET /api/account (needs
 // the logged-in session token; see auth.js) so the basket can show the
@@ -463,6 +469,36 @@ function methodsForDestination(groupItems) {
 // on their own (no companion needed) waives BOTH Tracked24 services; the
 // 2+ large-prints-plus-a-card bundle and the 2+ A3s-plus-a-card/A4/A5
 // bundle both waive every service on offer.
+// Case/whitespace/punctuation-tolerant comparison for an address-line —
+// "40 Leadenhall Street" vs "40 leadenhall street." should still match.
+// Mirrors promo.js's normalizeAddressLine — keep both in sync.
+function normalizeAddressLine(value) {
+    return (value || '')
+        .toString()
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+// Postcodes are case/spacing-insensitive — "EC3A 2BJ" and "ec3a2bj" are
+// the same postcode. Mirrors promo.js's normalizePostcode.
+function normalizePostcode(value) {
+    return (value || '').toString().toUpperCase().replace(/\s+/g, '');
+}
+
+// True if a promo code with no address restriction (both null), or one
+// whose required address1/postcode matches THIS parcel's own delivery
+// address. Mirrors promo.js's promoAppliesToAddress — see estimatePostage
+// below for why this is checked per parcel rather than once per order.
+function promoAppliesToAddress(requiredAddress1, requiredPostcode, address) {
+    if (!requiredAddress1 && !requiredPostcode) return true;
+    if (!address) return false;
+    const address1Matches = !requiredAddress1 || normalizeAddressLine(address.address1) === normalizeAddressLine(requiredAddress1);
+    const postcodeMatches = !requiredPostcode || normalizePostcode(address.postcode) === normalizePostcode(requiredPostcode);
+    return address1Matches && postcodeMatches;
+}
+
 function freeMethodsForGroup(groupItems, { qualifiesCard, qualifiesPrint, qualifiesEnvelope, qualifiesLargePrint, qualifiesA3Bundle, qualifiesA3Tracked, allCardsInGroup, isPromoValid, validMethods }) {
     const free = new Set();
     if (qualifiesLargePrint || qualifiesA3Bundle) {
@@ -527,7 +563,7 @@ function selectShippingMethod(key, method) {
 }
 
 // Returns { parcels: [{ label, amountPence }], totalPence }.
-function estimatePostage(items, { isPromoValid = false } = {}) {
+function estimatePostage(items, { isPromoValid = false, promoRequiredAddress1 = null, promoRequiredPostcode = null } = {}) {
     const groups = groupItemsByDestination(items);
     const parcels = [];
     let totalPence = 0;
@@ -535,6 +571,20 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
 
     for (const groupItems of groups.values()) {
         parcelNumber++;
+
+        // Friendly heading for this parcel's own box on the summary —
+        // "recipient" items already carry the nickname the customer gave
+        // that address (e.g. "home", "away", a person's name); "self"
+        // items ship to whichever address the customer picks at
+        // checkout, so there's no name to show yet. Also doubles as this
+        // parcel's own destination address, for matching against an
+        // address-restricted promo code below.
+        const firstItem = groupItems[0];
+        const wantsRecipient = firstItem.delivery?.type === 'recipient' && firstItem.delivery?.recipient;
+        const groupAddress = wantsRecipient ? firstItem.delivery.recipient : getChosenSelfAddress();
+        const destinationLabel = wantsRecipient
+            ? `Sending to ${firstItem.delivery.recipient.name || 'recipient'}`
+            : 'Sending to your address';
 
         const allCardsInGroup = groupItems.every((i) => i.kind === 'card');
         const allPrintsInGroup = groupItems.length > 0 && groupItems.every((i) => i.kind === 'print');
@@ -581,6 +631,11 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         // 2+ A3 prints, full stop — no companion required, whatever else
         // (if anything) is in the parcel. Waives both Tracked24 services.
         const qualifiesForFreeA3TrackedDelivery = a3UnitsInGroup >= 2;
+        // A promo code can be restricted to one specific delivery address
+        // (see promo.js's promoAppliesToAddress) — checked per PARCEL, not
+        // once for the whole order, since a multi-destination basket might
+        // only have one parcel actually going to that address.
+        const promoAppliesToThisParcel = isPromoValid && promoAppliesToAddress(promoRequiredAddress1, promoRequiredPostcode, groupAddress);
 
         const size = highestTier(groupItems);
         const validMethods = methodsForDestination(groupItems);
@@ -597,7 +652,7 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
             qualifiesA3Bundle: qualifiesForFreeA3BundleDelivery,
             qualifiesA3Tracked: qualifiesForFreeA3TrackedDelivery,
             allCardsInGroup,
-            isPromoValid,
+            isPromoValid: promoAppliesToThisParcel,
             validMethods,
         });
         const methodIsFree = freeMethods.has(selectedMethod);
@@ -611,19 +666,8 @@ function estimatePostage(items, { isPromoValid = false } = {}) {
         else if (methodIsFree && qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address`;
         else if (methodIsFree && qualifiesForFreeA3BundleDelivery) label = `Free Postage — 2+ A3 prints + a card/A4/A5, same address`;
         else if (methodIsFree && qualifiesForFreeA3TrackedDelivery) label = `Free Postage — 2+ A3 prints, same address`;
-        else if (methodIsFree && allCardsInGroup && isPromoValid) label = `Free Postage — Promo Code`;
+        else if (methodIsFree && allCardsInGroup && promoAppliesToThisParcel) label = `Free Postage — Promo Code`;
         else label = `Postage`;
-
-        // Friendly heading for this parcel's own box on the summary —
-        // "recipient" items already carry the nickname the customer gave
-        // that address (e.g. "home", "away", a person's name); "self"
-        // items ship to whichever address the customer picks at
-        // checkout, so there's no name to show yet.
-        const firstItem = groupItems[0];
-        const wantsRecipient = firstItem.delivery?.type === 'recipient' && firstItem.delivery?.recipient;
-        const destinationLabel = wantsRecipient
-            ? `Sending to ${firstItem.delivery.recipient.name || 'recipient'}`
-            : 'Sending to your address';
 
         parcels.push({
             label,
@@ -876,7 +920,7 @@ function renderBasket() {
     // everything postage.js touches (estimatePostage, the free-delivery
     // nudge, and whether a delivery address is even required).
     const physicalItems = items.filter((item) => item.kind !== 'membership');
-    const postage = estimatePostage(physicalItems, { isPromoValid: promoIsValid });
+    const postage = estimatePostage(physicalItems, { isPromoValid: promoIsValid, promoRequiredAddress1, promoRequiredPostcode });
     const postagePounds = postage.totalPence / 100;
     const grandTotal = subtotal + postagePounds;
     const freeDeliveryNudge = basketFreeDeliveryNudge(physicalItems);
@@ -1380,6 +1424,8 @@ async function applyPromoCode() {
 
     if (!code) {
         promoIsValid = false;
+        promoRequiredAddress1 = null;
+        promoRequiredPostcode = null;
         promoFeedbackText = 'Enter a code first.';
         promoFeedbackColor = '#c0392b';
         renderBasket();
@@ -1401,10 +1447,26 @@ async function applyPromoCode() {
         // for an all-card destination) — re-render so that updates
         // immediately, without waiting for checkout.
         promoIsValid = !!result.valid;
-        promoFeedbackText = promoIsValid ? '✓ Code Accepted' : '✗ Invalid Code';
+        promoRequiredAddress1 = result.requiredAddress1 || null;
+        promoRequiredPostcode = result.requiredPostcode || null;
+        if (promoIsValid && (promoRequiredAddress1 || promoRequiredPostcode)) {
+            // This is a best-effort heads-up, not a guarantee either way —
+            // a "self" address might not be chosen yet, and a
+            // multi-destination basket may still get it on SOME parcels
+            // even if this particular check comes back unmatched.
+            const knownSelfAddress = getChosenSelfAddress();
+            const matchesKnownAddress = promoAppliesToAddress(promoRequiredAddress1, promoRequiredPostcode, knownSelfAddress);
+            promoFeedbackText = matchesKnownAddress
+                ? `✓ Code Accepted — free delivery to ${promoRequiredAddress1 || 'the qualifying address'}`
+                : `✓ Code Accepted — but only applies to orders delivered to ${promoRequiredAddress1 || 'the qualifying address'}${promoRequiredPostcode ? ', ' + promoRequiredPostcode : ''}`;
+        } else {
+            promoFeedbackText = promoIsValid ? '✓ Code Accepted' : '✗ Invalid Code';
+        }
         promoFeedbackColor = promoIsValid ? '#1a7a3c' : '#c0392b';
     } catch (err) {
         promoIsValid = false;
+        promoRequiredAddress1 = null;
+        promoRequiredPostcode = null;
         promoFeedbackText = 'Could not check code — try again.';
         promoFeedbackColor = '#c0392b';
     }
