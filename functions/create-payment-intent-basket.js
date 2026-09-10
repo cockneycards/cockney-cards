@@ -49,7 +49,7 @@ import {
     qualifiesForFreeA3TrackedDelivery,
 } from './postage.js';
 import { checkPlusMembership, getUserFromAuth, findOrCreateUserByEmail } from './account-api.js';
-import { checkPromoCode } from './promo.js';
+import { getPromoDetails, promoAppliesToAddress } from './promo.js';
 import { getRewardCodeDetails, getActiveWelcomeReward } from './referrals.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -183,7 +183,7 @@ export async function onRequestPost(context) {
 
         let authedUser = await getUserFromAuth(request, env);
         const isClubMember = await checkPlusMembership(request, env);
-        const isPromoValid = await checkPromoCode(data.promoCode, env);
+        const promoDetails = await getPromoDetails(data.promoCode, env);
 
         // Matches basket.html's clubDiscountActive: a non-member adding the
         // Annual Membership to this same basket gets the 25% card discount
@@ -249,6 +249,15 @@ export async function onRequestPost(context) {
             parcelNumber++;
             const discountRate = membershipActive ? 0.25 : 0;
 
+            // This parcel's own delivery address — needed to check an
+            // address-restricted promo code (see promo.js) per parcel,
+            // not once for the whole order, since a multi-destination
+            // basket might only have one parcel actually going there.
+            const firstItem = groupItems[0];
+            const wantsRecipientAddress = firstItem.delivery?.type === 'recipient' && firstItem.delivery?.recipient;
+            const groupAddress = wantsRecipientAddress ? firstItem.delivery.recipient : selfAddress;
+            const promoAppliesToThisParcel = promoAppliesToAddress(promoDetails, groupAddress);
+
             groupItems.forEach((item) => {
                 const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
                 let unitAmount = hasPrice ? Math.round(item.priceValue * 100) : 999; // £9.99 fallback
@@ -302,7 +311,7 @@ export async function onRequestPost(context) {
             // The promo-code waiver is cards-only and, like the quantity
             // promos above, only ever covers First Class — a customer who
             // upgrades to a tracked service still pays for that upgrade.
-            const promoWaivesThisMethod = allCardsInGroup && isPromoValid && chosenMethod === POSTAGE_METHODS.FIRST_CLASS;
+            const promoWaivesThisMethod = allCardsInGroup && promoAppliesToThisParcel && chosenMethod === POSTAGE_METHODS.FIRST_CLASS;
             const postageWaived = freeMethods.has(chosenMethod) || promoWaivesThisMethod;
             const postageAmount = postageWaived ? 0 : postageAmountForMethod(groupItems, chosenMethod);
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
