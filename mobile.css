@@ -41,6 +41,10 @@
     .gallery-section { max-width: 100%; padding: 0 30px; overflow-x: visible; }
     .gallery-grid { min-width: 0; grid-template-columns: repeat(3, 1fr); }
     .gallery-column, .gallery-row { display: contents; }
+    /* Print previews + centre lion logo are the three .large-box
+       cards — hide them here, leaving just the small greeting-card
+       previews. */
+    .large-box { display: none; }
 }
 
 /* ---------- Homepage decorative gallery: mobile ----------
@@ -55,6 +59,9 @@
     .gallery-grid { min-width: 0; grid-template-columns: 1fr 1fr; gap: 10px; }
     .gallery-column, .gallery-row { display: contents; }
     .gallery-title { font-size: 19px; margin-bottom: 20px; }
+    /* Print previews + centre lion logo are the three .large-box
+       cards — hide them here too, same reasoning as tablet portrait. */
+    .large-box { display: none; }
 }
 
 /* ---------- Shop pages (shop-cards, shop-prints) ---------- */
