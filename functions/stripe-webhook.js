@@ -27,7 +27,12 @@
 // Requires (Cloudflare env vars/secrets):
 //   STRIPE_WEBHOOK_SECRET  - from the Stripe Dashboard webhook endpoint
 //   ZEPTOMAIL_TOKEN        - ZeptoMail Send Mail Token (Mail Agent > SMTP/API)
-//   FROM_EMAIL             - the verified sending address for that Agent
+//   FROM_EMAIL             - reminders@cockneycards.com, used for birthday
+//                             reminder emails only (not order emails, see
+//                             ORDER_FROM_EMAIL below)
+//   ORDER_FROM_EMAIL       - the verified sending address for order
+//                             notification/confirmation emails from this
+//                             file (receipts@cockneycards.com)
 // Requires the same ORDER_PDFS R2 bucket binding as the three create-checkout* functions.
 // Requires a DB (D1) binding pointing at the same cockney-cards-db used by
 // the account/reminders Worker — add it under Settings > Bindings,
@@ -637,10 +642,10 @@ async function verifyStripeSignature(payload, sigHeader, secret) {
 
 // Shared by sendOrderEmail() and sendBasketOrderEmail() — both build the
 // same subject/body/attachments shape, just from different order data.
-// Uses ZeptoMail (env.ZEPTOMAIL_TOKEN, env.FROM_EMAIL) — NOT Resend. The
-// account this webhook actually runs under (old-bush-4d25cockney-cards-api)
-// has a ZEPTOMAIL_TOKEN secret and a FROM_EMAIL var configured, with no
-// RESEND_API_KEY at all, so that's the real mail provider in use here.
+// Uses ZeptoMail (env.ZEPTOMAIL_TOKEN, env.ORDER_FROM_EMAIL) — NOT Resend.
+// The account this webhook actually runs under (old-bush-4d25cockney-cards-api)
+// has a ZEPTOMAIL_TOKEN secret and an ORDER_FROM_EMAIL var configured, with
+// no RESEND_API_KEY at all, so that's the real mail provider in use here.
 //
 // ZeptoMail's attachment `content` field wants base64 with no data URI
 // prefix, same shape this code already builds. Docs:
@@ -664,7 +669,7 @@ async function sendViaZeptoMail(env, { subject, text, attachments }) {
             Accept: 'application/json',
         },
         body: JSON.stringify({
-            from: { address: env.FROM_EMAIL, name: 'Cockney Cards Orders' },
+            from: { address: env.ORDER_FROM_EMAIL, name: 'Cockney Cards Orders' },
             to: [{ email_address: { address: 'orders@cockneycards.com', name: 'Cockney Cards Orders' } }],
             subject,
             textbody: text,
@@ -699,7 +704,7 @@ async function sendCustomerEmail(env, { to, subject, html }) {
             Accept: 'application/json',
         },
         body: JSON.stringify({
-            from: { address: env.FROM_EMAIL, name: 'Cockney Cards' },
+            from: { address: env.ORDER_FROM_EMAIL, name: 'Cockney Cards' },
             to: [{ email_address: { address: to, name: to } }],
             subject,
             htmlbody: html,
