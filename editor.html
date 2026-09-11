@@ -1731,6 +1731,44 @@ function setupTextEvents() {
         textbox._lastValidText = textbox.text;
         const maxLines = BOX_MAX_LINES[i];
 
+        // A paste can drop in a large block of text in one go — rather than
+        // let the browser insert it into the hidden textarea and hope the
+        // 'changed' handler below catches up after the fact, intercept the
+        // paste directly, build the resulting text ourselves (chunking any
+        // overlong run, then checking the same limits), and only ever let
+        // Fabric render the already-valid result.
+        textbox.hiddenTextarea.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData).getData('text');
+            if (!pasted) return;
+            const start = textbox.selectionStart, end = textbox.selectionEnd;
+            const combined = textbox.text.slice(0, start) + pasted + textbox.text.slice(end);
+            const fixed = breakOverlongWords(combined, start + pasted.length, textbox.fontSize, textbox.fontFamily, textbox.fontWeight, textbox.width);
+            textbox.text = fixed.text;
+            textbox.initDimensions();
+
+            const tooManyLines = textbox._textLines.length > maxLines;
+            const lineTooWide = textbox._textLines.some((line) =>
+                measureTextWidth(line, textbox.fontSize, textbox.fontFamily, textbox.fontWeight) > textbox.width
+            );
+            let pos;
+            if (tooManyLines || lineTooWide) {
+                // Too much to fit even after chunking — reject the paste
+                // entirely rather than dropping in a partial fragment.
+                textbox.text = textbox._lastValidText;
+                textbox.initDimensions();
+                pos = Math.max(0, Math.min(start, textbox.text.length));
+            } else {
+                textbox._lastValidText = textbox.text;
+                pos = Math.min(fixed.cursorPos, textbox.text.length);
+            }
+            textbox.selectionStart = textbox.selectionEnd = pos;
+            textbox.hiddenTextarea.value = textbox.text;
+            textbox.hiddenTextarea.selectionStart = textbox.hiddenTextarea.selectionEnd = pos;
+            textbox.setCoords();
+            canvas.requestRenderAll();
+        });
+
         textbox.on('changed', () => {
             const fixed = breakOverlongWords(textbox.text, textbox.selectionStart, textbox.fontSize, textbox.fontFamily, textbox.fontWeight, textbox.width);
             if (fixed.text !== textbox.text) {
