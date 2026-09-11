@@ -493,7 +493,12 @@ export async function onRequestPost(context) {
         params.append('amount', String(totalAmountPence));
         params.append('currency', 'gbp');
         params.append('automatic_payment_methods[enabled]', 'true');
-        params.append('receipt_email', customerEmail);
+        // Deliberately NOT setting receipt_email here — per Stripe's docs,
+        // doing so sends Stripe's own receipt email regardless of the
+        // account's other email settings, which duplicated the order
+        // confirmation email sent by stripe-webhook.js's
+        // sendCustomerOrderConfirmationEmail. That confirmation email is
+        // the customer-facing receipt now; Stripe's own is switched off.
         params.append('metadata[order_id]', orderId);
         params.append('metadata[product_type]', 'basket');
         params.append('metadata[item_count]', String(items.length));
