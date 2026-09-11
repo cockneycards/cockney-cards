@@ -592,52 +592,6 @@ function measureTextWidth(text, fontSize, fontFamily, fontWeight) {
     return measureCtx.measureText(text).width;
 }
 
-// Splits a single unbroken run of characters (no spaces — e.g. from a
-// held-down key, or a very long paste with no spaces) into pieces each
-// narrow enough to fit maxWidth, joined by real line breaks. Fabric's
-// normal word-wrap only ever breaks at spaces, so a word with none has
-// no way to reach a new line on its own — it just overflows sideways
-// forever. This is only ever applied to a word that's already too wide
-// to fit on a line by itself; ordinary words are never touched.
-function chunkOverlongWord(word, fontSize, fontFamily, fontWeight, maxWidth) {
-    const chunks = [];
-    let rest = word;
-    while (measureTextWidth(rest, fontSize, fontFamily, fontWeight) > maxWidth && rest.length > 1) {
-        let lo = 1, hi = rest.length;
-        while (lo < hi) {
-            const mid = (lo + hi + 1) >> 1;
-            if (measureTextWidth(rest.slice(0, mid), fontSize, fontFamily, fontWeight) <= maxWidth) lo = mid;
-            else hi = mid - 1;
-        }
-        chunks.push(rest.slice(0, lo));
-        rest = rest.slice(lo);
-    }
-    chunks.push(rest);
-    return chunks.join('\n');
-}
-
-// Runs chunkOverlongWord over every "word" (whitespace-delimited token) in
-// a block of text, leaving anything that already fits untouched. Returns
-// the fixed-up text plus an adjusted cursor position (best-effort — exact
-// when typing/pasting forward at the end, which is the common case).
-function breakOverlongWords(text, cursorPos, fontSize, fontFamily, fontWeight, maxWidth) {
-    let result = '';
-    let addedBeforeCursor = 0;
-    let consumed = 0;
-    text.replace(/\S+|\s+/g, (token) => {
-        const tokenStart = consumed;
-        consumed += token.length;
-        let piece = token;
-        if (/\S/.test(token) && measureTextWidth(token, fontSize, fontFamily, fontWeight) > maxWidth) {
-            piece = chunkOverlongWord(token, fontSize, fontFamily, fontWeight, maxWidth);
-            if (tokenStart < cursorPos) addedBeforeCursor += piece.length - token.length;
-        }
-        result += piece;
-        return token;
-    });
-    return { text: result, cursorPos: cursorPos + addedBeforeCursor };
-}
-
 // Canvas text (unlike normal DOM text) does NOT wait for a @font-face font
 // to finish downloading — if the font isn't already loaded by the time we
 // draw, the canvas just uses a fallback and never redraws itself once the
@@ -1686,48 +1640,6 @@ function switchPage(page) {
     canvas.requestRenderAll();
 }
 
-// A paste can drop in a large block of text in one go — rather than let
-// the browser insert it into the hidden textarea and hope the 'changed'
-// handler catches up after the fact, intercept the paste directly, build
-// the resulting text ourselves (chunking any overlong run, then checking
-// the same limits), and only ever let Fabric render the already-valid
-// result. Called once per box, the first time it enters editing (see
-// text:editing:entered above) — that's the first point its hiddenTextarea
-// element is guaranteed to exist.
-function attachPasteHandler(textbox, maxLines) {
-    textbox.hiddenTextarea.addEventListener('paste', (e) => {
-        e.preventDefault();
-        const pasted = (e.clipboardData || window.clipboardData).getData('text');
-        if (!pasted) return;
-        const start = textbox.selectionStart, end = textbox.selectionEnd;
-        const combined = textbox.text.slice(0, start) + pasted + textbox.text.slice(end);
-        const fixed = breakOverlongWords(combined, start + pasted.length, textbox.fontSize, textbox.fontFamily, textbox.fontWeight, textbox.width);
-        textbox.text = fixed.text;
-        textbox.initDimensions();
-
-        const tooManyLines = textbox._textLines.length > maxLines;
-        const lineTooWide = textbox._textLines.some((line) =>
-            measureTextWidth(line, textbox.fontSize, textbox.fontFamily, textbox.fontWeight) > textbox.width
-        );
-        let pos;
-        if (tooManyLines || lineTooWide) {
-            // Too much to fit even after chunking — reject the paste
-            // entirely rather than dropping in a partial fragment.
-            textbox.text = textbox._lastValidText;
-            textbox.initDimensions();
-            pos = Math.max(0, Math.min(start, textbox.text.length));
-        } else {
-            textbox._lastValidText = textbox.text;
-            pos = Math.min(fixed.cursorPos, textbox.text.length);
-        }
-        textbox.selectionStart = textbox.selectionEnd = pos;
-        textbox.hiddenTextarea.value = textbox.text;
-        textbox.hiddenTextarea.selectionStart = textbox.hiddenTextarea.selectionEnd = pos;
-        textbox.setCoords();
-        canvas.requestRenderAll();
-    });
-}
-
 function setupTextEvents() {
     canvas.on("mouse:down", ({ target }) => {
         if (currentPage !== 'inside' || !insideTexts.includes(target)) return;
@@ -1748,19 +1660,6 @@ function setupTextEvents() {
         }
         target._lastValidText = target.text;
 
-        // Fabric only creates a text box's hidden <textarea> the first
-        // time it's actually entered into edit mode — it doesn't exist yet
-        // at setup time (setupTextEvents runs once, right after the boxes
-        // are created, long before anyone has clicked into one). The paste
-        // listener below needs that real element, so it's attached here,
-        // on first edit, instead of up front — and only once per box, via
-        // the _pasteHandlerAttached guard, since text:editing:entered fires
-        // every time editing starts again.
-        if (!target._pasteHandlerAttached && target.hiddenTextarea) {
-            target._pasteHandlerAttached = true;
-            attachPasteHandler(target, idx !== -1 ? BOX_MAX_LINES[idx] : Infinity);
-        }
-
         // Fabric edits text through a hidden off-screen <textarea> that
         // grabs focus the moment you tap into a message box. Phones/tablets
         // then do what they'd do for any focused field — auto-scroll it
@@ -1773,36 +1672,15 @@ function setupTextEvents() {
         setTimeout(() => window.scrollTo(scrollX, scrollY), 60);
     });
 
-    // Enforce each box's max line count (BOX_MAX_LINES) AND per-line width —
-    // blocks typing/pasting/pressing return once either limit is hit, by
+    // Enforce each box's max line count (BOX_MAX_LINES) — blocks typing or
+    // pressing return once the box has wrapped/broken to the limit, by
     // reverting to the last valid text and restoring the cursor position.
-    // Before that check runs, breakOverlongWords() gives any unbroken run
-    // of characters (e.g. a held-down key) real line breaks so it can flow
-    // onto a new line like normal wrapped text — otherwise, since Fabric's
-    // word-wrap only ever breaks at spaces, a run with none would just
-    // overflow sideways with nowhere to go, and the check below would have
-    // to freeze it in place rather than letting it drop down.
     insideTexts.forEach((textbox, i) => {
         textbox._lastValidText = textbox.text;
         const maxLines = BOX_MAX_LINES[i];
 
         textbox.on('changed', () => {
-            const fixed = breakOverlongWords(textbox.text, textbox.selectionStart, textbox.fontSize, textbox.fontFamily, textbox.fontWeight, textbox.width);
-            if (fixed.text !== textbox.text) {
-                textbox.text = fixed.text;
-                const pos = Math.max(0, Math.min(fixed.cursorPos, textbox.text.length));
-                textbox.selectionStart = textbox.selectionEnd = pos;
-                textbox.hiddenTextarea.value = textbox.text;
-                textbox.hiddenTextarea.selectionStart = textbox.hiddenTextarea.selectionEnd = pos;
-                textbox.initDimensions();
-                textbox.setCoords();
-            }
-
-            const tooManyLines = textbox._textLines.length > maxLines;
-            const lineTooWide = textbox._textLines.some((line) =>
-                measureTextWidth(line, textbox.fontSize, textbox.fontFamily, textbox.fontWeight) > textbox.width
-            );
-            if (tooManyLines || lineTooWide) {
+            if (textbox._textLines.length > maxLines) {
                 const cursorPos = textbox.selectionStart;
                 textbox.text = textbox._lastValidText;
                 const pos = Math.max(0, Math.min(cursorPos - 1, textbox.text.length));
