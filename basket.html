@@ -246,7 +246,7 @@ let promoRequiredPostcode = null;
 
 // Cockney Cards Club membership — fetched from GET /api/account (needs
 // the logged-in session token; see auth.js) so the basket can show the
-// same 25%-off-cards price that create-checkout-basket.js actually
+// same 25%-off-cards price that create-payment-intent-basket.js actually
 // charges a member. Starts false (standard pricing) until this resolves,
 // so a guest or not-yet-checked visitor is never shown a discount that
 // might not apply — it only ever corrects upward into a lower price, not
@@ -401,10 +401,10 @@ window.addEventListener('pageshow', () => {
 
 // ---------------------------------------------------------------------
 // Postage estimate — mirrors functions/postage.js + the grouping/waiver
-// logic in functions/create-checkout-basket.js, so the basket shows the
-// same parcels/prices the Stripe session will actually charge. Keep in
-// sync if those files change. This is a display estimate only; the
-// Stripe Checkout Session created server-side is what actually charges
+// logic in functions/create-payment-intent-basket.js, so the basket shows
+// the same parcels/prices that'll actually be charged. Keep in sync if
+// those files change. This is a display estimate only; the PaymentIntent
+// created server-side (see checkout.html) is what actually charges
 // the customer.
 // ---------------------------------------------------------------------
 const POSTAGE_TIERS = { A5: 199, A4: 349, A3: 499 }; // pence — First Class only, kept for tierForItem/highestTier below
@@ -686,7 +686,7 @@ function estimatePostage(items, { isPromoValid = false, promoRequiredAddress1 = 
 }
 
 // Returns this line's per-unit price with the Club discount applied if
-// it qualifies — 25% off cards only, matching create-checkout-basket.js
+// it qualifies — 25% off cards only, matching create-payment-intent-basket.js
 // (`item.kind === 'card' && discountRate > 0`; prints and reward/promo
 // discounts aren't factored in here, those are checkout-only). Returns
 // null if this item has no usable price (matches the server's own
@@ -1401,18 +1401,6 @@ async function removeItem(id) {
     renderBasket();
 }
 
-// Sends every basket line (each already carrying its own print-ready PDF
-// and quantity) to the backend in one go, and expects the same shape of
-// response as the existing single-item checkouts: { url } to redirect to,
-// or { error } to show.
-//
-// NOTE: this posts to a NEW endpoint, /create-checkout-basket, which
-// doesn't exist yet server-side — the existing /create-checkout and
-// /create-checkout-print endpoints (used by editor.html and
-// editor-prints.html) only ever handled a single item. That backend work
-// (building a multi-item Stripe session, and having stripe-webhook.js
-// email every item's PDF once payment succeeds) needs to be added
-// alongside this page before real checkout will work end-to-end.
 // Checks the entered code against /api/validate-promo and shows
 // Invalid/Accepted feedback right away — checkout still re-validates
 // independently regardless of whether this was clicked, so this is
@@ -1478,6 +1466,11 @@ async function applyPromoCode() {
     if (applyBtn) { applyBtn.disabled = false; applyBtn.innerText = 'Apply'; }
 }
 
+// Stashes every basket line (each already carrying its own print-ready
+// PDF and quantity) into sessionStorage and hands off to checkout.html,
+// which posts it to /create-payment-intent-basket to open a Stripe
+// PaymentIntent — see checkout.html and create-payment-intent-basket.js
+// for the actual charge/postage/discount logic.
 async function goToCheckout() {
     const btn = $('checkout-btn');
     const errorEl = $('checkout-error');
