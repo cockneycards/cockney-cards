@@ -1686,6 +1686,48 @@ function switchPage(page) {
     canvas.requestRenderAll();
 }
 
+// A paste can drop in a large block of text in one go — rather than let
+// the browser insert it into the hidden textarea and hope the 'changed'
+// handler catches up after the fact, intercept the paste directly, build
+// the resulting text ourselves (chunking any overlong run, then checking
+// the same limits), and only ever let Fabric render the already-valid
+// result. Called once per box, the first time it enters editing (see
+// text:editing:entered above) — that's the first point its hiddenTextarea
+// element is guaranteed to exist.
+function attachPasteHandler(textbox, maxLines) {
+    textbox.hiddenTextarea.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+        if (!pasted) return;
+        const start = textbox.selectionStart, end = textbox.selectionEnd;
+        const combined = textbox.text.slice(0, start) + pasted + textbox.text.slice(end);
+        const fixed = breakOverlongWords(combined, start + pasted.length, textbox.fontSize, textbox.fontFamily, textbox.fontWeight, textbox.width);
+        textbox.text = fixed.text;
+        textbox.initDimensions();
+
+        const tooManyLines = textbox._textLines.length > maxLines;
+        const lineTooWide = textbox._textLines.some((line) =>
+            measureTextWidth(line, textbox.fontSize, textbox.fontFamily, textbox.fontWeight) > textbox.width
+        );
+        let pos;
+        if (tooManyLines || lineTooWide) {
+            // Too much to fit even after chunking — reject the paste
+            // entirely rather than dropping in a partial fragment.
+            textbox.text = textbox._lastValidText;
+            textbox.initDimensions();
+            pos = Math.max(0, Math.min(start, textbox.text.length));
+        } else {
+            textbox._lastValidText = textbox.text;
+            pos = Math.min(fixed.cursorPos, textbox.text.length);
+        }
+        textbox.selectionStart = textbox.selectionEnd = pos;
+        textbox.hiddenTextarea.value = textbox.text;
+        textbox.hiddenTextarea.selectionStart = textbox.hiddenTextarea.selectionEnd = pos;
+        textbox.setCoords();
+        canvas.requestRenderAll();
+    });
+}
+
 function setupTextEvents() {
     canvas.on("mouse:down", ({ target }) => {
         if (currentPage !== 'inside' || !insideTexts.includes(target)) return;
@@ -1705,6 +1747,19 @@ function setupTextEvents() {
             canvas.requestRenderAll();
         }
         target._lastValidText = target.text;
+
+        // Fabric only creates a text box's hidden <textarea> the first
+        // time it's actually entered into edit mode — it doesn't exist yet
+        // at setup time (setupTextEvents runs once, right after the boxes
+        // are created, long before anyone has clicked into one). The paste
+        // listener below needs that real element, so it's attached here,
+        // on first edit, instead of up front — and only once per box, via
+        // the _pasteHandlerAttached guard, since text:editing:entered fires
+        // every time editing starts again.
+        if (!target._pasteHandlerAttached && target.hiddenTextarea) {
+            target._pasteHandlerAttached = true;
+            attachPasteHandler(target, idx !== -1 ? BOX_MAX_LINES[idx] : Infinity);
+        }
 
         // Fabric edits text through a hidden off-screen <textarea> that
         // grabs focus the moment you tap into a message box. Phones/tablets
@@ -1730,44 +1785,6 @@ function setupTextEvents() {
     insideTexts.forEach((textbox, i) => {
         textbox._lastValidText = textbox.text;
         const maxLines = BOX_MAX_LINES[i];
-
-        // A paste can drop in a large block of text in one go — rather than
-        // let the browser insert it into the hidden textarea and hope the
-        // 'changed' handler below catches up after the fact, intercept the
-        // paste directly, build the resulting text ourselves (chunking any
-        // overlong run, then checking the same limits), and only ever let
-        // Fabric render the already-valid result.
-        textbox.hiddenTextarea.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const pasted = (e.clipboardData || window.clipboardData).getData('text');
-            if (!pasted) return;
-            const start = textbox.selectionStart, end = textbox.selectionEnd;
-            const combined = textbox.text.slice(0, start) + pasted + textbox.text.slice(end);
-            const fixed = breakOverlongWords(combined, start + pasted.length, textbox.fontSize, textbox.fontFamily, textbox.fontWeight, textbox.width);
-            textbox.text = fixed.text;
-            textbox.initDimensions();
-
-            const tooManyLines = textbox._textLines.length > maxLines;
-            const lineTooWide = textbox._textLines.some((line) =>
-                measureTextWidth(line, textbox.fontSize, textbox.fontFamily, textbox.fontWeight) > textbox.width
-            );
-            let pos;
-            if (tooManyLines || lineTooWide) {
-                // Too much to fit even after chunking — reject the paste
-                // entirely rather than dropping in a partial fragment.
-                textbox.text = textbox._lastValidText;
-                textbox.initDimensions();
-                pos = Math.max(0, Math.min(start, textbox.text.length));
-            } else {
-                textbox._lastValidText = textbox.text;
-                pos = Math.min(fixed.cursorPos, textbox.text.length);
-            }
-            textbox.selectionStart = textbox.selectionEnd = pos;
-            textbox.hiddenTextarea.value = textbox.text;
-            textbox.hiddenTextarea.selectionStart = textbox.hiddenTextarea.selectionEnd = pos;
-            textbox.setCoords();
-            canvas.requestRenderAll();
-        });
 
         textbox.on('changed', () => {
             const fixed = breakOverlongWords(textbox.text, textbox.selectionStart, textbox.fontSize, textbox.fontFamily, textbox.fontWeight, textbox.width);
