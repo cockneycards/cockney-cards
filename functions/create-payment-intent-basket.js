@@ -1,35 +1,35 @@
 // functions/create-payment-intent-basket.js
 //
-// Cloudflare Pages Function — the custom-checkout counterpart to
-// create-checkout-basket.js. Used by the new checkout.html page instead
-// of redirecting to a Stripe-hosted Checkout page.
+// Cloudflare Pages Function — creates a Stripe PaymentIntent for the
+// entire basket. Used by checkout.html, which confirms it client-side
+// via Stripe's embedded Payment Element (card entry only, no address UI).
+// This is the only checkout endpoint the site uses now — the older
+// Stripe-hosted Checkout Session flow (create-checkout-basket.js,
+// create-checkout.js, create-checkout-print.js) has been retired; every
+// purchase (basket or single item) now goes through editor.html/
+// editor-prints.html -> basket.html -> checkout.html -> this endpoint.
 //
-// Why this exists: Stripe Checkout Sessions always show Stripe's own
-// generic "Shipping information" step, even when every item's delivery
-// address has already been resolved on basket.html (a saved "self"
-// address, or a per-item "recipient" address). That produced a confusing
-// extra address field that looked broken (see the basket.html/
-// create-checkout-basket.js fix that stopped requesting it for
-// all-recipient baskets) and doesn't match the desired UX — a clear
-// review of every card + its delivery address (matching Moonpig's
-// checkout, per the design conversation), followed by payment, all on
-// our own pages. Stripe's Checkout Session product doesn't support that
-// — its shipping step is all-or-nothing per session — so this endpoint
-// creates a PaymentIntent instead, which checkout.html confirms itself
-// via Stripe's embedded Payment Element (card entry only, no address
-// UI at all).
+// Why a PaymentIntent rather than a Checkout Session: Stripe Checkout
+// Sessions always show Stripe's own generic "Shipping information" step,
+// even when every item's delivery address has already been resolved on
+// basket.html (a saved "self" address, or a per-item "recipient"
+// address). That produced a confusing extra address field that looked
+// broken, and doesn't match the desired UX — a clear review of every
+// card + its delivery address (matching Moonpig's checkout, per the
+// design conversation), followed by payment, all on our own pages.
+// Stripe's Checkout Session product doesn't support that — its shipping
+// step is all-or-nothing per session — so this endpoint creates a
+// PaymentIntent instead.
 //
-// Pricing/discount/reward/postage logic below is copied verbatim from
-// create-checkout-basket.js's line-item loop (same club discount, same
-// reward-unit splitting, same per-destination postage rules) — it just
-// accumulates one total instead of building Stripe Checkout line items,
-// since a PaymentIntent doesn't have a line-item concept the customer
-// sees; the itemised breakdown is stored in R2 instead, for the order
+// Pricing/discount/reward/postage logic below (same club discount, same
+// reward-unit splitting, same per-destination postage rules) accumulates
+// one total rather than building Stripe Checkout line items, since a
+// PaymentIntent doesn't have a line-item concept the customer sees; the
+// itemised breakdown is stored in R2 instead, for the order
 // email/receipt to read back out.
 //
-// Requires the same STRIPE_SECRET_KEY env var and ORDER_PDFS R2 bucket
-// binding as create-checkout-basket.js (all the checkout functions share
-// them).
+// Requires the STRIPE_SECRET_KEY env var and ORDER_PDFS R2 bucket
+// binding (set in Cloudflare Pages > Settings).
 //
 // Membership purchases work for guests too, not just logged-in
 // customers — see findOrCreateUserByEmail in account-api.js, used below
@@ -95,10 +95,10 @@ export async function onRequestPost(context) {
         const wantsMembership = rawMembershipItems.length === 1;
 
 
-        // Unlike create-checkout-basket.js, there's no Stripe-hosted page
-        // left to collect an email on — checkout.html collects it
-        // directly (prefilled for logged-in customers, typed in by
-        // guests), so it's required here rather than optional.
+        // There's no Stripe-hosted page here to collect an email on —
+        // checkout.html collects it directly (prefilled for logged-in
+        // customers, typed in by guests), so it's required rather than
+        // optional.
         const customerEmail = (data.customerEmail || '').toString().trim().toLowerCase();
         if (!customerEmail || !EMAIL_RE.test(customerEmail)) {
             return new Response(JSON.stringify({ error: 'Please enter a valid email address.' }), {
@@ -255,11 +255,10 @@ export async function onRequestPost(context) {
         ));
         let rewardApplied = false;
 
-        // Same grouping-by-destination + per-item pricing + per-parcel
-        // postage as create-checkout-basket.js — just accumulated into a
-        // total instead of Stripe line items, and recorded in
-        // `breakdown` (stored in R2) so the order email/receipt can still
-        // show a proper itemised list.
+        // Groups items by destination, then applies per-item pricing and
+        // per-parcel postage, accumulated into a total instead of Stripe
+        // line items, and recorded in `breakdown` (stored in R2) so the
+        // order email/receipt can still show a proper itemised list.
         const groups = groupItemsByDestination(items);
         let totalAmountPence = 0;
         let parcelNumber = 0;
@@ -321,11 +320,10 @@ export async function onRequestPost(context) {
             const qualifiesA3TrackedDelivery = qualifiesForFreeA3TrackedDelivery(groupItems);
 
             // Which service this parcel actually ships under — resolved
-            // from whatever each item requested on basket.html, same as
-            // create-checkout-basket.js. Note membership does NOT waive
-            // postage (that's the 25% card discount above instead), so
-            // isClubMember is deliberately not passed to
-            // freeMethodsForItems here.
+            // from whatever each item requested on basket.html. Note
+            // membership does NOT waive postage (that's the 25% card
+            // discount above instead), so isClubMember is deliberately
+            // not passed to freeMethodsForItems here.
             const chosenMethod = resolveGroupMethod(groupItems) || POSTAGE_METHODS.FIRST_CLASS;
             const freeMethods = freeMethodsForItems(groupItems);
             // The promo-code waiver is cards-only and, like the quantity
@@ -471,10 +469,10 @@ export async function onRequestPost(context) {
         }
 
         // Order record for stripe-webhook.js to pick up once payment
-        // succeeds — same shape as create-checkout-basket.js's R2 entry
-        // (items, selfAddress), plus what a PaymentIntent doesn't carry
-        // the way a Checkout Session's customer_details did: the email
-        // and the priced breakdown for the order emails/receipt.
+        // succeeds (items, selfAddress), plus what a PaymentIntent
+        // doesn't carry the way a Checkout Session's customer_details
+        // did: the email and the priced breakdown for the order
+        // emails/receipt.
         await env.ORDER_PDFS.put(orderId, JSON.stringify({
             items,
             selfAddress,
