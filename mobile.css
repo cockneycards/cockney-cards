@@ -31,18 +31,30 @@
     .footer-col { text-align: center; }
 }
 
-/* ---------- Homepage decorative gallery ----------
-   Previously locked to min-width:900px inside an 80%-width,
-   overflow-x:auto section — meaning mobile visitors landed on a
-   sideways-scrolling strip instead of a normal page. This lets it
-   stack into 2 columns, then 1, like a normal mobile layout. */
+/* ---------- Homepage decorative gallery: tablet portrait ----------
+   Below 900px the gallery grid's own min-width kicked in and turned
+   the section into a horizontal-scroll strip, so on a tablet held
+   upright you could swipe the cards off screen. This flattens the
+   column/row nesting and drops the forced min-width so it lays out
+   as an ordinary 3-across grid that fits the screen — no swiping. */
+@media (max-width: 1024px) and (min-width: 641px) and (orientation: portrait) {
+    .gallery-section { max-width: 100%; padding: 0 30px; overflow-x: visible; }
+    .gallery-grid { min-width: 0; grid-template-columns: repeat(3, 1fr); }
+    .gallery-column, .gallery-row { display: contents; }
+}
+
+/* ---------- Homepage decorative gallery: mobile ----------
+   Same min-width:900px / overflow-x:auto problem as above, but on
+   phones it also stacked into a mess: .gallery-column and
+   .gallery-row are themselves nested mini-grids, so the old 2-col
+   rule here was really placing whole 3-image clusters side by side,
+   not individual cards. Flattening that nesting first makes the
+   2-column rule apply to each card directly. */
 @media (max-width: 640px) {
     .gallery-section { max-width: 100%; padding: 0 16px; overflow-x: visible; margin: 20px auto; }
     .gallery-grid { min-width: 0; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .gallery-column, .gallery-row { display: contents; }
     .gallery-title { font-size: 19px; margin-bottom: 20px; }
-}
-@media (max-width: 420px) {
-    .gallery-grid { grid-template-columns: 1fr; }
 }
 
 /* ---------- Shop pages (shop-cards, shop-prints) ---------- */
