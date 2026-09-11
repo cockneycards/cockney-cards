@@ -977,13 +977,6 @@ function setupTextsAndOverlays() {
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
         hasBorders: true, backgroundColor: "transparent",
-        // A run of identical characters with no spaces (e.g. holding a key
-        // down) has no natural word-break point, so Fabric's default
-        // word-wrap lets it overflow the box width sideways instead of
-        // wrapping — which meant it never tripped the BOX_MAX_LINES check
-        // below. splitByGrapheme forces a wrap at the box edge regardless,
-        // so runaway typing always lands as extra lines and gets caught.
-        splitByGrapheme: true,
         ...STYLE_DASHED
     };
     insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
@@ -1679,15 +1672,24 @@ function setupTextEvents() {
         setTimeout(() => window.scrollTo(scrollX, scrollY), 60);
     });
 
-    // Enforce each box's max line count (BOX_MAX_LINES) — blocks typing or
-    // pressing return once the box has wrapped/broken to the limit, by
+    // Enforce each box's max line count (BOX_MAX_LINES) AND per-line width —
+    // blocks typing/pasting/pressing return once either limit is hit, by
     // reverting to the last valid text and restoring the cursor position.
+    // The width check exists alongside the line-count check because a run
+    // of characters with no spaces (e.g. holding a key down, or pasting a
+    // very long single "word") has no natural break point for Fabric's
+    // word-wrap to use — it just overflows sideways on one line rather than
+    // wrapping, so _textLines.length alone never catches it.
     insideTexts.forEach((textbox, i) => {
         textbox._lastValidText = textbox.text;
         const maxLines = BOX_MAX_LINES[i];
 
         textbox.on('changed', () => {
-            if (textbox._textLines.length > maxLines) {
+            const tooManyLines = textbox._textLines.length > maxLines;
+            const lineTooWide = textbox._textLines.some((line) =>
+                measureTextWidth(line, textbox.fontSize, textbox.fontFamily, textbox.fontWeight) > textbox.width
+            );
+            if (tooManyLines || lineTooWide) {
                 const cursorPos = textbox.selectionStart;
                 textbox.text = textbox._lastValidText;
                 const pos = Math.max(0, Math.min(cursorPos - 1, textbox.text.length));
