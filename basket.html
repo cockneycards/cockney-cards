@@ -975,17 +975,18 @@ function renderBasket() {
         : '';
 
     // A "recipient" item already has its address locked in from the
-    // editor — only a "self" item needs a "deliver to" chosen here.
-    // Club membership never needs one either way.
+    // editor — only a "self" item needs a delivery address. That's now
+    // set exclusively via "Add Address" on the item itself (left-hand
+    // side) — see renderDeliveryLine/openRecipientPicker — so there's no
+    // separate "deliver to" box in this sidebar any more.
     const hasSelfItem = physicalItems.some((item) => item.delivery?.type !== 'recipient');
-    const deliverToHtml = hasSelfItem ? renderDeliverToBlock() : '';
 
     // Checkout is disabled until every "self" item has a resolved
     // address — avoids the old flow where clicking Checkout was the
     // first place this got checked, and just bounced back with an error.
     const needsAddress = hasSelfItem && !getChosenSelfAddress();
     const missingAddressHtml = needsAddress
-        ? `<p style="font-size:12px; color:#c0392b; margin:8px 0 0;">Please add a delivery address to continue — use Select Recipient on your card, on the left.</p>`
+        ? `<p style="font-size:12px; color:#c0392b; margin:8px 0 0;">Please add a delivery address to continue — use Add Address on your card, on the left.</p>`
         : '';
 
     content.innerHTML = `
@@ -996,7 +997,6 @@ function renderBasket() {
             </div>
             <div class="basket-summary">
                 ${freeDeliveryNudgeHtml}
-                ${deliverToHtml}
                 <div class="summary-row"><span>Items</span><span>${count}</span></div>
                 <div class="summary-row"><span>Subtotal</span><span>${ccCart.formatGBP(rawSubtotal)}</span></div>
                 ${clubSavingsRowHtml}
@@ -1026,7 +1026,7 @@ function renderBasket() {
 function renderDeliveryLine(item) {
     const wantsRecipient = item.delivery?.type === 'recipient' && item.delivery?.recipient;
     const label = wantsRecipient ? `Sending to: ${item.delivery.recipient.name || 'recipient'}` : 'Sending to';
-    const actionText = wantsRecipient ? 'Change Recipient' : 'Select Recipient';
+    const actionText = wantsRecipient ? 'Change Recipient' : 'Add Address';
     const addressHtml = wantsRecipient ? renderRecipientAddressBlock(item.delivery.recipient) : '';
     return `
         <p class="item-delivery">
