@@ -1469,10 +1469,8 @@ async function addCurrentPrintToBasket() {
             // sizeInfo.priceValue is in POUNDS, e.g. 6.99 for a £6.99 print
             // (confirmed from a real basket subtotal — a size priced at
             // "£6.99" needs its priceValue to already be 6.99 for the
-            // maths to add up, not 699). create-checkout-print.js's own
-            // comment claims this value is in pence, which looks like a
-            // pre-existing bug in the single-item print checkout, not
-            // something to imitate here — see the note left in that file.
+            // maths to add up, not 699). Keep it this way — this is the
+            // convention create-payment-intent-basket.js expects.
             priceValue: sizeInfo?.priceValue ?? 0,
             pdfDataUri,
             delivery
