@@ -1043,7 +1043,7 @@ function renderDeliveryLine(item) {
 // per-item, not per-basket.
 function renderRecipientAddressBlock(recipient) {
     if (!recipient) return '';
-    const lines = [recipient.address1, recipient.address2, [recipient.city, recipient.county].filter(Boolean).join(', '), recipient.postcode, recipient.country]
+    const lines = [recipient.company, recipient.address1, recipient.address2, [recipient.city, recipient.county].filter(Boolean).join(', '), recipient.postcode, recipient.country]
         .filter(Boolean)
         .map((l) => l.replace(/</g, '&lt;'))
         .join('<br>');
@@ -1279,7 +1279,7 @@ function renderRecipientPicker() {
     const optionsHtml = addressList.map((a) => `
         <div class="recipient-option${currentRecipient && currentRecipient.address1 === a.address1 && currentRecipient.postcode === a.postcode && currentRecipient.name === a.name ? ' selected' : ''}" onclick="chooseAddress('${a.id}')">
             <strong>${a.label || 'Address'}</strong>
-            <span>${a.name}<br>${a.address1}, ${a.postcode}</span>
+            <span>${a.company ? a.company + '<br>' : ''}${a.name}<br>${a.address1}, ${a.postcode}</span>
         </div>
     `).join('');
 
@@ -1303,6 +1303,7 @@ function renderAddressForm() {
     $('recipient-modal-body').innerHTML = `
         <div class="recipient-form">
             <input type="text" id="rcpt-label" placeholder="Label (e.g. Home, Mum's house) — optional">
+            <input type="text" id="rcpt-company" placeholder="Company (optional)">
             <input type="text" id="rcpt-name" placeholder="Full name">
             <input type="text" id="rcpt-address1" placeholder="Address line 1">
             <input type="text" id="rcpt-address2" placeholder="Address line 2 (optional)">
@@ -1332,7 +1333,7 @@ function chooseAddress(addressId) {
     ccCart.updateItemDelivery(recipientPickerItemId, {
         type: 'recipient',
         recipient: {
-            name: a.name, address1: a.address1, address2: a.address2,
+            company: a.company, name: a.name, address1: a.address1, address2: a.address2,
             city: a.city, county: a.county, postcode: a.postcode, country: a.country,
         },
         envelopeMode: 'direct'
@@ -1346,6 +1347,7 @@ async function submitAddress() {
     statusEl.style.display = 'none';
 
     const recipient = {
+        company: $('rcpt-company').value.trim(),
         name: $('rcpt-name').value.trim(),
         address1: $('rcpt-address1').value.trim(),
         address2: $('rcpt-address2').value.trim(),
