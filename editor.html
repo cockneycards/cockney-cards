@@ -977,6 +977,13 @@ function setupTextsAndOverlays() {
         visible: false, hasControls: false,
         lockMovementX: true, lockMovementY: true, lockScalingX: true, lockScalingY: true,
         hasBorders: true, backgroundColor: "transparent",
+        // A run of identical characters with no spaces (e.g. holding a key
+        // down) has no natural word-break point, so Fabric's default
+        // word-wrap lets it overflow the box width sideways instead of
+        // wrapping — which meant it never tripped the BOX_MAX_LINES check
+        // below. splitByGrapheme forces a wrap at the box edge regardless,
+        // so runaway typing always lands as extra lines and gets caught.
+        splitByGrapheme: true,
         ...STYLE_DASHED
     };
     insideTexts = BOX_CONFIGS.map((cfg, i) => new fabric.Textbox(BOX_DEFAULT_TEXTS[i], { ...textDefaults, top: cfg.top, height: cfg.height, fontSize: 45 }));
