@@ -6,6 +6,35 @@
    <style> block, so these rules win on matching selectors.
    ============================================================ */
 
+/* ---------- Force portrait on mobile & tablet ----------
+   True orientation-locking isn't available to a normal website
+   (it's an OS-level control, and iOS Safari doesn't support the
+   partial API other browsers have). This is the standard
+   workaround: when a mobile/tablet-sized screen is in landscape,
+   cover the page with a "please rotate" message instead. Only
+   needs the <body> element, so it applies to every page that
+   links this file without extra markup. */
+@media (max-width: 1024px) and (orientation: landscape) {
+    body { overflow: hidden; height: 100vh; }
+    body > * { visibility: hidden; }
+    body::before {
+        content: "Please rotate your device back to portrait to view this site.";
+        visibility: visible;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        font-size: 18px;
+        color: #1e1e24;
+    }
+}
+
 /* ---------- Header & nav (all pages) ---------- */
 @media (max-width: 640px) {
     header { padding: 12px 16px 8px; }
