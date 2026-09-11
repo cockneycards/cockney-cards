@@ -270,8 +270,8 @@ function render() {
 
 // Step 2 -> 3: validates the email, asks the server to price the order
 // and open a PaymentIntent (create-payment-intent-basket.js does the
-// same pricing/promo/reward/postage work create-checkout-basket.js used
-// to do for the Stripe-hosted flow), then mounts Stripe's Payment
+// same pricing/promo/reward/postage work the old Stripe-hosted Checkout
+// Session flow used to), then mounts Stripe's Payment
 // Element with the returned client secret. No address fields appear
 // here at all — every delivery address was already resolved in step 1.
 async function continueToPayment() {
