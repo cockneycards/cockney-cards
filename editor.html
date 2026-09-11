@@ -1192,11 +1192,28 @@ function pointInPhotoFrame(pointer) {
 
 function setupPhotoAdjustWidget() {
     canvas.on('mouse:down', (opt) => {
+        // Mobile is handled below via a native touchend listener instead.
+        // On iOS Safari, Fabric's mouse:down on a touch device is really a
+        // *synthetic* mousedown that fires after touchend -- by then iOS no
+        // longer treats it as a trusted user gesture, so input.click() here
+        // silently fails to open the photo picker (this is why it worked on
+        // PCs and Android but not iPhone/iPad).
+        if (isMobileDevice()) return;
         if (photoImg || currentPage !== 'front' || !activeTemplate.photo) return;
         if (pointInPhotoFrame(canvas.getPointer(opt.e))) {
             $('photo-input').click();
         }
     });
+
+    // iOS fix: open the picker straight from the native touchend event,
+    // while it's still inside the original trusted touch gesture.
+    canvas.upperCanvasEl.addEventListener('touchend', (e) => {
+        if (!isMobileDevice() || photoImg || currentPage !== 'front' || !activeTemplate.photo) return;
+        const t = e.changedTouches[0];
+        if (!t || !pointInPhotoFrame(mobileCanvasPoint(t))) return;
+        e.preventDefault();
+        $('photo-input').click();
+    }, { passive: false });
 
     // Show a pointer cursor while hovering the empty frame, as a hint that
     // it's clickable.
