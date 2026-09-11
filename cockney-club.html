@@ -82,7 +82,7 @@
         .footer-grid { grid-template-columns: 1fr; gap: 30px; }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (orientation: portrait) and (max-width: 1024px) {
         .club-columns { flex-direction: column; }
         .club-image-join, .club-image-25 { display: none; }
         .club-image-mobile-join { display: block; max-width: clamp(280px, 65vw, 480px); margin: 30px auto; }
