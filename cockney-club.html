@@ -84,9 +84,15 @@
 
     @media (max-width: 768px), (orientation: portrait) and (max-width: 1024px) {
         .club-columns { flex-direction: column; }
-        .club-image-join, .club-image-25 { display: none; }
+        .club-image-join { display: none; }
         .club-image-mobile-join { display: block; max-width: clamp(280px, 65vw, 480px); margin: 30px auto; }
         .club-image-mobile-join img { width: 100%; height: auto; display: block; }
+        /* The 25%-off image sits last in the DOM (after club-main-col, which
+           ends with the terms box), so once it's un-hidden and taken out of
+           its sticky sidebar sizing, stacking naturally puts it directly
+           below Terms & Conditions on mobile and portrait tablet. */
+        .club-image-25 { position: static; top: auto; flex: 0 0 auto; max-width: clamp(280px, 65vw, 480px); margin: 30px auto 0; }
+        .club-image-25 img { width: 100%; height: auto; display: block; }
         .club-page { padding-bottom: 40px; }
         footer { margin-top: 20px; padding-top: 30px; }
     }
@@ -96,6 +102,7 @@
         .price-card { padding: 24px 30px; width: 100%; box-sizing: border-box; }
         .terms-box { padding: 24px 20px; }
         .club-image-mobile-join { max-width: clamp(240px, 80vw, 400px); margin: 20px auto; }
+        .club-image-25 { max-width: clamp(240px, 80vw, 400px); margin: 20px auto 0; }
     }
 </style>
     <link rel="stylesheet" href="mobile.css">
