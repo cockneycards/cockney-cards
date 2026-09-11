@@ -13,7 +13,7 @@
         "ALLOWED_ORIGIN": "https://cockneycards.com",
         "FROM_EMAIL": "reminders@cockneycards.com",
         "SITE_URL": "https://cockneycards.com",
-        "STRIPE_PUBLISHABLE_KEY": "pk_test_51Tt3vS3RZlOaCRsA8K9vvdWBmFnHnTv5Dk8PYUNggtjQAWpvnCsiDHmDMSvcx46bQyOHtRZlU3EkstkPFCBvRa2300d8vYupNz"
+        "STRIPE_PUBLISHABLE_KEY": "pk_live_51Tt3vD3Q0FZqXOgauRsi8SBeip2wTk6AVTYK23SnJAUzodveM6hxihGyqK6ExW7hu7cMjTVzjchNBagGOa9aRcLZ00ap3wjTvB"
     },
     "assets": {
         "directory": ".",
