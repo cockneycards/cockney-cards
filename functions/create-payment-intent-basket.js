@@ -206,13 +206,14 @@ export async function onRequestPost(context) {
         const familyMembershipFree = wantsMembership && membershipPromoEntered && hadExistingAccount;
 
         // Matches basket.html's clubDiscountActive: a non-member adding the
-        // Annual Membership to this same basket gets the 25% card discount
-        // applied to THIS order too (not just future ones), since they'll
-        // be a member by the time it's charged — see the membership block
-        // further down for the (separate, un-discounted) £9.99 charge for
-        // the membership itself. wantsMembership and isClubMember can never
-        // both be true here — the "already a member" check above already
-        // rejects that combination — so this never double-applies.
+        // Annual Membership to this same basket gets the 25% cards+prints
+        // discount applied to THIS order too (not just future ones), since
+        // they'll be a member by the time it's charged — see the
+        // membership block further down for the (separate, un-discounted)
+        // £9.99 charge for the membership itself. wantsMembership and
+        // isClubMember can never both be true here — the "already a
+        // member" check above already rejects that combination — so this
+        // never double-applies.
         const membershipActive = isClubMember || wantsMembership;
 
         // Membership has to attach to an account, and buying it again
@@ -282,7 +283,7 @@ export async function onRequestPost(context) {
                 let unitAmount = hasPrice ? Math.round(item.priceValue * 100) : 999; // £9.99 fallback
                 let name = hasPrice ? item.title : `${item.title} — PRICE CHECK NEEDED`;
 
-                if (item.kind === 'card' && discountRate > 0 && hasPrice) {
+                if ((item.kind === 'card' || item.kind === 'print') && discountRate > 0 && hasPrice) {
                     unitAmount = Math.round(unitAmount * (1 - discountRate));
                     name = `${item.title} (${Math.round(discountRate * 100)}% Club discount)`;
                 }
