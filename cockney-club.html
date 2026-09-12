@@ -168,6 +168,13 @@
         <li>
             <div class="tick">✓</div>
             <div>
+                <strong>25% off every print</strong>
+                <span>Applied automatically at checkout on every print you order, for as long as your membership is active.</span>
+            </div>
+        </li>
+        <li>
+            <div class="tick">✓</div>
+            <div>
                 <strong>Refer a friend, get a free card!!</strong>
                 <span>Share your referral link from My Account. Your friend gets 15% off their first order, and when they place it, you'll get a reward code for a free personalised card too — you just cover postage.</span>
             </div>
@@ -204,13 +211,13 @@
         <p class="updated">Last updated: August 2026</p>
 
         <h3>1. What This Is</h3>
-        <p>The Cockney Cards Club is an annual paid membership offered by Cockney Cards ("we", "us", "our") to customers in the United Kingdom. It gives members 25% off the price of personalised cards, applied automatically at checkout while the membership is active, in exchange for the annual fee shown at the time you join or renew (the "Membership Fee"). These terms sit alongside our general store policies (returns, refunds, and delivery) shown in the footer of this site, which continue to apply to any order you place, Club member or not.</p>
+        <p>The Cockney Cards Club is an annual paid membership offered by Cockney Cards ("we", "us", "our") to customers in the United Kingdom. It gives members 25% off the price of personalised cards and photo prints, applied automatically at checkout while the membership is active, in exchange for the annual fee shown at the time you join or renew (the "Membership Fee"). These terms sit alongside our general store policies (returns, refunds, and delivery) shown in the footer of this site, which continue to apply to any order you place, Club member or not.</p>
 
         <h3>2. Joining</h3>
         <p>To join the Cockney Cards Club you need a registered Cockney Cards account in good standing, and you must be aged 18 or over. You'll need to be logged in to join, and to receive Club pricing at checkout — the discount is checked against your account each time you pay, not stored on your device, so it can never be applied by mistake to someone else's order.</p>
 
         <h3>3. Using Your Membership</h3>
-        <p>Membership runs for 12 months from the date you join, and renews automatically unless you cancel (see Section 5). The 25% discount applies to personalised cards only — it doesn't apply to photo prints, postage, or any other product or fee on your order. Membership is for your own personal use. It isn't intended for business, trade, resale, or wholesale ordering, and we reserve the right to restrict or end a membership we reasonably believe is being used that way.</p>
+        <p>Membership runs for 12 months from the date you join, and renews automatically unless you cancel (see Section 5). The 25% discount applies to personalised cards and photo prints only — it doesn't apply to postage or any other product or fee on your order. Membership is for your own personal use. It isn't intended for business, trade, resale, or wholesale ordering, and we reserve the right to restrict or end a membership we reasonably believe is being used that way.</p>
 
         <h3>4. Price Changes</h3>
         <p>We may change the Membership Fee from time to time. If we do, the new price will only apply from your next renewal onwards — it never changes mid-way through a period you've already paid for. We'll email you at least 30 days before any renewal where the price is changing, so you have time to decide whether to continue.</p>
@@ -327,7 +334,7 @@ async function checkMembershipStatus() {
 
         priceCard.innerHTML = `
             <p style="margin:0; font-size:16px; font-weight:600; color:#1a7a3c;">✓ You're already a Club member</p>
-            <p style="margin:8px 0 0; font-size:13px; color:#666;">Your 25% card discount is already applied automatically at checkout.</p>
+            <p style="margin:8px 0 0; font-size:13px; color:#666;">Your 25% card &amp; print discount is already applied automatically at checkout.</p>
             ${renewsHtml}
             <a href="account.html#plus" class="join-btn" style="margin-top:18px;">Manage Membership</a>
         `;
