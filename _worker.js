@@ -57,6 +57,7 @@ import {
     handleGetOrders,
     runDailyReminderCheck,
 } from './functions/account-api.js';
+import { handleGetInstagramFeed } from './functions/instagram-feed-api.js';
 
 // Pages-Functions-style handlers (onRequestPost(context)) — dispatched by
 // exact pathname, POST only. Add a line here any time a new functions/*.js
@@ -134,6 +135,9 @@ export default {
         }
         if (pathname === '/api/account' && method === 'GET') {
             return handleGetAccount(request, env);
+        }
+        if (pathname === '/api/instagram-feed' && method === 'GET') {
+            return handleGetInstagramFeed(request, env);
         }
         if (pathname === '/api/account' && method === 'DELETE') {
             return handleDeleteAccount(request, env);
