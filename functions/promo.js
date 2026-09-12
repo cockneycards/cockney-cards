@@ -4,8 +4,8 @@
 // Club membership, this isn't tied to being logged in at all — any
 // customer can enter a code, and if it matches an active row in the
 // promo_codes table, cards in that order get free postage (Club
-// membership doesn't grant this — its benefit is the 30%/35% card
-// discount instead; see create-checkout-basket.js).
+// membership doesn't grant this — its benefit is the 25% cards+prints
+// discount instead; see create-payment-intent-basket.js).
 //
 // A code can optionally be restricted to one specific delivery address
 // (promo_codes.required_address1/required_postcode, both nullable) — e.g.
