@@ -189,29 +189,15 @@
 <script>
 const INSTAGRAM_URL = "https://www.instagram.com/cockneycards.ig";
 
-// PHOTOS: one line per photo. Swap these image URLs for your own Instagram
-// photos (upload to Cloudinary and paste the URL) — the grid re-renders
-// automatically, no other code needs to change. `link` defaults to your
-// Instagram profile but you can point an individual photo at a specific
-// post by giving it its own URL.
-const GALLERY_PHOTOS = [
-    { image: "https://images.cockneycards.com/mfc-eatsleep-preview.png" },
-    { image: "https://images.cockneycards.com/mfc-stone-preview.png" },
-    { image: "https://images.cockneycards.com/thankyou-teacher-preview.png" },
-    { image: "https://images.cockneycards.com/gaming-boy-preview.png" },
-    { image: "https://images.cockneycards.com/leaving-girl-preview.png" }, // placeholder — swap for a real Instagram photo
-    { image: "https://images.cockneycards.com/newhome-preview.png" }       // placeholder — swap for a real Instagram photo
-];
-
 const $ = (id) => document.getElementById(id);
 
 window.addEventListener('DOMContentLoaded', () => {
     loadPhotoGallery();
 });
 
-// Tries the live Instagram feed first; if the endpoint isn't set up yet,
-// or the request fails for any reason, silently falls back to the static
-// GALLERY_PHOTOS placeholder above so the section never breaks.
+// Loads posts from the live Instagram feed. If there are no posts yet (or
+// the request fails), the section is simply left empty rather than showing
+// placeholder images.
 async function loadPhotoGallery() {
     try {
         const res = await fetch('/api/instagram-feed');
@@ -219,12 +205,9 @@ async function loadPhotoGallery() {
         const data = await res.json();
         if (Array.isArray(data.posts) && data.posts.length) {
             renderPhotoGallery(data.posts);
-            return;
         }
-        throw new Error('Instagram feed returned no posts');
     } catch (err) {
-        console.warn('Falling back to static Instagram placeholder photos:', err);
-        renderPhotoGallery(GALLERY_PHOTOS);
+        console.warn('Could not load Instagram feed:', err);
     }
 }
 
