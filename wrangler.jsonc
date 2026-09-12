@@ -32,5 +32,11 @@
             "binding": "ORDER_PDFS",
             "bucket_name": "order-pdfs-r2"
         }
+    ],
+    "kv_namespaces": [
+        {
+            "binding": "CC_KV",
+            "id": "1eff24bf33a1461da19c141db0e1bb63"
+        }
     ]
 }
