@@ -206,11 +206,30 @@ const GALLERY_PHOTOS = [
 const $ = (id) => document.getElementById(id);
 
 window.addEventListener('DOMContentLoaded', () => {
-    renderPhotoGallery();
+    loadPhotoGallery();
 });
 
-function renderPhotoGallery() {
-    $('photo-grid').innerHTML = GALLERY_PHOTOS.map(({ image, link }) => `
+// Tries the live Instagram feed first; if the endpoint isn't set up yet,
+// or the request fails for any reason, silently falls back to the static
+// GALLERY_PHOTOS placeholder above so the section never breaks.
+async function loadPhotoGallery() {
+    try {
+        const res = await fetch('/api/instagram-feed');
+        if (!res.ok) throw new Error(`Instagram feed request failed: ${res.status}`);
+        const data = await res.json();
+        if (Array.isArray(data.posts) && data.posts.length) {
+            renderPhotoGallery(data.posts);
+            return;
+        }
+        throw new Error('Instagram feed returned no posts');
+    } catch (err) {
+        console.warn('Falling back to static Instagram placeholder photos:', err);
+        renderPhotoGallery(GALLERY_PHOTOS);
+    }
+}
+
+function renderPhotoGallery(photos) {
+    $('photo-grid').innerHTML = photos.map(({ image, link }) => `
         <a href="${link || INSTAGRAM_URL}" target="_blank" rel="noopener">
             <img src="${image}" alt="Cockney Cards on Instagram" loading="lazy">
         </a>
