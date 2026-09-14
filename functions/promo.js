@@ -1,11 +1,16 @@
 // functions/promo.js
 //
-// Validates the optional promo code entered at basket checkout. Unlike
-// Club membership, this isn't tied to being logged in at all — any
-// customer can enter a code, and if it matches an active row in the
-// promo_codes table, cards in that order get free postage (Club
-// membership doesn't grant this — its benefit is the 25% cards+prints
-// discount instead; see create-payment-intent-basket.js).
+// Validates the optional promo code entered at basket checkout. Most
+// codes aren't tied to being logged in at all — any customer can enter
+// one, and if it matches an active row in the promo_codes table, cards
+// in that order get free postage (Club membership doesn't grant this —
+// its benefit is the 25% cards+prints discount instead; see
+// create-payment-intent-basket.js).
+//
+// A code can also be marked promo_codes.requires_login (e.g. FAMILY13,
+// an account-linked/referral-style code) — see requiresLogin below and
+// its check in handleValidatePromo.
+
 //
 // A code can optionally be restricted to one specific delivery address
 // (promo_codes.required_address1/required_postcode, both nullable) — e.g.
@@ -16,10 +21,13 @@
 // whole order — a multi-destination basket only gets the discount on the
 // parcel(s) actually going to that address.
 
-// Returns the promo's details ({ requiredAddress1, requiredPostcode }) if
-// `code` matches an ACTIVE row, or null if it's missing/inactive/unknown.
-// requiredAddress1/requiredPostcode are null on a code with no address
-// restriction.
+import { getUserFromAuth } from './account-api.js';
+
+// Returns the promo's details ({ requiredAddress1, requiredPostcode,
+// requiresLogin }) if `code` matches an ACTIVE row, or null if it's
+// missing/inactive/unknown. requiredAddress1/requiredPostcode are null on
+// a code with no address restriction; requiresLogin is false unless the
+// row has requires_login set (e.g. FAMILY13).
 export async function getPromoDetails(code, env) {
     if (!code) return null;
     const normalized = code.toString().trim().toUpperCase();
@@ -27,12 +35,13 @@ export async function getPromoDetails(code, env) {
 
     try {
         const row = await env.DB.prepare(
-            'SELECT active, required_address1, required_postcode FROM promo_codes WHERE code = ?'
+            'SELECT active, required_address1, required_postcode, requires_login FROM promo_codes WHERE code = ?'
         ).bind(normalized).first();
         if (!row || !row.active) return null;
         return {
             requiredAddress1: row.required_address1 || null,
             requiredPostcode: row.required_postcode || null,
+            requiresLogin: !!row.requires_login,
         };
     } catch (err) {
         // A broken lookup should never block checkout — just means the
@@ -87,6 +96,28 @@ export async function handleValidatePromo(request, env) {
     try {
         const { code } = await request.json();
         const promo = await getPromoDetails(code, env);
+
+        // A requires_login code (e.g. FAMILY13) needs an actual verified
+        // session, not just a client-side "I'm logged in" claim — same
+        // trust boundary as checkPlusMembership above. A guest gets
+        // requiresLogin back instead of valid/invalid either way, so the
+        // basket can prompt them to sign in rather than saying the code
+        // itself is wrong.
+        if (promo?.requiresLogin) {
+            const user = await getUserFromAuth(request, env);
+            if (!user) {
+                return new Response(JSON.stringify({
+                    valid: false,
+                    requiresLogin: true,
+                    requiredAddress1: null,
+                    requiredPostcode: null,
+                }), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+        }
+
         return new Response(JSON.stringify({
             valid: !!promo,
             requiredAddress1: promo?.requiredAddress1 || null,
