@@ -1450,20 +1450,25 @@ async function applyPromoCode() {
     btn.innerText = 'Checking...';
 
     try {
+        const loggedInNow = typeof ccIsLoggedIn === 'function' && ccIsLoggedIn();
         const res = await fetch('/api/validate-promo', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: Object.assign(
+                { 'Content-Type': 'application/json' },
+                loggedInNow ? { Authorization: `Bearer ${ccGetSession()}` } : {}
+            ),
             body: JSON.stringify({ code })
         });
         const result = await res.json();
 
         // Some codes (e.g. account-linked / referral-style codes like
-        // FAMILY13) are only redeemable by a signed-in customer.
-        // /api/validate-promo flags this as requiresLogin rather than
-        // just returning valid:false, so we can point the guest at
+        // FAMILY13) are only redeemable by a signed-in customer. The
+        // server checks the actual session (not just this client-side
+        // flag) and flags this as requiresLogin rather than just
+        // returning valid:false, so we can point the guest at
         // sign-in/create-account instead of telling them the code is
         // invalid outright.
-        if (!ccIsLoggedIn() && result.requiresLogin) {
+        if (result.requiresLogin) {
             promoIsValid = false;
             promoRequiredAddress1 = null;
             promoRequiredPostcode = null;
