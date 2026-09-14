@@ -228,9 +228,10 @@ export async function onRequestPost(context) {
         // lapsed member can still rejoin here). A guest (no authedUser)
         // isn't turned away any more — findOrCreateUserByEmail attaches
         // membership to their existing account if customerEmail matches
-        // one, or creates a fresh one otherwise, same as clicking a
-        // magic-link login would, just skipping the click-through since
-        // completing payment is itself a strong enough verification.
+        // one, or creates a fresh one otherwise; either way they can log
+        // in normally afterwards with that email and a password they set
+        // via account.html, completing payment being a strong enough
+        // verification to skip that step here.
         if (wantsMembership) {
             if (isClubMember) {
                 return new Response(JSON.stringify({ error: "You're already a Cockney Cards Club member." }), {
