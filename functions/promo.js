@@ -7,13 +7,24 @@
 // its benefit is the 25% cards+prints discount instead; see
 // create-payment-intent-basket.js).
 //
-// A code can also be marked promo_codes.requires_login (e.g. FAMILY13,
-// an account-linked/referral-style code) — see requiresLogin below and
-// its check in handleValidatePromo.
-
+// A promo_codes row can be marked requires_login for a future
+// account-linked postage-waiver code — see requiresLogin below and its
+// check in handleValidatePromo.
 //
-// A code can optionally be restricted to one specific delivery address
-// (promo_codes.required_address1/required_postcode, both nullable) — e.g.
+// FAMILY_MEMBERSHIP_PROMO_CODE (FAMILY13) is a SEPARATE, hardcoded
+// special case, not a promo_codes row at all — see
+// create-payment-intent-basket.js, which checks it directly against the
+// raw code string and waives the £9.99 membership charge (never postage
+// or card prices) for an existing account only. It's exported from here
+// purely so this file and create-payment-intent-basket.js share the same
+// constant instead of two copies drifting apart.
+
+import { getUserFromAuth } from './account-api.js';
+
+export const FAMILY_MEMBERSHIP_PROMO_CODE = 'FAMILY13';
+
+// A promo_codes row can also be restricted to one specific delivery
+// address (required_address1/required_postcode, both nullable) — e.g.
 // 40LFREE only applies to orders shipping to 40 Leadenhall Street. When
 // both are NULL the code has no address restriction and behaves exactly
 // as before. This is checked PER PARCEL (see promoAppliesToAddress and
@@ -21,13 +32,13 @@
 // whole order — a multi-destination basket only gets the discount on the
 // parcel(s) actually going to that address.
 
-import { getUserFromAuth } from './account-api.js';
-
 // Returns the promo's details ({ requiredAddress1, requiredPostcode,
 // requiresLogin }) if `code` matches an ACTIVE row, or null if it's
 // missing/inactive/unknown. requiredAddress1/requiredPostcode are null on
 // a code with no address restriction; requiresLogin is false unless the
-// row has requires_login set (e.g. FAMILY13).
+// row itself has requires_login set. This never covers
+// FAMILY_MEMBERSHIP_PROMO_CODE (see above) — that's checked separately in
+// handleValidatePromo, not looked up here.
 export async function getPromoDetails(code, env) {
     if (!code) return null;
     const normalized = code.toString().trim().toUpperCase();
@@ -95,9 +106,40 @@ export async function checkPromoCode(code, env) {
 export async function handleValidatePromo(request, env) {
     try {
         const { code } = await request.json();
-        const promo = await getPromoDetails(code, env);
+        const normalized = (code || '').toString().trim().toUpperCase();
 
-        // A requires_login code (e.g. FAMILY13) needs an actual verified
+        // Family13 doesn't live in promo_codes (see the comment up top),
+        // so it needs its own check here rather than going through
+        // getPromoDetails — otherwise it would just look like an unknown
+        // code and every guest AND every logged-in customer would see
+        // "Invalid Code" here, even though checkout (which re-derives
+        // this independently) would honour it for a signed-in customer.
+        if (normalized === FAMILY_MEMBERSHIP_PROMO_CODE) {
+            const user = await getUserFromAuth(request, env);
+            if (!user) {
+                return new Response(JSON.stringify({
+                    valid: false,
+                    requiresLogin: true,
+                    requiredAddress1: null,
+                    requiredPostcode: null,
+                }), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+            return new Response(JSON.stringify({
+                valid: true,
+                requiredAddress1: null,
+                requiredPostcode: null,
+            }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+
+        const promo = await getPromoDetails(normalized, env);
+
+        // A requires_login promo_codes row needs an actual verified
         // session, not just a client-side "I'm logged in" claim — same
         // trust boundary as checkPlusMembership above. A guest gets
         // requiresLogin back instead of valid/invalid either way, so the
