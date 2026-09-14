@@ -49,7 +49,7 @@ import {
     qualifiesForFreeA3TrackedDelivery,
 } from './postage.js';
 import { checkPlusMembership, getUserFromAuth, findOrCreateUserByEmail, activateOneOffMembership } from './account-api.js';
-import { getPromoDetails, promoAppliesToAddress } from './promo.js';
+import { getPromoDetails, promoAppliesToAddress, FAMILY_MEMBERSHIP_PROMO_CODE } from './promo.js';
 import { getRewardCodeDetails, getActiveWelcomeReward } from './referrals.js';
 // Reused (not reimplemented) for the Family13 free-membership path below,
 // so the fulfilment email/D1-order shape stays identical to what a paid
@@ -192,7 +192,13 @@ export async function onRequestPost(context) {
         // this same checkout.
         const hadExistingAccount = !!authedUser;
         const isClubMember = await checkPlusMembership(request, env);
-        const promoDetails = await getPromoDetails(data.promoCode, env);
+        const rawPromoDetails = await getPromoDetails(data.promoCode, env);
+        // Never trust the basket UI's own sign-in prompt as the actual
+        // gate — a guest could skip straight to this endpoint. If this
+        // code is login-gated and there's no verified session, treat it
+        // as if no code had been entered at all (no postage waived),
+        // rather than crediting the discount anyway.
+        const promoDetails = (rawPromoDetails?.requiresLogin && !hadExistingAccount) ? null : rawPromoDetails;
 
         // Family13 — a free-membership code for people we know
         // personally, not advertised anywhere on the site. Reuses the
@@ -201,7 +207,6 @@ export async function onRequestPost(context) {
         // for this one specific code separately, and only ever waives
         // the £9.99 membership charge itself below — never postage or
         // card prices.
-        const FAMILY_MEMBERSHIP_PROMO_CODE = 'FAMILY13';
         const membershipPromoEntered = (data.promoCode || '').toString().trim().toUpperCase() === FAMILY_MEMBERSHIP_PROMO_CODE;
         const familyMembershipFree = wantsMembership && membershipPromoEntered && hadExistingAccount;
 
