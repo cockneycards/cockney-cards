@@ -1,6 +1,6 @@
 // Cockney Cards — shared account/session helper.
 // Replaces the old Netlify Identity widget across every page.
-// Login itself happens on account.html (magic-link email); this script
+// Login itself happens on account.html (email + password); this script
 // just reflects logged-in/out state in the header and gates "My Orders".
 
 function ccGetSession() { return localStorage.getItem("cc_session"); }
