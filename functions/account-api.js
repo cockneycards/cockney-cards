@@ -45,10 +45,10 @@
 //                       every page load.
 //  - sessions         (token, user_id, expires_at)
 //  - magic_tokens     (token, email, expires_at, used, ref) — originally
-//                       for magic-link login (now removed in favour of
-//                       password auth); repurposed as a generic
-//                       short-lived email-verification token for password
-//                       reset (handleRequestPasswordReset/
+//                       backed the old passwordless email-link login
+//                       (removed in favour of password auth); repurposed
+//                       as a generic short-lived email-verification token
+//                       for password reset (handleRequestPasswordReset/
 //                       handleResetPassword below), `ref` just stays NULL
 //                       for those rows.
 //  - reminders        (id, user_id, occasion_name, relationship, month, day, created_at)
@@ -235,11 +235,11 @@ export async function checkPlusMembership(request, env) {
 // attach to a user id (see the users table's plus_* columns), so this
 // finds their account by the email they typed at checkout, or creates
 // one on the spot if it doesn't exist yet. Same account-creation shape
-// handleVerify() uses for a magic-link login (id, referral code), just
-// without the click-through first — completing payment is the
-// verification here instead. Never issues a session token, so the guest
-// stays "logged out" for the rest of this visit; they can log in
-// normally afterwards with this same email via the usual magic link.
+// handleSignup uses (id, referral code), just without a password set
+// yet — completing payment is the verification here instead. Never
+// issues a session token, so the guest stays "logged out" for the rest
+// of this visit; they can log in normally afterwards with this same
+// email once they set a password via account.html.
 export async function findOrCreateUserByEmail(email, env) {
     const normalizedEmail = email.trim().toLowerCase();
     const existing = await env.DB.prepare('SELECT * FROM users WHERE email = ?').bind(normalizedEmail).first();
@@ -273,9 +273,8 @@ export async function activateOneOffMembership(env, userId) {
 }
 
 // Shared by handleSignup/handleResetPassword — creates a session and
-// returns the same { ok, sessionToken, email } shape the old magic-link
-// handleVerify used to, so account.html's existing setSessionToken(...)
-// call site needs no changes.
+// returns the { ok, sessionToken, email } shape account.html's
+// setSessionToken(...) call site expects.
 async function createSessionResponse(env, user) {
     const sessionToken = uid();
     const expiresAt = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
@@ -318,8 +317,10 @@ export async function handleSignup(request, env) {
         ).bind(newId, normalizedEmail, Date.now(), referralCode, passwordHash).run();
         user = { id: newId, email: normalizedEmail, referral_code: referralCode };
 
-        // Only ever recorded for a genuinely brand-new account — see the
-        // comment this had at the old handleVerify call site.
+        // Only ever recorded for a genuinely brand-new account — an
+        // existing password-less account setting its first password
+        // (the `existing` branch above) isn't a new signup, so it
+        // shouldn't trigger a referral reward a second time.
         const refCode = (ref || '').toString().trim().toUpperCase().slice(0, 20) || null;
         const referralResult = await recordReferralIfAny(env, refCode, newId, normalizedEmail);
         if (referralResult?.rewardCode) {
@@ -370,9 +371,10 @@ export async function handleLogin(request, env) {
     return createSessionResponse(env, user);
 }
 
-// Re-uses the magic_tokens table (token/email/expires_at/used) as a
-// generic short-lived email-verification token, now for password reset
-// instead of login itself — same shape, `ref` just stays NULL here.
+// Re-uses the token table from the old passwordless-login flow
+// (token/email/expires_at/used) as a generic short-lived
+// email-verification token, now for password reset instead of login
+// itself — same shape, `ref` just stays NULL here.
 export async function handleRequestPasswordReset(request, env) {
     const { email } = await request.json();
     if (!email || !EMAIL_RE.test(email)) {
