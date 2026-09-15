@@ -115,8 +115,8 @@
 </header>
 
 <section class="gallery-section">
-    <div class="promo-banner">
-        <p>Free delivery on cards for all customers + 25% off cards and prints all year round for members of the Cockney Card Club!! — <a href="https://www.cockneycards.com/cockney-club.html">join the Cockney Cards Club</a></p>
+    <div class="promo-banner" id="promo-banner">
+        <p>Free delivery on all cards for all customers + 25% off cards all year round for members of the Cockney Card Club!!<span id="promo-banner-join"> — <a href="https://www.cockneycards.com/cockney-club.html">join the Cockney Cards Club</a></span></p>
     </div>
 
     <div class="gallery-grid">
@@ -201,7 +201,28 @@ const $ = (id) => document.getElementById(id);
 
 window.addEventListener('DOMContentLoaded', () => {
     loadPhotoGallery();
+    updatePromoBannerForMembership();
 });
+
+// Hides the "join the club" link in the promo banner for confirmed active
+// members. Nothing needed to bring it back once membership lapses — this
+// check runs fresh on every page load, so it simply stops finding
+// plusActive true and leaves the link showing again on its own.
+async function updatePromoBannerForMembership() {
+    if (typeof ccIsLoggedIn !== 'function' || !ccIsLoggedIn()) return;
+    const token = localStorage.getItem('cc_session');
+    if (!token) return;
+    try {
+        const res = await fetch('/api/account', { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) return;
+        const account = await res.json();
+        if (!account.plusActive) return;
+        const joinSpan = document.getElementById('promo-banner-join');
+        if (joinSpan) joinSpan.style.display = 'none';
+    } catch (err) {
+        console.error('Could not check membership status for promo banner:', err);
+    }
+}
 
 // Loads posts from the live Instagram feed. If there are no posts yet (or
 // the request fails), the section is simply left empty rather than showing
