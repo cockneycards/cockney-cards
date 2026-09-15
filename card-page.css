@@ -1,0 +1,35 @@
+:root { --dark:#1e1e24; --muted:#666; --border:#e5e5e5; --accent:#1a1a1a; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:'Helvetica Neue',Arial,sans-serif; color:var(--dark); background:#fff; }
+a { color:inherit; }
+.site-header { border-bottom:1px solid var(--border); padding:18px 30px 14px; text-align:center; }
+.logo img { width:120px; height:auto; }
+.site-header nav { margin-top:14px; display:flex; justify-content:center; gap:28px; flex-wrap:wrap; }
+.site-header nav a { text-decoration:none; font-size:13px; letter-spacing:.5px; }
+.product-page { max-width:1180px; margin:0 auto; padding:28px 30px 70px; }
+.breadcrumbs { display:flex; gap:9px; flex-wrap:wrap; font-size:12px; color:#888; margin-bottom:30px; }
+.breadcrumbs a { color:#666; }
+.product-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(340px,460px); gap:70px; align-items:start; }
+.product-image-panel { border:1px solid var(--border); background:#fafafa; padding:20px; text-align:center; }
+.product-image { display:block; width:100%; max-width:620px; height:auto; margin:0 auto; }
+.product-details { padding-top:10px; }
+.eyebrow { text-transform:uppercase; letter-spacing:2px; font-size:11px; color:#888; margin:0 0 10px; }
+h1 { font-size:36px; line-height:1.15; font-weight:400; margin:0 0 14px; }
+.price { font-size:20px; font-weight:700; margin:0 0 22px; }
+.description { color:#555; line-height:1.7; font-size:15px; }
+.personalise-button { display:block; background:#1a1a1a; color:#fff; text-align:center; text-decoration:none; padding:16px 20px; margin:28px 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:1px; }
+.personalise-button:hover { background:#444; }
+.personalise-note { color:#777; font-size:12px; line-height:1.5; margin-bottom:28px; }
+.details-box { border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:18px 0; color:#666; font-size:13px; line-height:1.6; }
+.details-box p { margin:5px 0; }
+.seo-copy { max-width:820px; margin:70px auto 0; padding-top:35px; border-top:1px solid var(--border); }
+.seo-copy h2 { font-size:24px; font-weight:400; }
+.seo-copy p { color:#555; line-height:1.7; font-size:14px; }
+.site-footer { border-top:1px solid var(--border); text-align:center; padding:25px; color:#888; font-size:11px; }
+@media (max-width:800px) {
+  .site-header { padding-left:18px; padding-right:18px; }
+  .product-page { padding:20px 18px 55px; }
+  .product-layout { grid-template-columns:1fr; gap:35px; }
+  h1 { font-size:29px; }
+  .product-details { padding-top:0; }
+}
