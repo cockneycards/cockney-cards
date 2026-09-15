@@ -150,9 +150,10 @@ function unitCount(items, kind) {
         .reduce((sum, item) => sum + (item.quantity || 1), 0);
 }
 
-// 3 or more cards, and nothing but cards, going to the same address.
+// Any number of cards (1+), and nothing but cards, going to the same
+// address — cards always ship free now, regardless of quantity.
 export function qualifiesForFreeCardDelivery(items) {
-    return items.length > 0 && items.every((item) => item.kind === 'card') && unitCount(items, 'card') >= 3;
+    return items.length > 0 && items.every((item) => item.kind === 'card');
 }
 
 // 2 or more prints, all the SAME size, and nothing but prints, going to
@@ -228,11 +229,12 @@ export function qualifiesForFreeA3TrackedDelivery(items) {
 
 // Which shipping SERVICES a given promo waives — not every promo waives
 // every service:
-//   - 3+ cards (qualifiesForFreeCardDelivery) and the 3+ cards/A5-prints
-//     mix (qualifiesForFreeDelivery, e.g. 2 cards + 1 A5 print) are
-//     First Class only. Tracked24 and Tracked24 (signed) are never free
-//     under these two — a customer who upgrades to tracked shipping
-//     pays the normal rate for it even though their order qualifies.
+//   - Any cards-only order (qualifiesForFreeCardDelivery) and the 3+
+//     cards/A5-prints mix (qualifiesForFreeDelivery, e.g. 2 cards + 1 A5
+//     print) are First Class only. Tracked24 and Tracked24 (signed) are
+//     never free under these two — a customer who upgrades to tracked
+//     shipping pays the normal rate for it even though their order
+//     qualifies.
 //   - 2+ same-size prints (qualifiesForFreePrintDelivery) waives First
 //     Class AND Tracked24 (photo), but NOT Tracked24 (signed) — the
 //     signature add-on always costs on this promo.
@@ -360,7 +362,7 @@ export function appendShippingOption(params, amountPence, { free = false } = {})
 // 0, 1, 2… — that's what this does.
 //
 // Freeness is now decided PER SERVICE via freeMethodsForItems, not as an
-// all-or-nothing flag: a 3+ cards order shows free First Class alongside
+// all-or-nothing flag: a cards-only order shows free First Class alongside
 // paid Tracked24/Tracked24 signed upgrades; a 2+ same-size prints order
 // shows free First Class and free Tracked24, with only Tracked24 signed
 // still paid; Cockney Cards Club members and the large-print+card bundle
