@@ -342,7 +342,7 @@ export async function onRequestPost(context) {
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
             let postageName;
             if (postageWaived && qualifiesCardDelivery) {
-                postageName = `Free Postage (3+ cards to this address)${parcelLabel}`;
+                postageName = `Free Postage (cards)${parcelLabel}`;
             } else if (postageWaived && qualifiesPrintDelivery) {
                 postageName = `Free Postage (2+ same-size prints to this address)${parcelLabel}`;
             } else if (postageWaived && qualifiesLargePrintDelivery) {
