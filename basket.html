@@ -468,7 +468,7 @@ function methodsForDestination(groupItems) {
 
 // Which shipping SERVICES a promo waives — mirrors functions/postage.js's
 // freeMethodsForItems exactly (see that file for the full reasoning):
-// the 3+ cards and cards+A5-prints promos, and a valid all-cards promo
+// the all-cards and cards+A5-prints promos, and a valid all-cards promo
 // code, only ever waive First Class; the 2+ same-size prints promo also
 // waives Tracked24 (photo), but never Tracked24 (signed); 2+ A3 prints
 // on their own (no companion needed) waives BOTH Tracked24 services; the
@@ -619,7 +619,7 @@ function estimatePostage(items, { isPromoValid = false, promoRequiredAddress1 = 
             .reduce((sum, i) => sum + (i.quantity || 1), 0);
         const hasCompanionItemInGroup = cardUnitsInGroup >= 1 || printItemsInGroup.some((i) => i.size === 'A4' || i.size === 'A5');
 
-        const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 3;
+        const qualifiesForFreeCardDelivery = allCardsInGroup && cardUnitsInGroup >= 1;
         const qualifiesForFreePrintDelivery = allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2;
         // 3+ combined units of cards + A5 prints, mixed is fine (e.g. 2
         // cards + 1 A5 print, or 1 card + 2 A5 prints) — as long as
@@ -665,7 +665,7 @@ function estimatePostage(items, { isPromoValid = false, promoRequiredAddress1 = 
         totalPence += amountPence;
 
         let label;
-        if (methodIsFree && qualifiesForFreeCardDelivery) label = `Free Postage — 3+ cards, same address`;
+        if (methodIsFree && qualifiesForFreeCardDelivery) label = `Free Postage — cards`;
         else if (methodIsFree && qualifiesForFreePrintDelivery) label = `Free Postage — 2+ same-size prints, same address`;
         else if (methodIsFree && qualifiesForFreeEnvelopeDelivery) label = `Free Postage — cards + A5 prints, same address`;
         else if (methodIsFree && qualifiesForFreeLargePrintDelivery) label = `Free Postage — 2+ A4/A3 prints + a card, same address`;
@@ -738,20 +738,17 @@ function basketFreeDeliveryNudge(items) {
             .reduce((sum, i) => sum + (i.quantity || 1), 0);
 
         const alreadyFree =
-            (allCardsInGroup && cardUnitsInGroup >= 3) ||
+            (allCardsInGroup && cardUnitsInGroup >= 1) ||
             (allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup >= 2) ||
             (!hasNonA5PrintInGroup && (cardUnitsInGroup + a5PrintUnitsInGroup) >= 3) ||
             (cardUnitsInGroup >= 1 && largePrintUnitsInGroup >= 2);
         if (alreadyFree) continue;
 
         // Lower priority = cheaper to add = wins when more than one nudge
-        // applies to the same group. Cards are the cheapest add, then A5
-        // prints, then A4/A3 prints.
+        // applies to the same group. A5 prints are the cheapest add now
+        // that cards-only groups are always free (so no nudge needed for
+        // those), then A4/A3 prints.
         const candidates = [];
-        if (allCardsInGroup && cardUnitsInGroup >= 1 && cardUnitsInGroup < 3) {
-            const needed = 3 - cardUnitsInGroup;
-            candidates.push({ priority: 0, message: `Add ${needed} more card${needed > 1 ? 's' : ''} to the same address for free delivery!` });
-        }
         if (allPrintsInGroup && printSizesInGroup.size === 1 && !printSizesInGroup.has(null) && printUnitsInGroup === 1) {
             const size = [...printSizesInGroup][0];
             candidates.push({ priority: size === 'A5' ? 1 : size === 'A4' ? 2 : 3, message: `Add 1 more ${size} print to the same address for free delivery!` });
