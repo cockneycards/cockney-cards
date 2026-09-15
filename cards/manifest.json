@@ -1,0 +1,288 @@
+{
+  "generatedAt": "2026-09-15T16:02:57.630Z",
+  "pageCount": 47,
+  "pages": [
+    {
+      "key": "all",
+      "label": "All Cards",
+      "url": "/all-cards/",
+      "cards": 200
+    },
+    {
+      "key": "photo-upload",
+      "label": "Photo Upload Cards",
+      "url": "/photo-upload-cards/",
+      "cards": 17
+    },
+    {
+      "key": "birthdays",
+      "label": "Birthday Cards",
+      "url": "/birthday-cards/",
+      "cards": 78
+    },
+    {
+      "key": "mum",
+      "label": "Mum",
+      "url": "/birthday-cards/mum/",
+      "cards": 6
+    },
+    {
+      "key": "dad",
+      "label": "Dad",
+      "url": "/birthday-cards/dad/",
+      "cards": 3
+    },
+    {
+      "key": "nan",
+      "label": "Nan",
+      "url": "/birthday-cards/nan/",
+      "cards": 4
+    },
+    {
+      "key": "grandad",
+      "label": "Grandad",
+      "url": "/birthday-cards/grandad/",
+      "cards": 7
+    },
+    {
+      "key": "children",
+      "label": "Kids",
+      "url": "/birthday-cards/kids/",
+      "cards": 15
+    },
+    {
+      "key": "newbaby",
+      "label": "New Baby",
+      "url": "/new-baby-cards/",
+      "cards": 8
+    },
+    {
+      "key": "weddings-engagements",
+      "label": "Wedding & Engagement Cards",
+      "url": "/wedding-engagement-cards/",
+      "cards": 10
+    },
+    {
+      "key": "home",
+      "label": "New Home Cards",
+      "url": "/new-home-cards/",
+      "cards": 12
+    },
+    {
+      "key": "school-cards",
+      "label": "School Cards",
+      "url": "/school-cards/",
+      "cards": 10
+    },
+    {
+      "key": "work-related",
+      "label": "Work Related Cards",
+      "url": "/work-cards/",
+      "cards": 3
+    },
+    {
+      "key": "achievements",
+      "label": "Personal Achievement Cards",
+      "url": "/achievement-cards/",
+      "cards": 11
+    },
+    {
+      "key": "tv-movies",
+      "label": "TV / Movie Cards",
+      "url": "/tv-movie-cards/",
+      "cards": 10
+    },
+    {
+      "key": "christmas",
+      "label": "Christmas",
+      "url": "/christmas-cards/",
+      "cards": 3
+    },
+    {
+      "key": "sports",
+      "label": "Sports",
+      "url": "/sports-cards/",
+      "cards": 66
+    },
+    {
+      "key": "football",
+      "label": "Football",
+      "url": "/football-cards/",
+      "cards": 30
+    },
+    {
+      "key": "premiership",
+      "label": "Premiership",
+      "url": "/football-cards/premiership/",
+      "cards": 8
+    },
+    {
+      "key": "arsenal",
+      "label": "Arsenal",
+      "url": "/football-cards/premiership/arsenal/",
+      "cards": 3
+    },
+    {
+      "key": "chelsea",
+      "label": "Chelsea",
+      "url": "/football-cards/premiership/chelsea/",
+      "cards": 3
+    },
+    {
+      "key": "liverpool",
+      "label": "Liverpool",
+      "url": "/football-cards/premiership/liverpool/",
+      "cards": 1
+    },
+    {
+      "key": "tottenham",
+      "label": "Tottenham",
+      "url": "/football-cards/premiership/tottenham/",
+      "cards": 1
+    },
+    {
+      "key": "championship",
+      "label": "Championship",
+      "url": "/football-cards/championship/",
+      "cards": 12
+    },
+    {
+      "key": "cardiff",
+      "label": "Cardiff City",
+      "url": "/football-cards/championship/cardiff-city/",
+      "cards": 1
+    },
+    {
+      "key": "charlton",
+      "label": "Charlton Athletic",
+      "url": "/football-cards/championship/charlton-athletic/",
+      "cards": 1
+    },
+    {
+      "key": "middlesbrough",
+      "label": "Middlesbrough",
+      "url": "/football-cards/championship/middlesbrough/",
+      "cards": 1
+    },
+    {
+      "key": "millwall",
+      "label": "Millwall",
+      "url": "/football-cards/championship/millwall/",
+      "cards": 5
+    },
+    {
+      "key": "norwich",
+      "label": "Norwich City",
+      "url": "/football-cards/championship/norwich-city/",
+      "cards": 1
+    },
+    {
+      "key": "qpr",
+      "label": "Queens Park Rangers",
+      "url": "/football-cards/championship/queens-park-rangers/",
+      "cards": 1
+    },
+    {
+      "key": "west-ham",
+      "label": "West Ham",
+      "url": "/football-cards/championship/west-ham/",
+      "cards": 1
+    },
+    {
+      "key": "wrexham",
+      "label": "Wrexham",
+      "url": "/football-cards/championship/wrexham/",
+      "cards": 1
+    },
+    {
+      "key": "wsl",
+      "label": "WSL / WSL2",
+      "url": "/football-cards/wsl-wsl2/",
+      "cards": 10
+    },
+    {
+      "key": "arsenalw",
+      "label": "Arsenal",
+      "url": "/football-cards/wsl-wsl2/arsenal/",
+      "cards": 2
+    },
+    {
+      "key": "brightonw",
+      "label": "Brighton",
+      "url": "/football-cards/wsl-wsl2/brighton/",
+      "cards": 1
+    },
+    {
+      "key": "liverpoolw",
+      "label": "Liverpool",
+      "url": "/football-cards/wsl-wsl2/liverpool/",
+      "cards": 1
+    },
+    {
+      "key": "london-cityw",
+      "label": "London City Lionesses",
+      "url": "/football-cards/wsl-wsl2/london-city-lionesses/",
+      "cards": 1
+    },
+    {
+      "key": "man-cityw",
+      "label": "Manchester City",
+      "url": "/football-cards/wsl-wsl2/manchester-city/",
+      "cards": 1
+    },
+    {
+      "key": "man-utdw",
+      "label": "Manchester United",
+      "url": "/football-cards/wsl-wsl2/manchester-united/",
+      "cards": 1
+    },
+    {
+      "key": "tottenhamw",
+      "label": "Tottenham",
+      "url": "/football-cards/wsl-wsl2/tottenham/",
+      "cards": 1
+    },
+    {
+      "key": "westhamw",
+      "label": "West Ham",
+      "url": "/football-cards/wsl-wsl2/west-ham/",
+      "cards": 1
+    },
+    {
+      "key": "golf",
+      "label": "Golf",
+      "url": "/sports-cards/golf/",
+      "cards": 4
+    },
+    {
+      "key": "cricket",
+      "label": "Cricket",
+      "url": "/sports-cards/cricket/",
+      "cards": 2
+    },
+    {
+      "key": "formula1",
+      "label": "Formula 1",
+      "url": "/sports-cards/formula-1/",
+      "cards": 10
+    },
+    {
+      "key": "netball",
+      "label": "Netball",
+      "url": "/sports-cards/netball/",
+      "cards": 12
+    },
+    {
+      "key": "darts",
+      "label": "Darts",
+      "url": "/sports-cards/darts/",
+      "cards": 3
+    },
+    {
+      "key": "horseracing",
+      "label": "Horse Racing",
+      "url": "/sports-cards/horse-racing/",
+      "cards": 2
+    }
+  ]
+}
