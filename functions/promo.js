@@ -24,19 +24,31 @@ import { getUserFromAuth } from './account-api.js';
 export const FAMILY_MEMBERSHIP_PROMO_CODE = 'FAMILY13';
 
 // A promo_codes row can also be restricted to one specific delivery
-// address (required_address1/required_postcode, both nullable) — e.g.
-// 40LFREE only applies to orders shipping to 40 Leadenhall Street. When
-// both are NULL the code has no address restriction and behaves exactly
-// as before. This is checked PER PARCEL (see promoAppliesToAddress and
-// its call site in create-payment-intent-basket.js), not once for the
-// whole order — a multi-destination basket only gets the discount on the
+// address (required_address1/required_postcode, both nullable) — e.g. a
+// code that only applies to orders shipping to one particular address.
+// When both are NULL the code has no address restriction and behaves
+// exactly as before. This is checked PER PARCEL (see promoAppliesToAddress
+// and its call site in create-payment-intent-basket.js), not once for the
+// whole order — a multi-destination basket only gets the benefit on the
 // parcel(s) actually going to that address.
 
+// A promo_codes row can ALSO carry a discount_percent (nullable INTEGER,
+// e.g. 15 for COCKNEY15) instead of/as well as being an address
+// restriction. When set, create-payment-intent-basket.js takes that % off
+// cards+prints for any parcel the code applies to, rather than (not in
+// addition to) waiving First Class postage — see promoWaivesThisMethod
+// there, which is deliberately gated off for any code with a
+// discount_percent set, so a single code never grants both a price
+// discount AND free postage. A percent-off code also does not stack with
+// the Cockney Cards Club 25% discount — the customer gets whichever is
+// bigger, never both combined (see discountRate there).
+
 // Returns the promo's details ({ requiredAddress1, requiredPostcode,
-// requiresLogin }) if `code` matches an ACTIVE row, or null if it's
-// missing/inactive/unknown. requiredAddress1/requiredPostcode are null on
-// a code with no address restriction; requiresLogin is false unless the
-// row itself has requires_login set. This never covers
+// requiresLogin, discountPercent }) if `code` matches an ACTIVE row, or
+// null if it's missing/inactive/unknown. requiredAddress1/requiredPostcode
+// are null on a code with no address restriction; requiresLogin is false
+// unless the row itself has requires_login set; discountPercent is null
+// unless the row has one set. This never covers
 // FAMILY_MEMBERSHIP_PROMO_CODE (see above) — that's checked separately in
 // handleValidatePromo, not looked up here.
 export async function getPromoDetails(code, env) {
@@ -46,13 +58,14 @@ export async function getPromoDetails(code, env) {
 
     try {
         const row = await env.DB.prepare(
-            'SELECT active, required_address1, required_postcode, requires_login FROM promo_codes WHERE code = ?'
+            'SELECT active, required_address1, required_postcode, requires_login, discount_percent FROM promo_codes WHERE code = ?'
         ).bind(normalized).first();
         if (!row || !row.active) return null;
         return {
             requiredAddress1: row.required_address1 || null,
             requiredPostcode: row.required_postcode || null,
             requiresLogin: !!row.requires_login,
+            discountPercent: row.discount_percent || null,
         };
     } catch (err) {
         // A broken lookup should never block checkout — just means the
@@ -102,7 +115,11 @@ export async function checkPromoCode(code, env) {
 // this is purely for earlier feedback, not a security boundary. Also
 // returns requiredAddress1/requiredPostcode (safe to expose — a business
 // address, not sensitive) so the basket can show an accurate message and
-// preview the right postage line for an address-restricted code.
+// preview the right postage line for an address-restricted code, and
+// discountPercent (also safe to expose) for a percent-off code — the
+// basket doesn't currently show a price preview for this (see
+// displayUnitPrice's comment in basket.html: promo discounts are
+// checkout-only), but it's returned here for consistency/future use.
 export async function handleValidatePromo(request, env) {
     try {
         const { code } = await request.json();
@@ -164,6 +181,7 @@ export async function handleValidatePromo(request, env) {
             valid: !!promo,
             requiredAddress1: promo?.requiredAddress1 || null,
             requiredPostcode: promo?.requiredPostcode || null,
+            discountPercent: promo?.discountPercent || null,
         }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
