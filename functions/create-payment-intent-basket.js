@@ -273,7 +273,6 @@ export async function onRequestPost(context) {
 
         for (const groupItems of groups.values()) {
             parcelNumber++;
-            const discountRate = membershipActive ? 0.25 : 0;
 
             // This parcel's own delivery address — needed to check an
             // address-restricted promo code (see promo.js) per parcel,
@@ -284,6 +283,20 @@ export async function onRequestPost(context) {
             const groupAddress = wantsRecipientAddress ? firstItem.delivery.recipient : selfAddress;
             const promoAppliesToThisParcel = promoAppliesToAddress(promoDetails, groupAddress);
 
+            // Club membership takes 25% off cards+prints; a percent-off
+            // promo code (e.g. COCKNEY15, see promo.js) takes its own %
+            // off the same items, for whichever parcel(s) the code
+            // applies to. These are deliberately NOT combined — a
+            // customer gets whichever discount is bigger, never both
+            // stacked together, so a promo code can never be used to beat
+            // the Club price.
+            const clubDiscountRate = membershipActive ? 0.25 : 0;
+            const promoDiscountRate = (promoAppliesToThisParcel && promoDetails?.discountPercent)
+                ? promoDetails.discountPercent / 100
+                : 0;
+            const discountRate = Math.max(clubDiscountRate, promoDiscountRate);
+            const discountLabel = promoDiscountRate > clubDiscountRate ? 'Promo Code discount' : 'Club discount';
+
             groupItems.forEach((item) => {
                 const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
                 let unitAmount = hasPrice ? Math.round(item.priceValue * 100) : 999; // £9.99 fallback
@@ -291,7 +304,7 @@ export async function onRequestPost(context) {
 
                 if ((item.kind === 'card' || item.kind === 'print') && discountRate > 0 && hasPrice) {
                     unitAmount = Math.round(unitAmount * (1 - discountRate));
-                    name = `${item.title} (${Math.round(discountRate * 100)}% Club discount)`;
+                    name = `${item.title} (${Math.round(discountRate * 100)}% ${discountLabel})`;
                 }
 
                 if (!rewardApplied && rewardIsUsable && item.kind === 'card' && hasPrice) {
@@ -336,7 +349,10 @@ export async function onRequestPost(context) {
             // The promo-code waiver is cards-only and, like the quantity
             // promos above, only ever covers First Class — a customer who
             // upgrades to a tracked service still pays for that upgrade.
-            const promoWaivesThisMethod = allCardsInGroup && promoAppliesToThisParcel && chosenMethod === POSTAGE_METHODS.FIRST_CLASS;
+            // Gated off for a percent-off code (discount_percent set) —
+            // that type of code gives its % off cards+prints instead (see
+            // discountRate above), never free postage on top of it.
+            const promoWaivesThisMethod = allCardsInGroup && promoAppliesToThisParcel && chosenMethod === POSTAGE_METHODS.FIRST_CLASS && !promoDetails?.discountPercent;
             const postageWaived = freeMethods.has(chosenMethod) || promoWaivesThisMethod;
             const postageAmount = postageWaived ? 0 : postageAmountForMethod(groupItems, chosenMethod);
             const parcelLabel = groups.size > 1 ? ` (parcel ${parcelNumber} of ${groups.size})` : '';
