@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# The personaliser and basket are tools, not content — they have no
+# unique title/description per product and would only create thin,
+# duplicate pages in the index. The real, crawlable version of every
+# card now lives under /cards/, which is what should get indexed and
+# ranked instead.
+Disallow: /editor.html
+Disallow: /basket.html
+
+Sitemap: https://www.cockneycards.com/sitemap.xml
