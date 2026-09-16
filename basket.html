@@ -247,6 +247,12 @@ let promoLoginRequired = false;
 // the free-postage preview only applies to a parcel actually going there.
 let promoRequiredAddress1 = null;
 let promoRequiredPostcode = null;
+// Set when the applied code is a percent-off code (e.g. COCKNEY15 — see
+// promo.js's promo_codes.discount_percent) rather than a free-postage
+// code — null for a code with no discount_percent set. Drives the price
+// preview in displayUnitPrice/itemDiscountRate below, mirroring
+// create-payment-intent-basket.js's discountRate.
+let promoDiscountPercent = null;
 
 // Cockney Cards Club membership — fetched from GET /api/account (needs
 // the logged-in session token; see auth.js) so the basket can show the
@@ -690,19 +696,36 @@ function estimatePostage(items, { isPromoValid = false, promoRequiredAddress1 = 
     return { parcels, totalPence };
 }
 
-// Returns this line's per-unit price with the Club discount applied if
-// it qualifies — 25% off cards and prints, matching
-// create-payment-intent-basket.js ((item.kind === 'card' || item.kind
-// === 'print') && discountRate > 0; reward/promo discounts aren't
-// factored in here, those are checkout-only). Returns null if this item
-// has no usable price (matches the server's own hasPrice check, so a
-// missing price shows as missing here too rather than silently becoming
-// £0).
+// Returns { rate, label } — the best applicable discount for this line:
+// the Cockney Cards Club 25% off cards+prints, or (if bigger, and this
+// item's own delivery address qualifies — see promoAppliesToAddress) a
+// percent-off promo code like COCKNEY15. Mirrors
+// create-payment-intent-basket.js's discountRate, which takes the bigger
+// of the two per parcel rather than stacking them — never both applied
+// together. { rate: 0, label: null } for a non-card/print item, or when
+// neither discount applies. Reward/referral discounts still aren't
+// factored in here, those remain checkout-only.
+function itemDiscountRate(item) {
+    if (item.kind !== 'card' && item.kind !== 'print') return { rate: 0, label: null };
+
+    const clubRate = clubDiscountActive ? 0.25 : 0;
+    const itemAddress = (item.delivery?.type === 'recipient' && item.delivery?.recipient) ? item.delivery.recipient : getChosenSelfAddress();
+    const promoAppliesToThisItem = promoIsValid && promoAppliesToAddress(promoRequiredAddress1, promoRequiredPostcode, itemAddress);
+    const promoRate = (promoAppliesToThisItem && promoDiscountPercent) ? promoDiscountPercent / 100 : 0;
+
+    if (promoRate > clubRate) return { rate: promoRate, label: 'Promo price' };
+    if (clubRate > 0) return { rate: clubRate, label: 'Club price' };
+    return { rate: 0, label: null };
+}
+
+// Returns this line's per-unit price with whichever discount applies (see
+// itemDiscountRate above). Returns null if this item has no usable price
+// (matches the server's own hasPrice check, so a missing price shows as
+// missing here too rather than silently becoming £0).
 function displayUnitPrice(item) {
     const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
     if (!hasPrice) return null;
-    if ((item.kind === 'card' || item.kind === 'print') && clubDiscountActive) return item.priceValue * 0.75;
-    return item.priceValue;
+    return item.priceValue * (1 - itemDiscountRate(item).rate);
 }
 
 function basketSubtotal(items) {
@@ -912,7 +935,7 @@ function renderBasket() {
 
     const rawSubtotal = ccCart.getCartTotal();
     const subtotal = basketSubtotal(items);
-    const clubSavings = rawSubtotal - subtotal;
+    const discountSavings = rawSubtotal - subtotal;
     const count = ccCart.getCartCount();
     // Club membership isn't a physical parcel — it never affects postage
     // tiers/grouping or the free-delivery promos, so it's excluded from
@@ -965,8 +988,19 @@ function renderBasket() {
         `;
     }).join('');
 
-    const clubSavingsRowHtml = clubSavings > 0.001
-        ? `<div class="summary-row" style="color:#1a7a3c;"><span>Cockney Cards Club discount (25% off cards & prints)</span><span>−${ccCart.formatGBP(clubSavings)}</span></div>`
+    // Labels the combined savings row by whichever discount is bigger
+    // overall — matches itemDiscountRate's per-item choice for the
+    // common case (an unrestricted promo code, or a uniform-address
+    // basket). A mixed basket where only some parcels qualify for an
+    // address-restricted promo still shows this one blended savings
+    // figure rather than breaking it out per item.
+    const clubRateForLabel = clubDiscountActive ? 0.25 : 0;
+    const promoRateForLabel = (promoIsValid && promoDiscountPercent) ? promoDiscountPercent / 100 : 0;
+    const discountSavingsLabel = promoRateForLabel > clubRateForLabel
+        ? `Promo code discount (${promoDiscountPercent}% off cards & prints)`
+        : `Cockney Cards Club discount (25% off cards & prints)`;
+    const clubSavingsRowHtml = discountSavings > 0.001
+        ? `<div class="summary-row" style="color:#1a7a3c;"><span>${discountSavingsLabel}</span><span>−${ccCart.formatGBP(discountSavings)}</span></div>`
         : '';
 
     const freeDeliveryNudgeHtml = freeDeliveryNudge
@@ -1103,9 +1137,10 @@ function renderItem(item) {
     }
 
     const hasPrice = typeof item.priceValue === 'number' && item.priceValue > 0;
-    const isDiscountedItem = (item.kind === 'card' || item.kind === 'print') && clubDiscountActive && hasPrice;
+    const { rate: itemRate, label: itemDiscountLabel } = itemDiscountRate(item);
+    const isDiscountedItem = hasPrice && itemRate > 0;
     const priceHtml = isDiscountedItem
-        ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * 0.75)} <span style="color:#1a7a3c; font-weight:normal;">(Club price)</span>`
+        ? `<span style="text-decoration:line-through; color:#999; margin-right:6px; font-weight:normal;">${ccCart.formatGBP(item.priceValue)}</span>${ccCart.formatGBP(item.priceValue * (1 - itemRate))} <span style="color:#1a7a3c; font-weight:normal;">(${itemDiscountLabel})</span>`
         : (item.price || ccCart.formatGBP(item.priceValue));
 
     // previewFront/previewInside are fetched on demand from IndexedDB when
@@ -1417,6 +1452,7 @@ async function applyPromoCode() {
         promoIsValid = false;
         promoRequiredAddress1 = null;
         promoRequiredPostcode = null;
+        promoDiscountPercent = null;
         promoFeedbackText = 'Enter a code first.';
         promoFeedbackColor = '#c0392b';
         renderBasket();
@@ -1450,16 +1486,19 @@ async function applyPromoCode() {
             promoIsValid = false;
             promoRequiredAddress1 = null;
             promoRequiredPostcode = null;
+            promoDiscountPercent = null;
             promoFeedbackText = '';
             promoFeedbackColor = '#c0392b';
             promoLoginRequired = true;
         } else {
             // Drives the postage estimate above (a valid promo waives postage
-            // for an all-card destination) — re-render so that updates
+            // for an all-card destination) and, for a percent-off code, the
+            // price preview via itemDiscountRate — re-render so both update
             // immediately, without waiting for checkout.
             promoIsValid = !!result.valid;
             promoRequiredAddress1 = result.requiredAddress1 || null;
             promoRequiredPostcode = result.requiredPostcode || null;
+            promoDiscountPercent = result.discountPercent || null;
             if (promoIsValid && (promoRequiredAddress1 || promoRequiredPostcode)) {
                 // This is a best-effort heads-up, not a guarantee either way —
                 // a "self" address might not be chosen yet, and a
@@ -1470,6 +1509,8 @@ async function applyPromoCode() {
                 promoFeedbackText = matchesKnownAddress
                     ? `✓ Code Accepted — free delivery to ${promoRequiredAddress1 || 'the qualifying address'}`
                     : `✓ Code Accepted — but only applies to orders delivered to ${promoRequiredAddress1 || 'the qualifying address'}${promoRequiredPostcode ? ', ' + promoRequiredPostcode : ''}`;
+            } else if (promoIsValid && promoDiscountPercent) {
+                promoFeedbackText = `✓ Code Accepted — ${promoDiscountPercent}% off cards & prints`;
             } else {
                 promoFeedbackText = promoIsValid ? '✓ Code Accepted' : '✗ Invalid Code';
             }
@@ -1479,6 +1520,7 @@ async function applyPromoCode() {
         promoIsValid = false;
         promoRequiredAddress1 = null;
         promoRequiredPostcode = null;
+        promoDiscountPercent = null;
         promoFeedbackText = 'Could not check code — try again.';
         promoFeedbackColor = '#c0392b';
     }
