@@ -229,7 +229,11 @@ const PRODUCTS = Object.entries(PRINT_CATALOGUE)
         return {
             id, title: c.title, price: c.price,
             priceValue: c.priceValue,
-            image: CLOUD_BASE + (c.preview || c.full), categories: c.categories
+            image: CLOUD_BASE + (c.preview || c.full), categories: c.categories,
+            // A print only has something to personalise if it defines at
+            // least one of these fields (see prints-data.js) -- otherwise
+            // it's artwork-only and the shop button should say "Buy It Now".
+            personalisable: !!(c.name || c.age || c.name2 || c.age2 || c.extraFields)
         };
     });
 const $ = (id) => document.getElementById(id);
@@ -382,7 +386,7 @@ function renderGrid(productsToRender) {
                     <p class="product-price">from ${p.price}</p>
                 </div>
             </a>
-            <a class="btn-action" href="editor-prints.html?print=${p.id}" onclick="saveShopState()">Personalise</a>
+            <a class="btn-action" href="editor-prints.html?print=${p.id}" onclick="saveShopState()">${p.personalisable ? 'Personalise' : 'Buy It Now'}</a>
         </div>
     `).join('');
 }
