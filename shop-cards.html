@@ -691,17 +691,21 @@ function renderView() {
     $('breadcrumb').innerHTML = renderBreadcrumb();
 }
 
-// Matches a search term against each card/print's title and its category
-// slugs (e.g. "football", "grandad", "millwall") -- case-insensitive
-// substring match, so "grandad" finds every grandad card and "millwall"
-// finds the Millwall-tagged ones even though that word never appears in a
-// title. Searches cards and prints together so a search for e.g. "oasis"
-// can surface a print even from the cards shop page.
+// Matches a search term against each card/print's title (via
+// cardTitleMatchesSearch, from cards-data.js -- this also expands common
+// alternate terms/abbreviations through SEARCH_SYNONYMS, so e.g. "only
+// fools and horses" still finds cards titled "OFAH, You Plonker!!") and
+// against its category slugs (e.g. "football", "grandad", "millwall") --
+// case-insensitive substring match, so "grandad" finds every grandad card
+// and "millwall" finds the Millwall-tagged ones even though that word
+// never appears in a title. Searches cards and prints together so a
+// search for e.g. "oasis" can surface a print even from the cards shop
+// page.
 function searchProducts(term) {
     const q = term.trim().toLowerCase();
     if (!q) return PRODUCTS;
     return [...PRODUCTS, ...PRINT_PRODUCTS].filter((p) =>
-        p.title.toLowerCase().includes(q) ||
+        cardTitleMatchesSearch(p.title, q) ||
         p.categories.some((c) => c.toLowerCase().includes(q))
     );
 }
