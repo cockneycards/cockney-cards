@@ -5,6 +5,32 @@
 window.CLOUD_BASE = window.CLOUD_BASE || "https://images.cockneycards.com/";
 const DEFAULT_PRICE = "£3.99";
 
+// ---- Search synonyms ----
+// Some card titles use an abbreviation or nickname (e.g. "OFAH, You
+// Plonker!!" for Only Fools and Horses) that a customer searching the shop
+// is unlikely to type. Each entry maps a phrase a customer might search
+// for to a word that actually appears in the matching card title(s) --
+// shop-cards.html's search should check both the raw query AND, if the
+// query contains (or is contained in) one of these phrases, the mapped
+// term, against each card's title. Add to this list whenever a new card
+// title uses an abbreviation/slang a customer wouldn't search for.
+const SEARCH_SYNONYMS = {
+    "only fools and horses": "ofah",
+};
+
+// Case-insensitive check for whether `title` matches a raw search `query`,
+// expanding `query` through SEARCH_SYNONYMS first so e.g. "only fools and
+// horses" also matches a title containing "OFAH".
+function cardTitleMatchesSearch(title, query) {
+    const q = (query || "").trim().toLowerCase();
+    if (!q) return true;
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes(q)) return true;
+    return Object.entries(SEARCH_SYNONYMS).some(([phrase, alias]) =>
+        (q.includes(phrase) || phrase.includes(q)) && titleLower.includes(alias)
+    );
+}
+
 // CATEGORIES now lives in categories-data.js — shared with prints-data.js
 // / shop-prints.html so both catalogues use the same tree (and stay in
 // sync when a team or league gets added). Make sure categories-data.js
