@@ -14,11 +14,22 @@
     body { font-family: var(--font-family); margin: 0; padding: 0; background-color: #fcfcfc; color: var(--dark); }
 
     header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
-    .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
-    .logo-container { text-align: center; }
+    .header-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; max-width: 1400px; margin: 0 auto; }
+    .header-left { justify-self: end; padding-right: 20px; }
+    .logo-container { justify-self: center; text-align: center; }
     .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
-    .header-right { display: flex; align-items: center; gap: 20px; }
+    .header-right { justify-self: start; padding-left: 20px; display: flex; align-items: center; gap: 20px; }
     .cart-icon { position: relative; cursor: pointer; }
+
+    /* SEARCH BOX */
+    .search-form { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 6px 4px 14px; background: white; transition: border-color 0.2s; }
+    .search-form:focus-within { border-color: #999; }
+    .search-form input[type="search"] { border: none; outline: none; font-family: var(--font-family); font-size: 13px; color: #111; width: 160px; background: transparent; }
+    .search-form input[type="search"]::placeholder { color: #999; }
+    .search-form input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
+    .search-form button { background: none; border: none; padding: 6px; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .search-form button svg { stroke: #666; transition: stroke 0.2s; }
+    .search-form button:hover svg { stroke: #111; }
     nav { margin-top: 15px; text-align: center; }
     .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
     .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
@@ -74,6 +85,17 @@
 
 <header>
     <div class="header-top">
+        <div class="header-left">
+            <form class="search-form" role="search" action="shop-cards.html" method="GET" onsubmit="return handleSiteSearch(event)">
+                <input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card">
+                <button type="submit" aria-label="Search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </form>
+        </div>
         <div class="logo-container" onclick="window.location.href='index.html';">
             <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
         </div>
@@ -127,6 +149,17 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
+
+// Trims the search box before letting the form submit as a normal GET
+// request to shop-cards.html?search=... — blocks empty submissions rather
+// than sending customers to an unfiltered shop page.
+function handleSiteSearch(event) {
+    const input = document.getElementById('site-search-input');
+    const value = input.value.trim();
+    if (!value) { event.preventDefault(); return false; }
+    input.value = value;
+    return true;
+}
 
 let checkoutData = null;   // snapshot handed off from basket.html
 let stripe = null;
