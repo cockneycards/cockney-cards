@@ -2,12 +2,6 @@
 //
 // Cloudflare Workers entry point.
 //
-// This project deploys via `npx wrangler deploy` (a plain Worker with a
-// static assets directory), NOT `wrangler pages deploy`.
-//
-// Known API routes are dispatched here and everything else falls through
-// to the static assets binding.
-//
 
 import { onRequestPost as createCheckout } from './functions/create-checkout.js';
 import { onRequestPost as createCheckoutPrint } from './functions/create-checkout-print.js';
@@ -44,7 +38,6 @@ import {
 import { handleGetInstagramFeed } from './functions/instagram-feed-api.js';
 
 
-// Pages-Functions-style POST handlers.
 const POST_ROUTES = {
     '/create-checkout': createCheckout,
     '/create-checkout-print': createCheckoutPrint,
@@ -54,28 +47,14 @@ const POST_ROUTES = {
 };
 
 
-// Reminder ID pattern.
-const REMINDER_ID_PATTERN = /^\/api\/reminders\/([a-f0-9-]+)$/;
+const REMINDER_ID_PATTERN =
+    /^\/api\/reminders\/([a-f0-9-]+)$/;
 
+const ADDRESS_ID_PATTERN =
+    /^\/api\/addresses\/([a-f0-9-]+)$/;
 
-// Address ID patterns.
-const ADDRESS_ID_PATTERN = /^\/api\/addresses\/([a-f0-9-]+)$/;
-const ADDRESS_DEFAULT_PATTERN = /^\/api\/addresses\/([a-f0-9-]+)\/default$/;
-
-
-// Allowed hosts for Instagram image proxying.
-//
-// Instagram's image CDN normally uses hosts such as:
-//
-// cdninstagram.com
-// fbcdn.net
-//
-// instagram.com is included as well.
-const INSTAGRAM_ALLOWED_HOSTS = [
-    'cdninstagram.com',
-    'fbcdn.net',
-    'instagram.com',
-];
+const ADDRESS_DEFAULT_PATTERN =
+    /^\/api\/addresses\/([a-f0-9-]+)\/default$/;
 
 
 export default {
@@ -87,55 +66,52 @@ export default {
         const method = request.method;
 
 
-        // ------------------------------------------------------------
-        // CORS preflight
-        // ------------------------------------------------------------
-
+        // CORS preflight.
         if (method === 'OPTIONS') {
             return new Response(null, {
-                headers: corsHeaders(env),
+                headers: corsHeaders(env)
             });
         }
 
 
-        // ------------------------------------------------------------
-        // Stripe configuration
-        // ------------------------------------------------------------
-
-        if (pathname === '/stripe-config' && method === 'GET') {
+        // Stripe configuration.
+        if (
+            pathname === '/stripe-config' &&
+            method === 'GET'
+        ) {
             return stripeConfig({
                 request,
                 env,
-                waitUntil: ctx.waitUntil.bind(ctx),
+                waitUntil: ctx.waitUntil.bind(ctx)
             });
         }
 
 
-        // ------------------------------------------------------------
-        // POST handlers
-        // ------------------------------------------------------------
-
+        // POST routes.
         const postHandler = POST_ROUTES[pathname];
 
         if (postHandler && method === 'POST') {
             return postHandler({
                 request,
                 env,
-                waitUntil: ctx.waitUntil.bind(ctx),
+                waitUntil: ctx.waitUntil.bind(ctx)
             });
         }
 
 
-        // ------------------------------------------------------------
-        // Account API
-        // ------------------------------------------------------------
-
-        if (pathname === '/api/auth/signup' && method === 'POST') {
+        // Authentication.
+        if (
+            pathname === '/api/auth/signup' &&
+            method === 'POST'
+        ) {
             return handleSignup(request, env);
         }
 
 
-        if (pathname === '/api/auth/login' && method === 'POST') {
+        if (
+            pathname === '/api/auth/login' &&
+            method === 'POST'
+        ) {
             return handleLogin(request, env);
         }
 
@@ -164,20 +140,25 @@ export default {
         }
 
 
-        if (pathname === '/api/orders' && method === 'GET') {
+        // Orders.
+        if (
+            pathname === '/api/orders' &&
+            method === 'GET'
+        ) {
             return handleGetOrders(request, env);
         }
 
 
-        if (pathname === '/api/account' && method === 'GET') {
+        // Account.
+        if (
+            pathname === '/api/account' &&
+            method === 'GET'
+        ) {
             return handleGetAccount(request, env);
         }
 
 
-        // ------------------------------------------------------------
-        // Instagram feed
-        // ------------------------------------------------------------
-
+        // Instagram feed.
         if (
             pathname === '/api/instagram-feed' &&
             method === 'GET'
@@ -186,10 +167,7 @@ export default {
         }
 
 
-        // ------------------------------------------------------------
-        // Instagram image proxy
-        // ------------------------------------------------------------
-
+        // Instagram image proxy.
         if (
             pathname === '/api/instagram-image' &&
             method === 'GET'
@@ -198,10 +176,7 @@ export default {
         }
 
 
-        // ------------------------------------------------------------
-        // Account deletion
-        // ------------------------------------------------------------
-
+        // Delete account.
         if (
             pathname === '/api/account' &&
             method === 'DELETE'
@@ -210,10 +185,7 @@ export default {
         }
 
 
-        // ------------------------------------------------------------
-        // Referrals
-        // ------------------------------------------------------------
-
+        // Referrals.
         if (
             pathname === '/api/referrals' &&
             method === 'GET'
@@ -230,10 +202,7 @@ export default {
         }
 
 
-        // ------------------------------------------------------------
-        // Membership
-        // ------------------------------------------------------------
-
+        // Membership.
         if (
             pathname === '/api/account/cancel-membership' &&
             method === 'POST'
@@ -250,10 +219,7 @@ export default {
         }
 
 
-        // ------------------------------------------------------------
-        // Promo
-        // ------------------------------------------------------------
-
+        // Promo.
         if (
             pathname === '/api/validate-promo' &&
             method === 'POST'
@@ -262,10 +228,7 @@ export default {
         }
 
 
-        // ------------------------------------------------------------
-        // Reminders
-        // ------------------------------------------------------------
-
+        // Reminders.
         if (
             pathname === '/api/reminders' &&
             method === 'GET'
@@ -297,10 +260,7 @@ export default {
         }
 
 
-        // ------------------------------------------------------------
-        // Addresses
-        // ------------------------------------------------------------
-
+        // Addresses.
         if (
             pathname === '/api/addresses' &&
             method === 'GET'
@@ -347,92 +307,52 @@ export default {
         }
 
 
-        // ------------------------------------------------------------
-        // Static website assets
-        // ------------------------------------------------------------
-
+        // Everything else is a static asset.
         return env.ASSETS.fetch(request);
     },
 
 
-    // --------------------------------------------------------------
-    // Daily reminder cron
-    // --------------------------------------------------------------
-
+    // Daily reminder cron.
     async scheduled(event, env, ctx) {
-        ctx.waitUntil(runDailyReminderCheck(env));
-    },
-
+        ctx.waitUntil(
+            runDailyReminderCheck(env)
+        );
+    }
 };
 
 
 /*
- * ================================================================
+ * ============================================================
  * Instagram image proxy
- * ================================================================
- *
- * The Instagram feed returns a safe URL such as:
- *
- * /api/instagram-image?u=BASE64_VALUE
- *
- * This function decodes the original Instagram CDN URL, verifies
- * that it really belongs to an allowed Instagram/Facebook image
- * host, fetches it from Cloudflare's Worker, and returns it to
- * the browser.
+ * ============================================================
  */
+
 async function handleInstagramImage(request) {
 
     try {
 
         const requestUrl = new URL(request.url);
 
-        const encodedUrl =
-            requestUrl.searchParams.get('u');
+        // URLSearchParams automatically decodes the value that was
+        // encoded with encodeURIComponent() by instagram-feed-api.js.
+        const imageUrl =
+            requestUrl.searchParams.get('url');
 
 
-        if (!encodedUrl) {
+        if (!imageUrl) {
             return new Response(
-                'Missing image reference.',
+                'Missing image URL.',
                 {
                     status: 400,
                     headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                    },
+                        'Content-Type':
+                            'text/plain; charset=utf-8'
+                    }
                 }
             );
         }
 
 
-        // Convert base64url back to normal base64.
-        let base64 = encodedUrl
-            .replace(/-/g, '+')
-            .replace(/_/g, '/');
-
-
-        // Restore base64 padding.
-        while (base64.length % 4 !== 0) {
-            base64 += '=';
-        }
-
-
-        let imageUrl;
-
-        try {
-            imageUrl = atob(base64);
-        } catch (err) {
-            return new Response(
-                'Invalid image reference.',
-                {
-                    status: 400,
-                    headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                    },
-                }
-            );
-        }
-
-
-        // Parse the decoded URL.
         let target;
 
         try {
@@ -443,36 +363,43 @@ async function handleInstagramImage(request) {
                 {
                     status: 400,
                     headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                    },
+                        'Content-Type':
+                            'text/plain; charset=utf-8'
+                    }
                 }
             );
         }
 
 
-        // Only allow HTTPS.
+        // Only permit HTTPS.
         if (target.protocol !== 'https:') {
             return new Response(
                 'Image host not allowed.',
                 {
                     status: 403,
                     headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                    },
+                        'Content-Type':
+                            'text/plain; charset=utf-8'
+                    }
                 }
             );
         }
 
 
-        // Verify the hostname belongs to an allowed Instagram/Facebook
-        // image host.
         const hostname =
             target.hostname.toLowerCase();
 
 
+        const allowedHosts = [
+            'cdninstagram.com',
+            'fbcdn.net',
+            'instagram.com'
+        ];
+
+
         const allowed =
-            INSTAGRAM_ALLOWED_HOSTS.some(
-                (host) =>
+            allowedHosts.some(
+                host =>
                     hostname === host ||
                     hostname.endsWith(`.${host}`)
             );
@@ -484,8 +411,9 @@ async function handleInstagramImage(request) {
                 {
                     status: 403,
                     headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                    },
+                        'Content-Type':
+                            'text/plain; charset=utf-8'
+                    }
                 }
             );
         }
@@ -500,13 +428,14 @@ async function handleInstagramImage(request) {
                         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131 Safari/537.36',
 
                     'Accept':
-                        'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-                },
+                        'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+                }
             }
         );
 
 
         if (!response.ok) {
+
             console.error(
                 'Instagram image fetch failed:',
                 response.status,
@@ -518,35 +447,33 @@ async function handleInstagramImage(request) {
                 {
                     status: response.status,
                     headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                    },
+                        'Content-Type':
+                            'text/plain; charset=utf-8'
+                    }
                 }
             );
         }
 
 
-        // Copy the upstream headers.
         const headers =
             new Headers(response.headers);
 
 
-        // Allow the browser/CDN to cache the image.
         headers.set(
             'Cache-Control',
             'public, max-age=3600'
         );
 
 
-        // Never pass cookies back to the browser.
+        // Don't expose cookies.
         headers.delete('set-cookie');
 
 
-        // Return Instagram's image directly.
         return new Response(
             response.body,
             {
                 status: 200,
-                headers,
+                headers
             }
         );
 
@@ -564,8 +491,8 @@ async function handleInstagramImage(request) {
                 status: 502,
                 headers: {
                     'Content-Type':
-                        'text/plain; charset=utf-8',
-                },
+                        'text/plain; charset=utf-8'
+                }
             }
         );
     }
