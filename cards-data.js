@@ -1,4 +1,8 @@
-const CLOUD_BASE = "https://images.cockneycards.com/";
+// window.CLOUD_BASE is used (rather than a plain const) so this file can be
+// loaded alongside prints-data.js on the same page (e.g. shop-cards.html,
+// for combined card+print search) without a duplicate-declaration error --
+// whichever of the two loads first sets it, the other just reuses it.
+window.CLOUD_BASE = window.CLOUD_BASE || "https://images.cockneycards.com/";
 const DEFAULT_PRICE = "£3.99";
 
 // CATEGORIES now lives in categories-data.js — shared with prints-data.js
