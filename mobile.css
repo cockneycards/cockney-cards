@@ -16,6 +16,30 @@
     .nav-links a { font-size: 11.5px; letter-spacing: 0.5px; }
 }
 
+/* ---------- Header search bar (index, shop-cards, shop-prints, basket,
+   checkout — any page whose header has a search form in .header-left).
+   Those headers use a 3-column grid (search | logo | cart) sized for
+   desktop; the ~160px-wide search input doesn't fit in its 1fr share on
+   a phone screen, which pushes the whole header into horizontal scroll.
+   :has() scopes this to only pages that actually have a search bar, so
+   pages without one (cockney-club, account, thankyou) keep their
+   existing header-top layout untouched. Re-flows into two rows: logo +
+   cart icon on top, full-width search bar underneath. ---------- */
+@media (max-width: 640px) {
+    .header-top:has(.header-left) {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "logo cart"
+            "search search";
+        row-gap: 10px;
+    }
+    .header-top:has(.header-left) .header-left { grid-area: search; justify-self: stretch; padding-right: 0; }
+    .header-top:has(.header-left) .logo-container { grid-area: logo; justify-self: start; }
+    .header-top:has(.header-left) .header-right { grid-area: cart; justify-self: end; padding-left: 0; }
+    .search-form { width: 100%; box-sizing: border-box; }
+    .search-form input[type="search"] { flex: 1; min-width: 0; width: auto; }
+}
+
 /* ---------- Footer (index, thankyou, basket, cockney-club —
    shop-cards / shop-prints already stack their own footer-grid,
    this rule just reinforces it for all pages at a shared breakpoint) ---------- */
