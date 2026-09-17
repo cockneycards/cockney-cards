@@ -1,17 +1,12 @@
 // functions/instagram-feed-api.js
 //
 // Serves the site's live Instagram feed at GET /api/instagram-feed.
-// Instagram image URLs are converted into safe proxy URLs so the browser
-// never has to pass the long Instagram CDN URL through a query string.
 //
 
 const KV_KEY = 'ig_token';
-
-// Versioned cache key so the new image-proxy format is picked up immediately.
-const CACHE_KEY = 'ig_feed_cache_v2';
-
-const FEED_TTL_MS = 20 * 60 * 1000; // re-fetch from Instagram at most every 20 minutes
-const REFRESH_MARGIN_MS = 5 * 24 * 60 * 60 * 1000; // refresh if <5 days from expiry
+const CACHE_KEY = 'ig_feed_cache';
+const FEED_TTL_MS = 20 * 60 * 1000;
+const REFRESH_MARGIN_MS = 5 * 24 * 60 * 60 * 1000;
 const MAX_POSTS = 8;
 
 export async function handleGetInstagramFeed(request, env) {
@@ -25,22 +20,28 @@ export async function handleGetInstagramFeed(request, env) {
             );
         }
 
-        // Serve from cache if it is fresh.
+        // Use the existing cache if it is still fresh.
         const cachedRaw = await kv.get(CACHE_KEY);
 
         if (cachedRaw) {
-            const cached = JSON.parse(cachedRaw);
+            try {
+                const cached = JSON.parse(cachedRaw);
 
-            if (
-                Array.isArray(cached.posts) &&
-                cached.fetchedAt &&
-                Date.now() - cached.fetchedAt < FEED_TTL_MS
-            ) {
-                return jsonOk(cached.posts);
+                if (
+                    Array.isArray(cached.posts) &&
+                    cached.fetchedAt &&
+                    Date.now() - cached.fetchedAt < FEED_TTL_MS
+                ) {
+                    return jsonOk(cached.posts);
+                }
+            } catch (cacheError) {
+                console.error(
+                    'Instagram cache could not be parsed:',
+                    cacheError
+                );
             }
         }
 
-        // Get the stored Instagram token.
         let tokenData = await kv.get(KV_KEY, 'json');
 
         if (!tokenData || !tokenData.token || !tokenData.userId) {
@@ -50,7 +51,7 @@ export async function handleGetInstagramFeed(request, env) {
             );
         }
 
-        // Refresh the long-lived token if it is getting close to expiry.
+        // Refresh the long-lived token when it is close to expiry.
         if (
             tokenData.expiresAt &&
             tokenData.expiresAt - Date.now() < REFRESH_MARGIN_MS
@@ -58,40 +59,38 @@ export async function handleGetInstagramFeed(request, env) {
             tokenData = await refreshToken(tokenData, kv);
         }
 
-        // Fetch the latest Instagram media.
         const posts = await fetchRecentMedia(tokenData);
 
-        // Store the new feed in KV.
-        await kv.put(
-            CACHE_KEY,
-            JSON.stringify({
-                posts,
-                fetchedAt: Date.now(),
-            })
-        );
+        // Cache the feed, but don't allow a KV caching problem to prevent
+        // the actual Instagram response being returned.
+        try {
+            await kv.put(
+                CACHE_KEY,
+                JSON.stringify({
+                    posts,
+                    fetchedAt: Date.now()
+                })
+            );
+        } catch (cacheError) {
+            console.error(
+                'Could not cache Instagram feed:',
+                cacheError
+            );
+        }
 
         return jsonOk(posts);
 
     } catch (err) {
         console.error('Instagram feed error:', err);
 
-        // If Instagram temporarily fails, try to serve the last successful
-        // version from cache.
-        try {
-            const cachedRaw = await env.CC_KV.get(CACHE_KEY);
-
-            if (cachedRaw) {
-                const cached = JSON.parse(cachedRaw);
-
-                if (Array.isArray(cached.posts)) {
-                    return jsonOk(cached.posts);
-                }
-            }
-        } catch (_) {
-            // Fall through to the error response.
-        }
-
-        return jsonError('Could not load Instagram feed.', 502);
+        return jsonError(
+            `Could not load Instagram feed: ${
+                err && err.message
+                    ? err.message
+                    : String(err)
+            }`,
+            502
+        );
     }
 }
 
@@ -110,15 +109,15 @@ async function refreshToken(tokenData, kv) {
             await res.text()
         );
 
-        // Keep using the existing token rather than breaking the feed.
+        // Keep the existing token.
         return tokenData;
     }
 
     const data = await res.json();
 
-    if (!data.access_token || !data.expires_in) {
+    if (!data.access_token) {
         console.error(
-            'Instagram token refresh returned an unexpected response:',
+            'Instagram token refresh returned no access token:',
             data
         );
 
@@ -128,16 +127,20 @@ async function refreshToken(tokenData, kv) {
     const updated = {
         token: data.access_token,
         userId: tokenData.userId,
-        expiresAt: Date.now() + data.expires_in * 1000,
+        expiresAt: Date.now() + data.expires_in * 1000
     };
 
-    await kv.put(KV_KEY, JSON.stringify(updated));
+    await kv.put(
+        KV_KEY,
+        JSON.stringify(updated)
+    );
 
     return updated;
 }
 
 
 async function fetchRecentMedia(tokenData) {
+
     const fields =
         'id,caption,media_type,media_url,permalink,thumbnail_url';
 
@@ -150,25 +153,24 @@ async function fetchRecentMedia(tokenData) {
     const res = await fetch(url);
 
     if (!res.ok) {
+        const errorText = await res.text();
+
         throw new Error(
-            `Instagram media fetch failed: ${res.status} ${await res.text()}`
+            `Instagram media fetch failed: ${res.status} ${errorText}`
         );
     }
 
     const data = await res.json();
 
-    if (!Array.isArray(data.data)) {
-        return [];
-    }
-
-    return data.data
-        // Videos need a thumbnail because the website gallery displays images.
+    return (data.data || [])
         .filter(
-            (item) =>
-                item.media_type !== 'VIDEO' || !!item.thumbnail_url
+            item =>
+                item.media_type !== 'VIDEO' ||
+                !!item.thumbnail_url
         )
         .slice(0, MAX_POSTS)
-        .map((item) => {
+        .map(item => {
+
             const originalImage =
                 item.media_type === 'VIDEO'
                     ? item.thumbnail_url
@@ -176,47 +178,16 @@ async function fetchRecentMedia(tokenData) {
 
             return {
                 // IMPORTANT:
-                // The browser receives a short, safe URL rather than the
-                // enormous Instagram CDN URL containing lots of & characters.
-                image: createImageProxyUrl(originalImage),
+                // encodeURIComponent() safely handles Instagram's long
+                // URLs and all of their &, ?, = and other characters.
+                image:
+                    `/api/instagram-image?url=${encodeURIComponent(
+                        originalImage
+                    )}`,
 
-                // Keep the actual Instagram post link.
-                link: item.permalink,
+                link: item.permalink
             };
         });
-}
-
-
-/*
- * Convert the Instagram CDN URL into a safe base64url value.
- *
- * Example:
- *
- * https://scontent...jpg?...&...
- *
- * becomes:
- *
- * /api/instagram-image?u=...
- *
- * This avoids problems caused by Instagram URLs containing &, ?, =, etc.
- */
-function createImageProxyUrl(imageUrl) {
-    if (!imageUrl) {
-        return '';
-    }
-
-    try {
-        const encoded = btoa(imageUrl)
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/g, '');
-
-        return `/api/instagram-image?u=${encoded}`;
-
-    } catch (err) {
-        console.error('Could not encode Instagram image URL:', err);
-        return '';
-    }
 }
 
 
@@ -224,10 +195,11 @@ function jsonOk(posts) {
     return new Response(
         JSON.stringify({ posts }),
         {
+            status: 200,
             headers: {
                 'Content-Type': 'application/json',
-                'Cache-Control': 'no-store',
-            },
+                'Cache-Control': 'no-store'
+            }
         }
     );
 }
@@ -240,8 +212,8 @@ function jsonError(message, status) {
             status,
             headers: {
                 'Content-Type': 'application/json',
-                'Cache-Control': 'no-store',
-            },
+                'Cache-Control': 'no-store'
+            }
         }
     );
 }
