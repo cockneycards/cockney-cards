@@ -224,51 +224,26 @@ async function updatePromoBannerForMembership() {
     }
 }
 
-// Loads the live Instagram feed and renders the returned posts.
-// Instagram CDN image URLs can expire or occasionally be returned in
-// formats that a browser cannot display, so failed images are removed
-// individually rather than allowing the whole gallery to fail.
+// Loads posts from the live Instagram feed. If there are no posts yet (or
+// the request fails), the section is simply left empty rather than showing
+// placeholder images.
 async function loadPhotoGallery() {
-    const grid = $('photo-grid');
-    if (!grid) return;
-
     try {
-        const res = await fetch('/api/instagram-feed', {
-            cache: 'no-store',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        if (!res.ok) {
-            throw new Error(`Instagram feed request failed: ${res.status}`);
-        }
-
+        const res = await fetch('/api/instagram-feed');
+        if (!res.ok) throw new Error(`Instagram feed request failed: ${res.status}`);
         const data = await res.json();
-
         if (Array.isArray(data.posts) && data.posts.length) {
             renderPhotoGallery(data.posts);
-        } else {
-            grid.innerHTML = '';
         }
     } catch (err) {
         console.warn('Could not load Instagram feed:', err);
-        grid.innerHTML = '';
     }
 }
 
 function renderPhotoGallery(photos) {
-    const grid = $('photo-grid');
-    if (!grid) return;
-
-    grid.innerHTML = photos.map(({ image, link }) => `
-        <a href="${link || INSTAGRAM_URL}" target="_blank" rel="noopener noreferrer">
-            <img
-                src="${image}"
-                alt="Cockney Cards on Instagram"
-                loading="eager"
-                decoding="async"
-                referrerpolicy="no-referrer"
-                onerror="this.closest('a').remove()"
-            >
+    $('photo-grid').innerHTML = photos.map(({ image, link }) => `
+        <a href="${link || INSTAGRAM_URL}" target="_blank" rel="noopener">
+            <img src="/api/instagram-image?url=${encodeURIComponent(image)}" alt="Cockney Cards on Instagram" loading="lazy">
         </a>
     `).join('');
 }
