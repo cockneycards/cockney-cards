@@ -60,6 +60,18 @@ h1 { font-size:36px; line-height:1.15; font-weight:400; margin:0 0 14px; }
   .cart-icon { order:2; }
   .search-form { order:3; width:100%; box-sizing:border-box; justify-self:auto; }
   .search-form input[type="search"] { flex:1; min-width:0; width:auto; }
+  /* Keep all 4 nav links on one line instead of wrapping -- same
+     treatment as the rest of the site's mobile.css. */
+  .site-header nav {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .site-header nav::-webkit-scrollbar { display: none; }
+  .site-header nav a { font-size: 11px; letter-spacing: 0.3px; white-space: nowrap; flex: 0 0 auto; }
   .product-page { padding:20px 18px 55px; }
   .product-layout { grid-template-columns:1fr; gap:35px; }
   h1 { font-size:29px; }
