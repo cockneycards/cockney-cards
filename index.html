@@ -243,7 +243,7 @@ async function loadPhotoGallery() {
 function renderPhotoGallery(photos) {
     $('photo-grid').innerHTML = photos.map(({ image, link }) => `
         <a href="${link || INSTAGRAM_URL}" target="_blank" rel="noopener">
-            <img src="/api/instagram-image?url=${encodeURIComponent(image)}" alt="Cockney Cards on Instagram" loading="lazy">
+            <img src="${image}" alt="Cockney Cards on Instagram" loading="lazy">
         </a>
     `).join('');
 }
