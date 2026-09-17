@@ -8,6 +8,7 @@
     <script src="cart.js"></script>
     <script src="categories-data.js"></script>
     <script src="cards-data.js"></script>
+    <script src="prints-data.js"></script>
     <script src="card-pages.js"></script>
 
     <style>
@@ -17,11 +18,22 @@
 
         /* HEADER & NAVIGATION */
         header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
-        .header-top { display: flex; justify-content: center; align-items: center; gap: 30px; max-width: 1400px; margin: 0 auto; }
-        .logo-container { text-align: center; }
+        .header-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; max-width: 1400px; margin: 0 auto; }
+        .header-left { justify-self: start; }
+        .logo-container { justify-self: center; text-align: center; }
         .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
-        .header-right { display: flex; align-items: center; gap: 20px; }
+        .header-right { justify-self: end; display: flex; align-items: center; gap: 20px; }
         .cart-icon { position: relative; cursor: pointer; }
+
+        /* SEARCH BOX */
+        .search-form { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 6px 4px 14px; background: white; transition: border-color 0.2s; }
+        .search-form:focus-within { border-color: #999; }
+        .search-form input[type="search"] { border: none; outline: none; font-family: var(--font-family); font-size: 13px; color: #111; width: 160px; background: transparent; }
+        .search-form input[type="search"]::placeholder { color: #999; }
+        .search-form input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
+        .search-form button { background: none; border: none; padding: 6px; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .search-form button svg { stroke: #666; transition: stroke 0.2s; }
+        .search-form button:hover svg { stroke: #111; }
         .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
         .login-btn:hover { color: #111; }
         nav { margin-top: 15px; text-align: center; }
@@ -93,6 +105,7 @@
         .product-price { font-size: 13px; font-weight: bold; color: #444; margin: 0; }
         .btn-action { width: 100%; box-sizing: border-box; background-color: #1a1a1a; color: white; border: none; padding: 12px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: auto; text-align: center; display: block; }
         .btn-action:hover { background-color: #444; }
+        .no-results { grid-column: 1 / -1; font-size: 13px; color: #666; padding: 50px 0; text-align: center; }
 
         /* FOOTER */
         footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; }
@@ -117,6 +130,17 @@
 
 <header>
     <div class="header-top">
+        <div class="header-left">
+            <form class="search-form" role="search" onsubmit="return runSiteSearch(event)">
+                <input type="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card">
+                <button type="submit" aria-label="Search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </form>
+        </div>
         <div class="logo-container" onclick="window.location.href='index.html';">
             <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
         </div>
@@ -210,16 +234,31 @@ const PRODUCTS = Object.entries(CARD_CATALOGUE)
         return {
             id, title: c.title, price: priceLabel,
             priceValue: parseFloat(priceLabel.replace(/[^0-9.]/g, '')),
-            image: CLOUD_BASE + c.preview, categories: c.categories
+            image: CLOUD_BASE + c.preview, categories: c.categories, type: 'card'
+        };
+    });
+
+// PRINT_CATALOGUE comes from prints-data.js (loaded above). This shop page
+// still only browses cards by category -- these are used purely so the
+// search box can surface a matching print alongside matching cards.
+const PRINT_PRODUCTS = Object.entries(PRINT_CATALOGUE)
+    .filter(([id, c]) => c.title && (c.preview || c.full))
+    .map(([id, c]) => {
+        const priceLabel = c.price || DEFAULT_PRICE;
+        return {
+            id, title: c.title, price: priceLabel,
+            priceValue: c.priceValue != null ? c.priceValue : parseFloat(priceLabel.replace(/[^0-9.]/g, '')),
+            image: CLOUD_BASE + (c.preview || c.full), categories: c.categories || [], type: 'print'
         };
     });
 const $ = (id) => document.getElementById(id);
 
 let currentCategory = 'all';
 let currentSort = 'featured';
-let viewMode = 'grid';       // 'grid' | 'gallery' | 'team'
+let viewMode = 'grid';       // 'grid' | 'gallery' | 'team' | 'search'
 let currentLeague = null;    // e.g. "premiership" -- set when viewMode is 'gallery' or 'team'
 let currentTeam = null;      // e.g. "arsenal"      -- set when viewMode is 'team'
+let currentSearchTerm = '';  // set when viewMode is 'search'
 
 window.addEventListener('DOMContentLoaded', () => {
     renderCategories();
@@ -236,7 +275,16 @@ window.addEventListener('DOMContentLoaded', () => {
         if (catLink) filterProducts(catLink.dataset.cat);
     });
 
-    if (isBackForwardNavigation() || shouldResumeFromEditor()) {
+    const incomingSearch = new URLSearchParams(window.location.search).get('search');
+
+    if (incomingSearch && !isBackForwardNavigation() && !shouldResumeFromEditor()) {
+        // Arrived here from a search box (index.html's or this page's own)
+        // via a normal link/form navigation -- run that search and start a
+        // fresh session state, same as any other fresh arrival on this page.
+        sessionStorage.removeItem(SHOP_STATE_KEY);
+        $('site-search-input').value = incomingSearch;
+        runSearch(incomingSearch);
+    } else if (isBackForwardNavigation() || shouldResumeFromEditor()) {
         restoreShopState();
         // Clean the ?resume flag out of the address bar so a manual reload
         // later doesn't keep forcing a restore.
@@ -286,7 +334,7 @@ const SHOP_STATE_KEY = 'shopCardsState';
 function saveShopState() {
     try {
         sessionStorage.setItem(SHOP_STATE_KEY, JSON.stringify({
-            currentCategory, viewMode, currentLeague, currentTeam, currentSort
+            currentCategory, viewMode, currentLeague, currentTeam, currentSort, currentSearchTerm
         }));
     } catch (e) { /* sessionStorage unavailable -- fail silently */ }
 }
@@ -334,6 +382,10 @@ function restoreShopState() {
     } else if (state.viewMode === 'gallery' && state.currentLeague) {
         expandPathTo(state.currentLeague);
         openTeamGallery(state.currentLeague);
+    } else if (state.viewMode === 'search' && state.currentSearchTerm) {
+        const input = $('site-search-input');
+        if (input) input.value = state.currentSearchTerm;
+        runSearch(state.currentSearchTerm);
     } else if (state.currentCategory && state.currentCategory !== 'all') {
         expandPathTo(state.currentCategory);
         filterProducts(state.currentCategory);
@@ -464,20 +516,37 @@ function setActiveCategory(key) {
 
 function renderGrid(productsToRender) {
     $('product-count').innerText = `${productsToRender.length} products`;
-    $('product-grid').innerHTML = productsToRender.map((p) => `
+
+    if (productsToRender.length === 0) {
+        const suffix = currentSearchTerm ? ` for &quot;${escapeHtml(currentSearchTerm)}&quot;` : '';
+        const noun = viewMode === 'search' ? 'cards or prints' : 'cards';
+        $('product-grid').innerHTML = `<p class="no-results">No ${noun} found${suffix}. Try a different search, or browse a category on the left.</p>`;
+        return;
+    }
+
+    $('product-grid').innerHTML = productsToRender.map((p) => {
+        // Prints don't have a pretty cards/<slug>/ page or a card-style
+        // editor -- both the image and the action button just go straight
+        // to the print's own editor, same as prints-data.js documents.
+        const isPrint = p.type === 'print';
+        const linkHref = isPrint ? `editor-prints.html?print=${p.id}` : `cards/${CARD_PAGE_SLUGS[p.id] || p.id}/`;
+        const actionHref = isPrint ? `editor-prints.html?print=${p.id}` : `editor.html?card=${p.id}`;
+        const altSuffix = isPrint ? 'personalised print' : 'personalised greeting card';
+        return `
         <div class="product-card">
-            <a class="product-link" href="cards/${CARD_PAGE_SLUGS[p.id] || p.id}/" onclick="saveShopState()">
+            <a class="product-link" href="${linkHref}" onclick="saveShopState()">
                 <div class="image-wrapper">
-                    <img src="${p.image}" alt="${p.title} personalised greeting card" loading="lazy" oncontextmenu="return false;" draggable="false">
+                    <img src="${p.image}" alt="${p.title} ${altSuffix}" loading="lazy" oncontextmenu="return false;" draggable="false">
                 </div>
                 <div class="product-info">
-                    <h3 class="product-title">${p.title}</h3>
+                    <h3 class="product-title">${p.title}${isPrint ? ' <span style="color:#999;font-weight:normal;">(Print)</span>' : ''}</h3>
                     <p class="product-price">${p.price}</p>
                 </div>
             </a>
-            <a class="btn-action" href="editor.html?card=${p.id}" onclick="saveShopState()">Personalise</a>
+            <a class="btn-action" href="${actionHref}" onclick="saveShopState()">Personalise</a>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function renderTeamGallery(leagueKey) {
@@ -500,6 +569,9 @@ function renderTeamGallery(leagueKey) {
 }
 
 function renderBreadcrumb() {
+    if (viewMode === 'search') {
+        return `<span class="crumb current">Search results for &quot;${escapeHtml(currentSearchTerm)}&quot;</span>`;
+    }
     if (viewMode === 'grid') {
         if (currentCategory === 'all') return '';
         const path = findPath(currentCategory) || [];
@@ -611,10 +683,53 @@ function renderView() {
 
     const filtered = viewMode === 'team'
         ? PRODUCTS.filter((p) => p.categories.includes(currentLeague) && p.categories.includes(currentTeam))
+        : viewMode === 'search'
+        ? searchProducts(currentSearchTerm)
         : PRODUCTS.filter((p) => p.categories.includes(currentCategory));
 
     renderGrid(sortItems(filtered));
     $('breadcrumb').innerHTML = renderBreadcrumb();
+}
+
+// Matches a search term against each card/print's title and its category
+// slugs (e.g. "football", "grandad", "millwall") -- case-insensitive
+// substring match, so "grandad" finds every grandad card and "millwall"
+// finds the Millwall-tagged ones even though that word never appears in a
+// title. Searches cards and prints together so a search for e.g. "oasis"
+// can surface a print even from the cards shop page.
+function searchProducts(term) {
+    const q = term.trim().toLowerCase();
+    if (!q) return PRODUCTS;
+    return [...PRODUCTS, ...PRINT_PRODUCTS].filter((p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.categories.some((c) => c.toLowerCase().includes(q))
+    );
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function runSearch(term) {
+    currentSearchTerm = term;
+    viewMode = 'search';
+    setActiveCategory(null);
+    renderView();
+}
+
+// Handler for this page's own header search box -- runs the search
+// client-side against the catalogue already loaded here, rather than
+// reloading the page. Scrolling is only triggered here (not from inside
+// runSearch itself, and not on initial-load searches arriving via
+// ?search=), matching how category clicks already handle scrolling.
+function runSiteSearch(event) {
+    event.preventDefault();
+    const input = $('site-search-input');
+    const term = input.value.trim();
+    if (!term) return false;
+    runSearch(term);
+    scrollToFirstItem();
+    return false;
 }
 
 function filterProducts(categoryKey) {
