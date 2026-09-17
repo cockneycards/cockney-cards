@@ -12,6 +12,13 @@
 // After that, every request checks whether the token is within 5 days of
 // expiring and refreshes it automatically — no cron trigger needed, and
 // no manual renewal every 60 days.
+//
+// *** TEMPORARY DEBUG BUILD ***
+// The only change from the normal version: if the ig_token read fails the
+// hasToken/hasUserId check, the error response includes a "debug" object
+// describing exactly what was found in KV (never the token itself), so we
+// can see whether the key is missing, unparsable, or shaped unexpectedly.
+// Revert to the plain version once this is diagnosed.
 
 const KV_KEY = 'ig_token';
 const CACHE_KEY = 'ig_feed_cache';
@@ -36,10 +43,39 @@ export async function handleGetInstagramFeed(request, env) {
             }
         }
 
-        let tokenData = await kv.get(KV_KEY, 'json');
-        if (!tokenData || !tokenData.token || !tokenData.userId) {
-            return jsonError('Instagram feed is not configured (missing token in KV).', 500);
+        // --- DEBUG: read raw string first instead of using the 'json' type,
+        // so we can distinguish "key not found" from "found but unparsable"
+        // from "parsed fine but missing fields".
+        const tokenRaw = await kv.get(KV_KEY);
+        let tokenData = null;
+        let parseError = null;
+
+        if (tokenRaw !== null) {
+            try {
+                tokenData = JSON.parse(tokenRaw);
+            } catch (err) {
+                parseError = err.message;
+            }
         }
+
+        if (!tokenData || !tokenData.token || !tokenData.userId) {
+            return jsonError(
+                'Instagram feed is not configured (missing token in KV).',
+                500,
+                {
+                    keyFound: tokenRaw !== null,
+                    rawLength: tokenRaw ? tokenRaw.length : 0,
+                    rawFirstChar: tokenRaw ? tokenRaw[0] : null,
+                    rawLastChar: tokenRaw ? tokenRaw[tokenRaw.length - 1] : null,
+                    parseError,
+                    parsedType: tokenData === null ? 'null' : typeof tokenData,
+                    parsedKeys: tokenData && typeof tokenData === 'object' ? Object.keys(tokenData) : null,
+                    hasToken: !!(tokenData && tokenData.token),
+                    hasUserId: !!(tokenData && tokenData.userId),
+                }
+            );
+        }
+        // --- END DEBUG block (tokenData is used normally below) ---
 
         // Refresh the long-lived token if it's getting close to expiry.
         if (tokenData.expiresAt - Date.now() < REFRESH_MARGIN_MS) {
@@ -62,7 +98,7 @@ export async function handleGetInstagramFeed(request, env) {
         } catch (_) {
             // fall through to the error response below
         }
-        return jsonError('Could not load Instagram feed.', 502);
+        return jsonError('Could not load Instagram feed.', 502, { caughtError: String(err && err.message || err) });
     }
 }
 
@@ -109,8 +145,10 @@ function jsonOk(posts) {
     });
 }
 
-function jsonError(message, status) {
-    return new Response(JSON.stringify({ error: message }), {
+function jsonError(message, status, debug) {
+    const body = { error: message };
+    if (debug) body.debug = debug;
+    return new Response(JSON.stringify(body), {
         status,
         headers: { 'Content-Type': 'application/json' },
     });
