@@ -1,307 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cockney Cards | Home</title>
-    <script src="auth.js"></script>
-    <script src="cart.js"></script>
-
-    <style>
-        :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --font-family: 'Helvetica Neue', Arial, sans-serif; }
-        html { overflow-y: scroll; scrollbar-gutter: stable; }
-        body { font-family: var(--font-family); margin: 0; padding: 0; background-color: white; color: var(--dark); }
-
-        /* HEADER & NAVIGATION */
-        header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
-        .header-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; max-width: 1400px; margin: 0 auto; }
-        .header-left { justify-self: end; padding-right: 20px; }
-        .logo-container { justify-self: center; text-align: center; }
-        .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
-        .header-right { justify-self: start; padding-left: 20px; display: flex; align-items: center; gap: 20px; }
-        .cart-icon { position: relative; cursor: pointer; }
-
-        /* SEARCH BOX */
-        .search-form { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 6px 4px 14px; background: white; transition: border-color 0.2s; }
-        .search-form:focus-within { border-color: #999; }
-        .search-form input[type="search"] { border: none; outline: none; font-family: var(--font-family); font-size: 13px; color: #111; width: 160px; background: transparent; }
-        .search-form input[type="search"]::placeholder { color: #999; }
-        .search-form input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
-        .search-form button { background: none; border: none; padding: 6px; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .search-form button svg { stroke: #666; transition: stroke 0.2s; }
-        .search-form button:hover svg { stroke: #111; }
-        .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
-        .login-btn:hover { color: #111; }
-        nav { margin-top: 15px; text-align: center; }
-        .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
-        .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
-        .nav-links a:hover { color: #888; }
-        .nav-links a.active { font-weight: bold; }
-
-        /* Promo banner — matches basket.html's .club-banner styling/sizing */
-        .promo-banner { background: #0e2a4d; border-radius: 8px; padding: 16px 22px; margin-bottom: 24px; text-align: center; }
-        .promo-banner p { margin: 0; font-size: 17px; line-height: 1.5; color: #eef2f8; }
-        .promo-banner strong { color: #f4bc2c; }
-        .promo-banner a { color: #f4bc2c; text-decoration: underline; }
-
-        /* 3-COLUMN GALLERY GRID */
-        .gallery-section { max-width: 80%; margin: 20px auto; padding: 0 40px; overflow-x: auto; }
-        .gallery-title { text-align: center; font-size: 24px; font-weight: 300; margin-bottom: 30px; color: #1a1a1a; letter-spacing: 1px; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; min-width: 900px; }
-        .gallery-column { display: flex; flex-direction: column; gap: 15px; }
-        .gallery-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .gallery-item { border: 1px solid #ddd; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center; box-sizing: border-box; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; overflow: hidden; }
-        .gallery-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
-        .large-box { aspect-ratio: 4 / 5; }
-        .small-box { aspect-ratio: 3 / 4; }
-        .gallery-img { width: 100%; height: 100%; object-fit: cover; }
-        .logo-bg { background-color: #F7F7F7; padding: 5px; }
-        .logo-img { object-fit: contain; max-height: 95%; }
-
-        /* PHOTO GALLERY (LINKS OUT TO INSTAGRAM) */
-        .photo-gallery-section { max-width: 1200px; margin: 24px auto 5px auto; padding: 0 20px; text-align: center; }
-        .photo-gallery-title { font-size: 24px; font-weight: 300; letter-spacing: 1px; color: #1a1a1a; margin-bottom: 25px; }
-        .photo-grid {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            scroll-snap-type: x proximity;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-        }
-        .photo-grid::-webkit-scrollbar { height: 6px; }
-        .photo-grid::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
-        .photo-grid::-webkit-scrollbar-track { background: transparent; }
-        .photo-grid a { flex: 0 0 auto; width: 220px; aspect-ratio: 1 / 1; display: block; overflow: hidden; border: 1px solid #e2e2e2; scroll-snap-align: start; }
-        .photo-grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s ease; }
-        .photo-grid a:hover img { transform: scale(1.05); }
-        .instagram-handle { font-size: 24px; font-weight: 300; letter-spacing: 1px; color: #1a1a1a; text-decoration: none; display: inline-block; margin-top: 10px; }
-        .social-links { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 10px; }
-        .social-link { display: inline-flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 300; letter-spacing: 1px; color: #1a1a1a; text-decoration: none; }
-        .social-link svg { width: 24px; height: 24px; flex-shrink: 0; }
-        .social-link:hover { opacity: 0.7; }
-
-        /* FOOTER */
-        footer { border-top: 1px solid var(--border-color); padding: 60px 40px 20px 40px; background-color: white; margin-top: 60px; }
-        .footer-grid { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, max-content); justify-content: center; gap: 60px; }
-        .footer-col { font-size: 13px; line-height: 1.8; color: #333; text-align: left; }
-        .footer-col h4 { font-size: 14px; font-weight: bold; margin: 0 0 20px; letter-spacing: 0.5px; }
-        .footer-col p { margin: 0 0 15px 0; }
-        .footer-col a { color: #111; text-decoration: underline; }
-        .footer-bottom { max-width: 1300px; margin: 50px auto 0 auto; border-top: 1px solid #f0f0f0; padding-top: 20px; text-align: center; font-size: 11px; color: #888; letter-spacing: 0.5px; }
-
-        @media (max-width: 900px) {
-            .photo-grid a { width: 150px; }
-        }
-
-        @media (max-width: 850px) {
-            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
-        }
-    </style>
-    <link rel="stylesheet" href="mobile.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>11 Plus Girl | Personalised Greeting Card | Cockney Cards</title>
+  <meta name="description" content="The &#39;11 Plus Girl&#39; card is one of our School, Achievement designs. Write your own personal message inside using our online editor — the front design stays exactly as shown. £3.99, free UK delivery, printed and dispatched by Cockney Cards.">
+  <link rel="canonical" href="https://www.cockneycards.com/cards/11-plus-girl/">
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="11 Plus Girl | Cockney Cards">
+  <meta property="og:description" content="The &#39;11 Plus Girl&#39; card is one of our School, Achievement designs. Write your own personal message inside using our online editor — the front design stays exactly as shown. £3.99, free UK delivery, printed and dispatched by Cockney Cards.">
+  <meta property="og:url" content="https://www.cockneycards.com/cards/11-plus-girl/">
+  <meta property="og:image" content="https://images.cockneycards.com/11plus-girl-preview.png">
+  <meta property="og:site_name" content="Cockney Cards">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="11 Plus Girl | Cockney Cards">
+  <meta name="twitter:description" content="The &#39;11 Plus Girl&#39; card is one of our School, Achievement designs. Write your own personal message inside using our online editor — the front design stays exactly as shown. £3.99, free UK delivery, printed and dispatched by Cockney Cards.">
+  <meta name="twitter:image" content="https://images.cockneycards.com/11plus-girl-preview.png">
+  <link rel="stylesheet" href="../../card-page.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"11 Plus Girl","description":"The '11 Plus Girl' card is one of our School, Achievement designs. Write your own personal message inside using our online editor — the front design stays exactly as shown. £3.99, free UK delivery, printed and dispatched by Cockney Cards.","image":["https://images.cockneycards.com/11plus-girl-preview.png"],"url":"https://www.cockneycards.com/cards/11-plus-girl/","brand":{"@type":"Brand","name":"Cockney Cards"},"offers":{"@type":"Offer","url":"https://www.cockneycards.com/cards/11-plus-girl/","priceCurrency":"GBP","price":"3.99","availability":"https://schema.org/InStock"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.cockneycards.com/"},{"@type":"ListItem","position":2,"name":"Cards","item":"https://www.cockneycards.com/shop-cards.html"},{"@type":"ListItem","position":3,"name":"11 Plus Girl","item":"https://www.cockneycards.com/cards/11-plus-girl/"}]}</script>
 </head>
 <body>
-
-<header>
+  <header class="site-header">
     <div class="header-top">
-        <div class="header-left">
-            <form class="search-form" role="search" action="shop-cards.html" method="GET" onsubmit="return handleSiteSearch(event)">
-                <input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card">
-                <button type="submit" aria-label="Search">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </button>
-            </form>
-        </div>
-        <div class="logo-container" onclick="window.location.href='index.html';">
-            <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
-        </div>
-        <div class="header-right">
-            <div class="cart-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-            </div>
-        </div>
+      <form class="search-form" role="search" action="/shop-cards.html" method="GET">
+        <input type="search" name="search" placeholder="Search for a card..." aria-label="Search for a card">
+        <button type="submit" aria-label="Search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </form>
+      <a class="logo" href="/" aria-label="Cockney Cards home">
+        <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+      </a>
+      <a class="cart-icon" href="/basket.html" aria-label="Basket">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+      </a>
     </div>
-    <nav>
-        <ul class="nav-links">
-            <li><a href="shop-cards.html">Shop Cards</a></li>
-            <li><a href="shop-prints.html">Shop Prints</a></li>
-            <li><a href="cockney-club.html">Cockney Club</a></li>
-            <li><a href="account.html">My Account</a></li>
-        </ul>
+    <nav aria-label="Main navigation">
+      <a href="/shop-cards.html">Shop Cards</a>
+      <a href="/shop-prints.html">Shop Prints</a>
+      <a href="/cockney-club.html">Cockney Club</a>
+      <a href="/account.html">My Account</a>
     </nav>
-</header>
+  </header>
 
-<section class="gallery-section">
-    <div class="promo-banner" id="promo-banner">
-        <p>Free delivery on all cards for all customers + 25% off cards all year round for members of the Cockney Card Club!!<span id="promo-banner-join"> — <a href="https://www.cockneycards.com/cockney-club.html">join the Cockney Cards Club</a></span></p>
-    </div>
+  <main class="product-page">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="/">Home</a><span>/</span><a href="/shop-cards.html">Cards</a><span>/</span><span aria-current="page">11 Plus Girl</span>
+    </nav>
 
-    <div class="gallery-grid">
-        <div class="gallery-column">
-            <div class="gallery-item large-box" onclick="goToPrintsShop()">
-                <img src="https://images.cockneycards.com/print-miiiiiiiii-preview.png" alt="print-miiiiiiiii.png" class="gallery-img">
-            </div>
-            <div class="gallery-row">
-                <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://images.cockneycards.com/birthday-ofah_preview.png" alt="Only Fools and Horses Card" class="gallery-img">
-                </div>
-                <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://images.cockneycards.com/leaving-girl-preview.png" alt="Sorry You're Leaving Card" class="gallery-img">
-                </div>
-            </div>
+    <section class="product-layout">
+      <div class="product-image-panel">
+        <img class="product-image" src="https://images.cockneycards.com/11plus-girl-preview.png" alt="11 Plus Girl personalised School card - Cockney Cards" fetchpriority="high">
+      </div>
+      <div class="product-details">
+        <p class="eyebrow">Cockney Cards</p>
+        <h1>11 Plus Girl</h1>
+        <p class="price">£3.99</p>
+        <p class="description">The '11 Plus Girl' card is one of our School, Achievement designs. Write your own personal message inside using our online editor — the front design stays exactly as shown. £3.99, free UK delivery, printed and dispatched by Cockney Cards.</p>
+        <a class="personalise-button" href="/editor.html?card=11plus-girl">Personalise this card</a>
+        <p class="personalise-note">Use our online editor to personalise this design before ordering.</p>
+        <div class="details-box">
+          <strong>Card details</strong>
+          <p>Design: 11 Plus Girl</p>
+          <p>Categories: School Cards · Personal Achievement Cards</p>
         </div>
+      </div>
+    </section>
+    <section class="seo-copy">
+      <h2>About the 11 Plus Girl card</h2>
+      <p>The 11 Plus Girl design sits in our School, Achievement range. Write your own personal message inside using our online editor — the front design stays exactly as shown.</p>
+      <p>If this one isn't quite right, we've also got 11 Plus Boy, 11 Plus Kids, Driving Test Pass Boy, Driving Test Pass Girl in the same range.</p>
+    </section>
+    <section class="related">
+      <h2>You might also like</h2>
+      <ul class="related-grid">
+        <li>
+          <a href="/cards/11-plus-boy/">
+            <img src="https://images.cockneycards.com/11plus-boy-preview.png" alt="11 Plus Boy personalised card" loading="lazy">
+            <span>11 Plus Boy</span>
+          </a>
+        </li>
+        <li>
+          <a href="/cards/11-plus-kids/">
+            <img src="https://images.cockneycards.com/11plus-kids-preview.png" alt="11 Plus Kids personalised card" loading="lazy">
+            <span>11 Plus Kids</span>
+          </a>
+        </li>
+        <li>
+          <a href="/cards/driving-test-pass-boy/">
+            <img src="https://images.cockneycards.com/drivingtest-boy1-preview.png" alt="Driving Test Pass Boy personalised card" loading="lazy">
+            <span>Driving Test Pass Boy</span>
+          </a>
+        </li>
+        <li>
+          <a href="/cards/driving-test-pass-girl/">
+            <img src="https://images.cockneycards.com/drivingtest-girl1-preview.png" alt="Driving Test Pass Girl personalised card" loading="lazy">
+            <span>Driving Test Pass Girl</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+  </main>
 
-        <div class="gallery-column">
-            <div class="gallery-row">
-                <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://images.cockneycards.com/thankyou-teacher-preview.png" alt="Thank You Teacher Card" class="gallery-img">
-                </div>
-                <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://images.cockneycards.com/ladies-lunch-preview.png" alt="Ladies Lunch Card" class="gallery-img">
-                </div>
-            </div>
-            <div class="gallery-item large-box logo-bg">
-                <img src="https://images.cockneycards.com/lion.png" alt="Cockney Cards Logo Lion" class="gallery-img logo-img">
-            </div>
-        </div>
+  <footer class="site-footer">© 2026 Cockney Cards.</footer>
 
-        <div class="gallery-column">
-            <div class="gallery-item large-box" onclick="goToPrintsShop()">
-                <img src="https://images.cockneycards.com/oasis-dontlookback-preview.png" alt="OASIS Dont Look Back" class="gallery-img">
-            </div>
-            <div class="gallery-row">
-                <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://images.cockneycards.com/gaming-boy-preview.png" alt="Gamer Boy Card" class="gallery-img">
-                </div>
-                <div class="gallery-item small-box" onclick="goToCardsShop()">
-                    <img src="https://images.cockneycards.com/newhome-preview.png" alt="Congratulations New Home Card" class="gallery-img">
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- PHOTO GALLERY -> links out to Instagram (replaces the old embedded feed placeholder) -->
-<section class="photo-gallery-section">
-    <h3 class="photo-gallery-title">Follow us below on Instagram or TikTok</h3>
-    <div class="photo-grid" id="photo-grid"></div>
-    <div class="social-links">
-        <a href="https://www.instagram.com/cockneycards.ig" target="_blank" rel="noopener" class="social-link">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="currentColor" stroke-width="1.6"/>
-                <circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.6"/>
-                <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/>
-            </svg>
-            <span>@cockneycards.ig</span>
-        </a>
-        <a href="https://www.tiktok.com/@cockneycards" target="_blank" rel="noopener" class="social-link">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M16.5 3.5c.6 2.3 2.1 3.7 4.5 3.9v3.2c-1.6.1-3-.4-4.5-1.3v6.4c0 3.6-2.6 6-5.9 6-3.3 0-5.9-2.6-5.9-5.9 0-3.4 3-6.1 6.6-5.8v3.3c-.3-.1-.7-.1-1-.1-1.5 0-2.7 1.2-2.7 2.7 0 1.6 1.3 2.7 2.7 2.7 1.6 0 2.9-1.2 2.9-2.9V3.5h3.3z" stroke="currentColor" stroke-width="0.3" fill="currentColor"/>
-            </svg>
-            <span>@cockneycards</span>
-        </a>
-    </div>
-</section>
-
-<footer>
-    <div class="footer-grid">
-        <div class="footer-col">
-            <h4>Our Store Policies</h4>
-            <p><strong>Returns:</strong><br>Returns are only available on non-personalised products.</p>
-            <p><strong>Refunds:</strong><br>If an error has been made on your card by us we will refund and send a replacement free of charge.</p>
-        </div>
-        <div class="footer-col">
-            <h4>Contact Us</h4>
-            <p><strong>Email:</strong><br><a href="mailto:contact@cockneycards.com">contact@cockneycards.com</a></p>
-            <p><strong>Instagram:</strong><br><a href="https://www.instagram.com/cockneycards.ig" target="_blank">@cockneycards.ig</a></p>
-            <p><strong>TikTok:</strong><br><a href="https://www.tiktok.com/@cockneycards" target="_blank">@cockneycards</a></p>
-        </div>
-        <div class="footer-col">
-            <h4>Business Hours</h4>
-            <p><strong>Mon - Fri:</strong><br>9am - 5pm</p>
-            <p><strong>Saturday:</strong><br>10am - 4pm</p>
-            <p><strong>Sunday:</strong><br>Closed</p>
-        </div>
-    </div>
-    <div class="footer-bottom">© 2026 by Cockney Cards.</div>
-</footer>
-
-<script>
-const INSTAGRAM_URL = "https://www.instagram.com/cockneycards.ig";
-
-const $ = (id) => document.getElementById(id);
-
-window.addEventListener('DOMContentLoaded', () => {
-    loadPhotoGallery();
-    updatePromoBannerForMembership();
-});
-
-// Hides the "join the club" link in the promo banner for confirmed active
-// members. Nothing needed to bring it back once membership lapses — this
-// check runs fresh on every page load, so it simply stops finding
-// plusActive true and leaves the link showing again on its own.
-async function updatePromoBannerForMembership() {
-    if (typeof ccIsLoggedIn !== 'function' || !ccIsLoggedIn()) return;
-    const token = localStorage.getItem('cc_session');
-    if (!token) return;
-    try {
-        const res = await fetch('/api/account', { headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok) return;
-        const account = await res.json();
-        if (!account.plusActive) return;
-        const joinSpan = document.getElementById('promo-banner-join');
-        if (joinSpan) joinSpan.style.display = 'none';
-    } catch (err) {
-        console.error('Could not check membership status for promo banner:', err);
-    }
-}
-
-// Loads posts from the live Instagram feed. If there are no posts yet (or
-// the request fails), the section is simply left empty rather than showing
-// placeholder images.
-async function loadPhotoGallery() {
-    try {
-        const res = await fetch('/api/instagram-feed');
-        if (!res.ok) throw new Error(`Instagram feed request failed: ${res.status}`);
-        const data = await res.json();
-        if (Array.isArray(data.posts) && data.posts.length) {
-            renderPhotoGallery(data.posts);
-        }
-    } catch (err) {
-        console.warn('Could not load Instagram feed:', err);
-    }
-}
-
-function renderPhotoGallery(photos) {
-    $('photo-grid').innerHTML = photos.map(({ image, link }) => `
-        <a href="${link || INSTAGRAM_URL}" target="_blank" rel="noopener">
-            <img src="${image}" alt="Cockney Cards on Instagram" loading="lazy">
-        </a>
-    `).join('');
-}
-
-function goToPrintsShop() { window.location.href = 'shop-prints.html'; }
-function goToCardsShop() { window.location.href = 'shop-cards.html'; }
-
-// Trims the search box before letting the form submit as a normal GET
-// request to shop-cards.html?search=... — blocks empty submissions rather
-// than sending customers to an unfiltered shop page.
-function handleSiteSearch(event) {
-    const input = document.getElementById('site-search-input');
-    const value = input.value.trim();
-    if (!value) { event.preventDefault(); return false; }
-    input.value = value;
-    return true;
-}
-</script>
+  <script>window.CURRENT_CARD_ID = "11plus-girl";</script>
+  <script src="../../cards-data.js"></script>
+  <script src="../../related-cards.js"></script>
 </body>
 </html>
