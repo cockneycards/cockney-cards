@@ -67,7 +67,11 @@
 //                 Must match the sidebar's filter keys exactly:
 //                 'all', 'sports', 'music', 'black & White', 'childrens'.
 
-const CLOUD_BASE = "https://images.cockneycards.com/";
+// window.CLOUD_BASE (rather than a plain const) so this file can be loaded
+// alongside cards-data.js on the same page (e.g. shop-cards.html, for
+// combined card+print search) without a duplicate-declaration error --
+// whichever of the two loads first sets it, the other just reuses it.
+window.CLOUD_BASE = window.CLOUD_BASE || "https://images.cockneycards.com/";
 
 const PRINT_CATALOGUE = {
     // These two used to live in shop-prints.html's own PRODUCTS list —
