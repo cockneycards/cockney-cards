@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop Cards | Cockney Cards</title>
+    <title>Shop Prints | Cockney Cards</title>
     <script src="auth.js"></script>
     <script src="cart.js"></script>
-    <script src="categories-data.js"></script>
-    <script src="cards-data.js"></script>
-    <script src="card-pages.js"></script>
+    <script src="prints-data.js"></script>
 
     <style>
         :root { --primary: #1A73E8; --dark: #1e1e24; --light: #fcfcfc; --border-color: #e0e0e0; --font-family: 'Helvetica Neue', Arial, sans-serif; }
@@ -132,8 +130,8 @@
     </div>
     <nav>
         <ul class="nav-links">
-            <li><a href="shop-cards.html" class="active">Shop Cards</a></li>
-            <li><a href="shop-prints.html">Shop Prints</a></li>
+            <li><a href="shop-cards.html">Shop Cards</a></li>
+            <li><a href="shop-prints.html" class="active">Shop Prints</a></li>
             <li><a href="cockney-club.html">Cockney Club</a></li>
             <li><a href="account.html">My Account</a></li>
         </ul>
@@ -145,8 +143,8 @@
 </div>
 
 <div class="shop-header">
-    <h1>Cards</h1>
-    <p>Cockney Cards has a range of greeting cards for all celebrations that are perfect for any occasion.</p>
+    <h1>Prints</h1>
+    <p>Cockney Cards has a range of personalised prints, perfect for any wall at home or in the office.</p>
 </div>
 
 <div class="shop-container">
@@ -171,7 +169,6 @@
             </label>
         </div>
         <div class="product-grid" id="product-grid"></div>
-        <div class="team-gallery" id="team-gallery"></div>
     </main>
 </div>
 
@@ -199,39 +196,41 @@
 </footer>
 
 <script>
-// CLOUD_BASE, DEFAULT_PRICE, CARD_CATEGORIES and CARD_CATALOGUE all come from
-// cards-data.js (loaded above) -- that's the only place card data lives now.
-// Build the shop's product list straight from the shared catalogue. A card
-// only shows up here if its entry in cards-data.js has a title + preview.
-const PRODUCTS = Object.entries(CARD_CATALOGUE)
-    .filter(([id, c]) => c.title && c.preview)
+// CLOUD_BASE and PRINT_CATALOGUE come from prints-data.js (loaded above) --
+// that's the only place print data lives now. Build the shop's product list
+// straight from the shared catalogue. A print only shows up here if its
+// entry in prints-data.js has a title (preview falls back to the full
+// artwork when no separate thumbnail is set -- see prints-data.js).
+const PRODUCTS = Object.entries(PRINT_CATALOGUE)
+    .filter(([id, c]) => c.title && (c.preview || c.full))
     .map(([id, c]) => {
-        const priceLabel = c.price || DEFAULT_PRICE;
         return {
-            id, title: c.title, price: priceLabel,
-            priceValue: parseFloat(priceLabel.replace(/[^0-9.]/g, '')),
-            image: CLOUD_BASE + c.preview, categories: c.categories
+            id, title: c.title, price: c.price,
+            priceValue: c.priceValue,
+            image: CLOUD_BASE + (c.preview || c.full), categories: c.categories
         };
     });
 const $ = (id) => document.getElementById(id);
 
+// Prints only ever use a flat, single-level category list (no nested
+// leagues/teams the way cards do) -- keys must match prints-data.js's
+// `categories` arrays exactly.
+const PRINT_CATEGORIES = [
+    ['all', 'All Prints'],
+    ['sports', 'Sports'],
+    ['music', 'Music'],
+    ['b&w', 'Black & White'],
+    ['childrens', "Children's"]
+];
+
 let currentCategory = 'all';
 let currentSort = 'featured';
-let viewMode = 'grid';       // 'grid' | 'gallery' | 'team'
-let currentLeague = null;    // e.g. "premiership" -- set when viewMode is 'gallery' or 'team'
-let currentTeam = null;      // e.g. "arsenal"      -- set when viewMode is 'team'
 
 window.addEventListener('DOMContentLoaded', () => {
     renderCategories();
     updatePromoBannerForMembership();
-    $('team-gallery').addEventListener('click', (e) => {
-        const tile = e.target.closest('.team-tile');
-        if (tile) openTeamPage(currentLeague, tile.dataset.team);
-    });
     $('breadcrumb').addEventListener('click', (e) => {
         e.preventDefault();
-        const galleryLink = e.target.closest('[data-gallery-league]');
-        if (galleryLink) { openTeamGallery(galleryLink.dataset.galleryLeague); return; }
         const catLink = e.target.closest('[data-cat]');
         if (catLink) filterProducts(catLink.dataset.cat);
     });
@@ -280,13 +279,13 @@ async function updatePromoBannerForMembership() {
 }
 
 // --- Navigation state persistence (so back / cancel-and-return can restore
-// exactly where the user left off, category tree and all) ---
-const SHOP_STATE_KEY = 'shopCardsState';
+// exactly where the user left off) ---
+const SHOP_STATE_KEY = 'shopPrintsState';
 
 function saveShopState() {
     try {
         sessionStorage.setItem(SHOP_STATE_KEY, JSON.stringify({
-            currentCategory, viewMode, currentLeague, currentTeam, currentSort
+            currentCategory, currentSort
         }));
     } catch (e) { /* sessionStorage unavailable -- fail silently */ }
 }
@@ -306,17 +305,6 @@ function shouldResumeFromEditor() {
     return new URLSearchParams(window.location.search).get('resume') === '1';
 }
 
-// Expands every ancestor branch of the sidebar tree that leads to `key`,
-// so the category structure stays visible instead of collapsing back down.
-function expandPathTo(key) {
-    const path = findPath(key) || [];
-    path.forEach(([k]) => {
-        const link = document.querySelector(`.category-list a[data-cat="${k}"]`);
-        const li = link && link.closest('li');
-        if (li && li.classList.contains('has-children')) li.classList.add('expanded');
-    });
-}
-
 function restoreShopState() {
     const raw = sessionStorage.getItem(SHOP_STATE_KEY);
     if (!raw) { filterProducts('all'); return; }
@@ -328,132 +316,29 @@ function restoreShopState() {
     const sortSelect = $('sort-select');
     if (sortSelect) sortSelect.value = currentSort;
 
-    if (state.viewMode === 'team' && state.currentLeague && state.currentTeam) {
-        expandPathTo(state.currentLeague);
-        openTeamPage(state.currentLeague, state.currentTeam);
-    } else if (state.viewMode === 'gallery' && state.currentLeague) {
-        expandPathTo(state.currentLeague);
-        openTeamGallery(state.currentLeague);
-    } else if (state.currentCategory && state.currentCategory !== 'all') {
-        expandPathTo(state.currentCategory);
-        filterProducts(state.currentCategory);
-    } else {
-        filterProducts('all');
-    }
+    filterProducts(state.currentCategory && state.currentCategory !== 'all' ? state.currentCategory : 'all');
 }
 
-// True if this category (or any of its still-visible children) has at
-// least one matching card -- lets empty leagues/sub-categories stay hidden
-// automatically instead of showing an empty shelf.
-function categoryHasProducts(node) {
-    const [key, , children] = node;
-    if (PRODUCTS.some((p) => p.categories.includes(key))) return true;
-    if (Array.isArray(children)) {
-        return children.some((c) => c[3] !== false && categoryHasProducts(c));
-    }
-    return false;
+// True if this category has at least one matching print -- lets empty
+// categories stay hidden automatically instead of showing an empty shelf.
+function categoryHasProducts(key) {
+    return key === 'all' || PRODUCTS.some((p) => p.categories.includes(key));
 }
-
-function findCategoryNode(key, nodes = CARD_CATEGORIES) {
-    for (const node of nodes) {
-        if (node[0] === key) return node;
-        if (Array.isArray(node[2])) {
-            const found = findCategoryNode(key, node[2]);
-            if (found) return found;
-        }
-    }
-    return null;
-}
-
-// Returns the chain of [key, label] nodes from the CARD_CATEGORIES root down to `key`.
-function findPath(key, nodes = CARD_CATEGORIES, trail = []) {
-    for (const node of nodes) {
-        const newTrail = [...trail, node];
-        if (node[0] === key) return newTrail;
-        if (Array.isArray(node[2])) {
-            const found = findPath(key, node[2], newTrail);
-            if (found) return found;
-        }
-    }
-    return null;
-}
-
-// depth 0 = top-level (Sports), 1 = Football/Golf/etc, 2 = leagues.
-// Leagues (depth 2) that have a team list open the team gallery on click
-// instead of expanding inline -- so the sidebar never nests past 3 levels.
-function renderCategoryLevel(categories, depth) {
-    return categories.map(([key, label, children, enabled = true]) => {
-        if (enabled === false) return '';
-        if (!categoryHasProducts([key, label, children])) return '';
-
-        const visibleKids = Array.isArray(children)
-            ? children.filter((c) => c[3] !== false && categoryHasProducts(c))
-            : [];
-        const hasKids = visibleKids.length > 0;
-        const inlineExpand = hasKids && depth <= 1;
-        const isGallery = hasKids && depth >= 2;
-
-        const showArrow = inlineExpand && !LOCKED_EXPANDED_CATEGORIES.includes(key);
-
-        return `
-            <li class="${inlineExpand ? 'has-children' : ''}"${isGallery ? ' data-gallery="true"' : ''}>
-                <a data-cat="${key}">${label}${showArrow ? '<span class="arrow">&#9662;</span>' : ''}</a>
-                ${inlineExpand ? `<ul class="subcat-list">${renderCategoryLevel(visibleKids, depth + 1)}</ul>` : ''}
-            </li>`;
-    }).join('');
-}
-
-// Categories that should already be expanded when the page first loads
-// (their immediate children visible), without needing a click. Nested
-// grandchildren (e.g. Football's own leagues) still stay closed until
-// clicked directly.
-const DEFAULT_EXPANDED_CATEGORIES = ["sports", "birthdays", "football"];
-
-// Categories in this list can never be collapsed -- their arrow is hidden
-// and clicking them never toggles them shut, only navigates/filters.
-const LOCKED_EXPANDED_CATEGORIES = ["sports", "birthdays", "football"];
 
 function renderCategories() {
     const list = $('category-list');
-    list.innerHTML = renderCategoryLevel(CARD_CATEGORIES, 0);
-
-    DEFAULT_EXPANDED_CATEGORIES.forEach((key) => {
-        const link = list.querySelector(`a[data-cat="${key}"]`);
-        const li = link && link.closest('li');
-        if (li && li.classList.contains('has-children')) li.classList.add('expanded');
-    });
+    list.innerHTML = PRINT_CATEGORIES
+        .filter(([key]) => categoryHasProducts(key))
+        .map(([key, label]) => `<li><a data-cat="${key}">${label}</a></li>`)
+        .join('');
 
     // Single delegated click handler instead of one inline handler per item
     list.addEventListener('click', (e) => {
         const link = e.target.closest('a[data-cat]');
         if (!link) return;
-        const li = link.closest('li');
-        const key = link.dataset.cat;
-
-        if (li.dataset.gallery === 'true') {
-            openTeamGallery(key);
-            scrollToFirstItem();
-            return;
-        }
-        if (li.classList.contains('has-children') && !LOCKED_EXPANDED_CATEGORIES.includes(key)) {
-            toggleExpandSubtree(li);
-        }
-        filterProducts(key);
+        filterProducts(link.dataset.cat);
         scrollToFirstItem();
     });
-}
-
-// Expands/collapses a category AND every nested category inside it at once,
-// so clicking "Sports" reveals Football/Golf/Cricket... all in one click.
-function toggleExpandSubtree(li) {
-    const expanding = !li.classList.contains('expanded');
-    li.classList.toggle('expanded', expanding);
-    // Only reset nested branches on collapse -- expanding a category should
-    // only open that one level; its children (e.g. Football) stay closed
-    // until clicked themselves.
-    if (!expanding) {
-        li.querySelectorAll('li.has-children').forEach((child) => child.classList.remove('expanded'));
-    }
 }
 
 function setActiveCategory(key) {
@@ -466,71 +351,25 @@ function renderGrid(productsToRender) {
     $('product-count').innerText = `${productsToRender.length} products`;
     $('product-grid').innerHTML = productsToRender.map((p) => `
         <div class="product-card">
-            <a class="product-link" href="cards/${CARD_PAGE_SLUGS[p.id] || p.id}/" onclick="saveShopState()">
+            <a class="product-link" href="editor-prints.html?print=${p.id}" onclick="saveShopState()">
                 <div class="image-wrapper">
-                    <img src="${p.image}" alt="${p.title} personalised greeting card" loading="lazy" oncontextmenu="return false;" draggable="false">
+                    <img src="${p.image}" alt="${p.title} personalised print" loading="lazy" oncontextmenu="return false;" draggable="false">
                 </div>
                 <div class="product-info">
                     <h3 class="product-title">${p.title}</h3>
-                    <p class="product-price">${p.price}</p>
+                    <p class="product-price">from ${p.price}</p>
                 </div>
             </a>
-            <a class="btn-action" href="editor.html?card=${p.id}" onclick="saveShopState()">Personalise</a>
-        </div>
-    `).join('');
-}
-
-function renderTeamGallery(leagueKey) {
-    const node = findCategoryNode(leagueKey);
-    const teams = (node && Array.isArray(node[2]) ? node[2] : [])
-        .filter((t) => t[3] !== false)
-        .map(([key, label]) => {
-            const teamProducts = PRODUCTS.filter((p) => p.categories.includes(leagueKey) && p.categories.includes(key));
-            return { key, label, count: teamProducts.length, image: teamProducts[0] ? teamProducts[0].image : '' };
-        })
-        .filter((t) => t.count > 0);
-
-    $('team-gallery').innerHTML = teams.map((t) => `
-        <div class="team-tile" data-team="${t.key}">
-            <div class="team-image-wrapper"><img src="${t.image}" alt="${t.label}" loading="lazy" oncontextmenu="return false;" draggable="false"></div>
-            <h3 class="team-name">${t.label}</h3>
-            <p class="team-count">${t.count} card${t.count === 1 ? '' : 's'}</p>
+            <a class="btn-action" href="editor-prints.html?print=${p.id}" onclick="saveShopState()">Personalise</a>
         </div>
     `).join('');
 }
 
 function renderBreadcrumb() {
-    if (viewMode === 'grid') {
-        if (currentCategory === 'all') return '';
-        const path = findPath(currentCategory) || [];
-        if (path.length <= 1) return '';
-        return path.map(([key, label], i) => {
-            const isLast = i === path.length - 1;
-            return isLast
-                ? `<span class="crumb current">${label}</span>`
-                : `<a href="#" class="crumb" data-cat="${key}">${label}</a>`;
-        }).join('<span class="crumb-sep">/</span>');
-    }
-
-    // 'gallery' or 'team' -- both are rooted at the current league
-    const leaguePath = findPath(currentLeague) || [];
-    const ancestorCrumbs = leaguePath.slice(0, -1).map(([key, label]) =>
-        `<a href="#" class="crumb" data-cat="${key}">${label}</a>`
-    );
-    const last = leaguePath[leaguePath.length - 1] || [currentLeague, currentLeague];
-    const leagueCrumb = viewMode === 'gallery'
-        ? `<span class="crumb current">${last[1]}</span>`
-        : `<a href="#" class="crumb" data-gallery-league="${last[0]}">${last[1]}</a>`;
-
-    const crumbs = [...ancestorCrumbs, leagueCrumb];
-
-    if (viewMode === 'team') {
-        const leagueNode = findCategoryNode(currentLeague);
-        const teamNode = (leagueNode && Array.isArray(leagueNode[2]) ? leagueNode[2] : []).find((t) => t[0] === currentTeam);
-        crumbs.push(`<span class="crumb current">${teamNode ? teamNode[1] : currentTeam}</span>`);
-    }
-
-    return crumbs.join('<span class="crumb-sep">/</span>');
+    if (currentCategory === 'all') return '';
+    const entry = PRINT_CATEGORIES.find(([key]) => key === currentCategory);
+    if (!entry) return '';
+    return `<span class="crumb current">${entry[1]}</span>`;
 }
 
 // Session-scoped cache for the "Featured" shuffle order (see sortItems
@@ -538,7 +377,7 @@ function renderBreadcrumb() {
 // once per browser session and reused after that, so switching
 // categories, sorting, or navigating back to this page never reshuffles
 // what's already on screen.
-const FEATURED_ORDER_KEY = 'shopCardsFeaturedOrder';
+const FEATURED_ORDER_KEY = 'shopPrintsFeaturedOrder';
 let featuredOrderIds = null;
 
 function getFeaturedOrderIds() {
@@ -592,25 +431,8 @@ function sortItems(items) {
 }
 
 function renderView() {
-    const grid = $('product-grid');
-    const gallery = $('team-gallery');
-    const meta = $('catalog-meta');
-
-    if (viewMode === 'gallery') {
-        meta.style.display = 'none';
-        grid.style.display = 'none';
-        gallery.style.display = 'grid';
-        renderTeamGallery(currentLeague);
-        $('breadcrumb').innerHTML = renderBreadcrumb();
-        return;
-    }
-
-    gallery.style.display = 'none';
-    meta.style.display = 'flex';
-    grid.style.display = 'grid';
-
-    const filtered = viewMode === 'team'
-        ? PRODUCTS.filter((p) => p.categories.includes(currentLeague) && p.categories.includes(currentTeam))
+    const filtered = currentCategory === 'all'
+        ? PRODUCTS
         : PRODUCTS.filter((p) => p.categories.includes(currentCategory));
 
     renderGrid(sortItems(filtered));
@@ -619,37 +441,18 @@ function renderView() {
 
 function filterProducts(categoryKey) {
     currentCategory = categoryKey;
-    viewMode = 'grid';
     setActiveCategory(categoryKey);
     renderView();
 }
 
-// Scrolls the first item of whichever view is currently showing (product
-// grid or team gallery) into view -- used after a sidebar category click
-// so the customer lands on the results instead of having to scroll down
-// themselves. Only called from actual click handlers, never on initial
-// page load/restore, since jumping the page on load would be jarring.
+// Scrolls the first product into view -- used after a sidebar category
+// click so the customer lands on the results instead of having to scroll
+// down themselves. Only called from actual click handlers, never on
+// initial page load/restore, since jumping the page on load would be
+// jarring.
 function scrollToFirstItem() {
-    const firstItem = viewMode === 'gallery'
-        ? $('team-gallery').querySelector('.team-tile')
-        : $('product-grid').querySelector('.product-card');
+    const firstItem = $('product-grid').querySelector('.product-card');
     if (firstItem) firstItem.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function openTeamGallery(leagueKey) {
-    currentLeague = leagueKey;
-    currentTeam = null;
-    viewMode = 'gallery';
-    setActiveCategory(leagueKey);
-    renderView();
-}
-
-function openTeamPage(leagueKey, teamKey) {
-    currentLeague = leagueKey;
-    currentTeam = teamKey;
-    viewMode = 'team';
-    setActiveCategory(leagueKey);
-    renderView();
 }
 
 function sortProducts(sortKey) {
@@ -657,16 +460,9 @@ function sortProducts(sortKey) {
     renderView();
 }
 
-function goToCardPage(productId) {
-    saveShopState();
-    const slug = CARD_PAGE_SLUGS[productId];
-    window.location.href = slug ? `cards/${slug}/` : `editor.html?card=${productId}`;
-}
-
-// Backwards-compatible helper for any older code that may still call it.
 function goToEditor(productId) {
     saveShopState();
-    window.location.href = `editor.html?card=${productId}`;
+    window.location.href = `editor-prints.html?print=${productId}`;
 }
 </script>
 </body>
