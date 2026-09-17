@@ -23,19 +23,22 @@
    a phone screen, which pushes the whole header into horizontal scroll.
    :has() scopes this to only pages that actually have a search bar, so
    pages without one (cockney-club, account, thankyou) keep their
-   existing header-top layout untouched. Re-flows into two rows: logo +
-   cart icon on top, full-width search bar underneath. ---------- */
+   existing header-top layout untouched. Switches to flex-wrap so the
+   logo + cart icon sit together as one centered pair on the first line
+   (matching the centered logo on desktop), with the search bar wrapping
+   onto its own full-width line underneath. ---------- */
 @media (max-width: 640px) {
     .header-top:has(.header-left) {
-        grid-template-columns: 1fr auto;
-        grid-template-areas:
-            "logo cart"
-            "search search";
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
         row-gap: 10px;
+        column-gap: 14px;
     }
-    .header-top:has(.header-left) .header-left { grid-area: search; justify-self: stretch; padding-right: 0; }
-    .header-top:has(.header-left) .logo-container { grid-area: logo; justify-self: start; }
-    .header-top:has(.header-left) .header-right { grid-area: cart; justify-self: end; padding-left: 0; }
+    .header-top:has(.header-left) .logo-container { order: 1; }
+    .header-top:has(.header-left) .header-right { order: 2; padding-left: 0; }
+    .header-top:has(.header-left) .header-left { order: 3; width: 100%; padding-right: 0; }
     .search-form { width: 100%; box-sizing: border-box; }
     .search-form input[type="search"] { flex: 1; min-width: 0; width: auto; }
 }
