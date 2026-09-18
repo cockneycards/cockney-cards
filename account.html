@@ -144,7 +144,7 @@
         <div class="header-left">
             <form class="search-form" role="search" action="shop-cards.html" method="GET" onsubmit="return handleSiteSearch(event)">
                 <input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card">
-                <button type="submit" aria-label="Search">
+                <button type="submit" aria-label="Search" onclick="toggleMobileSearch(event)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -1234,6 +1234,39 @@
         input.value = value;
         return true;
     }
+
+    // Below 640px the search form collapses to just its icon (see mobile.css).
+    // First tap opens the input as a popup instead of submitting; once it's
+    // open, a tap on the icon (or Enter in the field) submits as normal.
+    // Above 640px the form is already fully visible, so the icon keeps its
+    // plain "submit the search" behaviour untouched.
+    const isMobileSearchLayout = () => window.matchMedia('(max-width: 640px)').matches;
+
+    function toggleMobileSearch(event) {
+        if (!isMobileSearchLayout()) return;
+        const wrapper = document.querySelector('.header-left');
+        if (!wrapper.classList.contains('search-active')) {
+            event.preventDefault();
+            wrapper.classList.add('search-active');
+            document.getElementById('site-search-input').focus();
+        }
+    }
+
+    document.addEventListener('click', (event) => {
+        if (!isMobileSearchLayout()) return;
+        const wrapper = document.querySelector('.header-left');
+        if (wrapper.classList.contains('search-active') && !wrapper.contains(event.target)) {
+            wrapper.classList.remove('search-active');
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        const wrapper = document.querySelector('.header-left');
+        if (wrapper.classList.contains('search-active')) {
+            wrapper.classList.remove('search-active');
+        }
+    });
 
     window.addEventListener("DOMContentLoaded", async () => {
         captureReferralCode();
