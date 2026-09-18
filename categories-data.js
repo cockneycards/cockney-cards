@@ -126,7 +126,7 @@ const SPORTS_TREE = ["sports", "Sports", [
             ["burnleyw", "Burnley"],
             ["charltonw", "Charlton Athletic"],
             ["chelseaw", "Chelsea"],
-            ["crystal-palacew", "Crystal Palace"],
+            ["crystalpw", "Crystal Palace"],
             ["durhamw", "Durham"],
             ["evertonw", "Everton"],
             ["ipswichw", "Ipswich Town"],
