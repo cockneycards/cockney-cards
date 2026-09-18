@@ -9,6 +9,11 @@ const categorySource = fs.readFileSync(path.join(ROOT, 'categories-data.js'), 'u
 
 function loadGlobals(source, names) {
   const context = {};
+  // cards-data.js assigns to window.CLOUD_BASE (so it can share a page with
+  // prints-data.js without a duplicate-declaration error). Alias `window`
+  // to the sandbox's own global object so that assignment also lands on
+  // the bare identifier, which the extraction below relies on.
+  context.window = context;
   vm.runInNewContext(source + '\n' + names.map(n => `globalThis.__${n} = ${n};`).join('\n'), context);
   return names.reduce((o, n) => (o[n] = context[`__${n}`], o), {});
 }
@@ -167,6 +172,10 @@ for (const p of products) {
   </main>
 
   <footer class="site-footer">© 2026 Cockney Cards.</footer>
+
+  <script>window.CURRENT_CARD_ID = ${JSON.stringify(p.id)};</script>
+  <script src="../../cards-data.js"></script>
+  <script src="../../related-cards.js"></script>
 </body>
 </html>`;
 

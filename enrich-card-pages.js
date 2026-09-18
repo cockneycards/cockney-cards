@@ -55,6 +55,9 @@ function loadCatalogue(filename) {
   CARD_CATALOGUE: typeof CARD_CATALOGUE !== 'undefined' ? CARD_CATALOGUE : undefined,
 };`;
     const sandbox = {};
+    // cards-data.js assigns to window.CLOUD_BASE; alias window to the
+    // sandbox's own global object so that assignment doesn't throw.
+    sandbox.window = sandbox;
     vm.createContext(sandbox);
     vm.runInContext(code + extract, sandbox, { filename });
     return (sandbox.__extracted || {}).CARD_CATALOGUE || null;

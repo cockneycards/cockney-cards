@@ -10,6 +10,9 @@ const CLOUD_BASE = 'https://images.cockneycards.com/';
 function loadGlobals(file) {
   const code = fs.readFileSync(file, 'utf8');
   const ctx = {};
+  // cards-data.js assigns to window.CLOUD_BASE; alias window to the
+  // sandbox's own global object so that assignment doesn't throw.
+  ctx.window = ctx;
   vm.createContext(ctx);
   vm.runInContext(code + "\nif (typeof CARD_CATALOGUE !== 'undefined') this.CARD_CATALOGUE = CARD_CATALOGUE; if (typeof DEFAULT_PRICE !== 'undefined') this.DEFAULT_PRICE = DEFAULT_PRICE; if (typeof CARD_CATEGORIES !== 'undefined') this.CARD_CATEGORIES = CARD_CATEGORIES;", ctx);
   return ctx;
