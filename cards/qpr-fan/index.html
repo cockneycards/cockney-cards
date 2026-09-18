@@ -22,27 +22,9 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="header-top">
-      <form class="search-form" role="search" action="/shop-cards.html" method="GET">
-        <input type="search" name="search" placeholder="Search for a card..." aria-label="Search for a card">
-        <button type="submit" aria-label="Search" onclick="toggleMobileSearch(event)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-        </button>
-      </form>
-      <a class="logo" href="/" aria-label="Cockney Cards home">
-        <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
-      </a>
-      <a class="cart-icon" href="/basket.html" aria-label="Basket">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <path d="M16 10a4 4 0 0 1-8 0"></path>
-        </svg>
-      </a>
-    </div>
+    <a class="logo" href="/" aria-label="Cockney Cards home">
+      <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+    </a>
     <nav aria-label="Main navigation">
       <a href="/shop-cards.html">Shop Cards</a>
       <a href="/shop-prints.html">Shop Prints</a>
@@ -111,6 +93,9 @@
   </main>
 
   <footer class="site-footer">© 2026 Cockney Cards.</footer>
-  <script src="../../card-search.js"></script>
+
+  <script>window.CURRENT_CARD_ID = "qprfan";</script>
+  <script src="../../cards-data.js"></script>
+  <script src="../../related-cards.js"></script>
 </body>
 </html>
