@@ -55,11 +55,38 @@ h1 { font-size:36px; line-height:1.15; font-weight:400; margin:0 0 14px; }
 .site-footer { border-top:1px solid var(--border); text-align:center; padding:25px; color:#888; font-size:11px; }
 @media (max-width:800px) {
   .site-header { padding-left:18px; padding-right:18px; }
-  .header-top { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; row-gap:10px; column-gap:14px; }
-  .logo { order:1; }
-  .cart-icon { order:2; }
-  .search-form { order:3; width:100%; box-sizing:border-box; justify-self:auto; }
-  .search-form input[type="search"] { flex:1; min-width:0; width:auto; }
+  .header-top { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:18px; }
+  /* Icon sits left of the logo, level with the cart icon; logo runs
+     bigger now the search bar isn't sitting in its own full-width row. */
+  .search-form { order:1; justify-self:auto; border:none; padding:0; background:none; }
+  .search-form button { padding:4px; }
+  .search-form button svg { width:20px; height:20px; }
+  .search-form input[type="search"] { display:none; }
+  .logo { order:2; }
+  .logo img { width:110px; }
+  .cart-icon { order:3; }
+
+  /* Tapping the icon adds .search-active to .search-form (see
+     card-search.js). display:contents drops the form's own box without
+     removing its children from the DOM, so the icon button and the
+     input become direct flex items of .header-top itself. Giving the
+     input flex:0 0 calc(100% - 32px) then forces it onto its own
+     full-width line — because header-top already wraps — sitting below
+     the icon/logo/cart row and pushing <nav> down after it, rather than
+     floating over the page. Removing .search-active reverses this. */
+  .search-form.search-active { display:contents; }
+  .search-form.search-active button { order:1; }
+  .search-form.search-active input[type="search"] {
+    display:block;
+    order:4;
+    flex:0 0 calc(100% - 32px);
+    box-sizing:border-box;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:8px 14px;
+    background:#fff;
+    box-shadow:0 4px 14px rgba(0,0,0,.1);
+  }
   /* Keep all 4 nav links on one line instead of wrapping -- same
      treatment as the rest of the site's mobile.css. */
   .site-header nav {
