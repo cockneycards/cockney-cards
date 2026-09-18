@@ -46,17 +46,48 @@
 @media (max-width: 640px) {
     .header-top:has(.header-left) {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-wrap: nowrap;
+        justify-content: space-between;
         align-items: center;
-        row-gap: 10px;
-        column-gap: 14px;
     }
-    .header-top:has(.header-left) .logo-container { order: 1; }
-    .header-top:has(.header-left) .header-right { order: 2; padding-left: 0; }
-    .header-top:has(.header-left) .header-left { order: 3; width: 100%; padding-right: 0; }
-    .search-form { width: 100%; box-sizing: border-box; }
-    .search-form input[type="search"] { flex: 1; min-width: 0; width: auto; }
+    /* Icon sits to the left, level with the cart icon on the right;
+       logo takes the remaining space in the middle so it reads as
+       centered (and can run bigger now the search bar isn't stealing
+       a full row underneath it). */
+    .header-top:has(.header-left) .header-left { order: 1; width: auto; padding-right: 0; position: relative; }
+    .header-top:has(.header-left) .logo-container { order: 2; flex: 1; }
+    .header-top:has(.header-left) .logo-container img { max-width: 110px; }
+    .header-top:has(.header-left) .header-right { order: 3; padding-left: 0; }
+
+    /* Collapse the search form itself down to just its icon button;
+       the input is repositioned as an absolutely-placed popup that
+       only appears once .search-active is toggled on .header-left
+       (see the page's toggleMobileSearch() script). */
+    .search-form {
+        border: none;
+        padding: 0;
+        background: none;
+        display: flex;
+        align-items: center;
+    }
+    .search-form button { padding: 4px; }
+    .search-form button svg { width: 20px; height: 20px; }
+    .search-form input[type="search"] {
+        display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 0;
+        width: 220px;
+        max-width: calc(100vw - 32px);
+        box-sizing: border-box;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 8px 14px;
+        background: white;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        z-index: 20;
+    }
+    .header-left.search-active .search-form input[type="search"] { display: block; }
 }
 
 /* ---------- Footer (index, thankyou, basket, cockney-club —
