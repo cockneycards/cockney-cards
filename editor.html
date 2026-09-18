@@ -1784,6 +1784,10 @@ function onBlankMessageChange(isChecked) {
         $('own-message-checkbox').checked = false;
     }
     toggleBlankMessage(isChecked);
+    // Once the message is blanked the inside pages are empty, so jump back
+    // to the front cover rather than leaving the customer staring at a
+    // blank card.
+    if (isChecked) switchPage('front');
     updateAddToBasketAvailability();
 }
 
