@@ -49,7 +49,7 @@
     <div class="header-top">
       <div class="header-left">
         <form class="search-form" role="search" action="/shop-cards.html" method="GET" onsubmit="return handleSiteSearch(event)">
-          <input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card">
+          <span class="search-drop"><input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card"></span>
           <button type="submit" aria-label="Search" onclick="toggleMobileSearch(event)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
@@ -146,31 +146,43 @@
   <script src="/auth.js"></script>
   <script src="/cart.js"></script>
   <script>
-    // Mirrors index.html's search-toggle behaviour so the collapsed
-    // mobile search icon (see mobile.css) works the same on every page.
-    const isMobileSearchLayout = () => window.matchMedia('(max-width: 640px)').matches;
+    // Header search toggle. mobile.css collapses the search bar to just its icon
+    // at every screen width, so tapping the icon has to open it everywhere, not
+    // only on phones. It adds .search-active to .header-left (mobile.css turns
+    // that into a full-width row under the logo row) and sizes the bar to match
+    // the nav links below it via --search-width.
+    function setSearchWidth() {
+      const wrapper = document.querySelector('.header-left');
+      const links = document.querySelector('.nav-links');
+      if (wrapper && links) {
+        wrapper.style.setProperty('--search-width', links.getBoundingClientRect().width + 'px');
+      }
+    }
     function toggleMobileSearch(event) {
-      if (!isMobileSearchLayout()) return;
       const wrapper = document.querySelector('.header-left');
       if (!wrapper.classList.contains('search-active')) {
         event.preventDefault();
+        setSearchWidth();
         wrapper.classList.add('search-active');
         document.getElementById('site-search-input').focus();
       }
     }
     document.addEventListener('click', (event) => {
-      if (!isMobileSearchLayout()) return;
       const wrapper = document.querySelector('.header-left');
-      if (wrapper.classList.contains('search-active') && !wrapper.contains(event.target)) {
+      if (wrapper && wrapper.classList.contains('search-active') && !wrapper.contains(event.target)) {
         wrapper.classList.remove('search-active');
       }
     });
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
       const wrapper = document.querySelector('.header-left');
-      if (wrapper.classList.contains('search-active')) {
+      if (wrapper && wrapper.classList.contains('search-active')) {
         wrapper.classList.remove('search-active');
       }
+    });
+    window.addEventListener('resize', () => {
+      const wrapper = document.querySelector('.header-left');
+      if (wrapper && wrapper.classList.contains('search-active')) setSearchWidth();
     });
     // Header search. Takes over from the browser's default form submit and
     // navigates to /shop-cards.html?search=... itself (the same way the logo
