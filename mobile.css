@@ -46,11 +46,10 @@
 @media (max-width: 640px) {
     .header-top:has(.header-left) {
         display: flex;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         justify-content: center;
         align-items: center;
         gap: 18px;
-        position: relative;
     }
     /* Icon sits to the left, level with the cart icon on the right;
        logo sits between them, close on both sides now that the row
@@ -60,11 +59,7 @@
     .header-top:has(.header-left) .logo-container img { max-width: 110px; }
     .header-top:has(.header-left) .header-right { order: 3; padding-left: 0; }
 
-    /* Collapse the search form itself down to just its icon button;
-       the input is repositioned as a popup centered under the whole
-       header row (not the icon) so it drops below the logo instead
-       of covering it. It only appears once .search-active is toggled
-       on .header-left (see the page's toggleMobileSearch() script). */
+    /* Collapse the search form itself down to just its icon button. */
     .search-form {
         border: none;
         padding: 0;
@@ -74,23 +69,33 @@
     }
     .search-form button { padding: 4px; }
     .search-form button svg { width: 20px; height: 20px; }
-    .search-form input[type="search"] {
-        display: none;
-        position: absolute;
-        top: calc(100% + 10px);
-        left: 50%;
-        transform: translateX(-50%);
-        width: 220px;
-        max-width: calc(100vw - 32px);
+    .search-form input[type="search"] { display: none; }
+
+    /* When the icon is tapped, toggleMobileSearch() adds .search-active
+       to .header-left. display:contents drops the .header-left and
+       .search-form boxes without removing their children from the DOM,
+       so the icon button and the input become direct flex items of
+       .header-top itself. Giving the input flex-basis: calc(100% - 32px)
+       then forces it onto its own full-width line — because header-top
+       already wraps — which sits below the icon/logo/cart row and pushes
+       <nav> down after it, rather than floating over the page. Removing
+       .search-active reverses all of this and the layout springs back. */
+    .header-left.search-active,
+    .header-left.search-active .search-form {
+        display: contents;
+    }
+    .header-left.search-active .search-form button { order: 1; }
+    .header-left.search-active .search-form input[type="search"] {
+        display: block;
+        order: 4;
+        flex: 0 0 calc(100% - 32px);
         box-sizing: border-box;
         border: 1px solid var(--border-color);
         border-radius: 20px;
         padding: 8px 14px;
         background: white;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-        z-index: 20;
     }
-    .header-left.search-active .search-form input[type="search"] { display: block; }
 }
 
 /* ---------- Footer (index, thankyou, basket, cockney-club —
