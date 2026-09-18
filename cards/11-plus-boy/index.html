@@ -172,12 +172,19 @@
         wrapper.classList.remove('search-active');
       }
     });
+    // Header search. Takes over from the browser's default form submit and
+    // navigates to /shop-cards.html?search=... itself (the same way the logo
+    // navigates), because a plain form submit can silently do nothing in some
+    // preview/embedded contexts. An empty box just puts the cursor in it. The
+    // form's own action/method stay in the markup as a no-JavaScript fallback.
     function handleSiteSearch(event) {
+      event.preventDefault();
       const input = document.getElementById('site-search-input');
       const value = input.value.trim();
-      if (!value) { event.preventDefault(); return false; }
+      if (!value) { input.focus(); return false; }
       input.value = value;
-      return true;
+      window.location.href = '/shop-cards.html?search=' + encodeURIComponent(value);
+      return false;
     }
   </script>
 
