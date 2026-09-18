@@ -128,7 +128,7 @@ const CARD_CATALOGUE = {
   "birthday-minecraft-girl": { title: "Minecraft Birthday Girl", categories: ["children", "birthdays"], preview: "minecraft-girl1-preview.png", full: "minecraft-girl1.png", name: { left: 894, top: 744, startSize: 110, minSize: 35, maxSize: 60, fontFamily: "CaacupeOne-Regular", fontWeight: "bold", color: "#5e17eb", canChangeSize: false, canChangeColor: false, canMove: true, canRotate: false, isCurved: false, curveRadius: 0, tiltAngle: 0, label: "Name", maxChars: 9 } },
   
 
-  "birthday-taxi": { title: "Fare Dodger", categories: ["all", "birthdays", "photo-upload"], preview: "birthday-taxi-preview.png", full: "birthday-taxi.png", name: { left: 895, top: 668, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
+  "birthday-taxi": { title: "Taxi Fare Dodger", categories: ["all", "birthdays", "photo-upload"], preview: "birthday-taxi-preview.png", full: "birthday-taxi.png", name: { left: 895, top: 668, startSize: 27, minSize: 28, maxSize: 28, maxSize: 86, fontFamily: "Anton", fontWeight: "normal", color: "#000000", canChangeSize: false, canChangeColor: false, canMove: false, canRotate: false, isCurved: false, curveRadius: 480, tiltAngle: 0, label: "Name", maxChars: 10 },
     // Round gold-ringed photo window near the top of the card — measured
     // from the artwork itself, NOT the generic default box. left/top is
     // the center of the circle; width/height is a square slightly larger
