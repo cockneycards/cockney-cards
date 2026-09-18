@@ -47,15 +47,15 @@
     .header-top:has(.header-left) {
         display: flex;
         flex-wrap: nowrap;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
+        gap: 18px;
     }
     /* Icon sits to the left, level with the cart icon on the right;
-       logo takes the remaining space in the middle so it reads as
-       centered (and can run bigger now the search bar isn't stealing
-       a full row underneath it). */
+       logo sits between them, close on both sides now that the row
+       is centered as a group rather than spread to the edges. */
     .header-top:has(.header-left) .header-left { order: 1; width: auto; padding-right: 0; position: relative; }
-    .header-top:has(.header-left) .logo-container { order: 2; flex: 1; }
+    .header-top:has(.header-left) .logo-container { order: 2; }
     .header-top:has(.header-left) .logo-container img { max-width: 110px; }
     .header-top:has(.header-left) .header-right { order: 3; padding-left: 0; }
 
