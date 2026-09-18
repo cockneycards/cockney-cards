@@ -68,15 +68,17 @@
 /* When the icon is tapped, toggleMobileSearch() adds .search-active
    to .header-left. display:contents drops the .header-left and
    .search-form boxes without removing their children from the DOM,
-   so the icon button and the input become direct flex items of
-   .header-top itself. flex-basis: 2000px with flex-shrink: 0 makes the
-   input too "big" to ever fit on the icon/logo/cart line, forcing it
-   onto its own new line unconditionally — on a narrow phone that
-   happens naturally anyway, but on a wide desktop screen everything
-   would otherwise comfortably fit on one line and never wrap. Once
-   alone on its own line, max-width clamps the rendered size back down
-   to --search-width — set by toggleMobileSearch() to match the width
-   of the nav links below — so it sits below the icon/logo/cart row and
+   so the icon button and .search-drop (a plain wrapping span around
+   the input — see the HTML) become direct flex items of .header-top
+   itself. .search-drop gets flex: 0 0 100% — unlike a fixed pixel
+   value, max-width can't clamp a percentage basis down before the
+   wrap decision is made, so this reliably forces it onto its own new
+   line at any viewport width, not just on a narrow phone where the
+   icon/logo/cart/input combination happens to overflow on its own.
+   The actual input inside .search-drop is a normal (non-flex) block
+   box, centered with margin: 0 auto at a fixed width matching
+   --search-width — set by toggleMobileSearch() to match the nav links
+   below — so the visible bar sits below the icon/logo/cart row and
    pushes <nav> down after it, rather than floating over the page or
    trailing off to the right of the cart icon. Removing .search-active
    reverses all of this and the layout springs back. */
@@ -85,11 +87,15 @@
     display: contents;
 }
 .header-left.search-active .search-form button { order: 1; }
+.header-left.search-active .search-form .search-drop {
+    order: 4;
+    flex: 0 0 100%;
+}
 .header-left.search-active .search-form input[type="search"] {
     display: block;
-    order: 4;
-    flex: 0 0 2000px;
-    max-width: min(var(--search-width, 300px), calc(100% - 32px));
+    margin: 0 auto;
+    width: var(--search-width, 300px);
+    max-width: calc(100% - 32px);
     box-sizing: border-box;
     border: 1px solid var(--border-color);
     border-radius: 20px;

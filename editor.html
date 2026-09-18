@@ -84,11 +84,12 @@
         display: contents;
     }
     .header-left.search-active .search-form button { order: 1; }
+    .header-left.search-active .search-form .search-drop { order: 4; flex: 0 0 100%; }
     .header-left.search-active .search-form input[type="search"] {
         display: block;
-        order: 4;
-        flex: 0 0 2000px;
-        max-width: min(var(--search-width, 300px), calc(100% - 32px));
+        margin: 0 auto;
+        width: var(--search-width, 300px);
+        max-width: calc(100% - 32px);
         box-sizing: border-box;
         border: 1px solid var(--border-color);
         border-radius: 20px;
@@ -262,7 +263,7 @@
     <div class="header-top">
         <div class="header-left">
             <form class="search-form" role="search" action="shop-cards.html" method="GET" onsubmit="return handleSiteSearch(event)">
-                <input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card">
+                <span class="search-drop"><input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card"></span>
                 <button type="submit" aria-label="Search" onclick="toggleMobileSearch(event)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>

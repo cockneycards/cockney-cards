@@ -19,11 +19,12 @@ a { color:inherit; }
 
 .search-form.search-active { display:contents; }
 .search-form.search-active button { order:1; }
+.search-form.search-active .search-drop { order:4; flex:0 0 100%; }
 .search-form.search-active input[type="search"] {
   display:block;
-  order:4;
-  flex:0 0 2000px;
-  max-width:min(var(--search-width, 300px), calc(100% - 32px));
+  margin:0 auto;
+  width:var(--search-width, 300px);
+  max-width:calc(100% - 32px);
   box-sizing:border-box;
   border:1px solid var(--border);
   border-radius:20px;
