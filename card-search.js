@@ -1,12 +1,10 @@
 // Shared by every /cards/<slug>/index.html page, alongside card-page.css.
 //
-// Below 800px the search form collapses to just its icon (see
-// card-page.css). First tap opens the input as its own row below the
-// header instead of submitting; once it's open, a tap on the icon (or
-// Enter in the field) submits as normal. Above 800px the form is already
-// fully visible, so the icon keeps its plain "submit the search"
-// behaviour untouched.
-const isMobileSearchLayout = () => window.matchMedia('(max-width: 800px)').matches;
+// The search form collapses to just its icon (see card-page.css) at every
+// screen width. First tap opens the input as its own row below the header
+// instead of submitting; once it's open, a tap on the icon (or Enter in
+// the field) submits as normal.
+const isMobileSearchLayout = () => true;
 
 function toggleMobileSearch(event) {
     if (!isMobileSearchLayout()) return;

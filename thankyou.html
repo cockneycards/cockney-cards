@@ -225,7 +225,8 @@ function handleSiteSearch(event) {
 // open, a tap on the icon (or Enter in the field) submits as normal.
 // Above 640px the form is already fully visible, so the icon keeps its
 // plain "submit the search" behaviour untouched.
-const isMobileSearchLayout = () => window.matchMedia('(max-width: 640px)').matches;
+// Popup search now applies at every width, not just mobile, so this always returns true.
+const isMobileSearchLayout = () => true;
 
 function toggleMobileSearch(event) {
     if (!isMobileSearchLayout()) return;
