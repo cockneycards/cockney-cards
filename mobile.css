@@ -69,11 +69,13 @@
    to .header-left. display:contents drops the .header-left and
    .search-form boxes without removing their children from the DOM,
    so the icon button and the input become direct flex items of
-   .header-top itself. Giving the input flex-basis: calc(100% - 32px)
-   then forces it onto its own full-width line — because header-top
-   already wraps — which sits below the icon/logo/cart row and pushes
-   <nav> down after it, rather than floating over the page. Removing
-   .search-active reverses all of this and the layout springs back. */
+   .header-top itself. Wrapping is forced by giving the input its own
+   full main-axis line (order 4, flex-shrink/grow 0), sized to
+   --search-width — set by toggleMobileSearch() to match the width of
+   the nav links below, rather than stretching edge to edge — so it
+   sits below the icon/logo/cart row and pushes <nav> down after it,
+   rather than floating over the page. Removing .search-active
+   reverses all of this and the layout springs back. */
 .header-left.search-active,
 .header-left.search-active .search-form {
     display: contents;
@@ -82,7 +84,9 @@
 .header-left.search-active .search-form input[type="search"] {
     display: block;
     order: 4;
-    flex: 0 0 calc(100% - 32px);
+    flex: 0 0 auto;
+    width: var(--search-width, 300px);
+    max-width: calc(100% - 32px);
     box-sizing: border-box;
     border: 1px solid var(--border-color);
     border-radius: 20px;

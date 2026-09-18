@@ -61,20 +61,47 @@
 
     /* HEADER & NAVIGATION */
     header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
-    .header-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; max-width: 1400px; margin: 0 auto; }
-    .header-left { justify-self: end; padding-right: 20px; }
-    .logo-container { justify-self: center; text-align: center; }
+    .header-top { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 18px; max-width: 1400px; margin: 0 auto; }
+    .header-left { order: 1; width: auto; padding-right: 0; }
+    .logo-container { order: 2; text-align: center; }
     .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
-    .header-right { justify-self: start; padding-left: 20px; display: flex; align-items: center; gap: 20px; }
+    .header-right { order: 3; padding-left: 0; display: flex; align-items: center; gap: 20px; }
     .cart-icon { position: relative; cursor: pointer; }
-    .search-form { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 6px 4px 14px; background: white; transition: border-color 0.2s; }
-    .search-form:focus-within { border-color: #999; }
-    .search-form input[type="search"] { border: none; outline: none; font-family: var(--font-family); font-size: 13px; color: #111; width: 160px; background: transparent; }
-    .search-form input[type="search"]::placeholder { color: #999; }
-    .search-form input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
-    .search-form button { background: none; border: none; padding: 6px; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .search-form button svg { stroke: #666; transition: stroke 0.2s; }
+
+    /* Search box — collapsed down to just its icon; the input pops open
+       as its own full-width row underneath (pushing <nav> down) when
+       tapped, via .search-active (see toggleMobileSearch()). Sized to
+       --search-width, set to match the nav links below it. */
+    .search-form { display: flex; align-items: center; border: none; padding: 0; background: none; }
+    .search-form button { background: none; border: none; padding: 4px; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .search-form button svg { width: 20px; height: 20px; stroke: #666; transition: stroke 0.2s; }
     .search-form button:hover svg { stroke: #111; }
+    .search-form input[type="search"] { display: none; }
+
+    .header-left.search-active,
+    .header-left.search-active .search-form {
+        display: contents;
+    }
+    .header-left.search-active .search-form button { order: 1; }
+    .header-left.search-active .search-form input[type="search"] {
+        display: block;
+        order: 4;
+        flex: 0 0 auto;
+        width: var(--search-width, 300px);
+        max-width: calc(100% - 32px);
+        box-sizing: border-box;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 8px 14px;
+        font-family: var(--font-family);
+        font-size: 14px;
+        color: #111;
+        background: white;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    }
+    .header-left.search-active .search-form input[type="search"]::placeholder { color: #999; }
+    .header-left.search-active .search-form input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
+
     .login-btn { font-size: 11px; text-decoration: none; color: #666; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: none; padding: 0; }
     .login-btn:hover { color: #111; }
     nav { margin-top: 15px; text-align: center; }
@@ -248,7 +275,7 @@
         <div class="header-left">
             <form class="search-form" role="search" action="shop-cards.html" method="GET" onsubmit="return handleSiteSearch(event)">
                 <input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card">
-                <button type="submit" aria-label="Search">
+                <button type="submit" aria-label="Search" onclick="toggleMobileSearch(event)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -1543,6 +1570,47 @@ function handleSiteSearch(event) {
     input.value = value;
     return true;
 }
+
+// The header (and this search bar with it) is hidden entirely below
+// 1040px on this page — see the @media (max-width: 1040px) rule above —
+// so this always runs, matching the "applies at every width" search
+// behaviour used across the rest of the site.
+const isMobileSearchLayout = () => true;
+
+function toggleMobileSearch(event) {
+    if (!isMobileSearchLayout()) return;
+    const wrapper = document.querySelector('.header-left');
+    const input = document.getElementById('site-search-input');
+    if (!wrapper.classList.contains('search-active')) {
+        event.preventDefault();
+        // Size the popped-open input to match the nav links below it,
+        // rather than stretching it edge to edge.
+        const navLinks = document.querySelectorAll('header nav a');
+        if (navLinks.length) {
+            const first = navLinks[0].getBoundingClientRect();
+            const last = navLinks[navLinks.length - 1].getBoundingClientRect();
+            input.style.setProperty('--search-width', (last.right - first.left) + 'px');
+        }
+        wrapper.classList.add('search-active');
+        input.focus();
+    }
+}
+
+document.addEventListener('click', (event) => {
+    if (!isMobileSearchLayout()) return;
+    const wrapper = document.querySelector('.header-left');
+    if (wrapper.classList.contains('search-active') && !wrapper.contains(event.target)) {
+        wrapper.classList.remove('search-active');
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const wrapper = document.querySelector('.header-left');
+    if (wrapper.classList.contains('search-active')) {
+        wrapper.classList.remove('search-active');
+    }
+});
 </script>
 </body>
 </html>

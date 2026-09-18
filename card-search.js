@@ -9,10 +9,19 @@ const isMobileSearchLayout = () => true;
 function toggleMobileSearch(event) {
     if (!isMobileSearchLayout()) return;
     const form = document.querySelector('.search-form');
+    const input = form.querySelector('input[type="search"]');
     if (!form.classList.contains('search-active')) {
         event.preventDefault();
+        // Size the popped-open input to match the nav links below it,
+        // rather than stretching it edge to edge.
+        const navLinks = document.querySelectorAll('header nav a');
+        if (navLinks.length) {
+            const first = navLinks[0].getBoundingClientRect();
+            const last = navLinks[navLinks.length - 1].getBoundingClientRect();
+            input.style.setProperty('--search-width', (last.right - first.left) + 'px');
+        }
         form.classList.add('search-active');
-        form.querySelector('input[type="search"]').focus();
+        input.focus();
     }
 }
 
