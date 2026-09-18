@@ -146,6 +146,7 @@ const SPORTS_TREE = ["sports", "Sports", [
             ["wolvesw", "Wolverhampton Wanderers"],
         ]],
     ]],
+    ["boxing", "Boxing"],
     ["golf", "Golf"],
     ["cricket", "Cricket"],
     ["formula1", "Formula 1"],
