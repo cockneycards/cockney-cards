@@ -17,21 +17,70 @@
   <meta name="twitter:description" content="The &#39;Beach Hut Birthday&#39; card is one of our Birthday designs. Write your own personal message inside using our online editor — the front design stays exactly as shown. £3.99, free UK delivery, printed and dispatched by Cockney Cards.">
   <meta name="twitter:image" content="https://images.cockneycards.com/birthday-beachhut-preview.png">
   <link rel="stylesheet" href="../../card-page.css">
+  <style>
+    :root { --border-color: #e0e0e0; --font-family: 'Helvetica Neue', Arial, sans-serif; }
+    header { background-color: white; padding: 15px 40px 10px 40px; border-bottom: 1px solid var(--border-color); }
+    .header-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; max-width: 1400px; margin: 0 auto; }
+    .header-left { justify-self: end; padding-right: 20px; }
+    .logo-container { justify-self: center; text-align: center; }
+    .logo-container img { max-width: 120px; height: auto; cursor: pointer; }
+    .header-right { justify-self: start; padding-left: 20px; display: flex; align-items: center; gap: 20px; }
+    .cart-icon { position: relative; cursor: pointer; }
+    .search-form { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 6px 4px 14px; background: white; transition: border-color 0.2s; }
+    .search-form:focus-within { border-color: #999; }
+    .search-form input[type="search"] { border: none; outline: none; font-family: var(--font-family); font-size: 13px; color: #111; width: 160px; background: transparent; }
+    .search-form input[type="search"]::placeholder { color: #999; }
+    .search-form input[type="search"]::-webkit-search-cancel-button { cursor: pointer; }
+    .search-form button { background: none; border: none; padding: 6px; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .search-form button svg { stroke: #666; transition: stroke 0.2s; }
+    .search-form button:hover svg { stroke: #111; }
+    nav { margin-top: 15px; text-align: center; }
+    .nav-links { display: inline-flex; gap: 30px; padding: 0; margin: 0; list-style: none; }
+    .nav-links a { text-decoration: none; color: #111; font-size: 13px; letter-spacing: 1px; transition: color 0.2s; }
+    .nav-links a:hover { color: #888; }
+    .nav-links a.active { font-weight: bold; }
+  </style>
+  <link rel="stylesheet" href="/mobile.css">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Beach Hut Birthday","description":"The 'Beach Hut Birthday' card is one of our Birthday designs. Write your own personal message inside using our online editor — the front design stays exactly as shown. £3.99, free UK delivery, printed and dispatched by Cockney Cards.","image":["https://images.cockneycards.com/birthday-beachhut-preview.png"],"url":"https://www.cockneycards.com/cards/beach-hut-birthday/","brand":{"@type":"Brand","name":"Cockney Cards"},"offers":{"@type":"Offer","url":"https://www.cockneycards.com/cards/beach-hut-birthday/","priceCurrency":"GBP","price":"3.99","availability":"https://schema.org/InStock"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.cockneycards.com/"},{"@type":"ListItem","position":2,"name":"Cards","item":"https://www.cockneycards.com/shop-cards.html"},{"@type":"ListItem","position":3,"name":"Beach Hut Birthday","item":"https://www.cockneycards.com/cards/beach-hut-birthday/"}]}</script>
 </head>
 <body>
-  <header class="site-header">
-    <a class="logo" href="/" aria-label="Cockney Cards home">
-      <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
-    </a>
-    <nav aria-label="Main navigation">
-      <a href="/shop-cards.html">Shop Cards</a>
-      <a href="/shop-prints.html">Shop Prints</a>
-      <a href="/cockney-club.html">Cockney Club</a>
-      <a href="/account.html">My Account</a>
+  <header>
+    <div class="header-top">
+      <div class="header-left">
+        <form class="search-form" role="search" action="/shop-cards.html" method="GET" onsubmit="return handleSiteSearch(event)">
+          <input type="search" name="search" id="site-search-input" placeholder="Search for a card..." aria-label="Search for a card">
+          <button type="submit" aria-label="Search" onclick="toggleMobileSearch(event)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+      <div class="logo-container" onclick="window.location.href='/';">
+        <img src="https://images.cockneycards.com/logo.png" alt="Cockney Cards">
+      </div>
+      <div class="header-right">
+        <div class="cart-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/shop-cards.html">Shop Cards</a></li>
+        <li><a href="/shop-prints.html">Shop Prints</a></li>
+        <li><a href="/cockney-club.html">Cockney Club</a></li>
+        <li><a href="/account.html">My Account</a></li>
+      </ul>
     </nav>
   </header>
+
 
   <main class="product-page">
     <nav class="breadcrumbs" aria-label="Breadcrumb">
@@ -93,6 +142,44 @@
   </main>
 
   <footer class="site-footer">© 2026 Cockney Cards.</footer>
+
+  <script src="/auth.js"></script>
+  <script src="/cart.js"></script>
+  <script>
+    // Mirrors index.html's search-toggle behaviour so the collapsed
+    // mobile search icon (see mobile.css) works the same on every page.
+    const isMobileSearchLayout = () => window.matchMedia('(max-width: 640px)').matches;
+    function toggleMobileSearch(event) {
+      if (!isMobileSearchLayout()) return;
+      const wrapper = document.querySelector('.header-left');
+      if (!wrapper.classList.contains('search-active')) {
+        event.preventDefault();
+        wrapper.classList.add('search-active');
+        document.getElementById('site-search-input').focus();
+      }
+    }
+    document.addEventListener('click', (event) => {
+      if (!isMobileSearchLayout()) return;
+      const wrapper = document.querySelector('.header-left');
+      if (wrapper.classList.contains('search-active') && !wrapper.contains(event.target)) {
+        wrapper.classList.remove('search-active');
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const wrapper = document.querySelector('.header-left');
+      if (wrapper.classList.contains('search-active')) {
+        wrapper.classList.remove('search-active');
+      }
+    });
+    function handleSiteSearch(event) {
+      const input = document.getElementById('site-search-input');
+      const value = input.value.trim();
+      if (!value) { event.preventDefault(); return false; }
+      input.value = value;
+      return true;
+    }
+  </script>
 
   <script>window.CURRENT_CARD_ID = "birthday-beachhut";</script>
   <script src="../../cards-data.js"></script>
