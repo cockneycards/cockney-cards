@@ -184,4 +184,19 @@ for (const p of products) {
 }
 
 fs.writeFileSync(path.join(cardsDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+
+// Regenerate card-pages.js (CARD_PAGE_SLUGS) from the same slugs used to
+// build the pages above, so shop-cards.html's `CARD_PAGE_SLUGS[p.id]`
+// lookup can never drift out of sync with the actual /cards/<slug>/ pages
+// -- previously this file was a static, hand-maintained snapshot that
+// silently went stale for any card added after it was last generated.
+const slugEntries = products.map(p => `  ${JSON.stringify(p.id)}: ${JSON.stringify(p.slug)}`).join(',\n');
+const cardPagesJs = `// Generated from cards-data.js. Maps each card id to its crawlable SEO page.
+const CARD_PAGE_SLUGS = {
+${slugEntries}
+};
+`;
+fs.writeFileSync(path.join(ROOT, 'card-pages.js'), cardPagesJs);
+
 console.log(`Generated ${products.length} individual card pages in ${cardsDir}`);
+console.log(`Regenerated card-pages.js (${products.length} slugs) so shop-cards.html links stay in sync.`);
