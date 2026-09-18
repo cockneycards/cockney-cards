@@ -86,9 +86,8 @@
     .header-left.search-active .search-form input[type="search"] {
         display: block;
         order: 4;
-        flex: 0 0 auto;
-        width: var(--search-width, 300px);
-        max-width: calc(100% - 32px);
+        flex: 0 0 2000px;
+        max-width: min(var(--search-width, 300px), calc(100% - 32px));
         box-sizing: border-box;
         border: 1px solid var(--border-color);
         border-radius: 20px;

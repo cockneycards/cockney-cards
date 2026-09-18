@@ -69,12 +69,16 @@
    to .header-left. display:contents drops the .header-left and
    .search-form boxes without removing their children from the DOM,
    so the icon button and the input become direct flex items of
-   .header-top itself. Wrapping is forced by giving the input its own
-   full main-axis line (order 4, flex-shrink/grow 0), sized to
-   --search-width — set by toggleMobileSearch() to match the width of
-   the nav links below, rather than stretching edge to edge — so it
-   sits below the icon/logo/cart row and pushes <nav> down after it,
-   rather than floating over the page. Removing .search-active
+   .header-top itself. flex-basis: 2000px with flex-shrink: 0 makes the
+   input too "big" to ever fit on the icon/logo/cart line, forcing it
+   onto its own new line unconditionally — on a narrow phone that
+   happens naturally anyway, but on a wide desktop screen everything
+   would otherwise comfortably fit on one line and never wrap. Once
+   alone on its own line, max-width clamps the rendered size back down
+   to --search-width — set by toggleMobileSearch() to match the width
+   of the nav links below — so it sits below the icon/logo/cart row and
+   pushes <nav> down after it, rather than floating over the page or
+   trailing off to the right of the cart icon. Removing .search-active
    reverses all of this and the layout springs back. */
 .header-left.search-active,
 .header-left.search-active .search-form {
@@ -84,9 +88,8 @@
 .header-left.search-active .search-form input[type="search"] {
     display: block;
     order: 4;
-    flex: 0 0 auto;
-    width: var(--search-width, 300px);
-    max-width: calc(100% - 32px);
+    flex: 0 0 2000px;
+    max-width: min(var(--search-width, 300px), calc(100% - 32px));
     box-sizing: border-box;
     border: 1px solid var(--border-color);
     border-radius: 20px;
